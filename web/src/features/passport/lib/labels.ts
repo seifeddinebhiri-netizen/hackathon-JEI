@@ -68,3 +68,26 @@ export function summarize(declarations: DepartmentDeclaration[]) {
 
 export const LABEL_DISCLAIMER =
   'Déclaration fondée sur la documentation publique des outils. Ce n’est pas un avis juridique.';
+
+export const DEPARTMENT_HINTS: Record<Department, string> = {
+  scenario: 'Écriture, structure, dialogues, recherche.',
+  image: 'Prise de vue, éclairage, images générées.',
+  montage: 'Découpage, rythme, étalonnage.',
+  son_voix: 'Prise de son, nettoyage, voix de synthèse, doublage.',
+  musique: 'Composition, arrangements, musique générée.',
+  vfx: 'Effets, incrustations, retouches d’image.',
+  sous_titres: 'Transcription, traduction, sous-titrage.',
+  affiche_promo: 'Affiche, bande-annonce, visuels de promotion.',
+};
+
+export const TOOL_STATUS_HELP =
+  'Ce statut décrit ce que le fournisseur de l’outil publie sur ses données d’entraînement et ses droits. Ce n’est pas un jugement sur ton travail. « Non divulgué » est un statut valide.';
+
+export type DeclarationState = 'vide' | 'humain' | 'ia_complet' | 'ia_incomplet';
+
+/** État d'une déclaration pour la navigation (icône + libellé). */
+export function declarationState(d: DepartmentDeclaration | undefined): DeclarationState {
+  if (!d) return 'vide';
+  if (!d.used_ai) return 'humain';
+  return (d.tool_id || d.custom_tool?.trim()) && d.what.trim() && d.level ? 'ia_complet' : 'ia_incomplet';
+}
