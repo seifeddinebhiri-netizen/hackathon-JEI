@@ -1,4 +1,3 @@
-import { brand } from '@/app/brand';
 import {
   DndContext,
   KeyboardSensor,
@@ -31,6 +30,7 @@ import {
   useToast,
 } from '@/components/ui';
 import { PrintLayout } from '@/app/layouts/PrintLayout';
+import { LogoImage } from '@/components/layout/Logo';
 import {
   ConflictList,
   MomentTag,
@@ -380,8 +380,9 @@ function DaySheet({
       </Section>
 
       <footer className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t-2 border-ink pt-4 text-meta">
-        <span className="text-muted-on-light">
-          {brand.name} · {schedule.status === 'valide' ? 'Planning validé' : 'Brouillon IA : à valider'}
+        <span className="flex items-center gap-3 text-muted-on-light">
+          <LogoImage onDark={false} height={28} />
+          {schedule.status === 'valide' ? 'Planning validé' : 'Brouillon IA : à valider'}
         </span>
         <nav aria-label="Autres jours" className="no-print flex gap-2">
           {prev ? (

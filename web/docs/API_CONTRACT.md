@@ -279,7 +279,7 @@ Réponse 200 :
 
 Réponse 200 (`VerifyResult`) : la déclaration, les outils utilisés (catalogue), l'état de la signature.
 ```json
-{ "passport": { "id": "exemple", "film_title": "[Film d'exemple]", "badge_code": "PP-EXEM-PL", "c2pa_signed": true, "…": "…" },
+{ "passport": { "id": "exemple", "film_title": "[Film d'exemple]", "badge_code": "EN-EXEM-PL", "c2pa_signed": true, "…": "…" },
   "tools": [{ "id": "tool-son-a", "status": "documente", "…": "…" }],
   "signature": { "signed": true, "signed_at": "2026-10-01T10:00:00+01:00", "manifest_id": "c2pa-exemple" },
   "checked_at": "2026-11-14T16:12:00+01:00" }
@@ -345,7 +345,7 @@ Corps : `{ "kind": "court", "text": "Amira, 24 ans, apprend…", "limit_chars": 
   "synopsis_short": "…", "synopsis_long": "…",
   "stills": ["/photos/ruelle.jpg", "/photos/porte.jpg"],
   "credits": [{ "role": "Amira", "name": "[Actrice 1]" }, { "role": "Réalisation", "name": "Yassine" }],
-  "trailer_url": "https://…", "passport_badge_code": "PP-WWVQ-M2",
+  "trailer_url": "https://…", "passport_badge_code": "EN-WWVQ-M2",
   "verify_url": "https://…/verifier/pass-4ff7045785" }
 ```
 Erreur 404 : « Film introuvable ». L'envoi de vraies photos (`POST /films/{id}/stills`) est **futur** : pour

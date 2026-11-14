@@ -57,7 +57,7 @@ export function Hero() {
             <AiLabel
               filmTitle="Marée basse"
               director="Yassine"
-              badgeCode="PP-7K3Q-2M"
+              badgeCode={`${brand.badgePrefix}-7K3Q-2M`}
               declarations={HERO_LABEL}
               compact
             />

@@ -9,7 +9,7 @@ export function FinalCta() {
       <div className="container-pp flex flex-col gap-8 py-16 md:flex-row md:items-end md:justify-between md:py-24">
         <div>
           <h2 id="cta-titre" className="max-w-3xl text-[44px] leading-[0.95] md:text-[72px]">
-            Ton premier plan commence ici.
+            Ton film, bien encadré.
           </h2>
           <p className="mt-4 max-w-xl text-lead font-medium">
             Ouvre le projet de démonstration ou crée le tien : planning, Passeport IA et Kit Festival.

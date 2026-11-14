@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router';
 import { isApiError } from '@/api';
 import { brand } from '@/app/brand';
+import { LogoImage } from '@/components/layout/Logo';
 import { ButtonLink, EmptyState, ErrorState, Icon, LoadingBlock, PhotoFrame } from '@/components/ui';
 import { usePublicFilm } from '@/features/festival/hooks/useFestivals';
 import { photoFromUrl } from '@/lib/photos';
@@ -171,7 +172,10 @@ export default function FilmPublic() {
               </Link>
             </section>
           ) : null}
-          <p className="text-meta text-muted-on-light">Page publiée avec {brand.name}.</p>
+          <p className="flex items-center gap-3 text-meta text-muted-on-light">
+            <LogoImage onDark={false} height={28} />
+            Page publiée avec {brand.name}.
+          </p>
         </aside>
       </div>
     </article>

@@ -1,3 +1,4 @@
+import { brand } from '@/app/brand';
 import { Icon } from '@/components/ui';
 import { AiLabel } from '@/features/passport/components/AiLabel';
 import type { DepartmentDeclaration } from '@/api/types';
@@ -115,7 +116,7 @@ export function PassportCapture() {
       <AiLabel
         filmTitle="Marée basse"
         director="Yassine"
-        badgeCode="PP-7K3Q-2M"
+        badgeCode={`${brand.badgePrefix}-7K3Q-2M`}
         declarations={SAMPLE}
         compact
         className="mx-auto max-w-sm"

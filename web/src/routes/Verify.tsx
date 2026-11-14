@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router';
 import { isApiError } from '@/api';
 import { brand } from '@/app/brand';
+import { LogoImage } from '@/components/layout/Logo';
 import { Button, ButtonLink, EmptyState, ErrorState, Icon, LoadingBlock, StatusChip } from '@/components/ui';
 import { AiLabel } from '@/features/passport/components/AiLabel';
 import { DeclarationDetail } from '@/features/passport/components/DeclarationDetail';
@@ -148,7 +149,8 @@ export default function Verify() {
               <Icon name="info" size={18} className="mt-0.5 shrink-0" /> {LABEL_DISCLAIMER}
             </p>
             <p className="text-meta text-muted-on-light">{TOOL_STATUS_HELP}</p>
-            <p className="text-meta text-muted-on-light">
+            <p className="flex flex-wrap items-center gap-3 text-meta text-muted-on-light">
+              <LogoImage onDark={false} height={28} />
               Page générée par {brand.name} · vérifiée le {formatDate(checked_at)}
             </p>
           </div>

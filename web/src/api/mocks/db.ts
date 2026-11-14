@@ -3,6 +3,7 @@
  * Réinitialisable depuis /mes-donnees ou avec resetMockDb().
  */
 import type { Passport, Project, SubtitleDraft } from '@/api/types';
+import { brand } from '@/app/brand';
 import { buildDemoProject } from './data/project';
 import subtitles from './data/subtitles.json';
 import { env } from '@/lib/env';
@@ -22,7 +23,7 @@ function examplePassport(): Passport {
     film_title: '[Film d’exemple]',
     director: '[Réalisatrice d’exemple]',
     c2pa_signed: true,
-    badge_code: 'PP-EXEM-PL',
+    badge_code: `${brand.badgePrefix}-EXEM-PL`,
     verify_url: `${env.publicAppUrl}/verifier/exemple`,
     updated_at: '2026-10-01T10:00:00+01:00',
     declarations: [

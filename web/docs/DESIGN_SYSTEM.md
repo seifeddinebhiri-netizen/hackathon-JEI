@@ -5,7 +5,17 @@ Tailwind CSS 4), et utilisés par les classes Tailwind (`bg-ink`, `text-muted-on
 Ne jamais écrire une couleur en dur dans un composant. Tous les composants sont visibles avec leurs états sur la page
 interne `/_ui` (développement uniquement).
 
-L'identité (nom, slogan, lettre du logo, couleurs du logo) est dans [`src/app/brand.ts`](../src/app/brand.ts).
+L'identité (nom **encadré**, toujours en minuscules ; slogan « Tu cadres, on t’encadre. » ; chemins des logos) est
+dans [`src/app/brand.ts`](../src/app/brand.ts). Les logos viennent du pack `public/brand/` : ne pas les redessiner.
+
+## Logo
+
+- Composants `Logo` (lien vers l'accueil) et `LogoImage` (`src/components/layout/Logo.tsx`).
+- Fond sombre (nav, pied de page) : logo transparent « pour fond sombre » (« en » gris clair, « cadr » blanc, « é » or).
+- Fond clair (feuille de service, vérification, page film) : logo transparent « pour fond clair » (« é » rouge).
+- Signes du logo réutilisables dans l'interface : **coins de viseur** rouges et **carré rouge** en bas à droite
+  (repris par le badge du Passeport IA et les cadres photo).
+- Zone de protection : au moins la hauteur d'un coin de viseur autour du logo ; hauteur minimale 24 px.
 
 ## Principes
 

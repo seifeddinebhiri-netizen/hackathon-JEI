@@ -1,18 +1,20 @@
-# Premier Plan — front web (`/web`)
+# encadré — front web (`/web`)
 
-Premier Plan accompagne les jeunes réalisateurs tunisiens, de l'organisation du tournage jusqu'au festival.
+> **encadré.** — Tu cadres, on t’encadre.
+
+encadré accompagne les jeunes réalisateurs tunisiens, de l'organisation du tournage jusqu'au festival.
 **Planifier** : quand et où tourner chaque scène, selon la lumière, la météo et les lieux.
 **Tourner** : le Coach de cadrage sur téléphone (bientôt).
 **Déclarer** : le Passeport IA, qui rend visible et vérifiable ce qui est humain et ce qui est IA.
 **Diffuser** : le Kit Festival, pour trouver les festivals compatibles et préparer chaque dossier.
 
-Projet du hackathon IA Éthique 360 (JEI INSAT + OIF). Le nom, le slogan et le logo de l'application sont définis
-dans un seul fichier : [`src/app/brand.ts`](src/app/brand.ts).
+Projet du hackathon IA Éthique 360 (JEI INSAT + OIF). Le nom (toujours en minuscules), le slogan et les chemins des
+logos sont définis dans un seul fichier : [`src/app/brand.ts`](src/app/brand.ts). Les logos viennent du pack déposé
+dans [`public/brand/`](public/brand/) (`svg/` et `png/`).
 
 ## Prérequis
 
 - Node.js 20 ou plus récent (testé avec Node 24) et npm 10+
-- Facultatif : Python 3 + Pillow, seulement pour régénérer les icônes PNG si le logo change
 
 ## Démarrer
 
@@ -31,14 +33,12 @@ Pour la démo, cliquer sur « Continuer en démo » sur la page de connexion : l
 | Script | Rôle |
 |---|---|
 | `npm run dev` | Serveur de développement (Vite) |
-| `npm run build` | Régénère les icônes SVG depuis `brand.ts`, vérifie les types, construit `dist/` |
+| `npm run build` | Vérifie les types et construit `dist/` |
 | `npm run preview` | Sert le build de production en local |
 | `npm run typecheck` | Vérification TypeScript (mode strict) |
 | `npm run lint` | ESLint (règles React, hooks, interdiction de `fetch` hors de `src/api/client.ts`) |
 | `npm run test` | Tests Vitest (planning, règles du soleil, parseur, sous-titres, Passeport, schémas) |
 | `npm run format` | Prettier |
-| `npm run brand:icons` | Régénère `public/icons/*.svg` depuis `src/app/brand.ts` |
-| `python3 scripts/brand-png.py` | Régénère les icônes PNG de la PWA (à relancer si le logo change) |
 
 La page interne `/_ui` (tous les composants et leurs états) n'existe qu'en développement.
 
@@ -53,11 +53,24 @@ La page interne `/_ui` (tous les composants et leurs états) n'existe qu'en dév
 | `VITE_PUBLIC_APP_URL` | `http://localhost:5173` | URL publique de l'app (liens de vérification, QR code du Coach) |
 | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | vide | Plus tard : authentification Supabase |
 
+## Identité visuelle
+
+| Usage | Fichier |
+|---|---|
+| Barre de navigation, pied de page (fonds sombres) | `public/brand/svg/encadre-logo-transparent-pour-fond-sombre.svg` |
+| Pages et documents clairs (feuille de service, vérification, page film) | `public/brand/svg/encadre-logo-transparent-pour-fond-clair.svg` |
+| Favicon | `public/brand/svg/encadre-favicon.svg` (+ `png/encadre-favicon-64.png`) |
+| Application installée (PWA) | `png/encadre-icone-192.png`, `png/encadre-icone.png` (512) ; dérivés « maskable » et Apple dans `public/icons/` |
+| Badge du Passeport IA | dessiné en SVG (`src/features/passport/lib/badge.ts`) avec les coins du viseur et le carré rouge du logo |
+
+Pour changer de logo : remplacer les fichiers de `public/brand/` (mêmes noms) ou mettre à jour les chemins dans
+`brand.ts`, puis régénérer les deux icônes de `public/icons/` (voir son README).
+
 ## Architecture
 
 ```
 src/
-  app/            brand.ts (identité), router.tsx (routes paresseuses), providers.tsx, layouts/
+  app/            brand.ts (nom, slogan, logos), router.tsx (routes paresseuses), providers.tsx, layouts/
   routes/         une page par route, fine : elle assemble des features
   features/       auth, project, planner, coach, passport, festival, home, account
                   chacune avec components/ hooks/ lib/

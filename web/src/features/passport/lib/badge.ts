@@ -2,6 +2,7 @@ import { brand } from '@/app/brand';
 
 /**
  * Badge « Passeport IA » à mettre au générique ou sur l'affiche.
+ * Reprend les codes du logo : coins de viseur rouges et carré rouge en bas à droite.
  * SVG autonome (polices système) pour qu'il se rende pareil partout, y compris converti en PNG.
  */
 export function badgeSvg({
@@ -13,18 +14,36 @@ export function badgeSvg({
   verifyHost: string;
   light?: boolean;
 }): string {
-  const bg = light ? '#FFFFFF' : '#121110';
-  const fg = light ? '#121110' : '#F2F2EF';
-  const accent = '#FFC82E';
+  const W = 480;
+  const H = 160;
+  const bg = light ? '#FFFFFF' : brand.colors.background;
+  const fg = light ? brand.colors.background : brand.colors.text;
+  const red = brand.colors.mark;
+  // Sur fond clair, l'accent passe au rouge (comme le « é » du logo clair)
+  const accent = light ? red : brand.colors.accent;
+  const muted = light ? '#55524C' : '#B8B4AC';
   const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="480" height="160" viewBox="0 0 480 160">
-  <rect width="480" height="160" fill="${bg}"/>
-  <rect x="6" y="6" width="468" height="148" fill="none" stroke="${fg}" stroke-width="4"/>
-  <rect x="24" y="30" width="100" height="100" fill="${brand.colors.mark}"/>
-  <text x="74" y="82" text-anchor="middle" dominant-baseline="central" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="38" fill="#FFFFFF">IA</text>
-  <text x="146" y="58" font-family="'Courier New', monospace" font-weight="700" font-size="16" letter-spacing="2" fill="${light ? fg : accent}">PASSEPORT IA</text>
-  <text x="146" y="96" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="34" fill="${fg}">${esc(code)}</text>
-  <text x="146" y="126" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="${fg}"${verifyHost.length > 34 ? ' textLength="310" lengthAdjust="spacingAndGlyphs"' : ''}>Vérifier : ${esc(verifyHost)}</text>
+  const m = 12; // marge du viseur
+  const arm = 34; // longueur des coins
+  const t = 4; // épaisseur des coins
+  const sq = 18; // carré rouge
+  const corners = [
+    // haut gauche
+    `<rect x="${m}" y="${m}" width="${arm}" height="${t}"/><rect x="${m}" y="${m}" width="${t}" height="${arm}"/>`,
+    // haut droite
+    `<rect x="${W - m - arm}" y="${m}" width="${arm}" height="${t}"/><rect x="${W - m - t}" y="${m}" width="${t}" height="${arm}"/>`,
+    // bas gauche
+    `<rect x="${m}" y="${H - m - t}" width="${arm}" height="${t}"/><rect x="${m}" y="${H - m - arm}" width="${t}" height="${arm}"/>`,
+  ].join('');
+  const fit = (len: number, max: number) =>
+    len > max ? ` textLength="${max * 9.5}" lengthAdjust="spacingAndGlyphs"` : '';
+  const verify = `Vérifier : ${verifyHost}`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+  <rect width="${W}" height="${H}" fill="${bg}"/>
+  <g fill="${red}">${corners}<rect x="${W - m - sq}" y="${H - m - sq}" width="${sq}" height="${sq}"/></g>
+  <text x="44" y="58" font-family="'Courier New', monospace" font-weight="700" font-size="15" letter-spacing="2" fill="${accent}">PASSEPORT IA<tspan fill="${muted}" font-weight="400"> · ${esc(brand.name)}.</tspan></text>
+  <text x="44" y="100" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="38" fill="${fg}">${esc(code)}</text>
+  <text x="44" y="128" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="${muted}"${fit(verify.length, 40)}>${esc(verify)}</text>
 </svg>`;
 }
 

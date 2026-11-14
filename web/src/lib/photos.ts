@@ -18,7 +18,7 @@ export type Photo = {
   usage: string;
 };
 
-const UTM = '?utm_source=premier_plan&utm_medium=referral';
+const UTM = '?utm_source=encadre&utm_medium=referral';
 
 export const PHOTOS = {
   hero: {

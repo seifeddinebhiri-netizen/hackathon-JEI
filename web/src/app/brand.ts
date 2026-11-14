@@ -1,23 +1,22 @@
 /**
- * Identité de l'application : SOURCE UNIQUE du nom, du slogan et du logo.
- * Changer le nom ici suffit : interface, <title>, description, manifeste PWA et icônes
- * (icônes régénérées par `npm run brand:icons`, lancé aussi avant chaque build).
+ * Identité de l'application : SOURCE UNIQUE du nom, du slogan et des logos.
+ * Les fichiers du logo viennent du pack déposé dans public/brand/ (svg/ et png/) : ne pas les modifier à la main.
  *
- * Ce fichier ne doit rien importer : il est lu par vite.config.ts et par scripts/brand-icons.ts.
+ * Ce fichier ne doit rien importer : il est lu par vite.config.ts.
  */
 export const brand = {
-  /** Nom affiché partout */
-  name: 'Premier Plan',
+  /** Nom affiché partout — toujours en minuscules, y compris en début de phrase */
+  name: 'encadré',
   /** Nom court (écran d'accueil du téléphone) */
-  shortName: 'Premier Plan',
-  /** Identifiant technique en minuscules (barres de titre des captures, domaines de démo) */
-  slug: 'premierplan',
-  /** Lettre du logo carré */
-  monogram: 'P',
+  shortName: 'encadré',
+  /** Identifiant technique ASCII (domaines de démo, noms de fichiers exportés) */
+  slug: 'encadre',
+  /** Slogan, en une phrase */
+  slogan: 'Tu cadres, on t’encadre.',
   /**
    * Slogan du hero, une ligne par entrée. Le texte entre *astérisques* est mis en couleur.
    */
-  sloganLines: ['Tourne.', 'Déclare.', 'Fais-toi *voir.*'],
+  sloganLines: ['Tu cadres,', 'on t’*encadre.*'],
   /** Phrase courte sous le logo (pied de page) */
   tagline: 'Du tournage au festival, sans faire le travail créatif à ta place.',
   /** Public visé (surtitre du hero) */
@@ -25,13 +24,33 @@ export const brand = {
   /** Description longue (meta description, manifeste PWA) */
   description:
     "Accompagne les jeunes réalisateurs tunisiens, de l'organisation du tournage jusqu'au festival, et rend visible ce qui est humain et ce qui est IA.",
-  /** Préfixe des identifiants de badge du Passeport IA (ex. PP-7K3Q-2M) */
-  badgePrefix: 'PP',
-  colors: { background: '#121110', mark: '#E4202E', markText: '#F2F2EF' },
+  /** Préfixe des identifiants de badge du Passeport IA (ex. EN-7K3Q-2M) */
+  badgePrefix: 'EN',
+  /** Fichiers du pack de logos (chemins publics) */
+  logos: {
+    /** Logo sans fond, pour les fonds sombres (nav, pied de page) */
+    onDark: '/brand/svg/encadre-logo-transparent-pour-fond-sombre.svg',
+    /** Logo sans fond, pour les fonds clairs (documents, pages claires) */
+    onLight: '/brand/svg/encadre-logo-transparent-pour-fond-clair.svg',
+    /** Logo avec slogan, sur fond sombre */
+    withSloganDark: '/brand/svg/encadre-logo-slogan-sombre.svg',
+    /** Icône carrée « é. » */
+    icon: '/brand/svg/encadre-icone.svg',
+    favicon: '/brand/svg/encadre-favicon.svg',
+    faviconPng: '/brand/png/encadre-favicon-64.png',
+    icon192: '/brand/png/encadre-icone-192.png',
+    icon512: '/brand/png/encadre-icone.png',
+    /** Dérivés du pack (marges de sécurité) : voir public/icons/README.md */
+    maskable512: '/icons/encadre-icone-maskable-512.png',
+    appleTouch: '/icons/apple-touch-icon.png',
+  },
+  /** Rapport largeur / hauteur du logo sans fond (viewBox 514.24 × 172) */
+  logoRatio: 514.24 / 172,
+  colors: { background: '#121110', mark: '#E4202E', accent: '#FFC82E', text: '#F2F2EF' },
 } as const;
 
 /** Slogan en une ligne, sans les marques de mise en couleur. */
-export const brandSlogan = brand.sloganLines.join(' ').replace(/\*/g, '');
+export const brandSlogan = brand.slogan;
 
 /** Découpe une ligne du slogan en segments normaux / mis en couleur. */
 export function sloganSegments(line: string): { text: string; accent: boolean }[] {
@@ -39,13 +58,4 @@ export function sloganSegments(line: string): { text: string; accent: boolean }[
     .split(/(\*[^*]+\*)/)
     .filter(Boolean)
     .map((t) => (t.startsWith('*') ? { text: t.slice(1, -1), accent: true } : { text: t, accent: false }));
-}
-
-/** Logo carré en SVG (favicon, icônes PWA). */
-export function brandMarkSvg({ maskable = false }: { maskable?: boolean } = {}): string {
-  const { background, mark, markText } = brand.colors;
-  const inset = maskable ? 0 : 10;
-  const size = 64 - inset * 2;
-  const fontSize = maskable ? 30 : 32;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="${maskable ? mark : background}"/><rect x="${inset}" y="${inset}" width="${size}" height="${size}" fill="${mark}"/><text x="32" y="33" text-anchor="middle" dominant-baseline="central" font-family="'Space Grotesk', Arial, sans-serif" font-weight="700" font-size="${fontSize}" fill="${markText}">${brand.monogram}</text></svg>`;
 }

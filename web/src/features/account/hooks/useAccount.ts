@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api';
+import { brand } from '@/app/brand';
 import { clearProjectCache } from '@/features/festival/lib/localStore';
 
 /** Rassemble tout ce qui concerne le projet en un seul fichier JSON. */
@@ -12,7 +13,7 @@ export function useExportData() {
         api.getSubtitleDraft(projectId),
       ]);
       return {
-        format: 'premier-plan-export',
+        format: `${brand.slug}-export`,
         version: 1,
         exported_at: new Date().toISOString(),
         project,

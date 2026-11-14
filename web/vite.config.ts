@@ -8,12 +8,15 @@ import { brand } from './src/app/brand';
 
 export default defineConfig({
   plugins: [
-    // %BRAND_NAME% et %BRAND_DESCRIPTION% dans index.html viennent de src/app/brand.ts
+    // %BRAND_*% dans index.html (nom, description, icônes) viennent de src/app/brand.ts
     {
       name: 'brand-html',
       transformIndexHtml: (html) =>
         html
           .replaceAll('%BRAND_NAME%', brand.name)
+          .replaceAll('%BRAND_FAVICON%', brand.logos.favicon)
+          .replaceAll('%BRAND_FAVICON_PNG%', brand.logos.faviconPng)
+          .replaceAll('%BRAND_APPLE_ICON%', brand.logos.appleTouch)
           .replaceAll(
             '%BRAND_DESCRIPTION%',
             `${brand.name} ${brand.description.charAt(0).toLowerCase()}${brand.description.slice(1)}`,
@@ -23,7 +26,11 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/*.svg', 'icons/*.png'],
+      includeAssets: [
+        'brand/svg/encadre-favicon.svg',
+        'brand/svg/encadre-logo-transparent-*.svg',
+        'icons/*.png',
+      ],
       manifest: {
         name: brand.name,
         short_name: brand.shortName,
@@ -34,10 +41,10 @@ export default defineConfig({
         display: 'standalone',
         start_url: '/projet',
         icons: [
-          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
-          { src: '/icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
-          { src: '/icons/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+          { src: brand.logos.icon192, sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: brand.logos.icon512, sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: brand.logos.maskable512, sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: brand.logos.icon, sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
         ],
       },
       workbox: {
