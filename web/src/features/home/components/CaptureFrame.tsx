@@ -1,3 +1,4 @@
+import { brand } from '@/app/brand';
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 
@@ -31,7 +32,7 @@ export function CaptureFrame({
         <span className="size-2.5 bg-gold" />
         <span className="size-2.5 bg-paper" />
         <span className="ml-2 min-w-0 truncate font-mono text-label text-muted-on-dark">
-          premierplan / {path}
+          {brand.slug} / {path}
         </span>
       </div>
       <div className="p-4 md:p-5">{children}</div>

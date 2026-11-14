@@ -1,5 +1,5 @@
 /**
- * Contrat d'API Premier Plan — SOURCE DE VÉRITÉ.
+ * Contrat d'API de l'application — SOURCE DE VÉRITÉ.
  * Règle : toutes les valeurs d'énumération sont en ASCII (sans accent ni espace) ;
  * les accents n'apparaissent que dans les libellés affichés.
  * Toute modification ici doit être répercutée dans schemas.ts (le compilateur le vérifie)

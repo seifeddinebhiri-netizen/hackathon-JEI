@@ -8,6 +8,7 @@ import { addDays, formatISO } from 'date-fns';
 import { setAuthTokenGetter } from '@/api/client';
 import type { Session, User } from '@/api/types';
 import { DEMO_PROJECT_ID } from '@/api/mocks/data/project';
+import { brand } from '@/app/brand';
 import { AuthContext, type AuthContextValue } from './context';
 
 const KEY = 'pp-session-v1';
@@ -75,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       save(
         makeSession({
           id: 'u-demo',
-          email: 'demo@premierplan.invalid',
+          email: `demo@${brand.slug}.invalid`,
           name: 'Yassine',
           is_demo: true,
           project_id: DEMO_PROJECT_ID,

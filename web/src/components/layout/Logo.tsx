@@ -1,4 +1,5 @@
 import { Link } from 'react-router';
+import { brand } from '@/app/brand';
 import { cn } from '@/lib/cn';
 
 export function Logo({
@@ -14,13 +15,13 @@ export function Logo({
     <Link
       to={to}
       className={cn('inline-flex min-h-11 items-center gap-2.5', className)}
-      aria-label="Premier Plan, accueil"
+      aria-label={`${brand.name}, accueil`}
     >
       <span
         aria-hidden
         className="grid size-8 place-items-center bg-brand-red font-display text-[18px] font-bold text-white"
       >
-        P
+        {brand.monogram}
       </span>
       <span
         className={cn(
@@ -28,7 +29,7 @@ export function Logo({
           onDark ? 'text-paper' : 'text-ink',
         )}
       >
-        Premier Plan
+        {brand.name}
       </span>
     </Link>
   );

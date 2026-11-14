@@ -1,3 +1,4 @@
+import { brand } from '@/app/brand';
 import { PhotoFrame } from '@/components/ui';
 import type { PhotoKey } from '@/lib/photos';
 
@@ -21,7 +22,7 @@ export function PhotoBand() {
             Fait pour les petites équipes, <span className="text-gold">avec peu de moyens.</span>
           </h2>
           <p className="max-w-sm text-muted-on-dark">
-            Premier Plan s’occupe de la logistique et de la paperasse. Toi, tu filmes.
+            {brand.name} s’occupe de la logistique et de la paperasse. Toi, tu filmes.
           </p>
         </div>
         <ul className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-3 md:gap-6">

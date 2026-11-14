@@ -1,3 +1,4 @@
+import { brand } from '@/app/brand';
 import { Link } from 'react-router';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { Logo } from './Logo';
@@ -9,9 +10,7 @@ export function Footer() {
       <div className="container-pp flex flex-col gap-8 py-12 md:flex-row md:items-start md:justify-between">
         <div className="max-w-sm">
           <Logo />
-          <p className="mt-3 text-meta text-muted-on-dark">
-            Du tournage au festival, sans faire le travail créatif à ta place.
-          </p>
+          <p className="mt-3 text-meta text-muted-on-dark">{brand.tagline}</p>
         </div>
         <nav aria-label="Pied de page" className="grid grid-cols-2 gap-x-10 gap-y-1 text-meta">
           <Link className="min-h-11 py-3 hover:underline" to={user ? '/projet' : '/connexion'}>

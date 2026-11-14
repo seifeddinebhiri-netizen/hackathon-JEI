@@ -1,3 +1,4 @@
+import { brand } from '@/app/brand';
 import {
   DndContext,
   KeyboardSensor,
@@ -377,7 +378,7 @@ function DaySheet({
 
       <footer className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t-2 border-ink pt-4 text-meta">
         <span className="text-muted-on-light">
-          Premier Plan · {schedule.status === 'valide' ? 'Planning validé' : 'Brouillon IA : à valider'}
+          {brand.name} · {schedule.status === 'valide' ? 'Planning validé' : 'Brouillon IA : à valider'}
         </span>
         <nav aria-label="Autres jours" className="no-print flex gap-2">
           {prev ? (

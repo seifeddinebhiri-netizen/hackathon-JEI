@@ -6,6 +6,7 @@
  */
 import { z } from 'zod';
 import { differenceInCalendarDays, eachDayOfInterval, formatISO, parseISO } from 'date-fns';
+import { brand } from '@/app/brand';
 import { env } from '@/lib/env';
 import { isoDay } from '@/lib/format';
 import { compassLabel, sunPosition } from '@/lib/sun';
@@ -260,7 +261,7 @@ function badgeCode(): string {
   const a = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   const pick = (n: number) =>
     Array.from({ length: n }, () => a[Math.floor(Math.random() * a.length)]).join('');
-  return `PP-${pick(4)}-${pick(2)}`;
+  return `${brand.badgePrefix}-${pick(4)}-${pick(2)}`;
 }
 
 function checkPassportLocal(p: T.Passport): T.PassportCheck {

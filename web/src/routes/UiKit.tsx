@@ -39,6 +39,7 @@ import {
   useToast,
 } from '@/components/ui';
 import { demoDate } from '@/api/mocks/weather';
+import { brandSlogan } from '@/app/brand';
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -100,7 +101,7 @@ export default function UiKit() {
 
       <Section title="Typographie">
         <p className="font-display text-[56px] leading-[0.92] font-bold tracking-tight md:text-hero">
-          Fais-toi <span className="text-brand-red">voir.</span>
+          {brandSlogan}
         </p>
         <h1 className="mt-6 text-page">Titre de page 56 px</h1>
         <h2 className="mt-4 text-h2">Titre de section 32 px</h2>
