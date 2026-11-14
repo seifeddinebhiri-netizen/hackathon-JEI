@@ -65,3 +65,14 @@ Sortie : un `Schedule` au statut `brouillon_ia`.
 Le front réutilise `layoutDay` pour recalculer horaires et conflits après chaque déplacement manuel,
 puis enregistre le planning avec `PATCH /projects/{id}` (`schedule`). Si le backend applique d'autres
 règles, il doit renvoyer un `Schedule` de même forme. La disponibilité des acteurs n'est pas prise en compte.
+
+## Données du Kit Festival sans endpoint (à confirmer)
+
+En attendant une décision, ces données sont gardées dans le navigateur (`src/features/festival/lib/localStore.ts`,
+clés `pp-<type>-<projectId>`). En mode mock, `getPublicFilm` les relit pour que `/film/:id` les affiche.
+
+| Donnée | Type proposé | Endpoint proposé |
+|---|---|---|
+| Profil du film (durée, langue, genre) | `FilmProfile` (sans `declared_ai_departments`, déduit du Passeport) | champ `film_profile` dans `Project` (via `PATCH /projects/{id}`) |
+| Synopsis (une phrase, court, long) | `{ phrase: string; court: string; long: string }` | champ `synopsis` dans `Project` |
+| Page film (photos, lien de bande-annonce) | `{ stills: string[]; trailer_url?: string }` | `PUT /films/{id}/public` ou champ `film_page` dans `Project` ; upload des photos à prévoir |
