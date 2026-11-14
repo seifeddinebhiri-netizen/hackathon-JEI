@@ -8,7 +8,7 @@ export function TabsList({ className, ...rest }: ComponentProps<typeof RTabs.Lis
   return (
     <RTabs.List
       className={cn(
-        'flex max-w-full gap-1 overflow-x-auto overflow-y-hidden border-b-2 border-ink no-print',
+        'flex max-w-full flex-wrap gap-1 border-b-2 border-ink no-print md:flex-nowrap md:overflow-x-auto md:overflow-y-hidden',
         className,
       )}
       {...rest}

@@ -66,6 +66,11 @@ export function DeclarationDetail({
                   </span>
                 </p>
               ) : null}
+              {!d?.used_ai && !d?.human_decisions ? (
+                <p className="text-meta text-muted-on-light">
+                  {d ? 'Aucun détail fourni.' : 'L’équipe n’a pas encore répondu pour ce département.'}
+                </p>
+              ) : null}
             </div>
           </li>
         );

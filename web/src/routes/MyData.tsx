@@ -101,7 +101,12 @@ export default function MyData() {
         <h2 id="stocke" className="text-h2">
           Ce qui est enregistré
         </h2>
-        <div className="mt-4 overflow-x-auto border-2 border-ink bg-white">
+        <div
+          className="mt-4 overflow-x-auto border-2 border-ink bg-white"
+          role="region"
+          aria-label="Tableau des données enregistrées"
+          tabIndex={0}
+        >
           <table className="w-full min-w-[560px] text-left">
             <thead className="border-b-2 border-ink bg-paper">
               <tr>

@@ -19,6 +19,7 @@ import {
 import { useOptimisticProjectUpdate } from '@/features/planner/hooks/usePlanner';
 import { cn } from '@/lib/cn';
 import { formatDate } from '@/lib/format';
+import { useMediaQuery } from '@/lib/useMediaQuery';
 import { useFestivalSearch } from '../hooks/useFestivals';
 import {
   AI_POLICY_ICONS,
@@ -90,7 +91,7 @@ function FestivalCard({
   const f = m.festival;
   return (
     <article aria-label={f.name} className="flex flex-col gap-4 border-2 border-ink bg-white p-5">
-      <header className="flex flex-wrap items-start justify-between gap-3">
+      <header>
         <div>
           <h3 className="text-h3">{f.name}</h3>
           <p className="mt-1 text-meta text-muted-on-light">
@@ -98,11 +99,11 @@ function FestivalCard({
             sous-titres {f.subtitle_langs.map((l) => LANG_LABELS[l] ?? l).join(', ')}
           </p>
         </div>
-        <div className="flex flex-col items-end gap-2">
-          <Countdown date={f.deadline} />
-          <span className="text-meta text-muted-on-light">Limite : {formatDate(f.deadline)}</span>
-        </div>
       </header>
+      <p className="flex flex-wrap items-center gap-2 text-meta">
+        <Countdown date={f.deadline} />
+        <span className="text-muted-on-light">Date limite : {formatDate(f.deadline)}</span>
+      </p>
       <div className="flex flex-wrap items-center gap-3">
         {ranked ? <ScoreSquares score={m.score} /> : null}
         <StatusChip tone={AI_POLICY_TONES[f.ai_policy]} icon={AI_POLICY_ICONS[f.ai_policy]}>
@@ -175,6 +176,8 @@ export function FindTab({
   const [q, setQ] = useState('');
   const [ranked, setRanked] = useState(false);
   const [addingId, setAddingId] = useState<string>();
+  const desktop = useMediaQuery('(min-width: 768px)');
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   // recherche texte : on attend la fin de la frappe
   useEffect(() => {
@@ -247,69 +250,87 @@ export function FindTab({
               placeholder="Nom du festival ou pays"
             />
           </Field>
-          <Field label="Pays">
-            <Select value={filters.country ?? ''} onChange={(e) => setF('country', e.target.value)}>
-              <option value="">Tous</option>
-              {countries.map((c) => (
-                <option key={c}>{c}</option>
-              ))}
-            </Select>
-          </Field>
-          <Field label="Durée max acceptée" hint="Festivals qui acceptent au plus…">
-            <Select
-              value={filters.max_duration_min ?? ''}
-              onChange={(e) => setF('max_duration_min', Number(e.target.value) || undefined)}
+          {!desktop ? (
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={filtersOpen ? 'minus' : 'plus'}
+              aria-expanded={filtersOpen}
+              onClick={() => setFiltersOpen((v) => !v)}
+              className="self-start"
             >
-              <option value="">Toutes</option>
-              <option value="15">15 min</option>
-              <option value="20">20 min</option>
-              <option value="30">30 min</option>
-              <option value="45">45 min</option>
-            </Select>
-          </Field>
-          <Field label="Frais d’inscription">
-            <Select
-              value={filters.fee ?? ''}
-              onChange={(e) => setF('fee', (e.target.value || undefined) as Filters['fee'])}
-            >
-              <option value="">Tous</option>
-              <option value="gratuit">Gratuit</option>
-              <option value="payant">Payant</option>
-            </Select>
-          </Field>
-          <Field label="Date limite avant le">
-            <Input
-              type="date"
-              value={filters.deadline_before ?? ''}
-              onChange={(e) => setF('deadline_before', e.target.value)}
-            />
-          </Field>
-          <Field label="Langue des sous-titres">
-            <Select
-              value={filters.subtitle_lang ?? ''}
-              onChange={(e) => setF('subtitle_lang', e.target.value)}
-            >
-              <option value="">Toutes</option>
-              {Object.entries(LANG_LABELS).map(([v, l]) => (
-                <option key={v} value={v}>
-                  {l}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Field label="Politique IA">
-            <Select
-              value={filters.ai_policy ?? ''}
-              onChange={(e) => setF('ai_policy', e.target.value as AiPolicy)}
-            >
-              <option value="">Toutes</option>
-              {(Object.keys(AI_POLICY_LABELS) as AiPolicy[]).map((p) => (
-                <option key={p} value={p}>
-                  {AI_POLICY_LABELS[p]}
-                </option>
-              ))}
-            </Select>
-          </Field>
+              {filtersOpen
+                ? 'Masquer les filtres'
+                : `Filtres${activeFilters ? ` (${activeFilters} actifs)` : ''}`}
+            </Button>
+          ) : null}
+          {desktop || filtersOpen ? (
+            <>
+              <Field label="Pays">
+                <Select value={filters.country ?? ''} onChange={(e) => setF('country', e.target.value)}>
+                  <option value="">Tous</option>
+                  {countries.map((c) => (
+                    <option key={c}>{c}</option>
+                  ))}
+                </Select>
+              </Field>
+              <Field label="Durée max acceptée" hint="Festivals qui acceptent au plus…">
+                <Select
+                  value={filters.max_duration_min ?? ''}
+                  onChange={(e) => setF('max_duration_min', Number(e.target.value) || undefined)}
+                >
+                  <option value="">Toutes</option>
+                  <option value="15">15 min</option>
+                  <option value="20">20 min</option>
+                  <option value="30">30 min</option>
+                  <option value="45">45 min</option>
+                </Select>
+              </Field>
+              <Field label="Frais d’inscription">
+                <Select
+                  value={filters.fee ?? ''}
+                  onChange={(e) => setF('fee', (e.target.value || undefined) as Filters['fee'])}
+                >
+                  <option value="">Tous</option>
+                  <option value="gratuit">Gratuit</option>
+                  <option value="payant">Payant</option>
+                </Select>
+              </Field>
+              <Field label="Date limite avant le">
+                <Input
+                  type="date"
+                  value={filters.deadline_before ?? ''}
+                  onChange={(e) => setF('deadline_before', e.target.value)}
+                />
+              </Field>
+              <Field label="Langue des sous-titres">
+                <Select
+                  value={filters.subtitle_lang ?? ''}
+                  onChange={(e) => setF('subtitle_lang', e.target.value)}
+                >
+                  <option value="">Toutes</option>
+                  {Object.entries(LANG_LABELS).map(([v, l]) => (
+                    <option key={v} value={v}>
+                      {l}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+              <Field label="Politique IA">
+                <Select
+                  value={filters.ai_policy ?? ''}
+                  onChange={(e) => setF('ai_policy', e.target.value as AiPolicy)}
+                >
+                  <option value="">Toutes</option>
+                  {(Object.keys(AI_POLICY_LABELS) as AiPolicy[]).map((p) => (
+                    <option key={p} value={p}>
+                      {AI_POLICY_LABELS[p]}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+            </>
+          ) : null}
           <div className="flex items-end sm:col-span-2 lg:col-span-2">
             <Button
               icon="sparkle"

@@ -28,7 +28,9 @@ export function Checkbox({
         onCheckedChange={(v) => onCheckedChange(v === true)}
         aria-describedby={hint ? `${id}-aide` : undefined}
         className={cn(
-          'mt-0.5 grid size-6 shrink-0 place-items-center border-2 border-ink bg-white',
+          'relative mt-0.5 grid size-6 shrink-0 place-items-center border-2 border-ink bg-white',
+          // zone cliquable étendue à 44 px
+          'after:absolute after:-inset-[10px] after:content-[""]',
           'data-[state=checked]:bg-ink data-[state=checked]:text-gold',
           'disabled:cursor-not-allowed disabled:border-line-light disabled:bg-paper',
         )}

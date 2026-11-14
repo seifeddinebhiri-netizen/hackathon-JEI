@@ -35,9 +35,15 @@ export function PlannerCapture() {
           Brouillon IA
         </span>
       </div>
-      <div className="grid grid-cols-5 gap-1.5">
+      <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-5">
         {WEEK.map((col) => (
-          <div key={col.d} className="flex min-h-40 flex-col gap-1.5 border border-line-light bg-paper p-1.5">
+          <div
+            key={col.d}
+            className={cn(
+              'flex min-h-40 flex-col gap-1.5 border border-line-light bg-paper p-1.5',
+              (col.d === 'Mar' || col.d === 'Mer') && 'hidden sm:flex',
+            )}
+          >
             <p className="eyebrow text-center">{col.d}</p>
             {col.blocks.map((b) => (
               <div
@@ -69,21 +75,23 @@ export function PlannerCapture() {
 export function CoachCapture() {
   return (
     <CaptureFrame path="coach" tilt="right">
-      <div className="mx-auto w-48 border-[6px] border-ink bg-ink p-1">
-        <div className="bg-paper p-3">
-          <p className="eyebrow text-muted-on-light">Aujourd’hui</p>
-          <p className="font-display text-[18px] leading-tight font-bold">3 scènes · Médina</p>
-          <ul className="mt-2 flex flex-col gap-1.5">
-            {['Sc. 1 · Café · 10 h', 'Sc. 2 · Ruelles · 12 h 30', 'Sc. 7 · Nuit · 17 h 45'].map((s) => (
-              <li key={s} className="border-l-4 border-ink bg-white px-2 py-1 text-label">
-                {s}
-              </li>
-            ))}
-          </ul>
-          <p className="mt-3 flex items-start gap-1 text-label leading-snug">
-            <Icon name="lock" size={12} className="mt-0.5 shrink-0" />
-            Images traitées sur le téléphone. Rien n’est envoyé.
-          </p>
+      <div className="-m-4 flex justify-center bg-surface-dark px-4 py-8 md:-m-5 md:py-10">
+        <div className="w-52 border-[6px] border-ink bg-ink p-1 shadow-hard-gold">
+          <div className="bg-paper p-3">
+            <p className="eyebrow text-muted-on-light">Aujourd’hui</p>
+            <p className="font-display text-[18px] leading-tight font-bold">3 scènes · Médina</p>
+            <ul className="mt-2 flex flex-col gap-1.5">
+              {['Sc. 1 · Café · 10 h', 'Sc. 2 · Ruelles · 12 h 30', 'Sc. 7 · Nuit · 17 h 45'].map((s) => (
+                <li key={s} className="border-l-4 border-ink bg-white px-2 py-1 text-label">
+                  {s}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 flex items-start gap-1 text-label leading-snug">
+              <Icon name="lock" size={12} className="mt-0.5 shrink-0" />
+              Images traitées sur le téléphone. Rien n’est envoyé.
+            </p>
+          </div>
         </div>
       </div>
     </CaptureFrame>

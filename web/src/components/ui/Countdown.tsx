@@ -11,7 +11,7 @@ export function Countdown({ date, className }: { date: string; className?: strin
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 border-2 px-2 py-1 font-mono text-label font-medium uppercase',
+        'inline-flex shrink-0 items-center gap-1.5 border-2 px-2 py-1 font-mono text-label font-medium whitespace-nowrap uppercase',
         past
           ? 'border-line-light text-muted-on-light'
           : urgent

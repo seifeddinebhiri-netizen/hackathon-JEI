@@ -12,10 +12,13 @@ export function SceneBlock({
   sceneId,
   compact,
   overlay,
+  hideLocation,
 }: {
   sceneId: string;
   compact?: boolean;
   overlay?: boolean;
+  /** Le lieu est déjà indiqué en tête de la journée */
+  hideLocation?: boolean;
 }) {
   const { sceneById, scheduledById, locationById, onMoveRequest } = useCalendar();
   const scene = sceneById.get(sceneId);
@@ -55,7 +58,7 @@ export function SceneBlock({
           compact && 'py-1',
         )}
       >
-        <span className="flex items-center gap-1.5 font-mono text-label font-medium">
+        <span className="flex items-center gap-1.5 font-mono text-label font-medium whitespace-nowrap">
           <span className="border border-ink bg-white px-1">{scene.setting}</span>
           <Icon name={MOMENT_ICONS[scene.moment]} size={14} />
           <span>Sc. {scene.number}</span>
@@ -73,7 +76,7 @@ export function SceneBlock({
               {scheduled
                 ? `${formatTime(scheduled.start)} – ${formatTime(scheduled.end)}`
                 : `${scene.estimated_hours} h`}
-              {loc ? ` · ${loc.name}` : ''}
+              {loc && !hideLocation ? ` · ${loc.name}` : ''}
             </span>
           </>
         ) : null}

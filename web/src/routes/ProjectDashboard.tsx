@@ -207,13 +207,13 @@ function PassportProgress({ project }: { project: Project }) {
           {c ? (
             <div className="mt-3 flex flex-wrap gap-2">
               <StatusChip tone="neutral" icon="user">
-                {c.humain} humains
+                {c.humain} humain{c.humain > 1 ? 's' : ''}
               </StatusChip>
               <StatusChip tone="neutral" icon="users">
-                {c.assiste} assistés
+                {c.assiste} assisté{c.assiste > 1 ? 's' : ''}
               </StatusChip>
               <StatusChip tone="neutral" icon="sparkle">
-                {c.genere} générés
+                {c.genere} généré{c.genere > 1 ? 's' : ''}
               </StatusChip>
             </div>
           ) : null}

@@ -16,7 +16,7 @@ export function Stepper({
   className?: string;
 }) {
   return (
-    <nav aria-label="Étapes" className={cn('no-print', className)}>
+    <nav aria-label="Étapes de l’assistant" className={cn('no-print', className)}>
       <ol className="flex w-full overflow-x-auto border-2 border-ink">
         {steps.map((s, i) => {
           const active = i === current;

@@ -3,6 +3,7 @@ import type { Project, SubtitleLine } from '@/api/types';
 import {
   AiDraftBadge,
   Button,
+  Checkbox,
   EmptyState,
   ErrorState,
   Field,
@@ -211,15 +212,12 @@ export function SubtitlesTab({ project }: { project: Project }) {
         </div>
       </div>
 
-      <label className="inline-flex min-h-11 items-center gap-2 self-start text-meta font-semibold">
-        <input
-          type="checkbox"
-          className="size-5 accent-ink"
-          checked={onlyTodo}
-          onChange={(e) => setOnlyTodo(e.target.checked)}
-        />
-        N’afficher que les lignes à valider
-      </label>
+      <Checkbox
+        checked={onlyTodo}
+        onCheckedChange={setOnlyTodo}
+        label={<span className="text-meta font-semibold">N’afficher que les lignes à valider</span>}
+        className="self-start"
+      />
 
       <ol className="flex flex-col gap-3" aria-label="Lignes de sous-titres">
         {shown.map((l) => (

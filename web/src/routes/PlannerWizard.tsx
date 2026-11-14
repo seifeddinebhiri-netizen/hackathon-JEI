@@ -108,9 +108,11 @@ function DraftSteps({
   const current = { ...project, ...draft };
   return (
     <>
-      <div className="flex min-h-11 items-center justify-end">
-        <SaveIndicator state={autosave.state} onRetry={() => void autosave.retry()} />
-      </div>
+      {autosave.state !== 'idle' ? (
+        <div className="-mt-4 flex justify-end">
+          <SaveIndicator state={autosave.state} onRetry={() => void autosave.retry()} />
+        </div>
+      ) : null}
       {step === 1 ? <StepScreenplay draft={draft} setDraft={setDraftState} onDetected={onDetected} /> : null}
       {step === 2 ? (
         <StepLocations draft={draft} setDraft={setDraftState} detected={detected.locations} />

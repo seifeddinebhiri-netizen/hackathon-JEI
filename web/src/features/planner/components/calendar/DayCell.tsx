@@ -79,7 +79,9 @@ export function DayCell({
       className={cn(
         'flex min-w-0 flex-col gap-1.5 border-2 p-1.5',
         variant === 'week' ? 'min-h-72' : 'min-h-32',
-        inWindow ? 'border-line-light bg-white' : 'border-transparent bg-paper text-muted-on-light',
+        inWindow
+          ? 'border-line-light bg-white'
+          : 'border-transparent bg-[repeating-linear-gradient(135deg,transparent_0_8px,var(--color-line-light)_8px_9px)] text-muted-on-light',
         outsideMonth && 'opacity-50',
         isOver && 'border-ink bg-gold-soft',
       )}
@@ -109,6 +111,7 @@ export function DayCell({
         )}
         {inWindow ? <WeatherDot date={date} /> : null}
       </div>
+      {!inWindow && variant === 'week' ? <p className="eyebrow mt-2 text-center">Hors période</p> : null}
       {inWindow && day && variant === 'week' ? (
         <p className="truncate text-label text-muted-on-light">
           RDV {day.call_time} ·{' '}
@@ -124,7 +127,7 @@ export function DayCell({
         </p>
       ) : null}
       {day?.scenes.map((s) => (
-        <SceneBlock key={s.scene_id} sceneId={s.scene_id} compact={variant === 'month'} />
+        <SceneBlock key={s.scene_id} sceneId={s.scene_id} compact={variant === 'month'} hideLocation />
       ))}
     </div>
   );

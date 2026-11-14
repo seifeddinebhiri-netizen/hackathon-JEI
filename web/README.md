@@ -104,9 +104,9 @@ Ce que l'interface garantit, et où le voir :
   la sélection. » Fiches sans source ni date de vérification masquées. Pas de soumission ni de paiement dans l'app.
 - **Signature C2PA simulée annoncée comme telle** dans cette version.
 - **Contrôle des données.** `/mes-donnees` : ce qui est stocké, ce qui ne l'est pas, export JSON, suppression.
-- **Accessibilité (objectifs, audit complet prévu en phase 8).** Contraste AA, focus or visible, navigation au
-  clavier (y compris pour déplacer une scène), cibles de 44 px, statuts en icône + libellé (jamais la couleur seule),
-  `lang="fr"`.
+- **Accessibilité.** Contraste AA, focus or visible, navigation au clavier (y compris pour déplacer une scène),
+  cibles de 44 px, statuts en icône + libellé (jamais la couleur seule), `lang="fr"`. Audit axe-core : 0 violation
+  sur les 20 écrans (détail dans `docs/REVUE.md`).
 - **Données d'exemple.** Festivals et outils IA sont des `[placeholders]` ; sources en `.invalid`, dates factices.
 - **Photos** : Unsplash, licence gratuite, créditées sur chaque image et sur `/credits`.
 
@@ -115,3 +115,5 @@ Ce que l'interface garantit, et où le voir :
 - [`docs/API_CONTRACT.md`](docs/API_CONTRACT.md) — chaque endpoint, exemples, algorithme de planning
 - [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) — tokens, typographie, composants, contraste, impression
 - [`docs/INTEGRATION.md`](docs/INTEGRATION.md) — brancher FastAPI et Supabase, checklist de tests
+- [`docs/REVUE.md`](docs/REVUE.md) — revue de design et audit d'accessibilité
+- [`docs/captures/`](docs/captures/) — captures de chaque écran en 1440 et 390 px

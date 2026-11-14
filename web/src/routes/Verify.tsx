@@ -6,7 +6,7 @@ import { Button, ButtonLink, EmptyState, ErrorState, Icon, LoadingBlock, StatusC
 import { AiLabel } from '@/features/passport/components/AiLabel';
 import { DeclarationDetail } from '@/features/passport/components/DeclarationDetail';
 import { useVerifyPassport } from '@/features/passport/hooks/usePassport';
-import { LABEL_DISCLAIMER, TOOL_STATUS_HELP } from '@/features/passport/lib/labels';
+import { DEPARTMENTS, LABEL_DISCLAIMER, summarize, TOOL_STATUS_HELP } from '@/features/passport/lib/labels';
 import { formatDate } from '@/lib/format';
 import { printPage } from '@/lib/print';
 
@@ -54,6 +54,7 @@ export default function Verify() {
   }
 
   const { passport: p, tools, signature, checked_at } = q.data;
+  const counts = summarize(p.declarations);
   return (
     <div className="bg-paper">
       <section className="bg-ink text-paper print:bg-white print:text-ink">
@@ -64,6 +65,31 @@ export default function Verify() {
             </p>
             <h1 className="mt-4 text-[44px] leading-none md:text-page">{p.film_title}</h1>
             <p className="mt-3 text-lead text-muted-on-dark print:text-ink">Réalisation : {p.director}</p>
+            <ul className="mt-6 flex flex-wrap gap-2" aria-label="Résumé de la déclaration">
+              <li>
+                <StatusChip tone="neutral" icon="user">
+                  {counts.humain} département{counts.humain > 1 ? 's' : ''} 100 % humain
+                  {counts.humain > 1 ? 's' : ''}
+                </StatusChip>
+              </li>
+              <li>
+                <StatusChip tone="gold" icon="users">
+                  {counts.assiste} assisté{counts.assiste > 1 ? 's' : ''} par IA
+                </StatusChip>
+              </li>
+              <li>
+                <StatusChip tone="gold" icon="sparkle">
+                  {counts.genere} généré{counts.genere > 1 ? 's' : ''} par IA
+                </StatusChip>
+              </li>
+            </ul>
+            {counts.non_renseigne ? (
+              <p className="mt-3 flex items-center gap-2 text-meta font-semibold text-gold print:text-ink">
+                <Icon name="alert" size={16} /> Déclaration incomplète : {counts.non_renseigne} département
+                {counts.non_renseigne > 1 ? 's' : ''} sur {DEPARTMENTS.length} non renseigné
+                {counts.non_renseigne > 1 ? 's' : ''}.
+              </p>
+            ) : null}
           </div>
           <dl className="grid grid-cols-2 gap-x-8 gap-y-3 text-meta">
             <div>

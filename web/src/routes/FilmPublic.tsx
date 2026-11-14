@@ -5,6 +5,11 @@ import { ButtonLink, EmptyState, ErrorState, Icon, LoadingBlock, PhotoFrame } fr
 import { usePublicFilm } from '@/features/festival/hooks/useFestivals';
 import { photoFromUrl } from '@/lib/photos';
 
+const CREW_ROLES =
+  /réalisation|image|son|régie|montage|scripte|production|musique|maquillage|costumes|assistanat/i;
+/** Un rôle de distribution est un nom de personnage (pas un poste technique). */
+const isCast = (role: string) => !CREW_ROLES.test(role);
+
 export default function FilmPublic() {
   const { id } = useParams();
   const q = usePublicFilm(id);
@@ -123,14 +128,24 @@ export default function FilmPublic() {
               Générique
             </h2>
             {f.credits.length ? (
-              <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2">
-                {f.credits.map((c, i) => (
-                  <div key={i} className="contents">
-                    <dt className="text-muted-on-light">{c.role}</dt>
-                    <dd className="font-semibold">{c.name}</dd>
+              [
+                { title: 'Distribution', list: f.credits.filter((c) => isCast(c.role)) },
+                { title: 'Équipe', list: f.credits.filter((c) => !isCast(c.role)) },
+              ]
+                .filter((g) => g.list.length)
+                .map((g) => (
+                  <div key={g.title} className="mt-3 first:mt-0">
+                    <h3 className="eyebrow mb-2 text-muted-on-light">{g.title}</h3>
+                    <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2">
+                      {g.list.map((c, i) => (
+                        <div key={i} className="contents">
+                          <dt className="text-muted-on-light">{c.role}</dt>
+                          <dd className="font-semibold">{c.name}</dd>
+                        </div>
+                      ))}
+                    </dl>
                   </div>
-                ))}
-              </dl>
+                ))
             ) : (
               <p className="text-muted-on-light">Générique à venir.</p>
             )}

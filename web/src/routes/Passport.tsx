@@ -52,9 +52,9 @@ function PassportEditor({ project, initial }: { project: Project; initial: Passp
   const declared = declarations.length;
 
   return (
-    <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
+    <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:items-start">
       {/* Élément principal : l'Étiquette IA et le lien vérifiable */}
-      <aside className="lg:col-span-5" aria-label="Étiquette IA et sorties">
+      <div className="lg:col-span-5 lg:row-start-1" aria-label="Étiquette IA" role="region">
         <div className="flex flex-col gap-6">
           <AiLabel
             filmTitle={project.title}
@@ -84,17 +84,10 @@ function PassportEditor({ project, initial }: { project: Project; initial: Passp
               </button>
             ) : null}
           </p>
-          {shown ? (
-            <>
-              <VerifyLink passport={shown} />
-              <PdfAndSign key={`${shown.id}-${shown.updated_at}`} passport={shown} />
-              <BadgeExport passport={shown} />
-            </>
-          ) : null}
         </div>
-      </aside>
+      </div>
 
-      <div className="flex flex-col gap-6 lg:col-span-7">
+      <div className="flex flex-col gap-6 lg:col-span-7 lg:col-start-6 lg:row-span-2 lg:row-start-1">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="text-h3">Ta déclaration</h2>
           <p className="text-meta text-muted-on-light">
@@ -129,19 +122,41 @@ function PassportEditor({ project, initial }: { project: Project; initial: Passp
           >
             Précédent
           </Button>
-          <Button
-            iconRight="arrowRight"
-            disabled={current === DEPARTMENTS.length - 1}
-            onClick={() => setCurrent((c) => c + 1)}
-          >
-            Département suivant
-          </Button>
+          {current < DEPARTMENTS.length - 1 ? (
+            <Button iconRight="arrowRight" onClick={() => setCurrent((c) => c + 1)}>
+              Département suivant
+            </Button>
+          ) : (
+            <Button
+              iconRight="arrowRight"
+              disabled={!shown}
+              onClick={() =>
+                document.getElementById('sorties')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }
+            >
+              Voir le lien, le PDF et le badge
+            </Button>
+          )}
         </div>
         <p className="flex items-start gap-2 border-l-4 border-gold pl-3 text-meta text-muted-on-light">
           <Icon name="info" size={16} className="mt-0.5 shrink-0" />
           {LABEL_DISCLAIMER} Le statut d’un outil décrit ce que publie son fournisseur, pas ton travail.
         </p>
       </div>
+
+      <section
+        id="sorties"
+        aria-label="Lien de vérification, PDF et badge"
+        className="flex scroll-mt-24 flex-col gap-6 lg:col-span-5 lg:row-start-2"
+      >
+        {shown ? (
+          <>
+            <VerifyLink passport={shown} />
+            <PdfAndSign key={`${shown.id}-${shown.updated_at}`} passport={shown} />
+            <BadgeExport passport={shown} />
+          </>
+        ) : null}
+      </section>
     </div>
   );
 }

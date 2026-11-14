@@ -24,7 +24,7 @@ export function badgeSvg({
   <text x="74" y="82" text-anchor="middle" dominant-baseline="central" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="38" fill="#FFFFFF">IA</text>
   <text x="146" y="58" font-family="'Courier New', monospace" font-weight="700" font-size="16" letter-spacing="2" fill="${light ? fg : accent}">PASSEPORT IA</text>
   <text x="146" y="96" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="34" fill="${fg}">${esc(code)}</text>
-  <text x="146" y="126" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="${fg}">Vérifier : ${esc(verifyHost)}</text>
+  <text x="146" y="126" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="${fg}"${verifyHost.length > 34 ? ' textLength="310" lengthAdjust="spacingAndGlyphs"' : ''}>Vérifier : ${esc(verifyHost)}</text>
 </svg>`;
 }
 

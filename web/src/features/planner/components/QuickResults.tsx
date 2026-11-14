@@ -19,6 +19,7 @@ export function QuickResults({
   addedSlot?: string;
 }) {
   const [selected, setSelected] = useState(0);
+  const [showAll, setShowAll] = useState(false);
   if (!result.slots.length) {
     return (
       <EmptyState icon="calendar" title="Aucun créneau sur cette période">
@@ -28,49 +29,79 @@ export function QuickResults({
   }
   const current = result.slots[Math.min(selected, result.slots.length - 1)];
 
+  const count = (v: QuickSlot['verdict']) => result.slots.filter((s) => s.verdict === v).length;
+  const summary = [
+    count('recommande') && `${count('recommande')} recommandé${count('recommande') > 1 ? 's' : ''}`,
+    count('plan_b') && `${count('plan_b')} en plan B`,
+    count('a_eviter') && `${count('a_eviter')} à éviter`,
+  ]
+    .filter(Boolean)
+    .join(', ');
+  const TOP = 3;
+  const visible = showAll ? result.slots : result.slots.slice(0, TOP);
+
   return (
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
-      <ol className="flex flex-col gap-3 xl:col-span-7" aria-label="Créneaux classés">
-        {result.slots.map((s, i) => {
-          const active = i === selected;
-          return (
-            <li key={s.start}>
-              <div
-                className={cn(
-                  'border-2 bg-white transition-shadow',
-                  active ? 'border-ink shadow-hard' : 'border-line-light hover:border-ink',
-                )}
-              >
-                <button
-                  type="button"
-                  onClick={() => setSelected(i)}
-                  aria-pressed={active}
-                  className="flex w-full flex-col gap-2 p-4 text-left"
+      <div className="flex flex-col gap-3 xl:col-span-7">
+        <p className="font-semibold">
+          {result.slots.length} créneaux : {summary}. Les {Math.min(TOP, result.slots.length)} meilleurs
+          d’abord.
+        </p>
+        <ol className="flex flex-col gap-3" aria-label="Créneaux classés">
+          {visible.map((s, i) => {
+            const active = i === selected;
+            return (
+              <li key={s.start}>
+                <div
+                  className={cn(
+                    'border-2 bg-white transition-shadow',
+                    active ? 'border-ink shadow-hard' : 'border-line-light hover:border-ink',
+                  )}
                 >
-                  <span className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="flex items-center gap-3">
-                      <span className="font-mono text-label text-muted-on-light">#{i + 1}</span>
-                      <span className="font-display text-[20px] font-bold first-letter:uppercase">
-                        {formatDayLong(s.start)}
+                  <button
+                    type="button"
+                    onClick={() => setSelected(i)}
+                    aria-pressed={active}
+                    className="flex w-full flex-col gap-2 p-4 text-left"
+                  >
+                    <span className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="flex items-center gap-3">
+                        <span className="font-mono text-label text-muted-on-light">#{i + 1}</span>
+                        <span className="font-display text-[20px] font-bold first-letter:uppercase">
+                          {formatDayLong(s.start)}
+                        </span>
                       </span>
+                      <StatusChip tone={VERDICT_TONES[s.verdict]} icon={VERDICT_ICONS[s.verdict]}>
+                        {VERDICT_LABELS[s.verdict]}
+                      </StatusChip>
                     </span>
-                    <StatusChip tone={VERDICT_TONES[s.verdict]} icon={VERDICT_ICONS[s.verdict]}>
-                      {VERDICT_LABELS[s.verdict]}
-                    </StatusChip>
-                  </span>
-                  <span className="flex items-center gap-1.5 font-semibold">
-                    <Icon name="clock" size={16} /> {formatTime(s.start)} → {formatTime(s.end)}
-                  </span>
-                  <span className="text-meta text-muted-on-light">{s.reason}</span>
-                  <span className="flex flex-wrap gap-x-6 gap-y-1">
-                    <WeatherSummary weather={s.weather} />
-                  </span>
-                </button>
-              </div>
-            </li>
-          );
-        })}
-      </ol>
+                    <span className="flex items-center gap-1.5 font-semibold">
+                      <Icon name="clock" size={16} /> {formatTime(s.start)} → {formatTime(s.end)}
+                    </span>
+                    <span className="text-meta text-muted-on-light">{s.reason}</span>
+                    <span className="flex flex-wrap gap-x-6 gap-y-1">
+                      <WeatherSummary weather={s.weather} />
+                    </span>
+                  </button>
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+        {result.slots.length > TOP ? (
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={showAll ? 'minus' : 'plus'}
+            onClick={() => setShowAll((v) => !v)}
+            className="self-start"
+          >
+            {showAll
+              ? 'Afficher les 3 meilleurs seulement'
+              : `Voir les ${result.slots.length - TOP} autres créneaux`}
+          </Button>
+        ) : null}
+      </div>
 
       <aside className="xl:col-span-5" aria-label="Détail du créneau choisi">
         <div className="sticky top-24 flex flex-col gap-4 border-2 border-ink bg-white p-5">

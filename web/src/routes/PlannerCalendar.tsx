@@ -140,28 +140,40 @@ function Calendar({ project, schedule }: { project: Project; schedule: Schedule 
   return (
     <CalendarContext.Provider value={ctx}>
       <div className="flex flex-col gap-6">
-        <div className="flex flex-wrap items-center gap-2">
-          <AiDraftBadge validated={schedule.status === 'valide'} />
-          <StatusChip tone={placed === project.scenes.length ? 'ok' : 'warn'} icon="film">
-            {placed}/{project.scenes.length} scènes placées
-          </StatusChip>
-          <StatusChip tone={conflicts ? 'warn' : 'ok'}>
-            {conflicts} conflit{conflicts > 1 ? 's' : ''}
-          </StatusChip>
-          {weather.isPending ? (
-            <span className="text-meta text-muted-on-light">Chargement de la météo…</span>
-          ) : null}
-          {weather.isError ? (
-            <span className="flex items-center gap-1 text-meta text-bad-fg">
-              <Icon name="alert" size={14} /> Météo indisponible : conflits calculés avec la dernière météo
-              connue.
-            </span>
-          ) : null}
-          {editor.saving ? (
-            <span role="status" className="text-meta text-muted-on-light">
-              Enregistrement…
-            </span>
-          ) : null}
+        <div className="flex flex-wrap items-center justify-between gap-4 border-2 border-ink bg-white p-3 md:p-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <AiDraftBadge validated={schedule.status === 'valide'} />
+            <StatusChip tone={placed === project.scenes.length ? 'ok' : 'warn'} icon="film">
+              {placed}/{project.scenes.length} scènes placées
+            </StatusChip>
+            <StatusChip tone={conflicts ? 'warn' : 'ok'}>
+              {conflicts} conflit{conflicts > 1 ? 's' : ''}
+            </StatusChip>
+            {weather.isPending ? (
+              <span className="text-meta text-muted-on-light">Chargement de la météo…</span>
+            ) : null}
+            {weather.isError ? (
+              <span className="flex items-center gap-1 text-meta text-bad-fg">
+                <Icon name="alert" size={14} /> Météo indisponible : conflits calculés avec la dernière météo
+                connue.
+              </span>
+            ) : null}
+            {editor.saving ? (
+              <span role="status" className="text-meta text-muted-on-light">
+                Enregistrement…
+              </span>
+            ) : null}
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <GenerateScheduleButton project={project} variant="secondary" size="sm" />
+            {schedule.status === 'brouillon_ia' ? (
+              <Button icon="check" size="sm" onClick={editor.validate} loading={editor.saving}>
+                Valider le planning
+              </Button>
+            ) : (
+              <StatusChip tone="ok">Planning validé</StatusChip>
+            )}
+          </div>
         </div>
 
         <DndContext
@@ -271,16 +283,6 @@ function Calendar({ project, schedule }: { project: Project; schedule: Schedule 
         onClose={() => setMoveId(null)}
         onMove={(id, to) => editor.move(id, to)}
       />
-      <div className="mt-8 flex flex-wrap justify-end gap-3 border-t-2 border-ink pt-6">
-        <GenerateScheduleButton project={project} variant="secondary" />
-        {schedule.status === 'brouillon_ia' ? (
-          <Button icon="check" onClick={editor.validate} loading={editor.saving}>
-            Valider le planning
-          </Button>
-        ) : (
-          <StatusChip tone="ok">Planning validé</StatusChip>
-        )}
-      </div>
     </CalendarContext.Provider>
   );
 }

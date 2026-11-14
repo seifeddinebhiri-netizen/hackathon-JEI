@@ -223,7 +223,7 @@ function DaySheet({
         </>
       }
     >
-      <header className="flex flex-wrap items-start justify-between gap-4 border-b-[6px] border-ink pb-4">
+      <header className="grid grid-cols-1 gap-4 border-b-[6px] border-ink pb-4 sm:grid-cols-[1fr_auto] sm:items-start">
         <div>
           <p className="eyebrow">
             Feuille de service · Jour {index + 1} sur {total}
@@ -233,10 +233,10 @@ function DaySheet({
           </h1>
           <p className="mt-2 font-semibold">{project.title}</p>
         </div>
-        <div className="flex flex-col items-end gap-2">
+        <div className="flex flex-col items-start gap-2 sm:items-end">
           <AiDraftBadge validated={schedule.status === 'valide'} className="no-print" />
-          <label className="flex flex-col items-end gap-1">
-            <span className="eyebrow">Rendez-vous</span>
+          <label className="flex flex-col items-start gap-1 border-2 border-ink bg-gold-soft p-3 sm:items-end print:bg-white">
+            <span className="eyebrow">Rendez-vous de l’équipe</span>
             <span className="no-print w-36">
               <Select
                 value={day.call_time}
@@ -262,7 +262,7 @@ function DaySheet({
         </div>
       </header>
 
-      <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3 [&>section]:border-t-0 [&>section]:pt-0">
         <Section title="Lieu" className="md:col-span-1">
           {locs.map((l) => (
             <div key={l.id} className="mb-2">
@@ -323,7 +323,10 @@ function DaySheet({
         <Section title={`Acteurs convoqués (${actors.length})`}>
           <ul className="flex flex-col gap-2">
             {actors.map((a) => (
-              <li key={a.character} className="flex flex-wrap items-baseline justify-between gap-2 text-meta">
+              <li
+                key={a.character}
+                className="flex flex-col gap-0.5 text-meta sm:flex-row sm:items-baseline sm:justify-between sm:gap-2"
+              >
                 <span>
                   <strong>{a.character}</strong> ·{' '}
                   {a.person?.name || <span className="text-warn-fg">acteur à distribuer</span>}

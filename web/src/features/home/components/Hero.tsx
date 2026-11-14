@@ -53,7 +53,7 @@ export function Hero() {
 
         <div className="relative lg:col-span-5">
           <PhotoFrame photo="hero" priority onDark sizes="(min-width: 1024px) 40vw, 100vw" />
-          <div className="relative z-10 -mt-24 ml-auto w-[min(300px,85%)] rotate-[3deg] shadow-hard-gold sm:-mt-32 lg:-mr-6">
+          <div className="relative z-10 -mt-10 ml-auto w-[min(300px,78%)] rotate-[3deg] shadow-hard-gold sm:-mt-24 lg:-mt-32 lg:-mr-6">
             <AiLabel
               filmTitle="Marée basse"
               director="Yassine"
