@@ -63,3 +63,62 @@ describe('reorderDay', () => {
     expect(ordered).toEqual(reversed);
   });
 });
+
+describe('horaires conservés et frise', () => {
+  it('garde les horaires des autres scènes quand une scène arrive', () => {
+    const { project, weather, schedule } = setup();
+    const day = schedule.days[0];
+    const before = new Map(day.scenes.map((s) => [s.scene_id, s.start]));
+    const other = schedule.days[1].scenes[0].scene_id;
+    const next = moveScene(schedule, other, day.date, { project, weather });
+    const after = next.days.find((d) => d.date === day.date)!;
+    for (const [id, start] of before) expect(after.scenes.find((s) => s.scene_id === id)!.start).toBe(start);
+  });
+
+  it('pose une scène à une heure précise et refuse un chevauchement', async () => {
+    const { moveSceneToTime } = await import('./schedule');
+    const { project, weather, schedule } = setup();
+    const day = schedule.days.find((d) => d.scenes.length >= 2)!;
+    const [a, b] = day.scenes;
+    const clash = moveSceneToTime(schedule, b.scene_id, day.date, a.start.slice(11, 16), {
+      project,
+      weather,
+    });
+    expect('error' in clash && clash.error).toBe('chevauchement');
+    const ok = moveSceneToTime(schedule, b.scene_id, day.date, '21:30', { project, weather });
+    expect('schedule' in ok).toBe(true);
+    if ('schedule' in ok) {
+      const moved = ok.schedule.days
+        .find((d) => d.date === day.date)!
+        .scenes.find((s) => s.scene_id === b.scene_id)!;
+      expect(moved.start.slice(11, 16)).toBe('21:30');
+    }
+  });
+});
+
+describe('conflits regroupés', () => {
+  it('regroupe l’autorisation à demander par lieu', async () => {
+    const { groupConflicts } = await import('./schedule');
+    const { project, schedule } = setup();
+    const groups = groupConflicts(schedule, project);
+    const permit = groups.filter((g) => g.kind === 'autorisation_manquante');
+    expect(permit).toHaveLength(1);
+    expect(permit[0].locationId).toBe('loc-medina');
+    expect(permit[0].sceneIds.length).toBe(3);
+  });
+
+  it('propose un jour qui supprime la pluie', async () => {
+    const { groupConflicts, suggestMove } = await import('./schedule');
+    const { project, weather, schedule } = setup();
+    const ext = project.scenes.find((s) => s.setting === 'EXT' && s.moment === 'jour')!;
+    const rainy = [...weather.values()].find((w) => w.forecast === 'prevision' && (w.rain_pct ?? 0) >= 40)!;
+    const wet = moveScene(schedule, ext.id, rainy.date, { project, weather });
+    const g = groupConflicts(wet, project).find((x) => x.kind === 'pluie')!;
+    const windowDates = [...weather.keys()];
+    const date = suggestMove(wet, g.sceneIds, 'pluie', { project, weather, windowDates });
+    expect(date).toBeDefined();
+    const fixed = moveScene(wet, ext.id, date!, { project, weather });
+    const sc = fixed.days.find((d) => d.date === date)!.scenes.find((s) => s.scene_id === ext.id)!;
+    expect(sc.conflicts.some((c) => c.kind === 'pluie')).toBe(false);
+  });
+});

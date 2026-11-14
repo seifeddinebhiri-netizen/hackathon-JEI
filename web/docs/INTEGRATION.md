@@ -96,8 +96,9 @@ le message et « Réessayer » doivent apparaître), vide.
 - [ ] `/planner/projet` : création (`?nouveau=1`), import PDF / TXT / texte collé, « Ajouter à la suite » ou
       « Remplacer », lieux et personnes, enregistrement automatique (couper le réseau → « Échec de l'enregistrement »).
 - [ ] Générer, puis régénérer (confirmation, puis « Annuler » pendant 8 s qui restaure le planning précédent).
-- [ ] `/planner/calendrier` : déplacer une scène à la souris, au clavier (Espace, flèches, Espace) et par
-      « Déplacer vers… » ; conflits recalculés ; « Valider le planning » ; liste par jour à 390 px.
+- [ ] `/planner/calendrier` : poser une scène à une heure précise sur la frise, la déposer sur une date ou un jour
+      libre, au clavier (Espace, flèches, Espace) et par « Déplacer vers… » ; chevauchement refusé ; conflits
+      regroupés avec « Marquer comme obtenue » et « Déplacer au … ? » ; vue « Période » ; cartes par jour à 390 px.
 - [ ] `/planner/jour/:date` : ordre des scènes, heure de rendez-vous, impression A4.
 - [ ] `/coach` : QR code (avec `VITE_PUBLIC_APP_URL` accessible depuis un téléphone), version mobile.
 - [ ] `/passeport` : 8 départements, outil hors catalogue, contrôle avant PDF, PDF, badge PNG/SVG, signature C2PA.

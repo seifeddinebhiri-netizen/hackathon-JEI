@@ -2,6 +2,7 @@ import {
   DndContext,
   DragOverlay,
   KeyboardSensor,
+  MeasuringStrategy,
   PointerSensor,
   TouchSensor,
   pointerWithin,
@@ -12,8 +13,8 @@ import {
   type CollisionDetection,
   type DragEndEvent,
 } from '@dnd-kit/core';
-import { addMonths, addWeeks, eachDayOfInterval, parseISO, startOfMonth, startOfWeek } from 'date-fns';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import type { Project, Schedule, ShootingDay } from '@/api/types';
 import {
   AiDraftBadge,
   Button,
@@ -25,62 +26,96 @@ import {
   PageHeader,
   SegmentedControl,
   StatusChip,
+  useToast,
 } from '@/components/ui';
+import { ConflictPanel } from '@/features/planner/components/calendar/ConflictPanel';
 import {
   CalendarContext,
-  UNPLACED_ID,
+  parseDropTarget,
   type CalendarCtx,
 } from '@/features/planner/components/calendar/context';
+import { DayRow } from '@/features/planner/components/calendar/DayRow';
+import { TimeAxis } from '@/features/planner/components/calendar/DayTimeline';
+import { FreeDaysRow } from '@/features/planner/components/calendar/FreeDaysRow';
+import { snapToHHMM, SPAN, T0 } from '@/features/planner/components/calendar/geometry';
+import { MobileDayCard } from '@/features/planner/components/calendar/MobileDayCard';
 import { MoveDialog } from '@/features/planner/components/calendar/MoveDialog';
-import { SceneBlock } from '@/features/planner/components/calendar/SceneBlock';
-import { ConflictsPanel, UnplacedTray } from '@/features/planner/components/calendar/SidePanel';
-import { DayListView, MonthView, WeekView } from '@/features/planner/components/calendar/Views';
-import { monthLabel, weekLabel } from '@/features/planner/lib/periods';
+import { PeriodView } from '@/features/planner/components/calendar/PeriodView';
+import { SceneChip } from '@/features/planner/components/calendar/SceneChip';
+import { UnplacedTray } from '@/features/planner/components/calendar/UnplacedTray';
 import { GenerateScheduleButton } from '@/features/planner/components/GenerateScheduleButton';
 import { usePeriodWeather } from '@/features/planner/hooks/usePlanner';
 import { useScheduleEditor } from '@/features/planner/hooks/useScheduleEditor';
 import { jumpToDroppable } from '@/features/planner/lib/keyboard';
-import { countConflicts } from '@/features/planner/lib/rules';
-import { findScene, scenesNotInSchedule } from '@/features/planner/lib/schedule';
+import { SCENE_KIND_LABELS, SCENE_KIND_SWATCH, type SceneKind } from '@/features/planner/lib/labels';
+import { anchoredSlot, countConflicts } from '@/features/planner/lib/rules';
+import { findScene, groupConflicts, scenesNotInSchedule } from '@/features/planner/lib/schedule';
 import { useCurrentProject } from '@/features/project/hooks/useProject';
-import { formatDayLong, isoDay } from '@/lib/format';
+import { cn } from '@/lib/cn';
+import { formatDayLong } from '@/lib/format';
 import { useMediaQuery } from '@/lib/useMediaQuery';
-import type { Project, Schedule } from '@/api/types';
 
 const collision: CollisionDetection = (args) => {
   const p = pointerWithin(args);
   return p.length ? p : rectIntersection(args);
 };
 
-function targetOf(overId: string | number | undefined): string | null | undefined {
-  if (overId === undefined) return undefined;
-  const id = String(overId);
-  if (id === UNPLACED_ID) return null;
-  if (id.startsWith('jour:')) return id.slice(5);
-  return undefined;
+type Item = { type: 'day'; day: ShootingDay; index: number } | { type: 'free'; dates: string[] };
+
+/** Jours de tournage + jours libres consécutifs regroupés. */
+function buildItems(windowDates: string[], days: ShootingDay[]): Item[] {
+  const byDate = new Map(days.map((d) => [d.date, d]));
+  const all = [...new Set([...windowDates, ...days.map((d) => d.date)])].sort();
+  const items: Item[] = [];
+  let free: string[] = [];
+  let index = 0;
+  for (const date of all) {
+    const day = byDate.get(date);
+    if (day) {
+      if (free.length) items.push({ type: 'free', dates: free });
+      free = [];
+      items.push({ type: 'day', day, index: index++ });
+    } else free.push(date);
+  }
+  if (free.length) items.push({ type: 'free', dates: free });
+  return items;
+}
+
+function Legend() {
+  return (
+    <ul
+      className="flex flex-wrap items-center gap-x-4 gap-y-1 text-meta text-muted-on-light"
+      aria-label="Légende"
+    >
+      {(['int-jour', 'ext-jour', 'int-nuit', 'ext-nuit'] as SceneKind[]).map((k) => (
+        <li key={k} className="inline-flex items-center gap-1.5">
+          <span className={cn('inline-block h-4 w-6 border-l-[4px]', SCENE_KIND_SWATCH[k])} />{' '}
+          {SCENE_KIND_LABELS[k]}
+        </li>
+      ))}
+      <li className="inline-flex items-center gap-1.5">
+        <span className="inline-block h-4 w-6 bg-gold-soft/70" /> aube
+      </li>
+      <li className="inline-flex items-center gap-1.5">
+        <span className="inline-block h-4 w-6 bg-gold/35" /> heure dorée
+      </li>
+      <li className="inline-flex items-center gap-1.5">
+        <span className="inline-block h-4 w-6 bg-ink/10" /> nuit
+      </li>
+    </ul>
+  );
 }
 
 function Calendar({ project, schedule }: { project: Project; schedule: Schedule }) {
   const weather = usePeriodWeather(project);
   const editor = useScheduleEditor(project, weather.byDate);
-  const [view, setView] = useState<'semaine' | 'mois'>('semaine');
-  const first = parseISO(project.shooting_window.from);
-  const [weekStart, setWeekStart] = useState(() =>
-    startOfWeek(schedule.days[0] ? parseISO(schedule.days[0].date) : first, { weekStartsOn: 1 }),
-  );
-  const [month, setMonth] = useState(() => startOfMonth(first));
+  const { toast } = useToast();
+  const desktop = useMediaQuery('(min-width: 768px)');
+  const [view, setView] = useState<'jours' | 'periode'>('jours');
+  const [highlight, setHighlight] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [moveId, setMoveId] = useState<string | null>(null);
-  // Une seule vue montée à la fois : chaque scène doit avoir un seul élément déplaçable
-  const desktop = useMediaQuery('(min-width: 768px)');
-
-  const { from: winFrom, to: winTo } = project.shooting_window;
-  const windowDates = useMemo(
-    () => eachDayOfInterval({ start: parseISO(winFrom), end: parseISO(winTo) }).map(isoDay),
-    [winFrom, winTo],
-  );
-  const daysByDate = useMemo(() => new Map(schedule.days.map((d) => [d.date, d])), [schedule.days]);
-  const extra = scenesNotInSchedule(schedule, project);
+  const { windowDates } = editor;
 
   const ctx: CalendarCtx = useMemo(
     () => ({
@@ -93,15 +128,33 @@ function Calendar({ project, schedule }: { project: Project; schedule: Schedule 
         ...weather.byDate,
       ]),
       windowDates,
+      dragging: activeId !== null,
       onMoveRequest: setMoveId,
     }),
-    [project, schedule, weather.byDate, windowDates],
+    [project, schedule, weather.byDate, windowDates, activeId],
   );
+
+  const items = useMemo(() => buildItems(windowDates, schedule.days), [windowDates, schedule.days]);
+  const daysByDate = useMemo(() => new Map(schedule.days.map((d) => [d.date, d])), [schedule.days]);
+  const groups = groupConflicts(schedule, project);
+  const extra = scenesNotInSchedule(schedule, project);
+
+  // Ouvrir un jour depuis la vue « Période » ou après un déplacement
+  useEffect(() => {
+    if (view !== 'jours' || !highlight) return;
+    const free = items.find((it) => it.type === 'free' && it.dates.includes(highlight));
+    const id = free && free.type === 'free' ? `libre-${free.dates[0]}` : `jour-${highlight}`;
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [view, highlight, items]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 6 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: jumpToDroppable }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: jumpToDroppable,
+      // Entrée ouvre le détail d'une scène ; Espace sert à la déplacer
+      keyboardCodes: { start: ['Space'], cancel: ['Escape'], end: ['Space', 'Enter'] },
+    }),
   );
 
   const label = (id: string | number) => {
@@ -109,8 +162,10 @@ function Calendar({ project, schedule }: { project: Project; schedule: Schedule 
     return s ? `scène ${s.number} (${s.title})` : 'scène';
   };
   const where = (over: string | number | undefined) => {
-    const t = targetOf(over);
-    return t === null ? 'les scènes non placées' : t ? formatDayLong(t) : 'aucune case';
+    const t = parseDropTarget(over);
+    if (!t) return 'aucune zone';
+    if (t.kind === 'unplaced') return 'les scènes non placées';
+    return `${formatDayLong(t.date)}${t.kind === 'timeline' ? ', sur la frise horaire' : ''}`;
   };
   const announcements: Announcements = {
     onDragStart: ({ active }) =>
@@ -125,26 +180,43 @@ function Calendar({ project, schedule }: { project: Project; schedule: Schedule 
 
   const onDragEnd = (e: DragEndEvent) => {
     setActiveId(null);
-    const to = targetOf(e.over?.id);
-    if (to === undefined) return;
-    editor.move(String(e.active.id), to);
+    const target = parseDropTarget(e.over?.id);
+    if (!target) return;
+    const sceneId = String(e.active.id);
+    if (target.kind === 'unplaced') return editor.move(sceneId, null);
+    if (target.kind === 'day') return editor.move(sceneId, target.date);
+    // Frise horaire : heure précise à la souris ou au toucher (pas de 15 min)
+    const scene = ctx.sceneById.get(sceneId);
+    const keyboard = e.activatorEvent instanceof KeyboardEvent;
+    const anchored = scene
+      ? !!anchoredSlot(scene, target.date, ctx.locationById.get(scene.location_id))
+      : false;
+    const rect = e.active.rect.current.translated;
+    if (keyboard || anchored || !rect || !e.over || !scene) {
+      if (anchored && findScene(schedule, sceneId) === target.date)
+        toast({
+          tone: 'info',
+          title: 'Horaire calé sur le soleil',
+          description: 'Aube, heure dorée et nuit suivent la lumière du jour.',
+        });
+      return editor.move(sceneId, target.date);
+    }
+    const hours = T0 + ((rect.left - e.over.rect.left) / e.over.rect.width) * SPAN;
+    editor.moveToTime(sceneId, target.date, snapToHHMM(hours, scene.estimated_hours));
   };
 
   const placed = schedule.days.reduce((n, d) => n + d.scenes.length, 0);
   const conflicts = countConflicts(schedule.days).total;
-  const minWeek = startOfWeek(first, { weekStartsOn: 1 });
-  const maxWeek = startOfWeek(parseISO(project.shooting_window.to), { weekStartsOn: 1 });
-  const minMonth = startOfMonth(first);
-  const maxMonth = startOfMonth(parseISO(project.shooting_window.to));
 
   return (
     <CalendarContext.Provider value={ctx}>
       <div className="flex flex-col gap-6">
+        {/* Statuts et actions */}
         <div className="flex flex-wrap items-center justify-between gap-4 border-2 border-ink bg-white p-3 md:p-4">
           <div className="flex flex-wrap items-center gap-2">
             <AiDraftBadge validated={schedule.status === 'valide'} />
             <StatusChip tone={placed === project.scenes.length ? 'ok' : 'warn'} icon="film">
-              {placed}/{project.scenes.length} scènes placées
+              {placed}/{project.scenes.length} scènes · {schedule.days.length} jours
             </StatusChip>
             <StatusChip tone={conflicts ? 'warn' : 'ok'}>
               {conflicts} conflit{conflicts > 1 ? 's' : ''}
@@ -154,8 +226,7 @@ function Calendar({ project, schedule }: { project: Project; schedule: Schedule 
             ) : null}
             {weather.isError ? (
               <span className="flex items-center gap-1 text-meta text-bad-fg">
-                <Icon name="alert" size={14} /> Météo indisponible : conflits calculés avec la dernière météo
-                connue.
+                <Icon name="alert" size={14} /> Météo indisponible : dernière météo connue.
               </span>
             ) : null}
             {editor.saving ? (
@@ -179,6 +250,7 @@ function Calendar({ project, schedule }: { project: Project; schedule: Schedule 
         <DndContext
           sensors={sensors}
           collisionDetection={collision}
+          measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
           onDragStart={(e) => setActiveId(String(e.active.id))}
           onDragCancel={() => setActiveId(null)}
           onDragEnd={onDragEnd}
@@ -186,102 +258,112 @@ function Calendar({ project, schedule }: { project: Project; schedule: Schedule 
             announcements,
             screenReaderInstructions: {
               draggable:
-                'Pour déplacer une scène : Espace pour la prendre, flèches pour changer de jour, Espace pour la déposer, Échap pour annuler. Ou utilise le bouton « Déplacer vers… ».',
+                'Pour déplacer une scène : Espace pour la prendre, flèches pour changer de jour, Espace pour la déposer, Échap pour annuler. Entrée ouvre le détail et le menu « Déplacer vers… ».',
             },
           }}
         >
-          <div className="grid grid-cols-1 gap-6 2xl:grid-cols-12">
-            <div className="min-w-0 2xl:col-span-9">
-              {/* Desktop : semaine / mois */}
-              {desktop ? (
-                <div>
-                  <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-                    <SegmentedControl
-                      legend="Affichage"
-                      value={view}
-                      onChange={setView}
-                      options={[
-                        { value: 'semaine', label: 'Semaine' },
-                        { value: 'mois', label: 'Mois' },
-                      ]}
-                    />
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        icon="chevronLeft"
-                        disabled={view === 'semaine' ? weekStart <= minWeek : month <= minMonth}
-                        onClick={() =>
-                          view === 'semaine'
-                            ? setWeekStart((w) => addWeeks(w, -1))
-                            : setMonth((m) => addMonths(m, -1))
-                        }
-                      >
-                        <span className="sr-only">Période précédente</span>
-                      </Button>
-                      <p
-                        className="min-w-52 text-center font-display text-[20px] font-bold first-letter:uppercase"
-                        aria-live="polite"
-                      >
-                        {view === 'semaine' ? weekLabel(weekStart) : monthLabel(month)}
-                      </p>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        icon="chevronRight"
-                        disabled={view === 'semaine' ? weekStart >= maxWeek : month >= maxMonth}
-                        onClick={() =>
-                          view === 'semaine'
-                            ? setWeekStart((w) => addWeeks(w, 1))
-                            : setMonth((m) => addMonths(m, 1))
-                        }
-                      >
-                        <span className="sr-only">Période suivante</span>
-                      </Button>
-                    </div>
-                  </div>
-                  {view === 'semaine' ? (
-                    <WeekView weekStart={weekStart} days={daysByDate} />
-                  ) : (
-                    <MonthView month={month} days={daysByDate} />
-                  )}
-                  <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-meta text-muted-on-light">
-                    <span className="inline-flex items-center gap-1.5">
-                      <span className="inline-block h-4 w-6 border-l-[6px] border-ink bg-ext" /> EXT ·
-                      extérieur
-                    </span>
-                    <span className="inline-flex items-center gap-1.5">
-                      <span className="inline-block h-4 w-6 border-l-[6px] border-muted-on-light bg-int" />{' '}
-                      INT · intérieur
-                    </span>
-                    <span className="inline-flex items-center gap-1.5">
-                      <Icon name="alert" size={14} className="text-bad-fg" /> conflit
-                    </span>
-                    <span>Glisse une scène, ou utilise le bouton calendrier d’un bloc.</span>
-                  </p>
-                </div>
-              ) : (
-                /* Mobile : liste par jour */
-                <DayListView days={schedule.days} />
-              )}
-            </div>
+          <ConflictPanel
+            groups={groups}
+            suggest={(g) => editor.suggest(g.sceneIds, g.kind)}
+            onMarkPermit={editor.markPermitObtained}
+            onMove={(ids, date) => {
+              editor.moveMany(ids, date);
+              setHighlight(date);
+            }}
+            busy={editor.saving}
+          />
+          <UnplacedTray schedule={schedule} extra={extra} />
 
-            <aside
-              className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:col-span-3 2xl:flex 2xl:flex-col"
-              aria-label="Conflits et scènes non placées"
-            >
-              <UnplacedTray schedule={schedule} extra={extra} />
-              <ConflictsPanel schedule={schedule} />
-            </aside>
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <SegmentedControl
+              legend="Affichage"
+              value={view}
+              onChange={setView}
+              options={[
+                { value: 'jours', label: 'Jours de tournage' },
+                { value: 'periode', label: 'Période' },
+              ]}
+            />
+            <Legend />
           </div>
-          <DragOverlay>{activeId ? <SceneBlock sceneId={activeId} overlay /> : null}</DragOverlay>
+
+          {view === 'periode' ? (
+            <PeriodView
+              days={daysByDate}
+              onOpenDay={(date) => {
+                setHighlight(date);
+                setView('jours');
+              }}
+            />
+          ) : desktop ? (
+            <div>
+              <div className="sticky top-16 z-10 grid grid-cols-[240px_1fr] border-x-2 border-transparent bg-paper pt-2">
+                <span className="eyebrow pl-3 text-muted-on-light">Jour</span>
+                <div className="px-3">
+                  <TimeAxis />
+                </div>
+              </div>
+              <ol className="flex flex-col gap-2" aria-label="Jours de tournage">
+                {items.map((it) =>
+                  it.type === 'day' ? (
+                    <DayRow
+                      key={it.day.date}
+                      day={it.day}
+                      index={it.index}
+                      highlight={highlight === it.day.date}
+                    />
+                  ) : (
+                    <FreeDaysRow
+                      key={it.dates[0]}
+                      dates={it.dates}
+                      highlight={!!highlight && it.dates.includes(highlight)}
+                    />
+                  ),
+                )}
+              </ol>
+              <p className="mt-3 text-meta text-muted-on-light">
+                Glisse une scène sur la frise pour la poser à une heure précise (au quart d’heure), ou sur la
+                date pour qu’elle prenne le premier créneau libre. Entrée sur une scène : détail et « Déplacer
+                vers… ».
+              </p>
+            </div>
+          ) : (
+            <ol className="flex flex-col gap-3" aria-label="Jours de tournage">
+              {items.map((it) =>
+                it.type === 'day' ? (
+                  <MobileDayCard
+                    key={it.day.date}
+                    day={it.day}
+                    index={it.index}
+                    highlight={highlight === it.day.date}
+                  />
+                ) : (
+                  <FreeDaysRow
+                    key={it.dates[0]}
+                    dates={it.dates}
+                    highlight={!!highlight && it.dates.includes(highlight)}
+                  />
+                ),
+              )}
+            </ol>
+          )}
+          <DragOverlay>
+            {activeId ? (
+              <div className="w-[min(420px,80vw)]">
+                <SceneChip sceneId={activeId} overlay />
+              </div>
+            ) : null}
+          </DragOverlay>
         </DndContext>
       </div>
       <MoveDialog
         sceneId={moveId}
         currentDate={moveId ? findScene(schedule, moveId) : undefined}
         onClose={() => setMoveId(null)}
-        onMove={(id, to) => editor.move(id, to)}
+        onMove={(id, to) => {
+          editor.move(id, to);
+          if (to) setHighlight(to);
+        }}
       />
     </CalendarContext.Provider>
   );
@@ -294,7 +376,7 @@ export default function PlannerCalendar() {
       <PageHeader
         eyebrow="Planifier · Calendrier"
         title="Calendrier de tournage"
-        lead="Déplace les scènes à la main : les horaires et les conflits sont recalculés à chaque fois."
+        lead="Chaque jour de tournage sur une frise de 6 h à minuit, avec la lumière et la météo. Déplace les scènes : horaires et conflits sont recalculés."
         actions={
           <ButtonLink to="/planner/projet?etape=2" variant="secondary" icon="edit">
             Modifier les scènes

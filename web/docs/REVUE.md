@@ -18,6 +18,16 @@ puis audit automatique **axe-core** (règles WCAG 2.1 A et AA, bonnes pratiques)
 | Page film | Générique séparé en « Distribution » et « Équipe » |
 | Tableau de bord, assistant | Compte à rebours sans retour à la ligne · accords (« 1 généré ») · plus de ligne vide sous les étapes de l'assistant |
 
+## Refonte du calendrier
+
+Retour utilisateur : pas d'axe horaire, blocs coupés, espace perdu, météo illisible, conflits répétitifs sans solution.
+Refonte : vue « Jours de tournage » (une ligne par jour, frise 06 h–24 h avec aube / heure dorée / nuit, scènes à leur
+vraie heure en texte complet, jours libres repliés), vue « Période », 4 teintes du plan de travail avec libellés,
+conflits regroupés par cause et lieu avec une action chacun, « Non placées » masqué quand vide, cartes par jour sur
+mobile. Les horaires posés sont conservés et une scène peut être posée au quart d'heure sur la frise.
+Vérifié par un scénario automatisé (autorisation marquée, pose à 14 h, jour libre, chevauchement refusé, clavier,
+« Déplacer au … ? » qui supprime le conflit de pluie) et par l'audit axe (0 violation à 1440 et 390 px).
+
 ## Accessibilité
 
 Résultat final de l'audit axe-core : **0 violation sur les 20 écrans, en 1440 et en 390 px.**

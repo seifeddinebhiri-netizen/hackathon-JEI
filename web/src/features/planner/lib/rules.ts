@@ -98,7 +98,7 @@ export function locationCoords(loc: Location | undefined): { lat: number; lon: n
 }
 
 // --- Horaires d'une scène ------------------------------------------------------
-type Slot = { start: Date; end: Date };
+export type Slot = { start: Date; end: Date };
 
 /** Horaire « ancré » sur le soleil pour aube / heure dorée / nuit ; null pour « jour ». */
 export function anchoredSlot(scene: Scene, dateIso: string, loc: Location | undefined): Slot | null {
@@ -222,10 +222,32 @@ export function layoutDay(input: DayLayoutInput): ShootingDay {
     cursor = addMinutes(end, CHANGEOVER_MIN);
   }
 
-  // 3. Tri chronologique, conflits, durée de la journée
-  const ordered = scenes
-    .map((s) => ({ scene: s, slot: slots.get(s.id)! }))
-    .sort((a, b) => a.slot.start.getTime() - b.slot.start.getTime());
+  return finalizeDay({
+    dateIso,
+    entries: scenes.map((s) => ({ scene: s, slot: slots.get(s.id)! })),
+    project,
+    weather,
+    backup_note: input.backup_note,
+  });
+}
+
+export type DayEntry = { scene: Scene; slot: Slot };
+
+/**
+ * Termine une journée à partir d'horaires DONNÉS (sans les recalculer) : ordre chronologique,
+ * conflits par scène, heure de rendez-vous (1 h avant la 1re scène), lieux du jour.
+ */
+export function finalizeDay(input: {
+  dateIso: string;
+  entries: DayEntry[];
+  project: Pick<Project, 'scenes' | 'locations' | 'max_hours_per_day'>;
+  weather?: WeatherDay;
+  backup_note?: string;
+}): ShootingDay {
+  const { dateIso, project, weather } = input;
+  const locById = new Map(project.locations.map((l) => [l.id, l]));
+  const ordered = [...input.entries].sort((a, b) => a.slot.start.getTime() - b.slot.start.getTime());
+  const scenes = ordered.map((o) => o.scene);
 
   const first = ordered[0]?.slot.start ?? atTime(dateIso, DEFAULT_DAY_START);
   const call = addMinutes(first, -CALL_BEFORE_MIN);

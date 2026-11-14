@@ -7,7 +7,8 @@ densité ×2). Numérotées dans l'ordre de la démo. À utiliser pour les slide
 |---|---|---|
 | 01 | Accueil | `/` |
 | 02 | Planner : scène rapide (avec créneaux) | `/planner/rapide` |
-| 03 | Planner : calendrier | `/planner/calendrier` |
+| 03 | Planner : calendrier, vue « Jours de tournage » | `/planner/calendrier` |
+| 03b | Planner : calendrier, vue « Période » | `/planner/calendrier` |
 | 04 | Feuille de service | `/planner/jour/:date` |
 | 05 | Passeport IA | `/passeport` |
 | 06 | Vérification publique | `/verifier/:id` |

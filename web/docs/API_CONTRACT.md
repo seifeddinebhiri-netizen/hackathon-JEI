@@ -377,6 +377,9 @@ Sortie : un `Schedule` au statut `brouillon_ia`.
    `meteo_a_reverifier` (EXT au-delà de 14 jours : la météo n'est pas inventée).
 6. Note de repli (`backup_note`) quand un jour avec des scènes EXT a une météo incertaine.
 
-Le front réutilise `layoutDay` pour recalculer horaires et conflits après chaque déplacement manuel, puis
-enregistre le planning avec `PATCH /projects/{id}` (`schedule`). Si le backend applique d'autres règles, il doit
+Après la génération, les modifications manuelles **conservent les horaires déjà posés** : une scène déplacée sur une
+date prend le premier créneau libre (ou son horaire solaire) ; déposée sur la frise, elle prend l'heure choisie
+(pas de 15 min, refusée si elle chevauche une autre scène). Le front recalcule les conflits de la journée
+(`finalizeDay`, `src/features/planner/lib/rules.ts`) et enregistre le planning avec `PATCH /projects/{id}` (`schedule`).
+Les actions sur les conflits (« Marquer comme obtenue », « Déplacer au … ? ») passent aussi par ce `PATCH`. Si le backend applique d'autres règles, il doit
 renvoyer un `Schedule` de même forme. La disponibilité des acteurs n'est pas prise en compte dans cette version.

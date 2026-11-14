@@ -114,6 +114,27 @@ sur mobile (évite le défilement horizontal).
 Composants métier notables : `AiLabel` (Étiquette IA, format étiquette nutritionnelle), `SunDiagram` (course du soleil
 en SVG), `CaptureFrame` (style unique des captures de l'accueil).
 
+## Calendrier de tournage (plan de travail)
+
+- **Vue « Jours de tournage »** : une ligne par jour. À gauche, la date, le lieu (en gros), le RDV, la météo en clair
+  (« Pluie 87 % », « Vent 50 km/h », « Météo à revérifier ») et le lever / coucher du soleil. À droite, une frise
+  de 06 h à 24 h avec des bandes de fond : aube, heure dorée (`bg-gold/35`), nuit (`bg-ink/10`), calculées avec suncalc.
+- **Scènes** : bandes à leur vraie heure ; texte complet « INT · Sc. 1 · Amira ouvre le café · 08 h–10 h » dans la
+  bande s'il tient, sinon sur une ligne dessous (sans chevauchement). Jamais de texte coupé. Clic ou Entrée : détail.
+- **4 teintes, toujours avec libellé écrit** :
+
+| Type | Classes | Usage |
+|---|---|---|
+| INT jour | `bg-int text-ink`, filet `muted-on-light` | intérieur, jour / aube / heure dorée |
+| EXT jour | `bg-ext text-ink`, filet `ink` | extérieur, jour / aube / heure dorée |
+| INT nuit | `bg-line-dark text-paper`, filet `muted-on-dark` | intérieur, nuit |
+| EXT nuit | `bg-ink text-paper`, filet `gold` | extérieur, nuit |
+
+- Jours sans tournage : une ligne fine pointillée (« 24–8 déc. · 15 jours libres »), une case par jour pendant un déplacement.
+- **Vue « Période »** : une case par jour de la période (scènes en carrés de couleur, icône météo, conflits).
+- Conflits regroupés par cause et lieu, filet gauche de la couleur du statut, une action par groupe.
+- Mobile : une carte par jour (infos, frise compacte, scènes dans l'ordre en texte complet).
+
 ## Photos
 
 `PhotoFrame` lit le registre [`src/lib/photos.ts`](../src/lib/photos.ts) : `<picture>` WebP + JPEG de secours, en 1000
