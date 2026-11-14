@@ -1,24 +1,19 @@
-import { ButtonLink } from '@/components/ui';
+import { EthicsBand } from '@/features/home/components/EthicsBand';
+import { FinalCta } from '@/features/home/components/FinalCta';
+import { Hero } from '@/features/home/components/Hero';
+import { PhotoBand } from '@/features/home/components/PhotoBand';
+import { StepsBand } from '@/features/home/components/StepsBand';
+import { StepsSection } from '@/features/home/components/StepsSection';
 
 export default function Home() {
   return (
-    <section className="bg-ink text-paper">
-      <div className="container-pp py-20">
-        <h1 className="text-[56px] leading-[0.92] md:text-hero">
-          Tourne. Déclare. Fais-toi <span className="text-brand-red">voir.</span>
-        </h1>
-        <p className="mt-6 max-w-xl text-lead text-muted-on-dark">Accueil complet en phase 2.</p>
-        <div className="mt-8 flex flex-wrap gap-3">
-          <ButtonLink to="/connexion" size="lg">
-            Commencer
-          </ButtonLink>
-          {import.meta.env.DEV ? (
-            <ButtonLink to="/_ui" variant="on-dark" size="lg">
-              Kit UI (dev)
-            </ButtonLink>
-          ) : null}
-        </div>
-      </div>
-    </section>
+    <>
+      <Hero />
+      <StepsBand />
+      <StepsSection />
+      <PhotoBand />
+      <EthicsBand />
+      <FinalCta />
+    </>
   );
 }

@@ -423,7 +423,7 @@ export const mockApi: Api = {
         director: pass?.director ?? p.people.find((x) => x.role === 'Réalisation')?.name ?? '[Réalisateur]',
         synopsis_short: '[Synopsis court à écrire dans le Kit Festival]',
         synopsis_long: '[Synopsis long à écrire dans le Kit Festival]',
-        stills: [],
+        stills: ['/photos/ruelle.jpg', '/photos/porte.jpg', '/photos/cote.jpg'],
         credits: p.people.map((x) => ({ role: x.kind === 'acteur' ? `${x.character ?? 'Rôle'}` : x.role, name: x.name })),
         passport_badge_code: pass?.badge_code,
         verify_url: pass?.verify_url,

@@ -144,6 +144,10 @@
       padding-inline: 64px;
     }
   }
+  /* Traitement photo « Noir pellicule » : contraste un peu renforcé, saturation un peu baissée */
+  .photo-grade {
+    filter: contrast(1.08) saturate(0.82);
+  }
   .sr-only-focusable:not(:focus) {
     position: absolute;
     width: 1px;

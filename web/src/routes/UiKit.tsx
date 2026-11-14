@@ -303,8 +303,9 @@ export default function UiKit() {
         <Perforations />
         <Perforations tone="gold" className="mt-2" />
         <div className="mt-6 grid gap-6 md:grid-cols-2">
-          <PhotoFrame alt="Plateau de tournage" credit="[à confirmer]" />
-          <PhotoFrame alt="Plan large" ratio="2.39:1" tilt />
+          <PhotoFrame photo="hero" />
+          <PhotoFrame photo="drapeaux" ratio="2.39:1" tilt />
+          <PhotoFrame alt="Emplacement sans photo" ratio="4:5" />
         </div>
       </Section>
 

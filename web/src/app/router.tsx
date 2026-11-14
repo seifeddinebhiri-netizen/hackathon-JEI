@@ -27,6 +27,7 @@ export const router = createBrowserRouter([
           { path: 'connexion', ...page(() => import('@/routes/Login')) },
           { path: 'verifier/:id', ...page(() => import('@/routes/Verify')) },
           { path: 'film/:id', ...page(() => import('@/routes/FilmPublic')) },
+          { path: 'credits', ...page(() => import('@/routes/Credits')) },
           ...devRoutes,
           { path: '*', ...page(() => import('@/routes/NotFound')) },
         ],
