@@ -12,9 +12,18 @@ export default function Credits() {
       <ul className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
         {Object.entries(PHOTOS).map(([key, p]) => (
           <li key={key}>
-            <PhotoFrame photo={p} ratio="3:2" sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" />
+            <PhotoFrame
+              photo={p}
+              ratio="3:2"
+              sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+            />
             <p className="mt-3 font-semibold">
-              <a href={p.authorUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center underline underline-offset-4">
+              <a
+                href={p.authorUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex min-h-11 items-center underline underline-offset-4"
+              >
                 {p.author}
               </a>
             </p>
@@ -32,8 +41,8 @@ export default function Credits() {
         ))}
       </ul>
       <p className="mt-12 max-w-prose text-meta text-muted-on-light">
-        Les photos sont affichées avec un léger traitement de couleur (contraste renforcé, saturation réduite) appliqué
-        par le navigateur. Les fichiers d’origine ne sont pas modifiés, à part leur taille.
+        Les photos sont affichées avec un léger traitement de couleur (contraste renforcé, saturation réduite)
+        appliqué par le navigateur. Les fichiers d’origine ne sont pas modifiés, à part leur taille.
       </p>
     </div>
   );

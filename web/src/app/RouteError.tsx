@@ -8,7 +8,8 @@ export function RouteError() {
     : err instanceof Error
       ? err.message
       : 'Erreur inconnue';
-  const chunkFailed = err instanceof Error && /dynamically imported module|Failed to fetch/i.test(err.message);
+  const chunkFailed =
+    err instanceof Error && /dynamically imported module|Failed to fetch/i.test(err.message);
   return (
     <main className="container-pp py-16">
       <p className="eyebrow text-muted-on-light">Erreur</p>

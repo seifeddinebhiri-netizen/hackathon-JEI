@@ -13,7 +13,8 @@ export default function NotFound() {
             Ce plan a été coupé <span className="text-brand-red">au montage.</span>
           </h1>
           <p className="mt-6 max-w-lg text-lead text-muted-on-dark">
-            La page que tu cherches n’existe pas ou a changé d’adresse. Vérifie le lien, ou reprends depuis le début.
+            La page que tu cherches n’existe pas ou a changé d’adresse. Vérifie le lien, ou reprends depuis le
+            début.
           </p>
           <div className="mt-10 flex flex-col gap-3 sm:flex-row">
             <ButtonLink to={user ? '/projet' : '/'} size="lg" icon="arrowLeft">

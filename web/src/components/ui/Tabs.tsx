@@ -7,7 +7,10 @@ export const Tabs = RTabs.Root;
 export function TabsList({ className, ...rest }: ComponentProps<typeof RTabs.List>) {
   return (
     <RTabs.List
-      className={cn('flex max-w-full gap-0 overflow-x-auto border-b-2 border-ink no-print', className)}
+      className={cn(
+        'flex max-w-full gap-1 overflow-x-auto overflow-y-hidden border-b-2 border-ink no-print',
+        className,
+      )}
       {...rest}
     />
   );
@@ -17,9 +20,9 @@ export function TabsTrigger({ className, ...rest }: ComponentProps<typeof RTabs.
   return (
     <RTabs.Trigger
       className={cn(
-        'eyebrow -mb-[2px] min-h-11 shrink-0 border-2 border-transparent px-4 py-3 text-muted-on-light',
-        'hover:text-ink',
-        'data-[state=active]:border-ink data-[state=active]:border-b-paper data-[state=active]:bg-paper data-[state=active]:text-ink',
+        'eyebrow min-h-11 shrink-0 border-b-4 border-transparent px-4 py-3 text-muted-on-light',
+        'hover:border-line-light hover:text-ink',
+        'data-[state=active]:border-ink data-[state=active]:bg-white data-[state=active]:text-ink',
         className,
       )}
       {...rest}

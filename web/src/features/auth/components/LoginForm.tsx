@@ -51,10 +51,16 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
           Essayer sans compte
         </h2>
         <p className="mt-2 text-meta text-ink">
-          Ouvre le projet de démonstration « Marée basse », un court métrage fictif tourné à Tunis, avec le compte de
-          Yassine.
+          Ouvre le projet de démonstration « Marée basse », un court métrage fictif tourné à Tunis, avec le
+          compte de Yassine.
         </p>
-        <Button className="mt-4 w-full sm:w-auto" onClick={() => void demo()} loading={pending === 'demo'} disabled={loading} iconRight="arrowRight">
+        <Button
+          className="mt-4 w-full sm:w-auto"
+          onClick={() => void demo()}
+          loading={pending === 'demo'}
+          disabled={loading}
+          iconRight="arrowRight"
+        >
           Continuer en démo
         </Button>
       </section>
@@ -65,12 +71,20 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
         <span className="h-0.5 flex-1 bg-line-light" />
       </div>
 
-      <form onSubmit={(e) => void submit(e)} noValidate className="flex flex-col gap-5" aria-labelledby="form-titre">
+      <form
+        onSubmit={(e) => void submit(e)}
+        noValidate
+        className="flex flex-col gap-5"
+        aria-labelledby="form-titre"
+      >
         <h2 id="form-titre" className="text-h3">
           Se connecter avec un email
         </h2>
         {serverError ? (
-          <p role="alert" className="flex items-center gap-2 border-2 border-bad-fg bg-bad-bg p-3 font-semibold text-bad-fg">
+          <p
+            role="alert"
+            className="flex items-center gap-2 border-2 border-bad-fg bg-bad-bg p-3 font-semibold text-bad-fg"
+          >
             <Icon name="alert" size={18} />
             {serverError}
           </p>
@@ -81,14 +95,21 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
         <Field label="Mot de passe" error={errors.password?.message} required>
           <Input type="password" autoComplete="current-password" {...register('password')} />
         </Field>
-        <Button type="submit" variant="secondary" loading={pending === 'form'} disabled={loading} className="self-start">
+        <Button
+          type="submit"
+          variant="secondary"
+          loading={pending === 'form'}
+          disabled={loading}
+          className="self-start"
+        >
           Se connecter
         </Button>
       </form>
 
       <p className="flex items-start gap-2 border-l-4 border-gold pl-3 text-meta text-muted-on-light">
         <Icon name="info" size={16} className="mt-0.5 shrink-0" />
-        Prototype : la connexion est simulée dans ton navigateur. Ton mot de passe n’est ni envoyé ni enregistré.
+        Prototype : la connexion est simulée dans ton navigateur. Ton mot de passe n’est ni envoyé ni
+        enregistré.
       </p>
     </div>
   );

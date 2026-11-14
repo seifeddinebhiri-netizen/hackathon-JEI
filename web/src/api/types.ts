@@ -109,14 +109,7 @@ export type QuickSlot = {
 // Passeport IA
 // ---------------------------------------------------------------------------
 export type Department =
-  | 'scenario'
-  | 'image'
-  | 'montage'
-  | 'son_voix'
-  | 'musique'
-  | 'vfx'
-  | 'sous_titres'
-  | 'affiche_promo';
+  'scenario' | 'image' | 'montage' | 'son_voix' | 'musique' | 'vfx' | 'sous_titres' | 'affiche_promo';
 export type AiToolStatus = 'documente' | 'partiel' | 'non_divulgue';
 export type AiTool = {
   id: string;
@@ -180,7 +173,12 @@ export type FestivalRequirement = {
   detail: string;
   limit_chars?: number;
 };
-export type FestivalMatch = { festival: Festival; score: 1 | 2 | 3 | 4 | 5; reasons: string[]; warnings: string[] };
+export type FestivalMatch = {
+  festival: Festival;
+  score: 1 | 2 | 3 | 4 | 5;
+  reasons: string[];
+  warnings: string[];
+};
 export type FilmProfile = {
   duration_min: number;
   language: string;
@@ -220,7 +218,10 @@ export type PublicFilm = {
 // ---------------------------------------------------------------------------
 // Corps de requête et réponses complémentaires (précisés dans API_CONTRACT.md)
 // ---------------------------------------------------------------------------
-export type CreateProjectInput = Pick<Project, 'title' | 'format' | 'city' | 'shooting_window' | 'max_hours_per_day'>;
+export type CreateProjectInput = Pick<
+  Project,
+  'title' | 'format' | 'city' | 'shooting_window' | 'max_hours_per_day'
+>;
 export type UpdateProjectInput = Partial<
   Pick<
     Project,
@@ -255,7 +256,10 @@ export type GenerateScheduleInput = { project_id: string };
 
 export type WeatherQuery = { lat: number; lon: number; from: string; to: string };
 
-export type SavePassportInput = Omit<Passport, 'id' | 'updated_at' | 'c2pa_signed' | 'verify_url' | 'badge_code'> & {
+export type SavePassportInput = Omit<
+  Passport,
+  'id' | 'updated_at' | 'c2pa_signed' | 'verify_url' | 'badge_code'
+> & {
   id?: string;
 };
 export type PassportCheck = {

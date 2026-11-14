@@ -24,7 +24,12 @@ export function QueryState<T>({
   if (query.isPending) return <>{loading ?? <LoadingBlock />}</>;
   if (query.isError)
     return (
-      <ErrorState title={errorTitle} error={query.error} onRetry={() => void query.refetch()} retrying={query.isFetching} />
+      <ErrorState
+        title={errorTitle}
+        error={query.error}
+        onRetry={() => void query.refetch()}
+        retrying={query.isFetching}
+      />
     );
   if (isEmpty?.(query.data)) return <>{empty}</>;
   return <>{children(query.data)}</>;

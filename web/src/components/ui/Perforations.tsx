@@ -1,7 +1,13 @@
 import { cn } from '@/lib/cn';
 
 /** Bande de perforations de pellicule (décorative). */
-export function Perforations({ className, tone = 'dark' }: { className?: string; tone?: 'dark' | 'light' | 'gold' }) {
+export function Perforations({
+  className,
+  tone = 'dark',
+}: {
+  className?: string;
+  tone?: 'dark' | 'light' | 'gold';
+}) {
   const bg = tone === 'dark' ? 'bg-ink' : tone === 'gold' ? 'bg-gold' : 'bg-paper';
   const hole = tone === 'dark' ? 'bg-paper/90' : 'bg-ink';
   return (

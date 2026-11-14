@@ -16,7 +16,12 @@ export function PageHeader({
   className?: string;
 }) {
   return (
-    <header className={cn('flex flex-col gap-4 border-b-2 border-ink pb-6 md:flex-row md:items-end md:justify-between', className)}>
+    <header
+      className={cn(
+        'flex flex-col gap-4 border-b-2 border-ink pb-6 md:flex-row md:items-end md:justify-between',
+        className,
+      )}
+    >
       <div className="max-w-3xl">
         {eyebrow ? <Eyebrow className="mb-3 text-muted-on-light">{eyebrow}</Eyebrow> : null}
         <h1 className="text-[40px] leading-none md:text-page">{title}</h1>

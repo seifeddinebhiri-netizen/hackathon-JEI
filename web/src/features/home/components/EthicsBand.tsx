@@ -1,10 +1,22 @@
 import { Icon, type IconName } from '@/components/ui';
 
 const ITEMS: { icon: IconName; title: string; text: string }[] = [
-  { icon: 'sparkle', title: 'L’IA propose, tu décides', text: 'Toute proposition est un « Brouillon IA » modifiable.' },
+  {
+    icon: 'sparkle',
+    title: 'L’IA propose, tu décides',
+    text: 'Toute proposition est un « Brouillon IA » modifiable.',
+  },
   { icon: 'cloud', title: 'Météo honnête', text: 'Au-delà de 14 jours, on écrit « Météo à revérifier ».' },
-  { icon: 'edit', title: 'Ton texte reste le tien', text: 'Le synopsis n’est jamais réécrit : on te pose des questions.' },
-  { icon: 'shield', title: 'Déclarer sans juger', text: '« Non divulgué » décrit l’outil, pas toi. Ce n’est pas un avis juridique.' },
+  {
+    icon: 'edit',
+    title: 'Ton texte reste le tien',
+    text: 'Le synopsis n’est jamais réécrit : on te pose des questions.',
+  },
+  {
+    icon: 'shield',
+    title: 'Déclarer sans juger',
+    text: '« Non divulgué » décrit l’outil, pas toi. Ce n’est pas un avis juridique.',
+  },
   { icon: 'film', title: 'Pas de promesse', text: 'Le classement des festivals ne prédit pas la sélection.' },
   { icon: 'lock', title: 'Tes données', text: 'Exporte ou supprime ton projet quand tu veux.' },
 ];
@@ -12,7 +24,11 @@ const ITEMS: { icon: IconName; title: string; text: string }[] = [
 /** Éthique 360 en bande compacte. */
 export function EthicsBand() {
   return (
-    <section id="ethique" aria-labelledby="ethique-titre" className="scroll-mt-4 border-y-2 border-ink bg-white">
+    <section
+      id="ethique"
+      aria-labelledby="ethique-titre"
+      className="scroll-mt-4 border-y-2 border-ink bg-white"
+    >
       <div className="container-pp py-14 md:py-16">
         <div className="flex flex-col gap-2 md:flex-row md:items-baseline md:justify-between">
           <h2 id="ethique-titre" className="text-h2">

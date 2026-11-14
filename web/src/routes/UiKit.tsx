@@ -222,14 +222,24 @@ export default function UiKit() {
           </Field>
           <CharCount value={text} limit={60} />
           <div>
-            <Checkbox checked={checked} onCheckedChange={setChecked} label="Sous-titres validés" hint="Coche quand c’est fait." />
+            <Checkbox
+              checked={checked}
+              onCheckedChange={setChecked}
+              label="Sous-titres validés"
+              hint="Coche quand c’est fait."
+            />
             <Checkbox checked={false} onCheckedChange={() => {}} label="Désactivé" disabled />
           </div>
         </div>
       </Section>
 
       <Section title="FileDrop">
-        <FileDrop accept={['.pdf', '.docx', '.txt', '.fountain']} maxSizeMb={10} file={file} onFile={setFile} />
+        <FileDrop
+          accept={['.pdf', '.docx', '.txt', '.fountain']}
+          maxSizeMb={10}
+          file={file}
+          onFile={setFile}
+        />
       </Section>
 
       <Section title="Tabs">
@@ -260,7 +270,10 @@ export default function UiKit() {
             <LoadingBlock />
             <Skeleton className="mt-4 h-24 w-full" />
           </div>
-          <EmptyState title="Aucune scène pour l’instant" action={<Button icon="plus">Ajouter une scène</Button>}>
+          <EmptyState
+            title="Aucune scène pour l’instant"
+            action={<Button icon="plus">Ajouter une scène</Button>}
+          >
             Importe ton scénario ou saisis tes scènes à la main.
           </EmptyState>
           <ErrorState error="Impossible de joindre le serveur. Vérifie ta connexion." onRetry={() => {}} />
@@ -287,7 +300,9 @@ export default function UiKit() {
           </Button>
           <Button
             variant="secondary"
-            onClick={() => toast({ title: 'Échec de l’enregistrement', description: 'Réessaie.', tone: 'bad' })}
+            onClick={() =>
+              toast({ title: 'Échec de l’enregistrement', description: 'Réessaie.', tone: 'bad' })
+            }
           >
             Toast erreur
           </Button>
@@ -312,13 +327,26 @@ export default function UiKit() {
       <Section title="Icônes">
         <p className="text-meta text-muted-on-light">Toujours accompagnées d’un libellé texte.</p>
         <div className="mt-4 flex flex-wrap gap-4">
-          {(['sun', 'moon', 'sunrise', 'golden', 'rain', 'wind', 'pin', 'clock', 'shield', 'alert', 'check', 'film'] as const).map(
-            (n) => (
-              <span key={n} className="inline-flex items-center gap-1.5 text-meta">
-                <Icon name={n} /> {n}
-              </span>
-            ),
-          )}
+          {(
+            [
+              'sun',
+              'moon',
+              'sunrise',
+              'golden',
+              'rain',
+              'wind',
+              'pin',
+              'clock',
+              'shield',
+              'alert',
+              'check',
+              'film',
+            ] as const
+          ).map((n) => (
+            <span key={n} className="inline-flex items-center gap-1.5 text-meta">
+              <Icon name={n} /> {n}
+            </span>
+          ))}
         </div>
       </Section>
     </div>

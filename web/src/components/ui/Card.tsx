@@ -15,5 +15,7 @@ const tones = {
 };
 
 export function Card({ tone = 'light', raised, as: Tag = 'div', className, ...rest }: Props) {
-  return <Tag className={cn('border-2 p-5 md:p-6', tones[tone], raised && 'shadow-hard', className)} {...rest} />;
+  return (
+    <Tag className={cn('border-2 p-5 md:p-6', tones[tone], raised && 'shadow-hard', className)} {...rest} />
+  );
 }

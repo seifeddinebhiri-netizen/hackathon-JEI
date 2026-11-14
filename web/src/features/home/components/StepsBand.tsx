@@ -11,7 +11,9 @@ export function StepsBand() {
         {STEPS.map((s, i) => (
           <Fragment key={s}>
             <li className="flex items-center gap-3">
-              <span className="grid size-8 place-items-center bg-ink font-mono text-label text-gold">{i + 1}</span>
+              <span className="grid size-8 place-items-center bg-ink font-mono text-label text-gold">
+                {i + 1}
+              </span>
               <span className="font-display text-[22px] font-bold md:text-[28px]">{s}</span>
             </li>
             {i < STEPS.length - 1 ? (

@@ -13,13 +13,14 @@
  *       - éliminé si l'horaire imposé par le soleil (aube / heure dorée / nuit) tombe hors
  *         des horaires d'accès du lieu, ou si une autre scène occupe déjà ce même moment ;
  *       - EXT : éliminé si pluie ≥ 40 % ou vent ≥ 40 km/h prévus (1er passage) ;
+ *       - éliminé si la journée deviendrait trop longue (amplitude ou heures) (1er passage) ;
  *       - bonus fort si le jour accueille déjà ce lieu (regroupement), malus si un autre lieu ;
  *       - EXT : bonus si la prévision est connue et sèche (plutôt qu'au-delà de l'horizon) ;
  *       - INT : bonus si le jour est pluvieux (on garde les jours secs pour l'EXT) ;
  *       - léger bonus aux jours les plus tôt.
  *     Le meilleur jour gagne.
- *  3. Si aucun jour ne passe, 2e passage sans le filtre météo : la scène est placée
- *     avec un conflit « pluie » ou « vent ». Si toujours rien : `unplaced` avec la raison.
+ *  3. Si aucun jour ne passe, 2e passage sans les filtres météo et amplitude : la scène est placée
+ *     avec un conflit « pluie », « vent » ou « journée trop longue ». Si toujours rien : `unplaced` avec la raison.
  *  4. Chaque journée est mise en page par `layoutDay` (features/planner/lib/rules.ts) :
  *     horaires calés sur le soleil (suncalc), scènes « jour » à la suite dès 08:00,
  *     rendez-vous 1 h avant la 1re scène, conflits (pluie, vent, lieu fermé, journée trop longue,
@@ -42,7 +43,13 @@ import {
   layoutDay,
 } from '@/features/planner/lib/rules';
 
-type DayLoad = { date: string; sceneIds: string[]; hours: number; locations: Set<string>; moments: Set<string> };
+type DayLoad = {
+  date: string;
+  sceneIds: string[];
+  hours: number;
+  locations: Set<string>;
+  moments: Set<string>;
+};
 
 export function mockSchedule(project: Project, weather: WeatherDay[]): Schedule {
   const dates = eachDayOfInterval({
@@ -66,7 +73,7 @@ export function mockSchedule(project: Project, weather: WeatherDay[]): Schedule 
   const extCount = (g: Scene[]) => g.filter((s) => s.setting === 'EXT').length;
   const orderedGroups = [...groups.values()].sort((a, b) => extCount(b) - extCount(a));
 
-  const fits = (s: Scene, day: DayLoad, ignoreWeather: boolean): boolean => {
+  const fits = (s: Scene, day: DayLoad, relaxed: boolean): boolean => {
     const loc = locBy.get(s.location_id);
     const w = weatherBy.get(day.date);
     if (isForbiddenDay(loc, day.date)) return false;
@@ -77,7 +84,11 @@ export function mockSchedule(project: Project, weather: WeatherDay[]): Schedule 
       if (anchored.start < atTime(day.date, loc.access_hours.from)) return false;
       if (anchored.end > atTime(day.date, loc.access_hours.to)) return false;
     }
-    if (!ignoreWeather && s.setting === 'EXT' && (isRainy(w) || isWindy(w))) return false;
+    if (relaxed) return true;
+    if (s.setting === 'EXT' && (isRainy(w) || isWindy(w))) return false;
+    // Amplitude : on évite de mettre une scène de nuit le même jour qu'une scène du matin, etc.
+    const trial = layoutDay({ dateIso: day.date, sceneIds: [...day.sceneIds, s.id], project, weather: w });
+    if (trial.scenes.some((x) => x.conflicts.some((c) => c.kind === 'jour_trop_long'))) return false;
     return true;
   };
 
@@ -95,15 +106,19 @@ export function mockSchedule(project: Project, weather: WeatherDay[]): Schedule 
   // 2-3. Placement
   for (const group of orderedGroups) {
     const scenes = [...group].sort((a, b) =>
-      a.setting === b.setting ? a.number.localeCompare(b.number, 'fr', { numeric: true }) : a.setting === 'EXT' ? -1 : 1,
+      a.setting === b.setting
+        ? a.number.localeCompare(b.number, 'fr', { numeric: true })
+        : a.setting === 'EXT'
+          ? -1
+          : 1,
     );
     for (const s of scenes) {
       let best: DayLoad | undefined;
-      for (const ignoreWeather of [false, true]) {
+      for (const relaxed of [false, true]) {
         let bestScore = -Infinity;
         dates.forEach((d, i) => {
           const day = load.get(d)!;
-          if (!fits(s, day, ignoreWeather)) return;
+          if (!fits(s, day, relaxed)) return;
           const sc = score(s, day, i);
           if (sc > bestScore) {
             bestScore = sc;
@@ -144,7 +159,12 @@ export function mockSchedule(project: Project, weather: WeatherDay[]): Schedule 
   return { generated_at: formatISO(new Date()), status: 'brouillon_ia', days, unplaced };
 }
 
-function backupNote(sceneIds: string[], w: WeatherDay | undefined, project: Project, day: DayLoad): string | undefined {
+function backupNote(
+  sceneIds: string[],
+  w: WeatherDay | undefined,
+  project: Project,
+  day: DayLoad,
+): string | undefined {
   const scenes = sceneIds.map((id) => project.scenes.find((s) => s.id === id)!);
   if (!scenes.some((s) => s.setting === 'EXT')) return undefined;
   const intElsewhere = project.scenes.filter((s) => s.setting === 'INT' && !sceneIds.includes(s.id));

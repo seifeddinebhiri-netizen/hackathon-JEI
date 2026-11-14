@@ -7,10 +7,22 @@ import { CaptureFrame } from './CaptureFrame';
 /* Contenu d'illustration : film fictif, aucune vraie donnée. */
 
 const WEEK = [
-  { d: 'Lun', blocks: [{ k: 'EXT', t: 'Sc. 2 · Ruelles', icon: 'sun' }, { k: 'INT', t: 'Sc. 1 · Café', icon: 'sun' }] },
+  {
+    d: 'Lun',
+    blocks: [
+      { k: 'EXT', t: 'Sc. 2 · Ruelles', icon: 'sun' },
+      { k: 'INT', t: 'Sc. 1 · Café', icon: 'sun' },
+    ],
+  },
   { d: 'Mar', blocks: [] },
   { d: 'Mer', blocks: [{ k: 'INT', t: 'Sc. 3 · Appart.', icon: 'moon' }] },
-  { d: 'Jeu', blocks: [{ k: 'EXT', t: 'Sc. 5 · Route', icon: 'sunrise' }, { k: 'EXT', t: 'Sc. 4 · Plage', icon: 'golden' }] },
+  {
+    d: 'Jeu',
+    blocks: [
+      { k: 'EXT', t: 'Sc. 5 · Route', icon: 'sunrise' },
+      { k: 'EXT', t: 'Sc. 4 · Plage', icon: 'golden' },
+    ],
+  },
   { d: 'Ven', blocks: [{ k: 'X', t: 'Médina fermée', icon: 'x' }] },
 ] as const;
 
@@ -19,7 +31,9 @@ export function PlannerCapture() {
     <CaptureFrame path="planner/calendrier" tilt="left">
       <div className="mb-3 flex items-center justify-between">
         <p className="font-display text-[18px] font-bold">Semaine 1</p>
-        <span className="eyebrow border border-dashed border-ink bg-gold-soft px-1.5 py-0.5">Brouillon IA</span>
+        <span className="eyebrow border border-dashed border-ink bg-gold-soft px-1.5 py-0.5">
+          Brouillon IA
+        </span>
       </div>
       <div className="grid grid-cols-5 gap-1.5">
         {WEEK.map((col) => (
@@ -90,7 +104,14 @@ const SAMPLE: DepartmentDeclaration[] = [
 export function PassportCapture() {
   return (
     <CaptureFrame path="passeport" tilt="left">
-      <AiLabel filmTitle="Marée basse" director="Yassine" badgeCode="PP-7K3Q-2M" declarations={SAMPLE} compact className="mx-auto max-w-sm" />
+      <AiLabel
+        filmTitle="Marée basse"
+        director="Yassine"
+        badgeCode="PP-7K3Q-2M"
+        declarations={SAMPLE}
+        compact
+        className="mx-auto max-w-sm"
+      />
     </CaptureFrame>
   );
 }

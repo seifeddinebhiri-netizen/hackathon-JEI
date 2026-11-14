@@ -3,7 +3,11 @@ import type { PhotoKey } from '@/lib/photos';
 
 const SHOTS: { photo: PhotoKey; label: string; text: string }[] = [
   { photo: 'ruelle', label: 'Le décor', text: 'Ta ville, tes ruelles, ta lumière.' },
-  { photo: 'tournageTelephone', label: 'Le matériel', text: 'Un téléphone et un stabilisateur suffisent pour commencer.' },
+  {
+    photo: 'tournageTelephone',
+    label: 'Le matériel',
+    text: 'Un téléphone et un stabilisateur suffisent pour commencer.',
+  },
   { photo: 'projection', label: 'La destination', text: 'Une salle, un public, un festival.' },
 ];
 

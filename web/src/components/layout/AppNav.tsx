@@ -34,7 +34,9 @@ function UserMenu() {
           sideOffset={6}
           className="z-50 min-w-56 border-2 border-ink bg-paper p-1 text-ink shadow-hard"
         >
-          <Menu.Label className="eyebrow px-3 py-2 text-muted-on-light">{user.is_demo ? 'Compte de démo' : user.email}</Menu.Label>
+          <Menu.Label className="eyebrow px-3 py-2 text-muted-on-light">
+            {user.is_demo ? 'Compte de démo' : user.email}
+          </Menu.Label>
           <Menu.Item
             onSelect={() => navigate('/mes-donnees')}
             className="flex min-h-11 cursor-pointer items-center gap-2 px-3 outline-none data-[highlighted]:bg-gold-soft"
@@ -64,7 +66,10 @@ export function AppNav() {
           <div className="flex items-center gap-3">
             <Logo to="/projet" />
             {usingMocks ? (
-              <span className="eyebrow hidden border border-gold px-2 py-1 whitespace-nowrap text-gold xl:inline" title="VITE_USE_MOCKS=true">
+              <span
+                className="eyebrow hidden border border-gold px-2 py-1 whitespace-nowrap text-gold xl:inline"
+                title="VITE_USE_MOCKS=true"
+              >
                 Données de démonstration
               </span>
             ) : null}
@@ -79,7 +84,9 @@ export function AppNav() {
                     className={({ isActive }) =>
                       cn(
                         'flex min-h-16 items-center gap-2 border-b-4 px-2 text-meta font-semibold whitespace-nowrap lg:px-4',
-                        isActive ? 'border-gold text-paper' : 'border-transparent text-muted-on-dark hover:text-paper',
+                        isActive
+                          ? 'border-gold text-paper'
+                          : 'border-transparent text-muted-on-dark hover:text-paper',
                       )
                     }
                   >
@@ -94,7 +101,10 @@ export function AppNav() {
         </div>
       </header>
       {/* Barre du bas sur mobile */}
-      <nav aria-label="Étapes (mobile)" className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-line-dark bg-ink md:hidden">
+      <nav
+        aria-label="Étapes (mobile)"
+        className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-line-dark bg-ink md:hidden"
+      >
         <ul className="grid grid-cols-5">
           {APP_LINKS.map((l) => (
             <li key={l.to}>

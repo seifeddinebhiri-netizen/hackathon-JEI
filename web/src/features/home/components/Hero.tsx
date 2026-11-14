@@ -27,8 +27,8 @@ export function Hero() {
             Fais-toi <span className="text-brand-red">voir.</span>
           </h1>
           <p className="mt-8 max-w-xl text-lead text-muted-on-dark">
-            Premier Plan t’accompagne de l’organisation du tournage jusqu’au festival. Sans faire le travail créatif à ta
-            place, et en rendant visible ce qui est humain et ce qui est IA.
+            Premier Plan t’accompagne de l’organisation du tournage jusqu’au festival. Sans faire le travail
+            créatif à ta place, et en rendant visible ce qui est humain et ce qui est IA.
           </p>
           <div className="mt-10 flex flex-col gap-3 sm:flex-row">
             <ButtonLink to="/connexion" size="lg" iconRight="arrowRight">
@@ -43,7 +43,13 @@ export function Hero() {
         <div className="relative lg:col-span-5">
           <PhotoFrame photo="hero" priority onDark sizes="(min-width: 1024px) 40vw, 100vw" />
           <div className="relative z-10 -mt-24 ml-auto w-[min(300px,85%)] rotate-[3deg] shadow-hard-gold sm:-mt-32 lg:-mr-6">
-            <AiLabel filmTitle="Marée basse" director="Yassine" badgeCode="PP-7K3Q-2M" declarations={HERO_LABEL} compact />
+            <AiLabel
+              filmTitle="Marée basse"
+              director="Yassine"
+              badgeCode="PP-7K3Q-2M"
+              declarations={HERO_LABEL}
+              compact
+            />
           </div>
         </div>
       </div>

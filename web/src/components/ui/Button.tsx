@@ -57,7 +57,18 @@ function Content({ icon, iconRight, loading, children }: CommonProps) {
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = 'primary', size = 'md', icon, iconRight, loading, className, children, disabled, type = 'button', ...rest },
+  {
+    variant = 'primary',
+    size = 'md',
+    icon,
+    iconRight,
+    loading,
+    className,
+    children,
+    disabled,
+    type = 'button',
+    ...rest
+  },
   ref,
 ) {
   return (
@@ -78,7 +89,15 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
 
 export type ButtonLinkProps = CommonProps & LinkProps;
 
-export function ButtonLink({ variant = 'primary', size = 'md', icon, iconRight, className, children, ...rest }: ButtonLinkProps) {
+export function ButtonLink({
+  variant = 'primary',
+  size = 'md',
+  icon,
+  iconRight,
+  className,
+  children,
+  ...rest
+}: ButtonLinkProps) {
   return (
     <Link className={cn(base, variants[variant], sizes[size], className)} {...rest}>
       <Content icon={icon} iconRight={iconRight}>
@@ -92,7 +111,10 @@ export function Spinner({ className }: { className?: string }) {
   return (
     <span
       aria-hidden
-      className={cn('inline-block size-4 animate-spin border-2 border-current border-r-transparent', className)}
+      className={cn(
+        'inline-block size-4 animate-spin border-2 border-current border-r-transparent',
+        className,
+      )}
     />
   );
 }

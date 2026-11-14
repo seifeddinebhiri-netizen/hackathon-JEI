@@ -61,11 +61,7 @@ const PLACES: T.GeocodeResult[] = [
   { label: 'Tozeur', lat: 33.9197, lon: 8.1335 },
   { label: 'Tabarka', lat: 36.9544, lon: 8.7581 },
 ];
-const norm = (s: string) =>
-  s
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '');
+const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
 function geocodeLocal(q: string): T.GeocodeResult[] {
   const n = norm(q.trim());
@@ -93,7 +89,15 @@ function quickSlotsFor(req: T.QuickSlotRequest): T.QuickSlotsResponse {
     source: 'manuel',
     validated: false,
   };
-  const loc: T.Location = { id: 'quick', name: place.label, address: '', lat: place.lat, lon: place.lon, forbidden_days: [], permit: 'non_necessaire' };
+  const loc: T.Location = {
+    id: 'quick',
+    name: place.label,
+    address: '',
+    lat: place.lat,
+    lon: place.lon,
+    forbidden_days: [],
+    permit: 'non_necessaire',
+  };
 
   const slots: T.QuickSlot[] = days.map((d) => {
     const dateIso = isoDay(d);
@@ -163,7 +167,8 @@ function rankFestival(f: T.Festival, film?: T.FilmProfile): T.FestivalMatch {
     score++;
     reasons.push('Inscription gratuite.');
   }
-  if (f.subtitle_langs.includes('fr')) reasons.push('Sous-titres français acceptés : brouillon disponible dans l’onglet Sous-titres.');
+  if (f.subtitle_langs.includes('fr'))
+    reasons.push('Sous-titres français acceptés : brouillon disponible dans l’onglet Sous-titres.');
   else warnings.push(`Sous-titres demandés en : ${f.subtitle_langs.join(', ')}.`);
   const left = differenceInCalendarDays(parseISO(f.deadline), new Date());
   if (left < 0) {
@@ -183,13 +188,18 @@ function searchFestivalsLocal(p: T.FestivalSearchParams): T.FestivalMatch[] {
     .filter((f) => f.source_url && f.checked_at)
     .filter((f) => !q || norm(`${f.name} ${f.country}`).includes(q))
     .filter((f) => !p.country || f.country === p.country)
-    .filter((f) => !p.max_duration_min || f.max_duration_min === undefined || f.max_duration_min <= p.max_duration_min)
+    .filter(
+      (f) =>
+        !p.max_duration_min || f.max_duration_min === undefined || f.max_duration_min <= p.max_duration_min,
+    )
     .filter((f) => !p.fee || (p.fee === 'gratuit') === (f.fee.toLowerCase() === 'gratuit'))
     .filter((f) => !p.deadline_before || f.deadline <= p.deadline_before)
     .filter((f) => !p.subtitle_lang || f.subtitle_langs.includes(p.subtitle_lang))
     .filter((f) => !p.ai_policy || f.ai_policy === p.ai_policy)
     .map((f) => rankFestival(f, p.film))
-    .sort((a, b) => (p.film ? b.score - a.score : 0) || a.festival.deadline.localeCompare(b.festival.deadline));
+    .sort(
+      (a, b) => (p.film ? b.score - a.score : 0) || a.festival.deadline.localeCompare(b.festival.deadline),
+    );
 }
 
 // --- Synopsis : uniquement des questions -------------------------------------------
@@ -213,7 +223,8 @@ function synopsisQuestions(input: T.SynopsisFeedbackInput): T.SynopsisFeedback {
   if (input.kind === 'phrase') {
     q.push('En une phrase : dit-elle qui, ce qu’il veut, et ce qui l’en empêche ?');
   } else {
-    if (!/[A-ZÀ-Ö][a-zà-ö]+/.test(text.slice(1))) q.push('Le lecteur connaît-il le prénom de ton personnage principal ?');
+    if (!/[A-ZÀ-Ö][a-zà-ö]+/.test(text.slice(1)))
+      q.push('Le lecteur connaît-il le prénom de ton personnage principal ?');
     q.push('Quel est le moment où tout bascule pour ton personnage ?');
     if (input.kind === 'long') q.push('Le lecteur comprend-il ce qui est en jeu si le personnage échoue ?');
     if (/\b(fin|finalement|à la fin)\b/i.test(text))
@@ -224,7 +235,16 @@ function synopsisQuestions(input: T.SynopsisFeedbackInput): T.SynopsisFeedback {
 }
 
 // --- Passeport ---------------------------------------------------------------------
-const DEPARTMENTS: T.Department[] = ['scenario', 'image', 'montage', 'son_voix', 'musique', 'vfx', 'sous_titres', 'affiche_promo'];
+const DEPARTMENTS: T.Department[] = [
+  'scenario',
+  'image',
+  'montage',
+  'son_voix',
+  'musique',
+  'vfx',
+  'sous_titres',
+  'affiche_promo',
+];
 const DEPT_LABEL: Record<T.Department, string> = {
   scenario: 'Scénario',
   image: 'Image et tournage',
@@ -238,7 +258,8 @@ const DEPT_LABEL: Record<T.Department, string> = {
 
 function badgeCode(): string {
   const a = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  const pick = (n: number) => Array.from({ length: n }, () => a[Math.floor(Math.random() * a.length)]).join('');
+  const pick = (n: number) =>
+    Array.from({ length: n }, () => a[Math.floor(Math.random() * a.length)]).join('');
   return `PP-${pick(4)}-${pick(2)}`;
 }
 
@@ -253,16 +274,21 @@ function checkPassportLocal(p: T.Passport): T.PassportCheck {
       continue;
     }
     if (decl.used_ai) {
-      if (!decl.tool_id && !decl.custom_tool) missing.push({ department: d, message: `${DEPT_LABEL[d]} : indique l’outil utilisé.` });
-      if (!decl.what.trim()) missing.push({ department: d, message: `${DEPT_LABEL[d]} : décris ce que l’IA a fait.` });
-      if (!decl.level) missing.push({ department: d, message: `${DEPT_LABEL[d]} : choisis le niveau d’usage.` });
+      if (!decl.tool_id && !decl.custom_tool)
+        missing.push({ department: d, message: `${DEPT_LABEL[d]} : indique l’outil utilisé.` });
+      if (!decl.what.trim())
+        missing.push({ department: d, message: `${DEPT_LABEL[d]} : décris ce que l’IA a fait.` });
+      if (!decl.level)
+        missing.push({ department: d, message: `${DEPT_LABEL[d]} : choisis le niveau d’usage.` });
       const t = tools.find((x) => x.id === decl.tool_id);
       if (t?.status === 'non_divulgue')
         warnings.push(
           `${DEPT_LABEL[d]} : ${t.name} est « Non divulgué » (le fournisseur ne publie pas ses données d’entraînement). Ce statut est valide et sera affiché tel quel.`,
         );
       if (decl.custom_tool && !decl.tool_id)
-        warnings.push(`${DEPT_LABEL[d]} : « ${decl.custom_tool} » n’est pas dans le catalogue ; son statut sera « Non divulgué ».`);
+        warnings.push(
+          `${DEPT_LABEL[d]} : « ${decl.custom_tool} » n’est pas dans le catalogue ; son statut sera « Non divulgué ».`,
+        );
     }
   }
   return { ok: missing.length === 0, missing, warnings };
@@ -272,7 +298,14 @@ function checkPassportLocal(p: T.Passport): T.PassportCheck {
 export const mockApi: Api = {
   createProject: (input) =>
     simulate('POST /projects', S.projectSchema, () => {
-      const p: T.Project = { ...input, id: uid('prj'), scenes: [], locations: [], people: [], festival_shortlist: [] };
+      const p: T.Project = {
+        ...input,
+        id: uid('prj'),
+        scenes: [],
+        locations: [],
+        people: [],
+        festival_shortlist: [],
+      };
       getDb().projects[p.id] = p;
       persist();
       return p;
@@ -281,12 +314,17 @@ export const mockApi: Api = {
   getProject: (id) => simulate(`GET /projects/${id}`, S.projectSchema, () => requireProject(id)),
 
   updateProject: (id, patch) =>
-    simulate(`PATCH /projects/${id}`, S.projectSchema, () => {
-      const p = { ...requireProject(id), ...patch };
-      getDb().projects[id] = p;
-      persist();
-      return p;
-    }, 0.5),
+    simulate(
+      `PATCH /projects/${id}`,
+      S.projectSchema,
+      () => {
+        const p = { ...requireProject(id), ...patch };
+        getDb().projects[id] = p;
+        persist();
+        return p;
+      },
+      0.5,
+    ),
 
   deleteProject: (id) =>
     simulate(`DELETE /projects/${id}`, S.okSchema, () => {
@@ -301,7 +339,8 @@ export const mockApi: Api = {
   parseScreenplay: (input) =>
     simulate('POST /planner/parse', S.parseScreenplayResultSchema, () => mockParseScreenplay(input), 2.5),
 
-  geocode: (q) => simulate('GET /planner/geocode', z.array(S.geocodeResultSchema), () => geocodeLocal(q), 0.4),
+  geocode: (q) =>
+    simulate('GET /planner/geocode', z.array(S.geocodeResultSchema), () => geocodeLocal(q), 0.4),
 
   quickSlots: (req) => simulate('POST /planner/quick', S.quickSlotsResponseSchema, () => quickSlotsFor(req)),
 
@@ -312,14 +351,24 @@ export const mockApi: Api = {
       () => {
         const p = requireProject(project_id);
         const coords = geocodeLocal(p.city)[0] ?? { ...TUNIS };
-        const weather = mockWeatherRange(p.shooting_window.from, p.shooting_window.to, coords.lat, coords.lon);
+        const weather = mockWeatherRange(
+          p.shooting_window.from,
+          p.shooting_window.to,
+          coords.lat,
+          coords.lon,
+        );
         return mockSchedule(p, weather);
       },
       2,
     ),
 
   getWeather: ({ lat, lon, from, to }) =>
-    simulate('GET /planner/weather', z.array(S.weatherDaySchema), () => mockWeatherRange(from, to, lat, lon), 0.5),
+    simulate(
+      'GET /planner/weather',
+      z.array(S.weatherDaySchema),
+      () => mockWeatherRange(from, to, lat, lon),
+      0.5,
+    ),
 
   getAiTools: () => simulate('GET /ai-tools', z.array(S.aiToolSchema), () => aiTools),
 
@@ -385,7 +434,9 @@ export const mockApi: Api = {
       return {
         passport: p,
         tools: (aiTools as T.AiTool[]).filter((t) => ids.has(t.id)),
-        signature: p.c2pa_signed ? { signed: true, signed_at: p.updated_at, manifest_id: `c2pa-${p.id}` } : { signed: false },
+        signature: p.c2pa_signed
+          ? { signed: true, signed_at: p.updated_at, manifest_id: `c2pa-${p.id}` }
+          : { signed: false },
         checked_at: formatISO(new Date()),
       };
     }),
@@ -400,13 +451,22 @@ export const mockApi: Api = {
     }),
 
   saveSubtitles: (projectId, lines) =>
-    simulate(`PUT /subtitles/${projectId}`, S.subtitleDraftSchema, () => {
-      const db = getDb();
-      const d: T.SubtitleDraft = { project_id: projectId, source_lang: db.subtitles[projectId]?.source_lang ?? 'derja', lines };
-      db.subtitles[projectId] = d;
-      persist();
-      return d;
-    }, 0.5),
+    simulate(
+      `PUT /subtitles/${projectId}`,
+      S.subtitleDraftSchema,
+      () => {
+        const db = getDb();
+        const d: T.SubtitleDraft = {
+          project_id: projectId,
+          source_lang: db.subtitles[projectId]?.source_lang ?? 'derja',
+          lines,
+        };
+        db.subtitles[projectId] = d;
+        persist();
+        return d;
+      },
+      0.5,
+    ),
 
   getSynopsisFeedback: (input) =>
     simulate('POST /synopsis/feedback', S.synopsisFeedbackSchema, () => synopsisQuestions(input)),
@@ -424,10 +484,12 @@ export const mockApi: Api = {
         synopsis_short: '[Synopsis court à écrire dans le Kit Festival]',
         synopsis_long: '[Synopsis long à écrire dans le Kit Festival]',
         stills: ['/photos/ruelle.jpg', '/photos/porte.jpg', '/photos/cote.jpg'],
-        credits: p.people.map((x) => ({ role: x.kind === 'acteur' ? `${x.character ?? 'Rôle'}` : x.role, name: x.name })),
+        credits: p.people.map((x) => ({
+          role: x.kind === 'acteur' ? `${x.character ?? 'Rôle'}` : x.role,
+          name: x.name,
+        })),
         passport_badge_code: pass?.badge_code,
         verify_url: pass?.verify_url,
       };
     }),
 };
-

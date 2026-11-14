@@ -9,7 +9,12 @@ const isoDate = z.string().min(1);
 const hhmm = z.string().regex(/^\d{2}:\d{2}$/);
 
 // --- Projet et Planner -------------------------------------------------------
-export const sceneMomentSchema = z.enum(['jour', 'nuit', 'aube', 'heure_doree']) satisfies z.ZodType<T.SceneMoment>;
+export const sceneMomentSchema = z.enum([
+  'jour',
+  'nuit',
+  'aube',
+  'heure_doree',
+]) satisfies z.ZodType<T.SceneMoment>;
 export const settingSchema = z.enum(['INT', 'EXT']);
 
 export const sceneSchema: z.ZodType<T.Scene> = z.object({
@@ -61,7 +66,14 @@ export const weatherDaySchema: z.ZodType<T.WeatherDay> = z.object({
 });
 
 export const scheduleConflictSchema: z.ZodType<T.ScheduleConflict> = z.object({
-  kind: z.enum(['pluie', 'vent', 'lieu_ferme', 'jour_trop_long', 'autorisation_manquante', 'meteo_a_reverifier']),
+  kind: z.enum([
+    'pluie',
+    'vent',
+    'lieu_ferme',
+    'jour_trop_long',
+    'autorisation_manquante',
+    'meteo_a_reverifier',
+  ]),
   message: z.string(),
 });
 

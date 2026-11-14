@@ -20,7 +20,11 @@ const STEPS: Step[] = [
     name: 'Planifier',
     title: 'Quand et où tourner chaque scène.',
     text: 'Importe ton scénario : l’IA propose un découpage en scènes, tu le valides. Le planning suit la lumière, la météo et les contraintes de chaque lieu.',
-    points: ['Créneaux calés sur le soleil et la météo', 'Scènes d’un même lieu regroupées', 'Feuille de service imprimable'],
+    points: [
+      'Créneaux calés sur le soleil et la météo',
+      'Scènes d’un même lieu regroupées',
+      'Feuille de service imprimable',
+    ],
     capture: <PlannerCapture />,
   },
   {
@@ -37,7 +41,11 @@ const STEPS: Step[] = [
     name: 'Déclarer',
     title: 'Le Passeport IA.',
     text: 'Département par département, tu déclares ce que l’IA a fait et ce que tu as décidé toi-même. Les festivals le vérifient sur une page publique.',
-    points: ['Une étiquette lisible d’un coup d’œil', 'Un badge pour le générique et l’affiche', 'Une page de vérification publique'],
+    points: [
+      'Une étiquette lisible d’un coup d’œil',
+      'Un badge pour le générique et l’affiche',
+      'Une page de vérification publique',
+    ],
     capture: <PassportCapture />,
   },
   {
@@ -45,7 +53,11 @@ const STEPS: Step[] = [
     name: 'Diffuser',
     title: 'Le Kit Festival.',
     text: 'Trouve les festivals compatibles avec ton film, prépare chaque dossier et suis les dates limites. La soumission se fait toujours sur le site officiel du festival.',
-    points: ['Filtres par durée, frais et politique IA', 'Un dossier à préparer par festival', 'Sous-titres et synopsis'],
+    points: [
+      'Filtres par durée, frais et politique IA',
+      'Un dossier à préparer par festival',
+      'Sous-titres et synopsis',
+    ],
     capture: <FestivalCapture />,
   },
 ];
@@ -67,7 +79,9 @@ export function StepsSection() {
                   <span className="grid size-12 place-items-center bg-ink font-display text-[24px] font-bold text-gold">
                     {s.n}
                   </span>
-                  <span className="eyebrow">Étape {s.n} · {s.name}</span>
+                  <span className="eyebrow">
+                    Étape {s.n} · {s.name}
+                  </span>
                   {s.soon ? (
                     <StatusChip tone="warn" icon="clock">
                       Bientôt
@@ -85,7 +99,9 @@ export function StepsSection() {
                   ))}
                 </ul>
               </div>
-              <div className={cn('lg:col-span-6', i % 2 === 1 ? 'lg:order-1 lg:col-start-1' : 'lg:col-start-7')}>
+              <div
+                className={cn('lg:col-span-6', i % 2 === 1 ? 'lg:order-1 lg:col-start-1' : 'lg:col-start-7')}
+              >
                 {s.capture}
               </div>
             </li>

@@ -16,7 +16,11 @@ export async function getProject(id: string): Promise<T.Project> {
 }
 
 export async function updateProject(id: string, patch: T.UpdateProjectInput): Promise<T.Project> {
-  return request(`/projects/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch, schema: S.projectSchema });
+  return request(`/projects/${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    body: patch,
+    schema: S.projectSchema,
+  });
 }
 
 export async function deleteProject(id: string): Promise<{ ok: true }> {
@@ -57,7 +61,9 @@ export async function getAiTools(): Promise<T.AiTool[]> {
 
 /** Ajout proposé (à confirmer) : récupérer le Passeport d'un projet. `null` si aucun. */
 export async function getProjectPassport(projectId: string): Promise<T.Passport | null> {
-  return request(`/projects/${encodeURIComponent(projectId)}/passport`, { schema: S.passportSchema.nullable() });
+  return request(`/projects/${encodeURIComponent(projectId)}/passport`, {
+    schema: S.passportSchema.nullable(),
+  });
 }
 
 export async function savePassport(input: T.SavePassportInput): Promise<T.Passport> {

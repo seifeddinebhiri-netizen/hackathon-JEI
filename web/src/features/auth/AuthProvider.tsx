@@ -12,7 +12,6 @@ import { AuthContext, type AuthContextValue } from './context';
 
 const KEY = 'pp-session-v1';
 
-
 function readSession(): Session | null {
   try {
     const raw = localStorage.getItem(KEY);
@@ -73,7 +72,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     try {
       await new Promise((r) => setTimeout(r, 300));
-      save(makeSession({ id: 'u-demo', email: 'demo@premierplan.invalid', name: 'Yassine', is_demo: true, project_id: DEMO_PROJECT_ID }));
+      save(
+        makeSession({
+          id: 'u-demo',
+          email: 'demo@premierplan.invalid',
+          name: 'Yassine',
+          is_demo: true,
+          project_id: DEMO_PROJECT_ID,
+        }),
+      );
     } finally {
       setLoading(false);
     }
@@ -83,9 +90,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     save(null);
   }, [save]);
 
+  const setCurrentProject = useCallback(
+    (projectId: string) => {
+      if (session) save({ ...session, user: { ...session.user, project_id: projectId } });
+    },
+    [session, save],
+  );
+
   const value = useMemo<AuthContextValue>(
-    () => ({ user: session?.user ?? null, session, loading, signIn, signInDemo, signOut }),
-    [session, loading, signIn, signInDemo, signOut],
+    () => ({ user: session?.user ?? null, session, loading, signIn, signInDemo, signOut, setCurrentProject }),
+    [session, loading, signIn, signInDemo, signOut, setCurrentProject],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

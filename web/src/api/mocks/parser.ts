@@ -18,9 +18,31 @@ function momentFrom(text: string): SceneMoment {
   return 'jour';
 }
 
+const SMALL_WORDS = new Set([
+  'de',
+  'du',
+  'des',
+  'la',
+  'le',
+  'les',
+  'et',
+  'à',
+  'au',
+  'aux',
+  'en',
+  'sur',
+  'sous',
+]);
+
+/** « PORT DE LA GOULETTE » → « Port de la Goulette » (les en-têtes de scène sont en capitales). */
 function cap(s: string): string {
-  const l = s.toLowerCase();
-  return l.charAt(0).toUpperCase() + l.slice(1);
+  return s
+    .toLowerCase()
+    .split(/(\s+|-|')/)
+    .map((w, i) =>
+      (i > 0 && SMALL_WORDS.has(w)) || /^(\s+|-|')$/.test(w) ? w : w.charAt(0).toUpperCase() + w.slice(1),
+    )
+    .join('');
 }
 
 export function parseScreenplayText(text: string): ParseScreenplayResult {
@@ -56,7 +78,9 @@ export function parseScreenplayText(text: string): ParseScreenplayResult {
       const l = d.body[j].trim();
       if (!l) continue;
       const isCue =
-        /^[A-ZÀ-ÖØ-Þ][A-ZÀ-ÖØ-Þ' -]{1,24}(\s*\(.*\))?$/.test(l) && l === l.toUpperCase() && d.body[j + 1]?.trim();
+        /^[A-ZÀ-ÖØ-Þ][A-ZÀ-ÖØ-Þ' -]{1,24}(\s*\(.*\))?$/.test(l) &&
+        l === l.toUpperCase() &&
+        d.body[j + 1]?.trim();
       if (isCue) {
         const name = cap(l.replace(/\(.*\)/, '').trim());
         characters.add(name);
@@ -70,7 +94,9 @@ export function parseScreenplayText(text: string): ParseScreenplayResult {
     return {
       id: uid('sc'),
       number: String(i + 1),
-      title: summary ? summary.split(/[.!?]/)[0].slice(0, 48) : `${kind.startsWith('EXT') ? 'Extérieur' : 'Intérieur'} ${place}`,
+      title: summary
+        ? summary.split(/[.!?]/)[0].slice(0, 48)
+        : `${kind.startsWith('EXT') ? 'Extérieur' : 'Intérieur'} ${place}`,
       setting: kind.startsWith('EXT') ? 'EXT' : 'INT',
       moment: momentFrom(timeParts.join(' ') || rest),
       location_id: locations.get(key)!.id,
@@ -83,7 +109,8 @@ export function parseScreenplayText(text: string): ParseScreenplayResult {
   });
 
   const warnings: string[] = [];
-  if (!scenes.length) warnings.push('Aucun en-tête de scène (INT. / EXT.) trouvé. Tu peux saisir les scènes à la main.');
+  if (!scenes.length)
+    warnings.push('Aucun en-tête de scène (INT. / EXT.) trouvé. Tu peux saisir les scènes à la main.');
   if (scenes.some((s) => !s.characters.length))
     warnings.push('Certaines scènes n’ont pas de personnage détecté : vérifie-les.');
   warnings.push('Les durées de tournage sont estimées à partir de la longueur du texte : ajuste-les.');
@@ -94,7 +121,8 @@ export async function mockParseScreenplay(input: ParseScreenplayInput): Promise<
   if (input.text?.trim()) return parseScreenplayText(input.text);
   if (input.file) {
     const name = input.file.name.toLowerCase();
-    if (name.endsWith('.txt') || name.endsWith('.fountain')) return parseScreenplayText(await input.file.text());
+    if (name.endsWith('.txt') || name.endsWith('.fountain'))
+      return parseScreenplayText(await input.file.text());
     // PDF / DOCX : exemple de démonstration
     const demo = buildDemoProject();
     return {

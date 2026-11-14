@@ -6,7 +6,15 @@
  */
 import { addMinutes, format, formatISO, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import type { Location, Project, Scene, ScheduleConflict, ScheduledScene, ShootingDay, WeatherDay } from '@/api/types';
+import type {
+  Location,
+  Project,
+  Scene,
+  ScheduleConflict,
+  ScheduledScene,
+  ShootingDay,
+  WeatherDay,
+} from '@/api/types';
 import { sunInfo, TUNIS } from '@/lib/sun';
 
 export const RAIN_THRESHOLD_PCT = 40;
@@ -61,14 +69,18 @@ export function weekdayFr(dateIso: string): string {
 export function isForbiddenDay(location: Location | undefined, dateIso: string): boolean {
   if (!location) return false;
   const wd = weekdayFr(dateIso);
-  return location.forbidden_days.some((f) => f.trim().toLowerCase() === dateIso || f.trim().toLowerCase() === wd);
+  return location.forbidden_days.some(
+    (f) => f.trim().toLowerCase() === dateIso || f.trim().toLowerCase() === wd,
+  );
 }
 
 /** Météo dont la prévision est connue : les trois valeurs sont non nulles. */
 export type KnownWeatherDay = WeatherDay & { rain_pct: number; wind_kmh: number; cloud_pct: number };
 
 export function isWeatherKnown(w: WeatherDay | undefined): w is KnownWeatherDay {
-  return !!w && w.forecast === 'prevision' && w.rain_pct !== null && w.wind_kmh !== null && w.cloud_pct !== null;
+  return (
+    !!w && w.forecast === 'prevision' && w.rain_pct !== null && w.wind_kmh !== null && w.cloud_pct !== null
+  );
 }
 export function isRainy(w: WeatherDay | undefined): boolean {
   return isWeatherKnown(w) && w.rain_pct >= RAIN_THRESHOLD_PCT;
@@ -131,14 +143,21 @@ export function sceneConflicts(args: {
       });
     } else {
       if (isRainy(weather))
-        out.push({ kind: 'pluie', message: `Pluie prévue (${weather.rain_pct} %) sur une scène extérieure.` });
-      if (isWindy(weather)) out.push({ kind: 'vent', message: `Vent fort prévu (${weather.wind_kmh} km/h).` });
+        out.push({
+          kind: 'pluie',
+          message: `Pluie prévue (${weather.rain_pct} %) sur une scène extérieure.`,
+        });
+      if (isWindy(weather))
+        out.push({ kind: 'vent', message: `Vent fort prévu (${weather.wind_kmh} km/h).` });
     }
   }
 
   if (location) {
     if (isForbiddenDay(location, dateIso)) {
-      out.push({ kind: 'lieu_ferme', message: `${location.name} n'est pas accessible ce jour-là (${weekdayFr(dateIso)}).` });
+      out.push({
+        kind: 'lieu_ferme',
+        message: `${location.name} n'est pas accessible ce jour-là (${weekdayFr(dateIso)}).`,
+      });
     } else if (location.access_hours) {
       const from = atTime(dateIso, location.access_hours.from);
       const to = atTime(dateIso, location.access_hours.to);
@@ -253,7 +272,10 @@ function round1(n: number): number {
 }
 
 /** Total des conflits d'un planning, par type. */
-export function countConflicts(days: ShootingDay[]): { total: number; byKind: Partial<Record<ScheduleConflict['kind'], number>> } {
+export function countConflicts(days: ShootingDay[]): {
+  total: number;
+  byKind: Partial<Record<ScheduleConflict['kind'], number>>;
+} {
   const byKind: Partial<Record<ScheduleConflict['kind'], number>> = {};
   let total = 0;
   for (const d of days)

@@ -4,7 +4,14 @@
  * - au-delà : forecast = 'hors_horizon' et rain_pct / wind_kmh / cloud_pct = null (« Météo à revérifier »).
  * Lever / coucher / heure dorée : vrais calculs astronomiques (suncalc).
  */
-import { addDays, differenceInCalendarDays, eachDayOfInterval, formatISO, parseISO, startOfDay } from 'date-fns';
+import {
+  addDays,
+  differenceInCalendarDays,
+  eachDayOfInterval,
+  formatISO,
+  parseISO,
+  startOfDay,
+} from 'date-fns';
 import type { WeatherDay } from '@/api/types';
 import { isoDay } from '@/lib/format';
 import { sunInfo } from '@/lib/sun';

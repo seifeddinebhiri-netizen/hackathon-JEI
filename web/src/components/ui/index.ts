@@ -16,6 +16,7 @@ export * from './Perforations';
 export * from './PhotoFrame';
 export * from './FileDrop';
 export * from './Countdown';
+export * from './SegmentedControl';
 export * from './Dialog';
 export * from './Tooltip';
 export * from './Toast';

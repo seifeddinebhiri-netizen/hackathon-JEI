@@ -5,7 +5,12 @@ import { Icon } from './Icon';
 export function AiDraftBadge({ validated = false, className }: { validated?: boolean; className?: string }) {
   if (validated) {
     return (
-      <span className={cn('eyebrow inline-flex items-center gap-1.5 border border-ok-fg/30 bg-ok-bg px-2 py-1 text-ok-fg', className)}>
+      <span
+        className={cn(
+          'eyebrow inline-flex items-center gap-1.5 border border-ok-fg/30 bg-ok-bg px-2 py-1 text-ok-fg',
+          className,
+        )}
+      >
         <Icon name="check" size={14} />
         Validé par toi
       </span>

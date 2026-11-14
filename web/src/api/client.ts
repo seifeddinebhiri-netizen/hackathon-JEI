@@ -36,7 +36,7 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   non_autorise: 'Ta session a expiré. Reconnecte-toi.',
   interdit: "Tu n'as pas accès à cette ressource.",
   introuvable: 'Élément introuvable.',
-  conflit: "Ces données ont été modifiées ailleurs. Recharge la page.",
+  conflit: 'Ces données ont été modifiées ailleurs. Recharge la page.',
   trop_volumineux: 'Fichier trop volumineux.',
   invalide: 'Certaines informations envoyées ne sont pas valides.',
   serveur: 'Le serveur a rencontré un problème. Réessaie dans un instant.',
@@ -98,7 +98,10 @@ type RequestOptions<S extends z.ZodType> = {
   signal?: AbortSignal;
 };
 
-export async function request<S extends z.ZodType>(path: string, opts: RequestOptions<S>): Promise<z.output<S>> {
+export async function request<S extends z.ZodType>(
+  path: string,
+  opts: RequestOptions<S>,
+): Promise<z.output<S>> {
   const url = new URL(path.replace(/^\//, ''), env.apiUrl.endsWith('/') ? env.apiUrl : `${env.apiUrl}/`);
   for (const [k, v] of Object.entries(opts.query ?? {})) {
     if (v !== undefined && v !== '') url.searchParams.set(k, String(v));
@@ -134,7 +137,8 @@ export async function request<S extends z.ZodType>(path: string, opts: RequestOp
     let serverMessage: string | undefined;
     try {
       const j = (await res.json()) as { message?: string; detail?: string };
-      serverMessage = typeof j.message === 'string' ? j.message : typeof j.detail === 'string' ? j.detail : undefined;
+      serverMessage =
+        typeof j.message === 'string' ? j.message : typeof j.detail === 'string' ? j.detail : undefined;
     } catch {
       /* corps vide ou non JSON */
     }

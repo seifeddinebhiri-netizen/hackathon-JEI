@@ -26,7 +26,12 @@ function examplePassport(): Passport {
     verify_url: `${env.publicAppUrl}/verifier/exemple`,
     updated_at: '2026-10-01T10:00:00+01:00',
     declarations: [
-      { department: 'scenario', used_ai: false, what: '', human_decisions: 'Écrit entièrement par la réalisatrice.' },
+      {
+        department: 'scenario',
+        used_ai: false,
+        what: '',
+        human_decisions: 'Écrit entièrement par la réalisatrice.',
+      },
       { department: 'image', used_ai: false, what: '', human_decisions: '' },
       {
         department: 'montage',

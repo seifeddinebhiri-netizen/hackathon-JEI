@@ -9,6 +9,8 @@ export type AuthContextValue = {
   signIn: (email: string, password: string) => Promise<void>;
   signInDemo: () => Promise<void>;
   signOut: () => Promise<void>;
+  /** Change le projet courant (ex. après « Nouveau film »). Avec Supabase : profil utilisateur. */
+  setCurrentProject: (projectId: string) => void;
 };
 
 export const AuthContext = createContext<AuthContextValue | null>(null);

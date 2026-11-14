@@ -26,7 +26,11 @@ export function Stepper({
               <span
                 className={cn(
                   'grid size-7 shrink-0 place-items-center border-2 font-mono text-label',
-                  active ? 'border-ink bg-gold text-ink' : s.done ? 'border-paper bg-ink text-paper' : 'border-ink',
+                  active
+                    ? 'border-ink bg-gold text-ink'
+                    : s.done
+                      ? 'border-paper bg-ink text-paper'
+                      : 'border-ink',
                 )}
               >
                 {s.done && !active ? <Icon name="check" size={14} /> : i + 1}
@@ -43,7 +47,11 @@ export function Stepper({
           return (
             <li key={s.id} className="flex-1" aria-current={active ? 'step' : undefined}>
               {onSelect ? (
-                <button type="button" className={cn(cls, !active && 'hover:bg-gold-soft')} onClick={() => onSelect(i)}>
+                <button
+                  type="button"
+                  className={cn(cls, !active && 'hover:bg-gold-soft')}
+                  onClick={() => onSelect(i)}
+                >
                   {inner}
                 </button>
               ) : (

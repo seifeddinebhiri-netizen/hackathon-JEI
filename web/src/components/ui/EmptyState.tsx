@@ -16,7 +16,12 @@ export function EmptyState({
   className?: string;
 }) {
   return (
-    <div className={cn('flex flex-col items-start gap-4 border-2 border-dashed border-ink/40 bg-white p-6 md:p-10', className)}>
+    <div
+      className={cn(
+        'flex flex-col items-start gap-4 border-2 border-dashed border-ink/40 bg-white p-6 md:p-10',
+        className,
+      )}
+    >
       <span className="grid size-12 place-items-center bg-gold text-ink">
         <Icon name={icon} size={24} />
       </span>

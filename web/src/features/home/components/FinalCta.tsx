@@ -15,7 +15,13 @@ export function FinalCta() {
             Ouvre le projet de démonstration ou crée le tien : planning, Passeport IA et Kit Festival.
           </p>
         </div>
-        <ButtonLink to={user ? '/projet' : '/connexion'} variant="secondary" size="lg" iconRight="arrowRight" className="shrink-0">
+        <ButtonLink
+          to={user ? '/projet' : '/connexion'}
+          variant="secondary"
+          size="lg"
+          iconRight="arrowRight"
+          className="shrink-0"
+        >
           {user ? 'Ouvrir mon projet' : 'Commencer mon projet'}
         </ButtonLink>
       </div>

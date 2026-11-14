@@ -36,8 +36,32 @@
 | `getSynopsisFeedback` | POST `/synopsis/feedback` | Questions du coach | confirmé |
 | `getPublicFilm` | GET `/films/{id}/public` | Page film publique | à confirmer |
 | — | POST `/shot-spec` | Coach (conseils de prise de vue) | **futur**, non utilisé |
+| — | GET `/projects/{id}/days/{date}/public` | Feuille de service partageable sans compte (lien à jeton) | **futur** : pour l'instant « Copier le lien » ne fonctionne que pour les membres connectés |
 
-## Algorithme de planning
+## Algorithme de planning (référence : `src/api/mocks/scheduler.ts`)
 
-Décrit en tête de `src/api/mocks/scheduler.ts` (référence pour le backend) ; règles partagées dans
-`src/features/planner/lib/rules.ts`.
+Entrée : le projet (scènes, lieux, période, heures max par jour) et la météo de chaque jour.
+Sortie : un `Schedule` au statut `brouillon_ia`.
+
+1. Grouper les scènes par lieu ; les groupes avec le plus de scènes EXT passent en premier.
+2. Pour chaque scène (EXT avant INT), noter chaque jour de la période :
+   - éliminé si le lieu est interdit ce jour-là (`forbidden_days` : date ISO ou jour de semaine en français) ;
+   - éliminé si la somme des durées dépasse `max_hours_per_day` ;
+   - éliminé si l'horaire imposé par le soleil (aube, heure dorée, nuit) sort des horaires d'accès du lieu,
+     ou si une autre scène occupe déjà ce moment ;
+   - 1er passage : éliminé si EXT et pluie ≥ 40 % ou vent ≥ 40 km/h, ou si la journée devient trop longue ;
+   - bonus si le jour accueille déjà ce lieu (regroupement), malus s'il accueille un autre lieu ;
+   - EXT : bonus si la prévision est connue et sèche ; INT : bonus si le jour est pluvieux ;
+   - léger bonus aux jours les plus tôt.
+3. Sans jour possible : 2e passage sans les filtres météo et amplitude (conflit signalé) ;
+   sinon la scène va dans `unplaced` avec la raison.
+4. Mise en page d'une journée (`layoutDay`, `src/features/planner/lib/rules.ts`) :
+   aube / heure dorée / nuit calées sur le soleil (suncalc), scènes « jour » à la suite dès 08:00
+   (ou l'ouverture du lieu) avec 30 min de battement, rendez-vous 1 h avant la 1re scène.
+5. Conflits par scène : `pluie`, `vent`, `lieu_ferme`, `jour_trop_long`, `autorisation_manquante`,
+   `meteo_a_reverifier` (EXT au-delà de 14 jours : la météo n'est pas inventée).
+6. Note de repli (`backup_note`) quand un jour avec des scènes EXT a une météo incertaine.
+
+Le front réutilise `layoutDay` pour recalculer horaires et conflits après chaque déplacement manuel,
+puis enregistre le planning avec `PATCH /projects/{id}` (`schedule`). Si le backend applique d'autres
+règles, il doit renvoyer un `Schedule` de même forme. La disponibilité des acteurs n'est pas prise en compte.

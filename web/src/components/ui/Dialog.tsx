@@ -30,7 +30,10 @@ export function DialogContent({
       >
         <div className="flex items-start justify-between gap-4">
           <RDialog.Title className="font-display text-h3 font-bold">{title}</RDialog.Title>
-          <RDialog.Close className="grid size-11 shrink-0 place-items-center hover:bg-ink/5" aria-label="Fermer">
+          <RDialog.Close
+            className="grid size-11 shrink-0 place-items-center hover:bg-ink/5"
+            aria-label="Fermer"
+          >
             <Icon name="x" />
           </RDialog.Close>
         </div>

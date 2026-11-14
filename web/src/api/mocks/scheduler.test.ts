@@ -50,7 +50,10 @@ describe('mockSchedule', () => {
   it('respecte le maximum d’heures par jour', () => {
     const { p, s } = run();
     for (const d of s.days) {
-      const h = d.scenes.reduce((n, x) => n + p.scenes.find((sc) => sc.id === x.scene_id)!.estimated_hours, 0);
+      const h = d.scenes.reduce(
+        (n, x) => n + p.scenes.find((sc) => sc.id === x.scene_id)!.estimated_hours,
+        0,
+      );
       expect(h).toBeLessThanOrEqual(p.max_hours_per_day);
     }
   });
@@ -71,7 +74,12 @@ describe('parseScreenplayText', () => {
       ].join('\n'),
     );
     expect(r.scenes).toHaveLength(2);
-    expect(r.scenes[0]).toMatchObject({ setting: 'INT', moment: 'jour', validated: false, source: 'import_ia' });
+    expect(r.scenes[0]).toMatchObject({
+      setting: 'INT',
+      moment: 'jour',
+      validated: false,
+      source: 'import_ia',
+    });
     expect(r.scenes[1]).toMatchObject({ setting: 'EXT', moment: 'heure_doree' });
     expect(r.characters).toContain('Mounir');
     expect(r.locations.map((l) => l.name)).toEqual(['Café', 'Plage']);

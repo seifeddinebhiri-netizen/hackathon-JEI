@@ -68,7 +68,8 @@ export function FileDrop({
         <Icon name={file ? 'doc' : 'upload'} size={32} />
         {file ? (
           <p className="font-semibold">
-            {file.name} <span className="font-normal text-muted-on-light">({Math.ceil(file.size / 1024)} Ko)</span>
+            {file.name}{' '}
+            <span className="font-normal text-muted-on-light">({Math.ceil(file.size / 1024)} Ko)</span>
           </p>
         ) : (
           <p className="font-semibold">{label}</p>
@@ -109,7 +110,11 @@ export function FileDrop({
         />
       </div>
       {err ? (
-        <p id={`${id}-err`} role="alert" className="mt-2 flex items-center gap-1.5 text-meta font-semibold text-bad-fg">
+        <p
+          id={`${id}-err`}
+          role="alert"
+          className="mt-2 flex items-center gap-1.5 text-meta font-semibold text-bad-fg"
+        >
           <Icon name="alert" size={14} />
           {err}
         </p>

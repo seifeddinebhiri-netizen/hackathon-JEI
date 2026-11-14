@@ -53,7 +53,12 @@ export function AiLabel({
       className={cn('border-[3px] border-ink bg-white text-ink', compact ? 'p-3' : 'p-4 md:p-5', className)}
     >
       <header className="border-b-[10px] border-ink pb-2">
-        <p className={cn('font-display leading-none font-bold tracking-tight', compact ? 'text-[26px]' : 'text-[36px]')}>
+        <p
+          className={cn(
+            'font-display leading-none font-bold tracking-tight',
+            compact ? 'text-[26px]' : 'text-[36px]',
+          )}
+        >
           Étiquette IA
         </p>
         <p className="mt-1 text-meta">
@@ -79,8 +84,13 @@ export function AiLabel({
           const d = declarations.find((x) => x.department === dep);
           const c = classify(d);
           return (
-            <li key={dep} className={cn('flex items-center justify-between gap-3', compact ? 'py-1' : 'py-1.5')}>
-              <span className={cn('font-semibold', compact ? 'text-meta' : 'text-body')}>{DEPARTMENT_LABELS[dep]}</span>
+            <li
+              key={dep}
+              className={cn('flex items-center justify-between gap-3', compact ? 'py-1' : 'py-1.5')}
+            >
+              <span className={cn('font-semibold', compact ? 'text-meta' : 'text-body')}>
+                {DEPARTMENT_LABELS[dep]}
+              </span>
               <span className="flex items-center gap-1.5 text-right text-meta">
                 {c ? (
                   <>

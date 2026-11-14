@@ -5,7 +5,15 @@ export function Skeleton({ className }: { className?: string }) {
 }
 
 /** Bloc de chargement accessible : annonce « Chargement » aux lecteurs d'écran. */
-export function LoadingBlock({ label = 'Chargement…', lines = 3, className }: { label?: string; lines?: number; className?: string }) {
+export function LoadingBlock({
+  label = 'Chargement…',
+  lines = 3,
+  className,
+}: {
+  label?: string;
+  lines?: number;
+  className?: string;
+}) {
   return (
     <div role="status" aria-live="polite" className={cn('flex flex-col gap-3', className)}>
       <span className="sr-only">{label}</span>

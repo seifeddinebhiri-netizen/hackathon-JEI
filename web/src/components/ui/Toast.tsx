@@ -3,9 +3,9 @@ import { useCallback, useMemo, useState, type ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 import { Icon } from './Icon';
 
-import { ToastContext as Ctx, type ToastApi, type ToastTone } from './toast-context';
+import { ToastContext as Ctx, type ToastApi, type ToastInput, type ToastTone } from './toast-context';
 
-type ToastItem = { id: number; title: string; description?: string; tone: ToastTone };
+type ToastItem = ToastInput & { id: number; tone: ToastTone };
 
 const tones: Record<ToastTone, string> = {
   ok: 'border-ok-fg bg-ok-bg text-ok-fg',
@@ -17,7 +17,7 @@ const icons = { ok: 'check', bad: 'alert', info: 'info' } as const;
 export function Toaster({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<ToastItem[]>([]);
   const toast = useCallback<ToastApi['toast']>((t) => {
-    setItems((xs) => [...xs, { id: Date.now() + Math.random(), tone: t.tone ?? 'info', title: t.title, description: t.description }]);
+    setItems((xs) => [...xs, { ...t, id: Date.now() + Math.random(), tone: t.tone ?? 'info' }]);
   }, []);
   const api = useMemo(() => ({ toast }), [toast]);
   return (
@@ -27,16 +27,27 @@ export function Toaster({ children }: { children: ReactNode }) {
         {items.map((t) => (
           <RToast.Root
             key={t.id}
-            duration={5000}
+            duration={t.duration ?? 5000}
             onOpenChange={(open) => !open && setItems((xs) => xs.filter((x) => x.id !== t.id))}
-            className={cn('flex items-start gap-3 border-2 p-4 shadow-hard-sm', tones[t.tone])}
+            className={cn('flex items-center gap-3 border-2 p-4 shadow-hard-sm', tones[t.tone])}
           >
             <Icon name={icons[t.tone]} className="mt-0.5 shrink-0" />
             <div className="flex-1">
               <RToast.Title className="font-semibold">{t.title}</RToast.Title>
-              {t.description ? <RToast.Description className="text-meta">{t.description}</RToast.Description> : null}
+              {t.description ? (
+                <RToast.Description className="text-meta">{t.description}</RToast.Description>
+              ) : null}
             </div>
-            <RToast.Close aria-label="Fermer" className="grid size-8 place-items-center">
+            {t.action ? (
+              <RToast.Action
+                altText={t.action.label}
+                onClick={t.action.onClick}
+                className="min-h-11 shrink-0 border-2 border-current px-3 font-semibold hover:bg-ink/5"
+              >
+                {t.action.label}
+              </RToast.Action>
+            ) : null}
+            <RToast.Close aria-label="Fermer" className="grid size-11 shrink-0 place-items-center">
               <Icon name="x" size={16} />
             </RToast.Close>
           </RToast.Root>

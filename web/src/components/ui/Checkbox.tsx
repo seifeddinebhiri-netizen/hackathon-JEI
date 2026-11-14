@@ -38,7 +38,10 @@ export function Checkbox({
         </RCheckbox.Indicator>
       </RCheckbox.Root>
       <div>
-        <label htmlFor={id} className={cn('cursor-pointer', disabled && 'cursor-not-allowed text-muted-on-light')}>
+        <label
+          htmlFor={id}
+          className={cn('cursor-pointer', disabled && 'cursor-not-allowed text-muted-on-light')}
+        >
           {label}
         </label>
         {hint ? (

@@ -39,10 +39,9 @@ export function sunInfo(date: Date, lat: number = TUNIS.lat, lon: number = TUNIS
 
 /** Azimut du soleil en degrés (0 = nord, 90 = est) et hauteur en degrés. */
 export function sunPosition(at: Date, lat: number = TUNIS.lat, lon: number = TUNIS.lon) {
+  // suncalc v2 renvoie déjà des degrés, azimut compté depuis le nord dans le sens horaire.
   const p = SunCalc.getPosition(at, lat, lon);
-  const azimuth = ((p.azimuth * 180) / Math.PI + 180 + 360) % 360;
-  const altitude = (p.altitude * 180) / Math.PI;
-  return { azimuth, altitude };
+  return { azimuth: ((p.azimuth % 360) + 360) % 360, altitude: p.altitude };
 }
 
 const DIRECTIONS = ['nord', 'nord-est', 'est', 'sud-est', 'sud', 'sud-ouest', 'ouest', 'nord-ouest'];

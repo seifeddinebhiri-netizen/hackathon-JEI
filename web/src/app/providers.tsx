@@ -12,7 +12,10 @@ function makeClient() {
         refetchOnWindowFocus: false,
         // On ne réessaie pas les erreurs « métier » (4xx, réponse invalide)
         retry: (count, error) => {
-          if (isApiError(error) && ((error.status >= 400 && error.status < 500) || error.code === 'reponse_invalide'))
+          if (
+            isApiError(error) &&
+            ((error.status >= 400 && error.status < 500) || error.code === 'reponse_invalide')
+          )
             return false;
           return count < 1;
         },

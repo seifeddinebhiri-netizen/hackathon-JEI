@@ -9,10 +9,16 @@ export function PublicNav() {
       <div className="container-pp flex min-h-16 items-center justify-between gap-4">
         <Logo />
         <nav aria-label="Navigation principale" className="flex items-center gap-1 md:gap-4">
-          <a href="/#etapes" className="hidden min-h-11 items-center px-2 text-meta hover:underline md:inline-flex">
+          <a
+            href="/#etapes"
+            className="hidden min-h-11 items-center px-2 text-meta hover:underline md:inline-flex"
+          >
             Comment ça marche
           </a>
-          <a href="/#ethique" className="hidden min-h-11 items-center px-2 text-meta hover:underline md:inline-flex">
+          <a
+            href="/#ethique"
+            className="hidden min-h-11 items-center px-2 text-meta hover:underline md:inline-flex"
+          >
             Éthique
           </a>
           {user ? (

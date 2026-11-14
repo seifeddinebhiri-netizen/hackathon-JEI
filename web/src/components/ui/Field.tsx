@@ -45,13 +45,25 @@ export function Field({
   const errId = `${id}-erreur`;
   const describedBy = [hint ? hintId : null, error ? errId : null].filter(Boolean).join(' ') || undefined;
   const child = isValidElement(children)
-    ? cloneElement(children, { id: children.props.id ?? id, 'aria-describedby': describedBy, 'aria-invalid': !!error || undefined })
+    ? cloneElement(children, {
+        id: children.props.id ?? id,
+        'aria-describedby': describedBy,
+        'aria-invalid': !!error || undefined,
+      })
     : children;
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
-      <label htmlFor={(isValidElement(children) && children.props.id) || id} className="text-meta font-semibold text-ink">
+      <label
+        htmlFor={(isValidElement(children) && children.props.id) || id}
+        className="text-meta font-semibold text-ink"
+      >
         {label}
-        {required ? <span aria-hidden className="text-action"> *</span> : null}
+        {required ? (
+          <span aria-hidden className="text-action">
+            {' '}
+            *
+          </span>
+        ) : null}
         {optional ? <span className="font-normal text-muted-on-light"> (facultatif)</span> : null}
       </label>
       {child}
@@ -77,12 +89,18 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
   return <input ref={ref} className={cn(control, className)} {...rest} />;
 });
 
-export const TextArea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<HTMLTextAreaElement>>(function TextArea(
-  { className, rows = 4, ...rest },
-  ref,
-) {
-  return <textarea ref={ref} rows={rows} className={cn(control, 'resize-y leading-relaxed', className)} {...rest} />;
-});
+export const TextArea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<HTMLTextAreaElement>>(
+  function TextArea({ className, rows = 4, ...rest }, ref) {
+    return (
+      <textarea
+        ref={ref}
+        rows={rows}
+        className={cn(control, 'resize-y leading-relaxed', className)}
+        {...rest}
+      />
+    );
+  },
+);
 
 export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSelectElement>>(function Select(
   { className, children, ...rest },
@@ -107,7 +125,10 @@ export function CharCount({ value, limit }: { value: string; limit?: number }) {
   const n = value.length;
   const over = limit !== undefined && n > limit;
   return (
-    <p className={cn('eyebrow flex items-center gap-1.5', over ? 'text-bad-fg' : 'text-muted-on-light')} aria-live="polite">
+    <p
+      className={cn('eyebrow flex items-center gap-1.5', over ? 'text-bad-fg' : 'text-muted-on-light')}
+      aria-live="polite"
+    >
       {over ? <Icon name="alert" size={14} /> : null}
       {n}
       {limit !== undefined ? ` / ${limit}` : ''} caractères{over ? ' : trop long' : ''}

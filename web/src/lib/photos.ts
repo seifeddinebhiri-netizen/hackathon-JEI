@@ -35,7 +35,8 @@ export const PHOTOS = {
     alt: 'Ruelle pavée bordée de murs blancs et de portes bleues, près de Carthage',
     author: 'Alex Vasey',
     authorUrl: `https://unsplash.com/@alexrvasey${UTM}`,
-    photoUrl: 'https://unsplash.com/photos/a-narrow-cobblestone-street-lined-with-white-buildings-cnuXEBrW-6U',
+    photoUrl:
+      'https://unsplash.com/photos/a-narrow-cobblestone-street-lined-with-white-buildings-cnuXEBrW-6U',
     position: '50% 60%',
     usage: 'Accueil (bande photo), page film de démo',
   },
@@ -53,7 +54,8 @@ export const PHOTOS = {
     alt: 'Faisceaux d’un projecteur au-dessus des fauteuils rouges d’une salle de cinéma sombre',
     author: 'Rafi Mohammed',
     authorUrl: `https://unsplash.com/@iamrafimohammed${UTM}`,
-    photoUrl: 'https://unsplash.com/photos/projector-light-beams-illuminate-an-empty-cinema-auditorium-L70rE9UChmI',
+    photoUrl:
+      'https://unsplash.com/photos/projector-light-beams-illuminate-an-empty-cinema-auditorium-L70rE9UChmI',
     position: '50% 40%',
     usage: 'Accueil (bande photo)',
   },
@@ -80,7 +82,8 @@ export const PHOTOS = {
     alt: 'Drapeaux tunisiens tendus au-dessus d’une avenue de Tunis',
     author: 'Carnet de Voyage d’Alex',
     authorUrl: `https://unsplash.com/@alexisribeyrecarnetdevoyage${UTM}`,
-    photoUrl: 'https://unsplash.com/photos/red-flags-strung-across-a-city-street-with-modern-buildings-XNFi52ZR0jg',
+    photoUrl:
+      'https://unsplash.com/photos/red-flags-strung-across-a-city-street-with-modern-buildings-XNFi52ZR0jg',
     position: '50% 30%',
     usage: 'Planner (lieux)',
   },
@@ -89,7 +92,8 @@ export const PHOTOS = {
     alt: 'Terrasses blanches et bleues face à la mer et au port, à Carthage',
     author: 'Tina Boujemil',
     authorUrl: `https://unsplash.com/@sidibeau${UTM}`,
-    photoUrl: 'https://unsplash.com/photos/people-on-beach-near-white-concrete-building-during-daytime-TX-9Ze-9nk8',
+    photoUrl:
+      'https://unsplash.com/photos/people-on-beach-near-white-concrete-building-during-daytime-TX-9Ze-9nk8',
     position: '60% 50%',
     usage: 'Page film de démo',
   },
@@ -108,5 +112,7 @@ export function photoSources(p: Photo) {
 
 /** Retrouve une photo du registre à partir d'une URL (ex. les `stills` d'un film). */
 export function photoFromUrl(url: string): Photo | undefined {
-  return Object.values(PHOTOS).find((p) => url.startsWith(`/photos/${p.file}.`) || url === `/photos/${p.file}`);
+  return Object.values(PHOTOS).find(
+    (p) => url.startsWith(`/photos/${p.file}.`) || url === `/photos/${p.file}`,
+  );
 }

@@ -12,7 +12,11 @@ export function Countdown({ date, className }: { date: string; className?: strin
     <span
       className={cn(
         'inline-flex items-center gap-1.5 border-2 px-2 py-1 font-mono text-label font-medium uppercase',
-        past ? 'border-line-light text-muted-on-light' : urgent ? 'border-bad-fg bg-bad-bg text-bad-fg' : 'border-ink',
+        past
+          ? 'border-line-light text-muted-on-light'
+          : urgent
+            ? 'border-bad-fg bg-bad-bg text-bad-fg'
+            : 'border-ink',
         className,
       )}
       title={formatDate(date)}
