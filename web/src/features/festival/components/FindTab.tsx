@@ -62,15 +62,13 @@ function FilmProfileBand({
         <Field label="Genre">
           <Input value={profile.genre} onChange={(e) => onChange({ ...profile, genre: e.target.value })} />
         </Field>
-        <Field label="Départements avec IA" hint="Depuis ton Passeport IA">
-          <Input
-            type="number"
-            min={0}
-            max={8}
-            value={profile.declared_ai_departments}
-            onChange={(e) => onChange({ ...profile, declared_ai_departments: Number(e.target.value) || 0 })}
-          />
-        </Field>
+        <div className="flex flex-col gap-1.5">
+          <p className="text-meta font-semibold text-paper">Départements avec IA</p>
+          <p className="flex min-h-11 items-center font-display text-h3 font-bold text-paper">
+            {profile.declared_ai_departments}/8
+          </p>
+          <p className="text-meta">Depuis ton Passeport IA</p>
+        </div>
       </div>
     </section>
   );

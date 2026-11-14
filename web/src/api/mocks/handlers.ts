@@ -20,7 +20,6 @@ import { getDb, persist, uid } from './db';
 import { mockParseScreenplay } from './parser';
 import { mockSchedule } from './scheduler';
 import { mockWeatherDay, mockWeatherRange } from './weather';
-import { EMPTY_FILM_PAGE, EMPTY_SYNOPSIS, readLocal } from '@/features/festival/lib/localStore';
 import { anchoredSlot, atTime, isRainy, isWeatherKnown, isWindy } from '@/features/planner/lib/rules';
 import { TUNIS } from '@/lib/sun';
 
@@ -479,9 +478,8 @@ export const mockApi: Api = {
       const p = db.projects[id];
       if (!p) throw apiError('introuvable', 404, 'Film introuvable.');
       const pass = Object.values(db.passports).find((x) => x.project_id === id);
-      // Mock : reprend les brouillons du Kit Festival gardés dans le navigateur (endpoint à confirmer)
-      const syn = readLocal('synopsis', id, EMPTY_SYNOPSIS);
-      const page = readLocal('film-page', id, EMPTY_FILM_PAGE);
+      const syn = p.synopsis ?? { phrase: '', court: '', long: '' };
+      const page = p.film_page ?? { stills: [] };
       return {
         id,
         title: p.title,
@@ -492,7 +490,7 @@ export const mockApi: Api = {
         credits: p.people
           .filter((x) => x.name.trim())
           .map((x) => ({ role: x.kind === 'acteur' ? (x.character ?? 'Rôle') : x.role, name: x.name })),
-        trailer_url: page.trailer_url || undefined,
+        trailer_url: page.trailer_url,
         passport_badge_code: pass?.badge_code,
         verify_url: pass?.verify_url,
       };

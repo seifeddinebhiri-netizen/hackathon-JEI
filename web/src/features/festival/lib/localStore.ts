@@ -1,57 +1,77 @@
 /**
- * Données du Kit Festival que le contrat d'API ne prévoit pas encore (profil du film, synopsis,
- * contenu éditable de la page film). Gardées dans le navigateur, par projet, en attendant un
- * endpoint (voir docs/API_CONTRACT.md, « à confirmer »).
+ * Champs du Kit Festival enregistrés dans le projet (film_profile, synopsis, film_page) via
+ * PATCH /projects/{id}. Le navigateur garde une copie (même forme) qui sert de CACHE :
+ * affichage immédiat, et filet de sécurité si l'enregistrement échoue.
  */
 import { useCallback, useState } from 'react';
-import type { FilmProfile } from '@/api/types';
+import type { FilmPageContent, Project, ProjectFilmProfile, SynopsisTexts } from '@/api/types';
+import { useAutosave } from '@/features/planner/hooks/useAutosave';
+import { useOptimisticProjectUpdate } from '@/features/planner/hooks/usePlanner';
 
-export type SynopsisDraft = { phrase: string; court: string; long: string };
-export type FilmPageDraft = { trailer_url: string; stills: string[] };
+type SyncedField = 'film_profile' | 'synopsis' | 'film_page';
+type FieldValue<K extends SyncedField> = NonNullable<Project[K]>;
 
-const key = (kind: string, projectId: string) => `pp-${kind}-${projectId}`;
+const cacheKey = (field: SyncedField, projectId: string) => `pp-cache-${field}-${projectId}`;
 
-export function readLocal<T>(kind: string, projectId: string, fallback: T): T {
+export function readCache<T>(field: SyncedField, projectId: string): T | undefined {
   try {
-    const raw = localStorage.getItem(key(kind, projectId));
-    return raw ? { ...fallback, ...(JSON.parse(raw) as T) } : fallback;
+    const raw = localStorage.getItem(cacheKey(field, projectId));
+    return raw ? (JSON.parse(raw) as T) : undefined;
   } catch {
-    return fallback;
+    return undefined;
   }
 }
 
-function writeLocal<T>(kind: string, projectId: string, value: T): void {
+function writeCache(field: SyncedField, projectId: string, value: unknown): void {
   try {
-    localStorage.setItem(key(kind, projectId), JSON.stringify(value));
+    localStorage.setItem(cacheKey(field, projectId), JSON.stringify(value));
   } catch {
-    /* stockage indisponible : la valeur reste en mémoire */
+    /* stockage indisponible */
   }
 }
 
-export function useLocalDraft<T>(kind: string, projectId: string, fallback: T) {
-  const [value, setValue] = useState<T>(() => readLocal(kind, projectId, fallback));
+export function clearProjectCache(projectId: string): void {
+  for (const f of ['film_profile', 'synopsis', 'film_page'] as const) {
+    try {
+      localStorage.removeItem(cacheKey(f, projectId));
+    } catch {
+      /* rien */
+    }
+  }
+}
+
+/** Valeur actuelle d'un champ (projet → cache → défaut), en lecture seule. */
+export function projectField<K extends SyncedField>(
+  project: Project,
+  field: K,
+  fallback: FieldValue<K>,
+): FieldValue<K> {
+  return (
+    (project[field] as FieldValue<K> | undefined) ?? readCache<FieldValue<K>>(field, project.id) ?? fallback
+  );
+}
+
+/** Champ modifiable, enregistré automatiquement dans le projet. */
+export function useProjectField<K extends SyncedField>(project: Project, field: K, fallback: FieldValue<K>) {
+  const [value, setValue] = useState<FieldValue<K>>(() => projectField(project, field, fallback));
+  const update = useOptimisticProjectUpdate(project.id);
+  const autosave = useAutosave(value, (v) => update.mutateAsync({ [field]: v }));
   const set = useCallback(
-    (next: T | ((v: T) => T)) =>
+    (next: FieldValue<K> | ((v: FieldValue<K>) => FieldValue<K>)) =>
       setValue((prev) => {
-        const v = typeof next === 'function' ? (next as (v: T) => T)(prev) : next;
-        writeLocal(kind, projectId, v);
+        const v = typeof next === 'function' ? (next as (v: FieldValue<K>) => FieldValue<K>)(prev) : next;
+        writeCache(field, project.id, v);
         return v;
       }),
-    [kind, projectId],
+    [field, project.id],
   );
-  return [value, set] as const;
+  return [value, set, autosave.state] as const;
 }
 
-export const EMPTY_SYNOPSIS: SynopsisDraft = { phrase: '', court: '', long: '' };
-export const EMPTY_FILM_PAGE: FilmPageDraft = {
-  trailer_url: '',
+export const EMPTY_SYNOPSIS: SynopsisTexts = { phrase: '', court: '', long: '' };
+export const EMPTY_FILM_PAGE: FilmPageContent = {
   stills: ['/photos/ruelle.jpg', '/photos/porte.jpg', '/photos/cote.jpg'],
 };
-export function defaultProfile(format: 'court' | 'long', aiDepartments: number): FilmProfile {
-  return {
-    duration_min: format === 'court' ? 15 : 90,
-    language: 'Derja (arabe tunisien)',
-    genre: 'Fiction',
-    declared_ai_departments: aiDepartments,
-  };
+export function defaultProfile(format: 'court' | 'long'): ProjectFilmProfile {
+  return { duration_min: format === 'court' ? 15 : 90, language: 'Derja (arabe tunisien)', genre: 'Fiction' };
 }

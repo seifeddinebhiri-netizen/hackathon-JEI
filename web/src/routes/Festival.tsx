@@ -14,7 +14,7 @@ import { FindTab } from '@/features/festival/components/FindTab';
 import { SelectionTab } from '@/features/festival/components/SelectionTab';
 import { SubtitlesTab } from '@/features/festival/components/SubtitlesTab';
 import { SynopsisTab } from '@/features/festival/components/SynopsisTab';
-import { defaultProfile, useLocalDraft } from '@/features/festival/lib/localStore';
+import { defaultProfile, useProjectField } from '@/features/festival/lib/localStore';
 import { useProjectPassport } from '@/features/passport/hooks/usePassport';
 import { useCurrentProject } from '@/features/project/hooks/useProject';
 
@@ -31,11 +31,11 @@ function Kit({ project, aiDepartments }: { project: Project; aiDepartments: numb
   const [params, setParams] = useSearchParams();
   const raw = params.get('onglet');
   const tab: TabValue = TABS.some((t) => t.value === raw) ? (raw as TabValue) : 'trouver';
-  const [profile, setProfile] = useLocalDraft<FilmProfile>(
-    'film-profile',
-    project.id,
-    defaultProfile(project.format, aiDepartments),
-  );
+  const [stored, setStored] = useProjectField(project, 'film_profile', defaultProfile(project.format));
+  // Le nombre de départements avec IA vient toujours du Passeport (non modifiable ici)
+  const profile: FilmProfile = { ...stored, declared_ai_departments: aiDepartments };
+  const setProfile = ({ duration_min, language, genre }: FilmProfile) =>
+    setStored({ duration_min, language, genre });
 
   return (
     <Tabs value={tab} onValueChange={(v) => setParams({ onglet: v }, { replace: true })}>

@@ -6,13 +6,7 @@ import { cn } from '@/lib/cn';
 import { env } from '@/lib/env';
 import { PHOTOS } from '@/lib/photos';
 import { copyToClipboard } from '@/lib/print';
-import {
-  EMPTY_FILM_PAGE,
-  EMPTY_SYNOPSIS,
-  useLocalDraft,
-  type FilmPageDraft,
-  type SynopsisDraft,
-} from '../lib/localStore';
+import { EMPTY_FILM_PAGE, EMPTY_SYNOPSIS, projectField, useProjectField } from '../lib/localStore';
 
 function Check({ ok, label, to }: { ok: boolean; label: string; to?: string }) {
   return (
@@ -42,8 +36,8 @@ function Check({ ok, label, to }: { ok: boolean; label: string; to?: string }) {
 }
 
 export function FilmPageTab({ project }: { project: Project }) {
-  const [page, setPage] = useLocalDraft<FilmPageDraft>('film-page', project.id, EMPTY_FILM_PAGE);
-  const [synopsis] = useLocalDraft<SynopsisDraft>('synopsis', project.id, EMPTY_SYNOPSIS);
+  const [page, setPage, saveState] = useProjectField(project, 'film_page', EMPTY_FILM_PAGE);
+  const synopsis = projectField(project, 'synopsis', EMPTY_SYNOPSIS);
   const passport = useProjectPassport(project.id);
   const { toast } = useToast();
   const url = `${env.publicAppUrl.replace(/\/$/, '')}/film/${project.id}`;
@@ -94,12 +88,18 @@ export function FilmPageTab({ project }: { project: Project }) {
         >
           <Input
             type="url"
-            value={page.trailer_url}
-            onChange={(e) => setPage((p) => ({ ...p, trailer_url: e.target.value.trim() }))}
+            value={page.trailer_url ?? ''}
+            onChange={(e) => setPage((p) => ({ ...p, trailer_url: e.target.value.trim() || undefined }))}
             placeholder="https://"
           />
         </Field>
-        <p className="text-meta text-muted-on-light">Brouillons enregistrés dans ce navigateur.</p>
+        <p role="status" className="text-meta text-muted-on-light">
+          {saveState === 'saving' || saveState === 'pending'
+            ? 'Enregistrement…'
+            : saveState === 'error'
+              ? 'Échec de l’enregistrement : une copie reste dans ce navigateur.'
+              : 'Enregistré automatiquement dans ton projet.'}
+        </p>
       </div>
 
       <aside className="lg:col-span-5">

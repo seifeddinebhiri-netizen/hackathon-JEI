@@ -134,6 +134,11 @@ export const projectSchema: z.ZodType<T.Project> = z.object({
   people: z.array(personSchema),
   schedule: scheduleSchema.optional(),
   festival_shortlist: z.array(shortlistItemSchema),
+  film_profile: z
+    .object({ duration_min: z.number().nonnegative(), language: z.string(), genre: z.string() })
+    .optional(),
+  synopsis: z.object({ phrase: z.string(), court: z.string(), long: z.string() }).optional(),
+  film_page: z.object({ stills: z.array(z.string()), trailer_url: z.string().optional() }).optional(),
 });
 
 export const quickSlotSchema: z.ZodType<T.QuickSlot> = z.object({

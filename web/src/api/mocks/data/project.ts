@@ -155,5 +155,6 @@ export function buildDemoProject(): Project {
       { id: 'p-8', kind: 'equipe', name: '[Nom]', role: 'Régie' },
     ],
     festival_shortlist: [],
+    film_page: { stills: ['/photos/ruelle.jpg', '/photos/porte.jpg', '/photos/cote.jpg'] },
   };
 }

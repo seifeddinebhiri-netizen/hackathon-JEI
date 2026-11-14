@@ -1,4 +1,5 @@
 import { Outlet, ScrollRestoration } from 'react-router';
+import { OfflineBanner } from '@/components/layout/OfflineBanner';
 
 export function RootLayout() {
   return (
@@ -9,6 +10,7 @@ export function RootLayout() {
       >
         Aller au contenu
       </a>
+      <OfflineBanner />
       <Outlet />
       <ScrollRestoration />
     </>

@@ -22,7 +22,16 @@ export type Project = {
   people: Person[];
   schedule?: Schedule;
   festival_shortlist: ShortlistItem[];
+  /** Kit Festival : profil du film (le nombre de départements IA est déduit du Passeport). */
+  film_profile?: ProjectFilmProfile;
+  /** Kit Festival : les trois synopsis, écrits par le réalisateur. */
+  synopsis?: SynopsisTexts;
+  /** Kit Festival : contenu éditable de la page film publique. */
+  film_page?: FilmPageContent;
 };
+export type ProjectFilmProfile = { duration_min: number; language: string; genre: string };
+export type SynopsisTexts = { phrase: string; court: string; long: string };
+export type FilmPageContent = { stills: string[]; trailer_url?: string };
 export type SceneMoment = 'jour' | 'nuit' | 'aube' | 'heure_doree';
 export type Scene = {
   id: string;
@@ -235,6 +244,9 @@ export type UpdateProjectInput = Partial<
     | 'people'
     | 'schedule'
     | 'festival_shortlist'
+    | 'film_profile'
+    | 'synopsis'
+    | 'film_page'
   >
 >;
 

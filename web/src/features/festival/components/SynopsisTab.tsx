@@ -1,7 +1,7 @@
 import type { Project, SynopsisKind } from '@/api/types';
 import { Button, CharCount, ErrorState, Field, Icon, StatusChip, TextArea } from '@/components/ui';
 import { useFestivalSearch, useSynopsisFeedback } from '../hooks/useFestivals';
-import { EMPTY_SYNOPSIS, useLocalDraft, type SynopsisDraft } from '../lib/localStore';
+import { EMPTY_SYNOPSIS, useProjectField } from '../lib/localStore';
 
 const VERSIONS: { kind: SynopsisKind; title: string; hint: string; rows: number; guide?: number }[] = [
   {
@@ -68,7 +68,7 @@ function Coach({ kind, text, limit }: { kind: SynopsisKind; text: string; limit?
 }
 
 export function SynopsisTab({ project }: { project: Project }) {
-  const [draft, setDraft] = useLocalDraft<SynopsisDraft>('synopsis', project.id, EMPTY_SYNOPSIS);
+  const [draft, setDraft, saveState] = useProjectField(project, 'synopsis', EMPTY_SYNOPSIS);
   const all = useFestivalSearch({}, project.festival_shortlist.length > 0);
   const ids = new Set(project.festival_shortlist.map((s) => s.festival_id));
   // Limites demandées par les festivals de la sélection
@@ -144,7 +144,15 @@ export function SynopsisTab({ project }: { project: Project }) {
           </section>
         );
       })}
-      <p className="text-meta text-muted-on-light">Brouillons enregistrés dans ce navigateur.</p>
+      <p role="status" className="text-meta text-muted-on-light">
+        {saveState === 'saving' || saveState === 'pending'
+          ? 'Enregistrement…'
+          : saveState === 'error'
+            ? 'Échec de l’enregistrement : une copie reste dans ce navigateur.'
+            : saveState === 'saved'
+              ? 'Enregistré dans ton projet.'
+              : 'Enregistré automatiquement dans ton projet.'}
+      </p>
     </div>
   );
 }
