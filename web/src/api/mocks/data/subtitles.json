@@ -1,0 +1,14 @@
+{
+  "project_id": "demo-maree-basse",
+  "source_lang": "derja",
+  "lines": [
+    { "id": "st-1", "start": "00:00:12,400", "end": "00:00:14,900", "source": "Sbe7 el khir ya khali.", "fr": "Bonjour, mon oncle.", "en": "Morning, uncle.", "confidence": "elevee", "validated": false },
+    { "id": "st-2", "start": "00:00:15,300", "end": "00:00:18,200", "source": "El 9ahwa mabi3a, Amira.", "fr": "Le café est vendu, Amira.", "en": "The café is sold, Amira.", "confidence": "elevee", "validated": false },
+    { "id": "st-3", "start": "00:00:19,000", "end": "00:00:21,600", "source": "Chnowa? Ba3etha?", "fr": "Quoi ? Tu l'as vendu ?", "en": "What? You sold it?", "confidence": "elevee", "validated": false },
+    { "id": "st-4", "start": "00:00:22,100", "end": "00:00:25,400", "source": "Ma3andich el 9alb nkamel.", "fr": "Je n'ai plus le cœur à continuer.", "en": "I don't have the heart to go on.", "confidence": "moyenne", "note": "« Ma3andich el 9alb » : littéralement « je n'ai pas le cœur ». Sens : courage, envie.", "validated": false },
+    { "id": "st-5", "start": "00:01:02,000", "end": "00:01:04,300", "source": "Yezzi ya Slim!", "fr": "Ça suffit, Slim !", "en": "Enough, Slim!", "confidence": "elevee", "validated": false },
+    { "id": "st-6", "start": "00:01:05,000", "end": "00:01:08,700", "source": "Enti dima t7ebi tkouni 3la 7a9.", "fr": "Tu veux toujours avoir raison.", "en": "You always want to be right.", "confidence": "moyenne", "validated": false },
+    { "id": "st-7", "start": "00:02:40,500", "end": "00:02:43,000", "source": "Rabbi yesahel.", "fr": "Que Dieu te facilite la route.", "en": "May God ease your way.", "confidence": "faible", "note": "Formule de politesse idiomatique. Selon le ton, « Bon courage » ou « Bonne route » peut être plus naturel.", "validated": false },
+    { "id": "st-8", "start": "00:02:44,000", "end": "00:02:46,800", "source": "Ya3tik essa7a, Nour.", "fr": "Merci, Nour.", "en": "Thank you, Nour.", "confidence": "faible", "note": "« Ya3tik essa7a » : littéralement « que Dieu te donne la santé ». Remerciement courant, nuance de reconnaissance pour un effort.", "validated": false }
+  ]
+}

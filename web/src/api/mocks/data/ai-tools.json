@@ -1,0 +1,83 @@
+[
+  {
+    "id": "tool-texte-a",
+    "name": "[Assistant d'écriture A]",
+    "provider": "[Fournisseur A]",
+    "status": "documente",
+    "note": "Le fournisseur publie la liste des sources d'entraînement et ses conditions de droits. [placeholder]",
+    "source_url": "https://fournisseur-a.exemple.invalid/transparence",
+    "checked_at": "2026-10-01"
+  },
+  {
+    "id": "tool-texte-b",
+    "name": "[Assistant d'écriture B]",
+    "provider": "[Fournisseur B]",
+    "status": "partiel",
+    "note": "Le fournisseur décrit les catégories de données sans liste détaillée. [placeholder]",
+    "source_url": "https://fournisseur-b.exemple.invalid/politique",
+    "checked_at": "2026-10-01"
+  },
+  {
+    "id": "tool-image-a",
+    "name": "[Générateur d'images A]",
+    "provider": "[Fournisseur C]",
+    "status": "non_divulgue",
+    "note": "Le fournisseur ne publie pas d'information sur ses données d'entraînement. [placeholder]",
+    "source_url": "https://fournisseur-c.exemple.invalid/",
+    "checked_at": "2026-10-01"
+  },
+  {
+    "id": "tool-image-b",
+    "name": "[Générateur d'images B]",
+    "provider": "[Fournisseur D]",
+    "status": "documente",
+    "note": "Entraîné sur des images sous licence, selon la documentation publique du fournisseur. [placeholder]",
+    "source_url": "https://fournisseur-d.exemple.invalid/licences",
+    "checked_at": "2026-10-01"
+  },
+  {
+    "id": "tool-montage-a",
+    "name": "[Logiciel de montage avec IA]",
+    "provider": "[Fournisseur E]",
+    "status": "partiel",
+    "note": "Fonctions IA documentées, origine des données partiellement décrite. [placeholder]",
+    "source_url": "https://fournisseur-e.exemple.invalid/ia",
+    "checked_at": "2026-10-01"
+  },
+  {
+    "id": "tool-voix-a",
+    "name": "[Outil de voix de synthèse]",
+    "provider": "[Fournisseur F]",
+    "status": "partiel",
+    "note": "Le fournisseur indique utiliser des voix sous contrat, sans détail public. [placeholder]",
+    "source_url": "https://fournisseur-f.exemple.invalid/voix",
+    "checked_at": "2026-10-01"
+  },
+  {
+    "id": "tool-son-a",
+    "name": "[Outil de nettoyage audio]",
+    "provider": "[Fournisseur G]",
+    "status": "documente",
+    "note": "Modèle de débruitage, données d'entraînement décrites publiquement. [placeholder]",
+    "source_url": "https://fournisseur-g.exemple.invalid/doc",
+    "checked_at": "2026-10-01"
+  },
+  {
+    "id": "tool-musique-a",
+    "name": "[Générateur de musique]",
+    "provider": "[Fournisseur H]",
+    "status": "non_divulgue",
+    "note": "Aucune information publique sur les données d'entraînement. [placeholder]",
+    "source_url": "https://fournisseur-h.exemple.invalid/",
+    "checked_at": "2026-10-01"
+  },
+  {
+    "id": "tool-trad-a",
+    "name": "[Outil de traduction]",
+    "provider": "[Fournisseur I]",
+    "status": "partiel",
+    "note": "Documentation générale, sans détail sur les corpus. [placeholder]",
+    "source_url": "https://fournisseur-i.exemple.invalid/",
+    "checked_at": "2026-10-01"
+  }
+]

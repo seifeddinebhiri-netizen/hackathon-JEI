@@ -1,0 +1,171 @@
+/**
+ * Festivals FICTIFS (placeholders). Aucun nom, tarif ou date réels.
+ * source_url pointe vers le domaine réservé « .invalid » et checked_at est factice :
+ * à remplacer par des fiches vérifiées côté backend.
+ * La fiche « fest-sans-source » n'a ni source ni date : elle ne doit JAMAIS s'afficher.
+ */
+import type { Festival, FestivalRequirement } from '@/api/types';
+import { demoDate } from '../weather';
+
+const CHECKED = '2026-10-01'; // date de vérification FACTICE
+
+const synopsis = (limit: number): FestivalRequirement => ({
+  kind: 'synopsis',
+  detail: `Synopsis de ${limit} caractères maximum`,
+  limit_chars: limit,
+});
+const req = (kind: FestivalRequirement['kind'], detail: string): FestivalRequirement => ({ kind, detail });
+
+export function buildFestivals(): Festival[] {
+  return [
+    {
+      id: 'fest-a',
+      name: '[Festival A] : courts métrages méditerranéens',
+      country: 'Tunisie',
+      deadline: demoDate(38),
+      fee: 'Gratuit',
+      max_duration_min: 30,
+      subtitle_langs: ['fr', 'en'],
+      ai_policy: 'a_declarer',
+      requirements: [
+        req('format', 'Fichier H.264, 1080p, 30 min maximum'),
+        req('sous_titres', 'Sous-titres français et anglais (.srt)'),
+        synopsis(300),
+        req('photos', '3 photos du film'),
+        req('affiche', 'Affiche A3'),
+        req('bio', 'Biographie et filmographie (500 caractères)'),
+        req('declaration_ia', 'Déclaration d’usage de l’IA'),
+      ],
+      source_url: 'https://festival-a.exemple.invalid/reglement',
+      checked_at: CHECKED,
+    },
+    {
+      id: 'fest-b',
+      name: '[Festival B] : premier film francophone',
+      country: 'France',
+      deadline: demoDate(21),
+      fee: '[montant] €',
+      max_duration_min: 20,
+      subtitle_langs: ['fr'],
+      ai_policy: 'a_declarer',
+      requirements: [
+        req('format', 'Fichier ProRes ou H.264, 20 min maximum'),
+        req('sous_titres', 'Sous-titres français'),
+        synopsis(150),
+        synopsis(1000),
+        req('photos', '2 photos du film'),
+        req('bande_annonce', 'Bande-annonce (lien)'),
+        req('bio', 'Biographie du réalisateur'),
+        req('declaration_ia', 'Déclaration d’usage de l’IA'),
+        req('droits_musique', 'Attestation des droits musicaux'),
+      ],
+      source_url: 'https://festival-b.exemple.invalid/appel',
+      checked_at: CHECKED,
+    },
+    {
+      id: 'fest-c',
+      name: '[Festival C] : cinéma africain émergent',
+      country: 'Burkina Faso',
+      deadline: demoDate(55),
+      fee: 'Gratuit',
+      max_duration_min: 45,
+      subtitle_langs: ['fr', 'en'],
+      ai_policy: 'acceptee',
+      requirements: [
+        req('format', 'Fichier H.264, 45 min maximum'),
+        req('sous_titres', 'Sous-titres français ou anglais'),
+        synopsis(500),
+        req('photos', '3 photos du film'),
+        req('bio', 'Biographie et filmographie'),
+      ],
+      source_url: 'https://festival-c.exemple.invalid/inscriptions',
+      checked_at: CHECKED,
+    },
+    {
+      id: 'fest-d',
+      name: '[Festival D] : films d’école et jeunes talents',
+      country: 'Maroc',
+      deadline: demoDate(12),
+      fee: 'Gratuit',
+      max_duration_min: 25,
+      subtitle_langs: ['fr', 'ar'],
+      ai_policy: 'a_declarer',
+      requirements: [
+        req('format', 'Fichier H.264, 25 min maximum'),
+        req('sous_titres', 'Sous-titres français'),
+        synopsis(250),
+        req('affiche', 'Affiche'),
+        req('declaration_ia', 'Déclaration d’usage de l’IA'),
+      ],
+      source_url: 'https://festival-d.exemple.invalid/reglement',
+      checked_at: CHECKED,
+    },
+    {
+      id: 'fest-e',
+      name: '[Festival E] : cinéma sans IA générative',
+      country: 'Belgique',
+      deadline: demoDate(30),
+      fee: '[montant] €',
+      max_duration_min: 30,
+      subtitle_langs: ['fr', 'en'],
+      ai_policy: 'interdite',
+      requirements: [
+        req('format', 'Fichier H.264, 30 min maximum'),
+        req('sous_titres', 'Sous-titres anglais'),
+        synopsis(400),
+        req('photos', '4 photos du film'),
+        req('declaration_ia', 'Attestation : aucune génération par IA'),
+      ],
+      source_url: 'https://festival-e.exemple.invalid/conditions',
+      checked_at: CHECKED,
+    },
+    {
+      id: 'fest-f',
+      name: '[Festival F] : longs métrages du Sud',
+      country: 'Canada',
+      deadline: demoDate(70),
+      fee: '[montant] $',
+      subtitle_langs: ['fr', 'en'],
+      ai_policy: 'a_declarer',
+      requirements: [
+        req('format', 'DCP ou fichier ProRes, long métrage (plus de 60 min)'),
+        req('sous_titres', 'Sous-titres français et anglais'),
+        synopsis(200),
+        synopsis(1500),
+        req('photos', '5 photos du film'),
+        req('affiche', 'Affiche'),
+        req('bande_annonce', 'Bande-annonce'),
+        req('bio', 'Biographie et filmographie'),
+        req('declaration_ia', 'Déclaration d’usage de l’IA'),
+        req('droits_musique', 'Liste des musiques et droits'),
+      ],
+      source_url: 'https://festival-f.exemple.invalid/soumettre',
+      checked_at: CHECKED,
+    },
+    {
+      id: 'fest-g',
+      name: '[Festival G] : films courts en ligne',
+      country: 'Tunisie',
+      deadline: demoDate(8),
+      fee: 'Gratuit',
+      max_duration_min: 15,
+      subtitle_langs: ['ar', 'fr'],
+      ai_policy: 'acceptee',
+      requirements: [req('format', 'Lien de visionnage, 15 min maximum'), synopsis(200)],
+      source_url: 'https://festival-g.exemple.invalid/',
+      checked_at: CHECKED,
+    },
+    {
+      id: 'fest-sans-source',
+      name: '[Festival non vérifié]',
+      country: 'France',
+      deadline: demoDate(40),
+      fee: '[montant] €',
+      subtitle_langs: ['fr'],
+      ai_policy: 'acceptee',
+      requirements: [],
+      source_url: '',
+      checked_at: '',
+    },
+  ];
+}
