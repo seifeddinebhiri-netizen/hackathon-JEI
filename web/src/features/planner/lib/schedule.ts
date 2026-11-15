@@ -276,6 +276,7 @@ export function groupConflicts(schedule: Schedule, project: Pick<Project, 'scene
     'jour_trop_long',
     'autorisation_manquante',
     'meteo_a_reverifier',
+    'lumiere_non_respectee',
   ];
   return [...groups.values()].sort(
     (a, b) => order.indexOf(a.kind) - order.indexOf(b.kind) || (a.date ?? '').localeCompare(b.date ?? ''),

@@ -26,6 +26,11 @@ export function formatDateNumeric(value: string | Date): string {
 export function formatTime(value: string | Date): string {
   return format(toDate(value), "HH 'h' mm", { locale: fr });
 }
+/** Heure pour un lecteur : « 8 h 00 », « 17 h 06 » (sans zéro devant l'heure) */
+export function formatHourFr(value: string | Date): string {
+  const d = toDate(value);
+  return `${d.getHours()} h ${String(d.getMinutes()).padStart(2, '0')}`;
+}
 /** yyyy-MM-dd */
 export function isoDay(value: Date): string {
   return format(value, 'yyyy-MM-dd');

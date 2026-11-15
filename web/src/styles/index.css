@@ -34,6 +34,13 @@
   --color-ext: #ffe7a3;
   --color-int: #e2e0d9;
 
+  /* Plan de travail : blocs de scène (texte blanc, AA) et phrases de conflit */
+  --color-scene-int: #34506b; /* blanc dessus : 8,3:1 */
+  --color-scene-int-night: #15202b; /* filet « nuit » */
+  --color-scene-ext: #9a5b00; /* blanc dessus : 5,4:1 */
+  --color-scene-ext-night: #3d2400; /* filet « nuit » */
+  --color-conflict: #8a3b00; /* orange foncé, 7,7:1 sur blanc */
+
   /* Typo */
   --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;

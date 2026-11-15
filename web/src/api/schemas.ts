@@ -73,6 +73,7 @@ export const scheduleConflictSchema: z.ZodType<T.ScheduleConflict> = z.object({
     'jour_trop_long',
     'autorisation_manquante',
     'meteo_a_reverifier',
+    'lumiere_non_respectee',
   ]),
   message: z.string(),
 });

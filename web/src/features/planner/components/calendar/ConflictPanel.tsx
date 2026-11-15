@@ -48,7 +48,11 @@ export function ConflictPanel({
           const loc = g.locationId ? locationById.get(g.locationId) : undefined;
           const n = g.sceneIds.length;
           const scenesTxt = g.sceneIds.map((id) => `Sc. ${sceneById.get(id)?.number}`).join(', ');
-          const date = g.kind === 'autorisation_manquante' ? undefined : suggest(g);
+          // Changer de jour ne règle ni une autorisation ni une lumière : ces deux-là ont leur propre action
+          const date =
+            g.kind === 'autorisation_manquante' || g.kind === 'lumiere_non_respectee'
+              ? undefined
+              : suggest(g);
           const when = g.date ? ` · ${format(parseISO(g.date), 'EEE d MMM', { locale: fr })}` : '';
           return (
             <li
@@ -92,6 +96,10 @@ export function ConflictPanel({
                   >
                     Déplacer au {format(parseISO(date), 'EEE d MMM', { locale: fr })} ?
                   </Button>
+                ) : g.kind === 'lumiere_non_respectee' ? (
+                  <p className="text-meta text-muted-on-light">
+                    Utilise « Décaler à… » sous la scène pour la tourner dans sa lumière.
+                  </p>
                 ) : g.kind === 'meteo_a_reverifier' ? (
                   <p className="text-meta text-muted-on-light">
                     Prévision disponible environ 14 jours avant : à revérifier.

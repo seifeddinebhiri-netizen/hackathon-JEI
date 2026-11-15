@@ -79,7 +79,14 @@ export type WeatherDay = {
   forecast: 'prevision' | 'hors_horizon';
 };
 export type ScheduleConflict = {
-  kind: 'pluie' | 'vent' | 'lieu_ferme' | 'jour_trop_long' | 'autorisation_manquante' | 'meteo_a_reverifier';
+  kind:
+    | 'pluie'
+    | 'vent'
+    | 'lieu_ferme'
+    | 'jour_trop_long'
+    | 'autorisation_manquante'
+    | 'meteo_a_reverifier'
+    | 'lumiere_non_respectee';
   message: string;
 };
 export type ScheduledScene = { scene_id: string; start: string; end: string; conflicts: ScheduleConflict[] };
