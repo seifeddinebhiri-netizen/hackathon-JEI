@@ -196,6 +196,64 @@ export const locationSuggestResultSchema: z.ZodType<T.LocationSuggestResult> = z
   model: z.string(),
 });
 
+// --- Suggestions de tournage ----------------------------------------------------------
+export const sceneSuggestResultSchema: z.ZodType<T.SceneSuggestResult> = z.object({
+  status: z.literal('Brouillon IA : à valider'),
+  suggestions: z.array(
+    z.object({
+      id: z.string(),
+      scene_numbers: z.array(z.string()).min(1),
+      kind: z.enum([
+        'preciser_int_ext',
+        'preciser_moment',
+        'regrouper_decors',
+        'alleger_scene',
+        'info_manquante',
+      ]),
+      message: z.string(),
+      source: z.string(),
+      change_setting: settingSchema.nullable(),
+      change_moment: sceneMomentSchema.nullable(),
+      change_decor: z.string().nullable(),
+    }),
+  ),
+  model: z.string(),
+});
+
+// --- Dépouillement du scénario par l'IA --------------------------------------------------
+export const scenarioAnalysisSchema: z.ZodType<T.ScenarioAnalysis> = z.object({
+  title: z.string(),
+  status: z.literal('Brouillon IA : à valider'),
+  simulated: z.boolean(),
+  scenes: z
+    .array(
+      z.object({
+        number: z.number().int().positive(),
+        heading: z.string().min(1),
+        setting: z.enum(['INT', 'EXT', 'UNKNOWN']),
+        time_of_day: z.enum(['DAY', 'NIGHT', 'DAWN', 'DUSK', 'UNKNOWN']),
+        location: z.string(),
+        summary: z.string(),
+        characters: z.array(z.string()),
+        props: z.array(z.string()),
+        technical_requirements: z.array(z.string()),
+        production_challenges: z.array(z.string()),
+        missing_information: z.array(z.string()),
+        inferences: z.array(z.string()),
+        suggestions: z.array(z.string()),
+      }),
+    )
+    .min(1),
+  characters: z.array(
+    z.object({
+      name: z.string().min(1),
+      description: z.string(),
+      scenes: z.array(z.number().int().positive()),
+      production_observations: z.array(z.string()),
+    }),
+  ),
+});
+
 export const parseScreenplayResultSchema: z.ZodType<T.ParseScreenplayResult> = z.object({
   scenes: z.array(sceneSchema),
   locations: z.array(locationSchema),

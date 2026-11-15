@@ -7,7 +7,7 @@ Deux niveaux :
   qui viennent UNIQUEMENT de la recherche géographique (OpenStreetMap Nominatim).
 """
 
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
@@ -42,6 +42,10 @@ class LocationSuggestRequest(BaseModel):
     scenes: list[SceneInput] = Field(min_length=1, max_length=40)
     other_decors: list[str] = Field(default_factory=list, max_length=60)
     exclude: list[str] = Field(default_factory=list, max_length=30)
+    # Ex. « pluie probable sur la période : préférer des lieux abrités »
+    constraints: list[Annotated[str, Field(max_length=200)]] = Field(
+        default_factory=list, max_length=5
+    )
 
 
 # --- Sortie du LLM ------------------------------------------------------------------------

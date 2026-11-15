@@ -1,5 +1,7 @@
 # Encadré — repérage intégré des lieux et de la météo
 
+> **Mise à jour :** la page séparée décrite ici a été retirée. Ce module est désormais intégré à l’assistant de planification : voir [PLANIFICATION_IA.md](PLANIFICATION_IA.md).
+
 L'IA propose, le cinéaste décide.
 
 ## Lancer exactement le MVP en local (PowerShell)

@@ -16,6 +16,7 @@ const realApi: Api = {
   parseScreenplay: real.parseScreenplay,
   geocode: real.geocode,
   suggestLocations: real.suggestLocations,
+  suggestScenes: real.suggestScenes,
   quickSlots: real.quickSlots,
   generateSchedule: real.generateSchedule,
   getWeather: real.getWeather,

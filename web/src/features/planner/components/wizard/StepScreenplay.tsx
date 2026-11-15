@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { PlannerHandoff } from '../../scenario/PlannerHandoff';
-import type { ParseScreenplayResult, Person, Scene } from '@/api/types';
+import type { ParseScreenplayResult, Person, Project, Scene } from '@/api/types';
 import {
   AiDraftBadge,
   Button,
@@ -19,9 +18,11 @@ import {
 import { useParseScreenplay } from '../../hooks/usePlanner';
 import { localId, nextSceneNumber } from '../../lib/ids';
 import { SceneEditor, SceneSummaryBar } from './SceneEditor';
+import { SceneSuggestions } from './SceneSuggestions';
 import type { Detected, DraftSetter, PlannerDraft } from './types';
 
-const ACCEPT = ['.pdf', '.docx', '.txt', '.fountain'];
+// Le découpage par l'IA lit du texte : fichiers texte, ou texte collé
+const ACCEPT = ['.txt', '.fountain'];
 const MAX_MB = 10;
 
 /** Fusionne le résultat du découpage dans le brouillon (lieux par nom, personnages → acteurs à préciser). */
@@ -67,10 +68,12 @@ function merge(
 }
 
 export function StepScreenplay({
+  project,
   draft,
   setDraft,
   onDetected,
 }: {
+  project: Project;
   draft: PlannerDraft;
   setDraft: DraftSetter;
   onDetected: (d: Detected) => void;
@@ -127,7 +130,6 @@ export function StepScreenplay({
 
   return (
     <div className="flex flex-col gap-8">
-      <PlannerHandoff onApply={(result) => apply(result, 'append')} />
       <Tabs defaultValue={draft.scenes.length ? 'manuel' : 'import'}>
         <TabsList aria-label="Comment ajouter tes scènes">
           <TabsTrigger value="import">Importer mon scénario</TabsTrigger>
@@ -137,8 +139,9 @@ export function StepScreenplay({
           <div className="flex items-start gap-3 border-2 border-ink bg-gold-soft p-4">
             <Icon name="lock" size={20} className="mt-0.5 shrink-0" />
             <p>
-              Ton scénario est envoyé pour être découpé en scènes. Il n’est pas conservé après le découpage et
-              ne sert pas à entraîner une IA.
+              Ton scénario est envoyé à l’IA pour être découpé en scènes, décors et personnages. Il n’est pas
+              conservé après le découpage et ne sert pas à entraîner une IA. Tu relis et tu valides chaque
+              scène.
             </p>
           </div>
           <FileDrop
@@ -150,7 +153,7 @@ export function StepScreenplay({
               if (f) setText('');
             }}
             label="Dépose ton scénario ici"
-            hint={`PDF, DOCX, TXT ou Fountain · ${MAX_MB} Mo maximum`}
+            hint={`TXT ou Fountain · ${MAX_MB} Mo maximum · ou colle le texte ci-dessous`}
           />
           <details className="border-2 border-line-light bg-white p-4">
             <summary className="min-h-11 cursor-pointer content-center font-semibold">
@@ -197,6 +200,8 @@ export function StepScreenplay({
           ))}
         </ul>
       ) : null}
+
+      <SceneSuggestions project={project} draft={draft} setDraft={setDraft} />
 
       <section aria-labelledby="scenes-titre" className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-3">

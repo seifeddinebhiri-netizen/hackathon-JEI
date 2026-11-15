@@ -38,8 +38,6 @@ export const router = createBrowserRouter([
         children: [
           { path: 'projet', ...page(() => import('@/routes/ProjectDashboard')) },
           { path: 'planner', ...page(() => import('@/routes/PlannerHome')) },
-          { path: 'planner/scenario', ...page(() => import('@/routes/ScenarioAnalysis')) },
-          { path: 'planner/reperage', ...page(() => import('@/routes/PlannerScouting')) },
           { path: 'planner/rapide', ...page(() => import('@/routes/PlannerQuick')) },
           { path: 'planner/projet', ...page(() => import('@/routes/PlannerWizard')) },
           { path: 'planner/calendrier', ...page(() => import('@/routes/PlannerCalendar')) },

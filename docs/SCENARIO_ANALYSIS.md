@@ -1,5 +1,7 @@
 # Encadré — analyse de scénario
 
+> **Mise à jour :** la page séparée décrite ici a été retirée. Ce module est désormais intégré à l’assistant de planification : voir [PLANIFICATION_IA.md](PLANIFICATION_IA.md).
+
 L'analyse peut désormais utiliser Ollama avec `SCENARIO_PROVIDER=ollama`.
 Voir [le guide repérage et Ollama](LOCATION_WEATHER_SCOUTING.md) pour la configuration.
 

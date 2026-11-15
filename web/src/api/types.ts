@@ -125,6 +125,8 @@ export type LocationSuggestInput = {
   other_decors: string[];
   /** Types de lieux déjà proposés, à ne pas reproposer */
   exclude: string[];
+  /** Contraintes à respecter, ex. « pluie probable : préférer des lieux abrités » */
+  constraints?: string[];
 };
 /** Lieu réel trouvé par la recherche géographique (OpenStreetMap), jamais inventé par l'IA. */
 export type PlaceCandidate = { name: string; address: string; lat: number; lon: number; osm_url: string };
@@ -146,6 +148,70 @@ export type LocationSuggestResult = {
   propositions: LocationProposition[];
   mutualisation: string | null;
   model: string;
+};
+
+// --- Suggestions de tournage sur le scénario (validées par l'auteur) --------------------
+/**
+ * Jamais d'écriture : l'IA propose seulement de préciser INT/EXT ou le moment, de regrouper deux
+ * décors, d'alléger une scène coûteuse à tourner, ou signale une information manquante.
+ */
+export type SceneSuggestionKind =
+  'preciser_int_ext' | 'preciser_moment' | 'regrouper_decors' | 'alleger_scene' | 'info_manquante';
+export type SceneSuggestInput = {
+  film: LocationSuggestInput['film'];
+  scenes: {
+    number: string;
+    title: string;
+    setting: 'INT' | 'EXT';
+    moment: SceneMoment;
+    decor: string;
+    summary: string;
+    characters: string[];
+    estimated_hours: number;
+    excerpt?: string;
+  }[];
+  decors: string[];
+};
+export type SceneSuggestion = {
+  id: string;
+  scene_numbers: string[];
+  kind: SceneSuggestionKind;
+  message: string;
+  /** Ce qui, dans le texte, justifie la suggestion */
+  source: string;
+  change_setting: 'INT' | 'EXT' | null;
+  change_moment: SceneMoment | null;
+  /** Nom exact d'un décor existant, pour un regroupement */
+  change_decor: string | null;
+};
+export type SceneSuggestResult = {
+  status: 'Brouillon IA : à valider';
+  suggestions: SceneSuggestion[];
+  model: string;
+};
+
+// --- Dépouillement du scénario par l'IA (POST /scenarios/analyze) ----------------------
+export type ScenarioAnalysisScene = {
+  number: number;
+  heading: string;
+  setting: 'INT' | 'EXT' | 'UNKNOWN';
+  time_of_day: 'DAY' | 'NIGHT' | 'DAWN' | 'DUSK' | 'UNKNOWN';
+  location: string;
+  summary: string;
+  characters: string[];
+  props: string[];
+  technical_requirements: string[];
+  production_challenges: string[];
+  missing_information: string[];
+  inferences: string[];
+  suggestions: string[];
+};
+export type ScenarioAnalysis = {
+  title: string;
+  status: 'Brouillon IA : à valider';
+  simulated: boolean;
+  scenes: ScenarioAnalysisScene[];
+  characters: { name: string; description: string; scenes: number[]; production_observations: string[] }[];
 };
 
 export type QuickSlotRequest = {

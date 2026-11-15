@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { forwardRef, useImperativeHandle, useState } from 'react';
 import type {
   Location,
   LocationProposition,
@@ -11,6 +11,7 @@ import { AiDraftBadge, Button, Icon, Skeleton, StatusChip } from '@/components/u
 import { cn } from '@/lib/cn';
 import { cachedLocationSuggestion, useSuggestLocations } from '../../hooks/usePlanner';
 import { buildSuggestInput } from './locationSuggestInput';
+import { SHELTER_CONSTRAINT } from './weatherVerdict';
 
 const FACILITE: Record<LocationProposition['facilite'], string> = {
   facile: 'Facile à obtenir',
@@ -131,35 +132,53 @@ function PropositionCard({
  * Lieux proposés par l'IA pour ce décor : ce que les scènes demandent, puis 3 types de lieux avec
  * de vrais lieux trouvés sur la carte. Tout reste facultatif : on peut remplir le lieu à la main.
  */
-export function LocationSuggestions({
-  project,
-  location,
-  scenes,
-  otherDecors,
-  onChange,
-  addressInputId,
-}: {
+/** Commande exposée au panneau météo : demander des lieux abrités. */
+export type LocationSuggestionsHandle = { askSheltered: () => void };
+
+type Props = {
   project: Project;
   location: Location;
   scenes: Scene[];
   otherDecors: string[];
   onChange: (l: Location) => void;
   addressInputId: string;
-}) {
+};
+
+export const LocationSuggestions = forwardRef<LocationSuggestionsHandle, Props>(function LocationSuggestions(
+  { project, location, scenes, otherDecors, onChange, addressInputId },
+  ref,
+) {
   const suggest = useSuggestLocations();
   const [exclude, setExclude] = useState<string[]>([]);
+  const [constraints, setConstraints] = useState<string[]>([]);
   const [result, setResult] = useState<LocationSuggestResult | undefined>(() =>
     cachedLocationSuggestion(location.id, buildSuggestInput(project, location, scenes, otherDecors, [])),
   );
   const ready = !!location.name.trim() && scenes.length > 0 && !!project.city.trim();
 
-  const run = (nextExclude: string[]) => {
+  const sectionId = `propositions-${location.id}`;
+  const run = (nextExclude: string[], nextConstraints: string[] = constraints) => {
     setExclude(nextExclude);
+    setConstraints(nextConstraints);
     suggest.mutate(
-      { decorId: location.id, input: buildSuggestInput(project, location, scenes, otherDecors, nextExclude) },
+      {
+        decorId: location.id,
+        input: buildSuggestInput(project, location, scenes, otherDecors, nextExclude, nextConstraints),
+      },
       { onSuccess: setResult },
     );
   };
+
+  // La météo menace les scènes en extérieur : on demande des lieux abrités (sans reproposer les mêmes)
+  useImperativeHandle(ref, () => ({
+    askSheltered: () => {
+      run(
+        [...new Set([...exclude, ...(result?.propositions.map((p) => p.type_de_lieu) ?? [])])],
+        [SHELTER_CONSTRAINT],
+      );
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    },
+  }));
 
   const choose = (p: LocationProposition, c: PlaceCandidate) =>
     onChange({
@@ -183,7 +202,16 @@ export function LocationSuggestions({
   };
 
   return (
-    <section aria-label="Lieux proposés pour ce décor" className="mb-5 flex flex-col gap-4">
+    <section
+      id={sectionId}
+      aria-label="Lieux proposés pour ce décor"
+      className="mb-5 flex scroll-mt-24 flex-col gap-4"
+    >
+      {constraints.length && (result || suggest.isPending) ? (
+        <p className="flex items-center gap-2 text-meta font-semibold">
+          <Icon name="rain" size={16} /> Lieux abrités, à cause de la météo prévue pendant le tournage.
+        </p>
+      ) : null}
       {!result && !suggest.isPending ? (
         <div className="flex flex-wrap items-center gap-3">
           <Button variant="secondary" icon="pin" disabled={!ready} onClick={() => run([])}>
@@ -264,4 +292,4 @@ export function LocationSuggestions({
       ) : null}
     </section>
   );
-}
+});

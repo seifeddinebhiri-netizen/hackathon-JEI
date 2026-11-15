@@ -2,9 +2,7 @@
 
 > L'IA propose, le cinéaste décide.
 
-Le MVP d'analyse de scénario est documenté dans [docs/SCENARIO_ANALYSIS.md](docs/SCENARIO_ANALYSIS.md) : lancement, analyse réelle, démo explicite, confidentialité et tests.
-
-Le repérage intégré lieux + météo est documenté dans [docs/LOCATION_WEATHER_SCOUTING.md](docs/LOCATION_WEATHER_SCOUTING.md) : Geoapify, Open-Meteo, Ollama, carte Leaflet et confirmation humaine.
+L'IA dans la planification (dépouillement du scénario, suggestions de tournage validées par l'auteur, lieux et météo) est décrite dans [docs/PLANIFICATION_IA.md](docs/PLANIFICATION_IA.md). Lancement local du backend et d'Ollama : [docs/SCENARIO_ANALYSIS.md](docs/SCENARIO_ANALYSIS.md).
 
 > **FilmFreeway t'aide à envoyer ton film. Encadré t'aide à ce qu'il soit prêt, sous-titré, et honnête sur l'IA.**
 

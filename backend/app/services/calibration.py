@@ -100,9 +100,7 @@ def compute_targets(shot: ShotIntent) -> ShotTargets:
         contrast=_r(CONTRAST[shot.light_contrast]),
         backlight_ratio_max=BACKLIGHT_RATIO_MAX[shot.backlight],
         sun_offset_abs_deg=(
-            _r(SUN_OFFSET_ABS[shot.sun_relative])
-            if shot.sun_relative in SUN_OFFSET_ABS
-            else None
+            _r(SUN_OFFSET_ABS[shot.sun_relative]) if shot.sun_relative in SUN_OFFSET_ABS else None
         ),
         shake_max=SHAKE_MAX[shot.stability],
     )

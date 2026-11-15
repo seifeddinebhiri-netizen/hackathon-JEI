@@ -30,6 +30,8 @@ const PLACES = {
   marsa: place('Plage de La Marsa', 'La Marsa, Tunis', 36.8826, 10.3302),
   gammarth: place('Plage de Gammarth', 'Gammarth, La Marsa, Tunis', 36.918, 10.287),
   delices: place('Café des Délices', 'Sidi Bou Saïd, Tunis', 36.8686, 10.347),
+  port: place('Port de Sidi Bou Saïd', 'Port de plaisance, Sidi Bou Saïd, Tunis', 36.874, 10.353),
+  attarine: place('Souk El Attarine', 'Souk El Attarine, Médina de Tunis, Tunis', 36.7978, 10.1717),
 };
 
 type Set3 = { besoins: LocationNeeds; propositions: LocationProposition[][] };
@@ -238,6 +240,60 @@ const GENERIQUE: Set3 = {
   ],
 };
 
+/** Lieux abrités, quand la météo menace les scènes en extérieur. */
+const ABRI: LocationProposition[] = [
+  prop({
+    type_de_lieu: 'Souk couvert de la Médina',
+    pourquoi: 'L’animation d’une rue, mais sous un toit : la pluie ne gêne pas le tournage.',
+    requete_recherche: 'souk couvert médina',
+    zone: 'Médina de Tunis',
+    facilite: 'moyenne',
+    autorisation_probable: 'a_demander',
+    a_verifier_sur_place: ['la lumière, plus sombre que dehors'],
+    candidates: [PLACES.attarine],
+  }),
+  prop({
+    type_de_lieu: 'Marché couvert',
+    pourquoi: 'Du monde, des étals, et un abri en cas d’averse.',
+    requete_recherche: 'marché central Tunis',
+    zone: 'Centre-ville',
+    facilite: 'facile',
+    autorisation_probable: 'non_necessaire',
+    candidates: [PLACES.marche],
+  }),
+  prop({
+    type_de_lieu: 'Café avec grande baie vitrée',
+    pourquoi: 'On voit la rue à travers la vitre, mais l’équipe reste à l’abri.',
+    requete_recherche: 'café terrasse couverte Tunis',
+    zone: 'Centre-ville',
+    facilite: 'facile',
+    autorisation_probable: 'a_demander',
+  }),
+];
+
+/** Lieux abrités qui gardent la mer à l'image (décors de bord de mer). */
+const ABRI_MER: LocationProposition[] = [
+  prop({
+    type_de_lieu: 'Café en bord de mer avec baie vitrée',
+    pourquoi: 'La mer reste à l’image, mais l’équipe et le matériel sont à l’abri.',
+    requete_recherche: 'café Sidi Bou Saïd',
+    zone: 'Sidi Bou Saïd',
+    facilite: 'moyenne',
+    autorisation_probable: 'a_demander',
+    a_verifier_sur_place: ['les reflets sur la vitre'],
+    candidates: [PLACES.delices],
+  }),
+  prop({
+    type_de_lieu: 'Quai de port abrité',
+    pourquoi: 'Bord de mer, avec des auvents et des bâtiments pour s’abriter entre deux averses.',
+    requete_recherche: 'port Sidi Bou Saïd',
+    zone: 'Sidi Bou Saïd',
+    facilite: 'moyenne',
+    autorisation_probable: 'a_demander',
+    candidates: [PLACES.port],
+  }),
+];
+
 function pick(input: LocationSuggestInput): Set3 {
   const text = [input.decor.name, ...input.scenes.map((s) => `${s.title} ${s.summary}`)]
     .join(' ')
@@ -251,10 +307,15 @@ function pick(input: LocationSuggestInput): Set3 {
 export function mockSuggestLocations(input: LocationSuggestInput): LocationSuggestResult {
   const set = pick(input);
   const seen = new Set(input.exclude.map((x) => x.toLowerCase()));
+  // Météo menaçante : des lieux abrités d'abord
+  const sheltered = (input.constraints ?? []).some((c) => /abrit/i.test(c))
+    ? (set === PLAGE ? ABRI_MER : ABRI).filter((p) => !seen.has(p.type_de_lieu.toLowerCase()))
+    : [];
   // « Proposer d'autres lieux » : on passe au lot suivant, sans reproposer un type déjà vu
-  const batch =
-    set.propositions.find((b) => b.length && b.every((p) => !seen.has(p.type_de_lieu.toLowerCase()))) ??
-    set.propositions[0].filter((p) => !seen.has(p.type_de_lieu.toLowerCase()));
+  const batch = sheltered.length
+    ? sheltered
+    : (set.propositions.find((b) => b.length && b.every((p) => !seen.has(p.type_de_lieu.toLowerCase()))) ??
+      set.propositions[0].filter((p) => !seen.has(p.type_de_lieu.toLowerCase())));
   const others = input.other_decors.filter((d) => d.toLowerCase() !== input.decor.name.toLowerCase());
   const mutualisation =
     set === CAFE

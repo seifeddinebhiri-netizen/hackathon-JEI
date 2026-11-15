@@ -18,6 +18,7 @@ import aiTools from './data/ai-tools.json';
 import { buildFestivals } from './data/festivals';
 import { getDb, persist, uid } from './db';
 import { mockSuggestLocations } from './locationSuggest';
+import { mockSuggestScenes } from './sceneSuggest';
 import { mockParseScreenplay } from './parser';
 import { mockSchedule } from './scheduler';
 import { mockWeatherDay, mockWeatherRange } from './weather';
@@ -350,6 +351,14 @@ export const mockApi: Api = {
       'POST /planner/locations/suggest',
       S.locationSuggestResultSchema,
       () => mockSuggestLocations(input),
+      2000 / Math.max(1, env.mockLatencyMs),
+    ),
+
+  suggestScenes: (input) =>
+    simulate(
+      'POST /planner/scenes/suggest',
+      S.sceneSuggestResultSchema,
+      () => mockSuggestScenes(input),
       2000 / Math.max(1, env.mockLatencyMs),
     ),
 

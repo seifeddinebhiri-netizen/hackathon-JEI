@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ScoutHandoff } from '../../scouting/ScoutHandoff';
+import { useRef, useState } from 'react';
+import { LocationWeather } from './LocationWeather';
 import type { Location, PermitStatus, Project, Scene } from '@/api/types';
 import {
   AiDraftBadge,
@@ -19,7 +19,7 @@ import { formatDateNumeric } from '@/lib/format';
 import { useGeocode } from '../../hooks/usePlanner';
 import { localId } from '../../lib/ids';
 import { PERMIT_LABELS, WEEKDAYS } from '../../lib/labels';
-import { LocationSuggestions } from './LocationSuggestions';
+import { LocationSuggestions, type LocationSuggestionsHandle } from './LocationSuggestions';
 import type { DraftSetter, PlannerDraft } from './types';
 
 const PERMIT_OPTIONS = (Object.keys(PERMIT_LABELS) as PermitStatus[]).map((v) => ({
@@ -48,6 +48,7 @@ function LocationEditor({
 }) {
   const scenesCount = scenes.length;
   const addressId = `adresse-${location.id}`;
+  const suggestions = useRef<LocationSuggestionsHandle>(null);
   const geocode = useGeocode();
   const [dateToAdd, setDateToAdd] = useState('');
   const set = <K extends keyof Location>(k: K, v: Location[K]) => onChange({ ...location, [k]: v });
@@ -91,6 +92,7 @@ function LocationEditor({
         otherDecors={otherDecors}
         onChange={onChange}
         addressInputId={addressId}
+        ref={suggestions}
       />
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -119,6 +121,13 @@ function LocationEditor({
       >
         Localiser ce lieu
       </Button>
+
+      <LocationWeather
+        project={project}
+        location={location}
+        scenes={scenes}
+        onShelteredPlaces={() => suggestions.current?.askSheltered()}
+      />
 
       <div className="mt-5 grid grid-cols-1 gap-6 md:grid-cols-2">
         <div className="flex flex-col gap-3">
@@ -262,7 +271,6 @@ export function StepLocations({
 
   return (
     <div className="flex flex-col gap-8">
-      <ScoutHandoff draft={draft} setDraft={setDraft} />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-center">
         <div className="lg:col-span-6">
           <h2 className="text-h2">Tes lieux de tournage</h2>

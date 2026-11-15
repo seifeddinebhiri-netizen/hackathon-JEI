@@ -3,7 +3,8 @@
  * mocks/handlers.ts expose EXACTEMENT la même signature (type `Api`).
  */
 import { z } from 'zod';
-import { request, UPLOAD_TIMEOUT_MS } from './client';
+import { ApiError, request, UPLOAD_TIMEOUT_MS } from './client';
+import { analysisToParseResult } from './scenarioImport';
 import * as S from './schemas';
 import type * as T from './types';
 
@@ -27,14 +28,43 @@ export async function deleteProject(id: string): Promise<{ ok: true }> {
   return request(`/projects/${encodeURIComponent(id)}`, { method: 'DELETE', schema: S.okSchema });
 }
 
+/** Fichiers que le navigateur sait lire en texte avant de les envoyer au dépouillement. */
+const TEXT_FILES = /\.(txt|fountain)$/i;
+/** Le dépouillement par l'IA peut être long sur un long scénario. */
+const ANALYSIS_TIMEOUT_MS = 190_000;
+
+/**
+ * Découpage du scénario en scènes par l'IA (POST /scenarios/analyze), converti en scènes et
+ * décors de l'assistant. Le texte n'est envoyé qu'à ce moment-là.
+ */
 export async function parseScreenplay(input: T.ParseScreenplayInput): Promise<T.ParseScreenplayResult> {
-  const fd = new FormData();
-  if (input.file) fd.append('file', input.file);
-  if (input.text) fd.append('text', input.text);
-  return request('/planner/parse', {
+  let content = input.text ?? '';
+  let title = 'Mon scénario';
+  if (input.file) {
+    if (!TEXT_FILES.test(input.file.name))
+      throw new ApiError(
+        0,
+        'invalide',
+        'Pour le découpage par l’IA, colle le texte du scénario ou importe un fichier .txt ou .fountain.',
+      );
+    content = await input.file.text();
+    title = input.file.name.replace(/\.[^.]+$/, '') || title;
+  }
+  const analysis = await request('/scenarios/analyze', {
     method: 'POST',
-    formData: fd,
-    schema: S.parseScreenplayResultSchema,
+    body: { title, content },
+    schema: S.scenarioAnalysisSchema,
+    timeoutMs: ANALYSIS_TIMEOUT_MS,
+  });
+  return analysisToParseResult(analysis, content);
+}
+
+/** Suggestions de tournage sur les scènes (jamais d'écriture), que l'auteur accepte ou refuse. */
+export async function suggestScenes(input: T.SceneSuggestInput): Promise<T.SceneSuggestResult> {
+  return request('/planner/scenes/suggest', {
+    method: 'POST',
+    body: input,
+    schema: S.sceneSuggestResultSchema,
     timeoutMs: UPLOAD_TIMEOUT_MS,
   });
 }
@@ -138,6 +168,7 @@ export type Api = {
   parseScreenplay: typeof parseScreenplay;
   geocode: typeof geocode;
   suggestLocations: typeof suggestLocations;
+  suggestScenes: typeof suggestScenes;
   quickSlots: typeof quickSlots;
   generateSchedule: typeof generateSchedule;
   getWeather: typeof getWeather;

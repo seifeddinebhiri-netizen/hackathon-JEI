@@ -1,8 +1,51 @@
+import type { ReactNode } from 'react';
 import { Link } from 'react-router';
-import { AiDraftBadge, ButtonLink, Card, Icon, PageHeader, QueryState, StatusChip } from '@/components/ui';
+import {
+  AiDraftBadge,
+  ButtonLink,
+  Card,
+  Icon,
+  PageHeader,
+  QueryState,
+  StatusChip,
+  type IconName,
+} from '@/components/ui';
 import { useCurrentProject } from '@/features/project/hooks/useProject';
 import { countConflicts } from '@/features/planner/lib/rules';
 import { formatDate, plural } from '@/lib/format';
+
+/** Carte d'un outil du Planner : ce qu'on fait, en une phrase, et l'action qui l'ouvre. */
+function ToolCard({
+  to,
+  icon,
+  title,
+  action,
+  children,
+}: {
+  to: string;
+  icon: IconName;
+  title: string;
+  action: string;
+  children: ReactNode;
+}) {
+  return (
+    <Link
+      to={to}
+      className="group flex flex-col justify-between gap-8 border-2 border-ink bg-white p-6 transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard md:p-8"
+    >
+      <div>
+        <span className="grid size-12 place-items-center bg-gold">
+          <Icon name={icon} size={24} />
+        </span>
+        <h2 className="mt-5 text-h2">{title}</h2>
+        <p className="mt-3 text-muted-on-light">{children}</p>
+      </div>
+      <span className="inline-flex items-center gap-2 font-semibold group-hover:underline">
+        {action} <Icon name="arrowRight" size={18} />
+      </span>
+    </Link>
+  );
+}
 
 export default function PlannerHome() {
   const project = useCurrentProject();
@@ -16,31 +59,6 @@ export default function PlannerHome() {
       />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <ButtonLink to="/planner/reperage" icon="pin" className="lg:col-span-2">
-          Repérage · Lieux & météo
-        </ButtonLink>
-        <ButtonLink to="/planner/scenario" icon="film" className="lg:col-span-2">
-          Analyser mon scénario · Encadré
-        </ButtonLink>
-        <Link
-          to="/planner/rapide"
-          className="group flex flex-col justify-between gap-8 border-2 border-ink bg-white p-6 transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard md:p-8"
-        >
-          <div>
-            <span className="grid size-12 place-items-center bg-gold">
-              <Icon name="sun" size={24} />
-            </span>
-            <h2 className="mt-5 text-h2">Une scène rapide</h2>
-            <p className="mt-3 text-muted-on-light">
-              Décris une scène en quelques lignes, indique le lieu et le moment voulu. Tu obtiens les
-              meilleurs créneaux, la direction du soleil et les heures de lever et de coucher.
-            </p>
-          </div>
-          <span className="inline-flex items-center gap-2 font-semibold group-hover:underline">
-            Trouver un créneau <Icon name="arrowRight" size={18} />
-          </span>
-        </Link>
-
         <Link
           to="/planner/projet"
           className="group flex flex-col justify-between gap-8 border-2 border-ink bg-ink p-6 text-paper transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-gold md:p-8"
@@ -51,14 +69,20 @@ export default function PlannerHome() {
             </span>
             <h2 className="mt-5 text-h2">Planifier tout mon film</h2>
             <p className="mt-3 text-muted-on-dark">
-              Projet, scénario, lieux, personnes : en cinq étapes, l’outil propose un calendrier de tournage
-              que tu ajustes à la main, puis une feuille de service pour chaque jour.
+              En cinq étapes : l’IA découpe ton scénario et suggère comment simplifier le tournage, propose
+              des lieux avec la météo prévue, puis un calendrier que tu ajustes à la main. Tu valides chaque
+              proposition.
             </p>
           </div>
           <span className="inline-flex items-center gap-2 font-semibold text-gold group-hover:underline">
             Ouvrir l’assistant <Icon name="arrowRight" size={18} />
           </span>
         </Link>
+
+        <ToolCard to="/planner/rapide" icon="sun" title="Une scène rapide" action="Trouver un créneau">
+          Décris une scène en quelques lignes, indique le lieu et le moment voulu. Tu obtiens les meilleurs
+          créneaux, la direction du soleil et les heures de lever et de coucher.
+        </ToolCard>
       </div>
 
       <section aria-labelledby="film-en-cours">

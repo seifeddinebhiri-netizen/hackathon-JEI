@@ -113,7 +113,9 @@ function DraftSteps({
           <SaveIndicator state={autosave.state} onRetry={() => void autosave.retry()} />
         </div>
       ) : null}
-      {step === 1 ? <StepScreenplay draft={draft} setDraft={setDraftState} onDetected={onDetected} /> : null}
+      {step === 1 ? (
+        <StepScreenplay project={project} draft={draft} setDraft={setDraftState} onDetected={onDetected} />
+      ) : null}
       {step === 2 ? (
         <StepLocations
           project={project}
