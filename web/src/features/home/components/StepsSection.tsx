@@ -1,11 +1,14 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router';
+import { Bulle, type BabaJamilPose } from '@/components/BabaJamil';
 import { Icon, StatusChip } from '@/components/ui';
 import { cn } from '@/lib/cn';
 import { CoachCapture, FestivalCapture, PassportCapture, PlannerCapture } from './StepCaptures';
 
 type Step = {
   n: number;
+  pose: BabaJamilPose;
+  bulle: string;
   name: string;
   title: string;
   text: string;
@@ -17,6 +20,8 @@ type Step = {
 const STEPS: Step[] = [
   {
     n: 1,
+    pose: 'planifier',
+    bulle: 'Je te trouve la bonne lumière.',
     name: 'Planifier',
     title: 'Quand et où tourner chaque scène.',
     text: 'Importe ton scénario : l’IA propose un découpage en scènes, tu le valides. Le planning suit la lumière, la météo et les contraintes de chaque lieu.',
@@ -29,6 +34,8 @@ const STEPS: Step[] = [
   },
   {
     n: 2,
+    pose: 'tourner',
+    bulle: 'Silence… ça tourne !',
     name: 'Tourner',
     title: 'Le Coach, sur ton téléphone.',
     text: 'Des repères de cadrage en direct pendant le tournage. Les images restent sur ton téléphone.',
@@ -38,6 +45,8 @@ const STEPS: Step[] = [
   },
   {
     n: 3,
+    pose: 'declarer',
+    bulle: 'Ici, on dit tout.',
     name: 'Déclarer',
     title: 'Le Passeport IA.',
     text: 'Département par département, tu déclares ce que l’IA a fait et ce que tu as décidé toi-même. Les festivals le vérifient sur une page publique.',
@@ -50,6 +59,8 @@ const STEPS: Step[] = [
   },
   {
     n: 4,
+    pose: 'diffuser',
+    bulle: 'Direction le festival !',
     name: 'Diffuser',
     title: 'Le Kit Festival.',
     text: 'Trouve les festivals compatibles avec ton film, prépare chaque dossier et suis les dates limites. La soumission se fait toujours sur le site officiel du festival.',
@@ -61,6 +72,53 @@ const STEPS: Step[] = [
     capture: <FestivalCapture />,
   },
 ];
+
+/**
+ * Baba Jamil appuyé sur le coin bas de la capture, côté opposé au texte (grand écran),
+ * ou sous la capture, aligné à droite (mobile et tablette).
+ */
+function StepMascot({ pose, bulle, side }: { pose: BabaJamilPose; bulle: string; side: 'left' | 'right' }) {
+  const src = `/mascotte/baba-jamil-${pose}.svg`;
+  return (
+    <>
+      {/* Grand écran : déborde d'environ 30 % sur le coin bas de la capture, au-dessus d'elle */}
+      <div
+        className={cn(
+          'pointer-events-none absolute -bottom-7 z-10 hidden w-[220px] lg:block xl:w-[240px]',
+          side === 'left'
+            ? 'left-0 -translate-x-[65%] xl:-translate-x-[70%]'
+            : 'right-0 translate-x-[65%] xl:translate-x-[70%]',
+        )}
+      >
+        <img
+          src={src}
+          alt=""
+          width={320}
+          height={290}
+          loading="lazy"
+          decoding="async"
+          className="h-auto w-full"
+        />
+        <div className={cn('absolute top-[4%]', side === 'left' ? 'left-[82%]' : 'right-[82%]')}>
+          <Bulle pointe={side === 'left' ? 'gauche' : 'droite'}>{bulle}</Bulle>
+        </div>
+      </div>
+      {/* Mobile et tablette : sous la capture, alignée à droite, bulle au-dessus, sans débordement */}
+      <div className="mt-5 flex flex-col items-end gap-3 lg:hidden">
+        <Bulle pointe="bas-droite">{bulle}</Bulle>
+        <img
+          src={src}
+          alt=""
+          width={320}
+          height={290}
+          loading="lazy"
+          decoding="async"
+          className="h-auto w-[140px] md:w-[180px]"
+        />
+      </div>
+    </>
+  );
+}
 
 export function StepsSection() {
   return (
@@ -102,7 +160,10 @@ export function StepsSection() {
               <div
                 className={cn('lg:col-span-6', i % 2 === 1 ? 'lg:order-1 lg:col-start-1' : 'lg:col-start-7')}
               >
-                {s.capture}
+                <div className="relative">
+                  {s.capture}
+                  <StepMascot pose={s.pose} bulle={s.bulle} side={i % 2 === 0 ? 'left' : 'right'} />
+                </div>
               </div>
             </li>
           ))}

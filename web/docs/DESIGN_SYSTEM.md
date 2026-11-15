@@ -114,6 +114,23 @@ sur mobile (évite le défilement horizontal).
 Composants métier notables : `AiLabel` (Étiquette IA, format étiquette nutritionnelle), `SunDiagram` (course du soleil
 en SVG), `CaptureFrame` (style unique des captures de l'accueil).
 
+## Mascotte : Baba Jamil
+
+Une vieille caméra devenue un oncle tunisien bienveillant, qui « encadre » le jeune réalisateur. Il tutoie, parle
+simplement, parfois avec un mot de derja (« Ahla », « wlidi »), toujours en français.
+
+- Fichiers : `public/mascotte/baba-jamil-<pose>.svg` (salut, parle, montre, planifier, tourner, declarer, diffuser),
+  animés en CSS interne, arrêtés par `prefers-reduced-motion`.
+- Composant `BabaJamil` (`src/components/BabaJamil.tsx`) : `pose`, `bulle`, `cote` (côté de la bulle), `taille`
+  (`s` 96 / `m` 160 / `l` 260 px ; `s` au maximum sur mobile, bulle au-dessus), `aligne`, `decoratif`.
+- Bulle : fond `paper`, bordure 3 px `ink`, ombre `shadow-hard-red`, pointe vers la mascotte, Inter 500 15-16 px.
+- `alt=""` quand la bulle porte le message ou que l'image est décorative ; sinon « Baba Jamil, la mascotte d'encadré ».
+- Une fois par écran au plus : accueil (hero, 4 étapes, appel final), connexion, scène rapide (état vide), Passeport,
+  vérification, sélection de festivals, 404.
+- Règles : c'est une mascotte, pas l'IA. Il ne présente pas un contenu généré comme le sien, ne cache jamais une
+  étiquette « Brouillon IA », ne se fait pas passer pour une vraie personne, et ne porte jamais seul une information
+  utile (elle reste dans la page).
+
 ## Calendrier de tournage (plan de travail)
 
 - **Vue « Jours de tournage »** : une ligne par jour. À gauche, la date, le lieu (en gros), le RDV, la météo en clair

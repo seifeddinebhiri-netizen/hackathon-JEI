@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { BabaJamil } from '@/components/BabaJamil';
 import type { DepartmentDeclaration, Passport as PassportT, Project } from '@/api/types';
 import { Button, ErrorState, Icon, LoadingBlock, PageHeader, Skeleton } from '@/components/ui';
 import { useAuth } from '@/features/auth/hooks/useAuth';
@@ -88,6 +89,11 @@ function PassportEditor({ project, initial }: { project: Project; initial: Passp
       </div>
 
       <div className="flex flex-col gap-6 lg:col-span-7 lg:col-start-6 lg:row-span-2 lg:row-start-1">
+        <BabaJamil
+          pose="declarer"
+          taille="s"
+          bulle="Ici, on dit tout : ce qui est humain et ce qui vient de l’IA."
+        />
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="text-h3">Ta déclaration</h2>
           <p className="text-meta text-muted-on-light">

@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from 'react-router';
+import { BabaJamil } from '@/components/BabaJamil';
 import { ButtonLink, Perforations } from '@/components/ui';
 import { LoginForm } from '@/features/auth/components/LoginForm';
 import { useAuth } from '@/features/auth/hooks/useAuth';
@@ -19,6 +20,7 @@ export default function Login() {
           <p className="mt-6 max-w-md text-lead text-muted-on-dark">
             Ton planning, ton Passeport IA et ta sélection de festivals t’attendent là où tu les as laissés.
           </p>
+          <BabaJamil pose="salut" taille="m" bulle="Ahla wlidi ! On reprend le tournage ?" className="mt-8" />
         </div>
         <Perforations className="hidden lg:flex" />
       </aside>

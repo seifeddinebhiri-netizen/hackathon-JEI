@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { BabaJamil } from '@/components/BabaJamil';
 import type { QuickSlot, QuickSlotRequest } from '@/api/types';
 import { ErrorState, Icon, LoadingBlock, PageHeader, useToast } from '@/components/ui';
 import { QuickResults } from '@/features/planner/components/QuickResults';
@@ -94,8 +95,12 @@ export default function PlannerQuick() {
               />
             </div>
           ) : (
-            <div className="flex h-full min-h-64 flex-col items-start justify-center gap-3 border-2 border-dashed border-ink/40 p-8">
-              <Icon name="sun" size={32} />
+            <div className="flex h-full min-h-64 flex-col items-start justify-center gap-4 border-2 border-dashed border-ink/40 p-8">
+              <BabaJamil
+                pose="planifier"
+                taille="m"
+                bulle="Donne-moi ta scène, je te trouve le meilleur moment pour la tourner."
+              />
               <p className="font-display text-h3 font-bold">Les créneaux apparaîtront ici.</p>
               <p className="max-w-md text-muted-on-light">
                 Classés du plus recommandé au moins recommandé, avec la raison, la météo et la position du

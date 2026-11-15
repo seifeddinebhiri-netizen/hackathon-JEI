@@ -1,4 +1,5 @@
 import { ButtonLink, Perforations } from '@/components/ui';
+import { BabaJamil } from '@/components/BabaJamil';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 
 export default function NotFound() {
@@ -25,19 +26,14 @@ export default function NotFound() {
             </ButtonLink>
           </div>
         </div>
-        <div aria-hidden className="lg:col-span-5">
-          <div className="border-2 border-paper p-6 md:rotate-[2deg]">
-            <div className="grid grid-cols-3 border-b-2 border-paper pb-3 font-mono text-label text-muted-on-dark">
-              <span>Scène</span>
-              <span>Plan</span>
-              <span>Prise</span>
-            </div>
-            <div className="grid grid-cols-3 pt-3 font-display text-[64px] leading-none font-bold md:text-[88px]">
-              <span>4</span>
-              <span className="text-gold">0</span>
-              <span className="text-brand-red">4</span>
-            </div>
-          </div>
+        <div className="lg:col-span-5">
+          <BabaJamil
+            pose="parle"
+            taille="l"
+            cote="gauche"
+            bulle="Coupez ! Cette scène n’existe pas. On retourne au plateau ?"
+            className="md:justify-end"
+          />
         </div>
       </div>
     </section>

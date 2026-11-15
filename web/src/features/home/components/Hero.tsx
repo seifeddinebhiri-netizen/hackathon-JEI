@@ -1,3 +1,4 @@
+import { BabaJamil } from '@/components/BabaJamil';
 import { ButtonLink, Perforations, PhotoFrame } from '@/components/ui';
 import { AiLabel } from '@/features/passport/components/AiLabel';
 import type { DepartmentDeclaration } from '@/api/types';
@@ -62,6 +63,13 @@ export function Hero() {
               compact
             />
           </div>
+          <BabaJamil
+            pose="salut"
+            taille="m"
+            aligne="bas"
+            bulle="Ahla ! Moi c’est Baba Jamil. Je t’encadre de l’idée jusqu’au festival."
+            className="relative z-20 mt-6 md:-mt-20"
+          />
         </div>
       </div>
       <Perforations />

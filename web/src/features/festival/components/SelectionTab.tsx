@@ -1,4 +1,5 @@
 import { Link } from 'react-router';
+import { BabaJamil } from '@/components/BabaJamil';
 import type { Festival, Project, ShortlistItem } from '@/api/types';
 import {
   Button,
@@ -230,7 +231,10 @@ export function SelectionTab({ project }: { project: Project }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <Timeline entries={entries} />
+      <div className="grid grid-cols-1 items-end gap-4 md:grid-cols-[1fr_auto]">
+        <Timeline entries={entries} />
+        <BabaJamil pose="diffuser" taille="m" className="hidden md:block" />
+      </div>
       {entries.map(({ f, item }) => (
         <Dossier
           key={f.id}

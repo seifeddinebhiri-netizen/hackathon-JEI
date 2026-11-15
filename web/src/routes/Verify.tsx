@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { BabaJamil } from '@/components/BabaJamil';
 import { useParams, useSearchParams } from 'react-router';
 import { isApiError } from '@/api';
 import { brand } from '@/app/brand';
@@ -133,6 +134,12 @@ export default function Verify() {
             <Button variant="secondary" icon="printer" onClick={printPage} className="no-print">
               Imprimer / PDF
             </Button>
+            <BabaJamil
+              pose="declarer"
+              taille="s"
+              bulle="Ici, on dit tout : ce qui est humain et ce qui vient de l’IA."
+              className="no-print mt-2"
+            />
           </div>
         </aside>
         <section aria-labelledby="detail-titre" className="lg:col-span-8">

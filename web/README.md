@@ -116,6 +116,8 @@ Ce que l'interface garantit, et où le voir :
 - **Pas de promesse.** « Le classement indique la compatibilité avec les critères du festival. Il ne prédit pas
   la sélection. » Fiches sans source ni date de vérification masquées. Pas de soumission ni de paiement dans l'app.
 - **Signature C2PA simulée annoncée comme telle** dans cette version.
+- **Mascotte, pas IA.** Baba Jamil (mascotte de marque) n'est pas l'IA : il ne cache jamais une étiquette
+  « Brouillon IA », ne se présente pas comme une vraie personne et ne porte pas seul une information utile.
 - **Contrôle des données.** `/mes-donnees` : ce qui est stocké, ce qui ne l'est pas, export JSON, suppression.
 - **Accessibilité.** Contraste AA, focus or visible, navigation au clavier (y compris pour déplacer une scène),
   cibles de 44 px, statuts en icône + libellé (jamais la couleur seule), `lang="fr"`. Audit axe-core : 0 violation
