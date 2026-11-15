@@ -39,6 +39,16 @@ export async function parseScreenplay(input: T.ParseScreenplayInput): Promise<T.
   });
 }
 
+/** Lieux proposés par l'IA pour un décor, avec de vrais lieux trouvés par la recherche géographique. */
+export async function suggestLocations(input: T.LocationSuggestInput): Promise<T.LocationSuggestResult> {
+  return request('/planner/locations/suggest', {
+    method: 'POST',
+    body: input,
+    schema: S.locationSuggestResultSchema,
+    timeoutMs: UPLOAD_TIMEOUT_MS,
+  });
+}
+
 export async function geocode(q: string): Promise<T.GeocodeResult[]> {
   return request('/planner/geocode', { query: { q }, schema: z.array(S.geocodeResultSchema) });
 }
@@ -127,6 +137,7 @@ export type Api = {
   deleteProject: typeof deleteProject;
   parseScreenplay: typeof parseScreenplay;
   geocode: typeof geocode;
+  suggestLocations: typeof suggestLocations;
   quickSlots: typeof quickSlots;
   generateSchedule: typeof generateSchedule;
   getWeather: typeof getWeather;

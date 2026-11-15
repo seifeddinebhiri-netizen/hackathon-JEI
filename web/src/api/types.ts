@@ -43,6 +43,8 @@ export type Scene = {
   characters: string[]; // noms de personnages
   estimated_hours: number;
   summary: string;
+  /** Extrait du texte de la scène (1 200 caractères au plus), gardé au découpage du scénario. */
+  excerpt?: string;
   source: 'import_ia' | 'manuel';
   validated: boolean;
 };
@@ -103,6 +105,47 @@ export type Schedule = {
   status: 'brouillon_ia' | 'valide';
   days: ShootingDay[];
   unplaced: { scene_id: string; reason: string }[];
+};
+
+// --- Lieux proposés par l'IA pour un décor -------------------------------------------
+/** Scène envoyée au repérage : ce que le LLM lit pour déduire les besoins du lieu. */
+export type LocationSuggestScene = {
+  number: string;
+  title: string;
+  setting: 'INT' | 'EXT';
+  moment: SceneMoment;
+  summary: string;
+  characters: string[];
+  excerpt?: string;
+};
+export type LocationSuggestInput = {
+  film: { title: string; format: FilmFormat; city: string; genre?: string; synopsis?: string };
+  decor: { name: string };
+  scenes: LocationSuggestScene[];
+  other_decors: string[];
+  /** Types de lieux déjà proposés, à ne pas reproposer */
+  exclude: string[];
+};
+/** Lieu réel trouvé par la recherche géographique (OpenStreetMap), jamais inventé par l'IA. */
+export type PlaceCandidate = { name: string; address: string; lat: number; lon: number; osm_url: string };
+export type LocationProposition = {
+  type_de_lieu: string;
+  pourquoi: string;
+  requete_recherche: string;
+  zone: string;
+  facilite: 'facile' | 'moyenne' | 'difficile';
+  autorisation_probable: 'non_necessaire' | 'a_demander';
+  a_verifier_sur_place: string[];
+  candidates: PlaceCandidate[];
+};
+export type LocationNeeds = { a_voir: string[]; actions: string[]; ambiance: string; pratique: string[] };
+export type LocationSuggestResult = {
+  status: 'Brouillon IA : à valider';
+  decor: string;
+  besoins: LocationNeeds;
+  propositions: LocationProposition[];
+  mutualisation: string | null;
+  model: string;
 };
 
 export type QuickSlotRequest = {

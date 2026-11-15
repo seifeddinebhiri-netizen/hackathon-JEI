@@ -56,6 +56,8 @@ function merge(
     ...s,
     number: mode === 'replace' ? s.number : String(++n),
     location_id: locIdMap.get(s.location_id) ?? s.location_id,
+    // Extrait du texte gardé pour les propositions de lieux (1 200 caractères au plus)
+    excerpt: s.excerpt?.slice(0, 1200) || undefined,
   }));
   return {
     draft: { scenes: [...base, ...parsed], locations, people },

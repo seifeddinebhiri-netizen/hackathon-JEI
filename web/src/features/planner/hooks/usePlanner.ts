@@ -1,6 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { api, type Project, type QuickSlotRequest, type Schedule, type UpdateProjectInput } from '@/api';
+import {
+  api,
+  type LocationSuggestInput,
+  type LocationSuggestResult,
+  type Project,
+  type QuickSlotRequest,
+  type Schedule,
+  type UpdateProjectInput,
+} from '@/api';
 import { projectKeys } from '@/features/project/hooks/useProject';
 import type { WeatherByDate } from '../lib/schedule';
 
@@ -76,6 +84,42 @@ export function useParseScreenplay() {
 
 export function useQuickSlots() {
   return useMutation({ mutationFn: (req: QuickSlotRequest) => api.quickSlots(req) });
+}
+
+/** Empreinte stable des données envoyées (scènes du décor, contexte, exclusions). */
+export function locationSuggestKey(input: LocationSuggestInput): string {
+  const s = JSON.stringify(input);
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
+  return (h >>> 0).toString(36);
+}
+
+/** Dernière proposition par décor, avec l'empreinte des scènes qui l'ont produite (durée de la session). */
+const suggestionCache = new Map<string, { key: string; result: LocationSuggestResult }>();
+
+/** Proposition déjà obtenue pour ce décor et ces mêmes scènes, sinon undefined. */
+export function cachedLocationSuggestion(
+  decorId: string,
+  input: LocationSuggestInput,
+): LocationSuggestResult | undefined {
+  const hit = suggestionCache.get(decorId);
+  return hit && hit.key === locationSuggestKey(input) ? hit.result : undefined;
+}
+
+/**
+ * Lieux proposés par l'IA pour un décor. Mise en cache par décor : tant que les scènes du décor
+ * (et le contexte envoyé) n'ont pas changé, on ne relance pas l'appel.
+ */
+export function useSuggestLocations() {
+  return useMutation({
+    mutationFn: async ({ decorId, input }: { decorId: string; input: LocationSuggestInput }) => {
+      const cached = cachedLocationSuggestion(decorId, input);
+      if (cached) return cached;
+      const result = await api.suggestLocations(input);
+      suggestionCache.set(decorId, { key: locationSuggestKey(input), result });
+      return result;
+    },
+  });
 }
 
 export function useGeocode() {

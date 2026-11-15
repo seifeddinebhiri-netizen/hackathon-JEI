@@ -27,6 +27,7 @@ export const sceneSchema: z.ZodType<T.Scene> = z.object({
   characters: z.array(z.string()),
   estimated_hours: z.number().nonnegative(),
   summary: z.string(),
+  excerpt: z.string().max(1200).optional(),
   source: z.enum(['import_ia', 'manuel']),
   validated: z.boolean(),
 });
@@ -159,6 +160,40 @@ export const geocodeResultSchema: z.ZodType<T.GeocodeResult> = z.object({
 export const quickSlotsResponseSchema: z.ZodType<T.QuickSlotsResponse> = z.object({
   place: geocodeResultSchema,
   slots: z.array(quickSlotSchema),
+});
+
+// --- Lieux proposés par l'IA --------------------------------------------------------
+export const placeCandidateSchema: z.ZodType<T.PlaceCandidate> = z.object({
+  name: z.string(),
+  address: z.string(),
+  lat: z.number(),
+  lon: z.number(),
+  osm_url: z.string(),
+});
+
+export const locationPropositionSchema: z.ZodType<T.LocationProposition> = z.object({
+  type_de_lieu: z.string(),
+  pourquoi: z.string(),
+  requete_recherche: z.string(),
+  zone: z.string(),
+  facilite: z.enum(['facile', 'moyenne', 'difficile']),
+  autorisation_probable: z.enum(['non_necessaire', 'a_demander']),
+  a_verifier_sur_place: z.array(z.string()),
+  candidates: z.array(placeCandidateSchema).max(3),
+});
+
+export const locationSuggestResultSchema: z.ZodType<T.LocationSuggestResult> = z.object({
+  status: z.literal('Brouillon IA : à valider'),
+  decor: z.string(),
+  besoins: z.object({
+    a_voir: z.array(z.string()),
+    actions: z.array(z.string()),
+    ambiance: z.string(),
+    pratique: z.array(z.string()),
+  }),
+  propositions: z.array(locationPropositionSchema),
+  mutualisation: z.string().nullable(),
+  model: z.string(),
 });
 
 export const parseScreenplayResultSchema: z.ZodType<T.ParseScreenplayResult> = z.object({

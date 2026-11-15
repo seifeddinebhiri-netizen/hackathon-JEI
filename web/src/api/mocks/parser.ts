@@ -45,6 +45,16 @@ function cap(s: string): string {
     .join('');
 }
 
+/** Extrait du texte d'une scène (1 200 caractères au plus) : précise les propositions de lieux. */
+export function excerptOf(body: string[], max = 1200): string | undefined {
+  const text = body
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .join('\n');
+  if (!text) return undefined;
+  return text.length > max ? `${text.slice(0, max - 1)}…` : text;
+}
+
 export function parseScreenplayText(text: string): ParseScreenplayResult {
   const lines = text.split(/\r?\n/);
   type Draft = { heading: RegExpExecArray; body: string[] };
@@ -103,6 +113,7 @@ export function parseScreenplayText(text: string): ParseScreenplayResult {
       characters: [...characters],
       estimated_hours: estimated,
       summary,
+      excerpt: excerptOf(d.body),
       source: 'import_ia',
       validated: false,
     };

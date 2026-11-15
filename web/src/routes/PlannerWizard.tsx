@@ -115,7 +115,12 @@ function DraftSteps({
       ) : null}
       {step === 1 ? <StepScreenplay draft={draft} setDraft={setDraftState} onDetected={onDetected} /> : null}
       {step === 2 ? (
-        <StepLocations draft={draft} setDraft={setDraftState} detected={detected.locations} />
+        <StepLocations
+          project={project}
+          draft={draft}
+          setDraft={setDraftState}
+          detected={detected.locations}
+        />
       ) : null}
       {step === 3 ? <StepPeople draft={draft} setDraft={setDraftState} detected={detected.people} /> : null}
       {step === 4 ? <StepGenerate project={current} /> : null}

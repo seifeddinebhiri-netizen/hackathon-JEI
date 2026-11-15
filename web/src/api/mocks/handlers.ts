@@ -17,6 +17,7 @@ import type * as T from '../types';
 import aiTools from './data/ai-tools.json';
 import { buildFestivals } from './data/festivals';
 import { getDb, persist, uid } from './db';
+import { mockSuggestLocations } from './locationSuggest';
 import { mockParseScreenplay } from './parser';
 import { mockSchedule } from './scheduler';
 import { mockWeatherDay, mockWeatherRange } from './weather';
@@ -342,6 +343,15 @@ export const mockApi: Api = {
 
   geocode: (q) =>
     simulate('GET /planner/geocode', z.array(S.geocodeResultSchema), () => geocodeLocal(q), 0.4),
+
+  // Latence d'environ 2 s, comme un appel au LLM puis à la recherche de lieux
+  suggestLocations: (input) =>
+    simulate(
+      'POST /planner/locations/suggest',
+      S.locationSuggestResultSchema,
+      () => mockSuggestLocations(input),
+      2000 / Math.max(1, env.mockLatencyMs),
+    ),
 
   quickSlots: (req) => simulate('POST /planner/quick', S.quickSlotsResponseSchema, () => quickSlotsFor(req)),
 

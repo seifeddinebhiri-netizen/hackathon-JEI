@@ -15,6 +15,7 @@ const realApi: Api = {
   deleteProject: real.deleteProject,
   parseScreenplay: real.parseScreenplay,
   geocode: real.geocode,
+  suggestLocations: real.suggestLocations,
   quickSlots: real.quickSlots,
   generateSchedule: real.generateSchedule,
   getWeather: real.getWeather,
