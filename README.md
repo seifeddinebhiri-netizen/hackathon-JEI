@@ -18,10 +18,7 @@ Projet réalisé pour le hackathon **IA Éthique 360** (Junior Entreprise INSAT 
 6. [Éthique 360 : nos engagements](#6-éthique-360--nos-engagements)
 7. [API](#7-api)
 8. [Structure du dépôt et lancement](#8-structure-du-dépôt-et-lancement)
-9. [État d'avancement et limites connues](#9-état-davancement-et-limites-connues)
-10. [Feuille de route](#10-feuille-de-route)
-11. [Équipe et crédits](#11-équipe-et-crédits)
-
+9. [limites connues](#9-état-davancement-et-limites-connues)
 ---
 
 ## 1. Le problème et notre positionnement
@@ -323,4 +320,11 @@ uv run python -m scripts.validate_rules rules/rules.json
 
 ---
 
+## 9.limites connues
 
+- Les **seuils numériques** du Coach sont des réglages de départ, à calibrer sur le terrain.
+- Les règles de **moindre confiance** sont marquées comme telles, et plusieurs thèmes sont peu sourcés : iPhone (fréquence d'images, distorsion), documentaire en médina, son avec micro de téléphone, plan de dos. Nous les compléterons par l'expérience de terrain de l'équipe, en la citant comme telle.
+- Un conseil de lumière de la base provient d'une source nord-américaine (direction du soleil dans les rues) : **à vérifier en Tunisie**.
+- Aucun chiffre de performance (précision, vitesse, satisfaction) n'est annoncé : nous n'avons pas encore mené d'évaluation. Elle fera l'objet d'un protocole sur des extraits tournés par l'équipe.
+
+---
