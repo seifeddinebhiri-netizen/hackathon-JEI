@@ -34,6 +34,10 @@
   --color-ext: #ffe7a3;
   --color-int: #e2e0d9;
 
+  /* En-tête de l'application */
+  --color-header: #141414;
+  --color-header-accent: #f5c518;
+
   /* Plan de travail : blocs de scène (texte blanc, AA) et phrases de conflit */
   --color-scene-int: #34506b; /* blanc dessus : 8,3:1 */
   --color-scene-int-night: #15202b; /* filet « nuit » */

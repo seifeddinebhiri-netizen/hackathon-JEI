@@ -1,8 +1,14 @@
-# Premier Plan
+# Encadré
 
-> **FilmFreeway t'aide à envoyer ton film. Premier Plan t'aide à ce qu'il soit prêt, sous-titré, et honnête sur l'IA.**
+> L'IA propose, le cinéaste décide.
 
-Premier Plan est une plateforme web (PWA, utilisable sur téléphone) qui accompagne un jeune cinéaste tunisien **du premier plan jusqu'au festival**, sans faire le travail à sa place, et qui lui permet de **prouver ce qui est humain et ce qui est IA** dans son film.
+Le MVP d'analyse de scénario est documenté dans [docs/SCENARIO_ANALYSIS.md](docs/SCENARIO_ANALYSIS.md) : lancement, analyse réelle, démo explicite, confidentialité et tests.
+
+Le repérage intégré lieux + météo est documenté dans [docs/LOCATION_WEATHER_SCOUTING.md](docs/LOCATION_WEATHER_SCOUTING.md) : Geoapify, Open-Meteo, Ollama, carte Leaflet et confirmation humaine.
+
+> **FilmFreeway t'aide à envoyer ton film. Encadré t'aide à ce qu'il soit prêt, sous-titré, et honnête sur l'IA.**
+
+Encadré est une plateforme web (PWA, utilisable sur téléphone) qui accompagne un jeune cinéaste tunisien **du premier plan jusqu'au festival**, sans faire le travail à sa place, et qui lui permet de **prouver ce qui est humain et ce qui est IA** dans son film.
 
 Projet réalisé pour le hackathon **IA Éthique 360** (Junior Entreprise INSAT et OIF), sous-thème : *l'IA dans l'audiovisuel culturel*.
 
@@ -32,7 +38,7 @@ Un jeune cinéaste tunisien qui débute rencontre trois obstacles :
 - **Utiliser l'IA sans s'en cacher** : de plus en plus de festivals demandent de déclarer l'usage d'outils d'IA, mais il n'existe pas de moyen simple de le documenter.
 - **Diffuser** : sous-titres dans une autre langue, synopsis, choix d'un festival adapté.
 
-**Notre positionnement.** Les plateformes de soumission sont des places de marché pour *envoyer* un film. Premier Plan intervient **en amont** : préparer le film, le sous-titrer, rédiger le synopsis, déclarer l'IA, puis **renvoyer vers le site officiel du festival**. **Il n'y a ni soumission ni paiement chez nous.**
+**Notre positionnement.** Les plateformes de soumission sont des places de marché pour *envoyer* un film. Encadré intervient **en amont** : préparer le film, le sous-titrer, rédiger le synopsis, déclarer l'IA, puis **renvoyer vers le site officiel du festival**. **Il n'y a ni soumission ni paiement chez nous.**
 
 **Notre principe directeur.** L'IA propose, le cinéaste décide. Toute proposition est modifiable et marquée *« Brouillon IA : à valider »*.
 

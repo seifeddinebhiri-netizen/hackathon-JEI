@@ -11,6 +11,7 @@ from app.middleware import register_middleware
 from app.routes import api_router
 from app.services.llm_service import LLMService
 from app.services.rules_service import get_all_rules
+from app.services.scouting_service import ScoutingService
 
 
 def create_app() -> FastAPI:
@@ -22,13 +23,15 @@ def create_app() -> FastAPI:
         app.state.db_pool = await create_pool(settings)
         app.state.supabase = await create_supabase(settings)
         app.state.llm = LLMService(settings)
+        app.state.scouting = ScoutingService(settings)
         app.state.rules = get_all_rules()  # vide + avertissement si rules.json absent
         yield
+        await app.state.scouting.client.aclose()
         if app.state.db_pool is not None:
             await app.state.db_pool.close()
 
     app = FastAPI(
-        title="Premier Plan API",
+        title="Encadré API",
         lifespan=lifespan,
         docs_url=None if settings.is_production else "/docs",
         redoc_url=None,

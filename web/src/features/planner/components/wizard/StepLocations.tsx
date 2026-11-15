@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ScoutHandoff } from '../../scouting/ScoutHandoff';
 import type { Location, PermitStatus, Project, Scene } from '@/api/types';
 import {
   AiDraftBadge,
@@ -261,6 +262,7 @@ export function StepLocations({
 
   return (
     <div className="flex flex-col gap-8">
+      <ScoutHandoff draft={draft} setDraft={setDraft} />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-center">
         <div className="lg:col-span-6">
           <h2 className="text-h2">Tes lieux de tournage</h2>

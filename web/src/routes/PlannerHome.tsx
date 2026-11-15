@@ -16,6 +16,12 @@ export default function PlannerHome() {
       />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <ButtonLink to="/planner/reperage" icon="pin" className="lg:col-span-2">
+          Repérage · Lieux & météo
+        </ButtonLink>
+        <ButtonLink to="/planner/scenario" icon="film" className="lg:col-span-2">
+          Analyser mon scénario · Encadré
+        </ButtonLink>
         <Link
           to="/planner/rapide"
           className="group flex flex-col justify-between gap-8 border-2 border-ink bg-white p-6 transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard md:p-8"

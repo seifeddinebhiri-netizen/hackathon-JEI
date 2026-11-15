@@ -1,10 +1,10 @@
 import * as Menu from '@radix-ui/react-dropdown-menu';
-import { NavLink, useNavigate } from 'react-router';
+import { Link, NavLink, useNavigate } from 'react-router';
 import { usingMocks } from '@/api';
 import { Icon, type IconName } from '@/components/ui';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { cn } from '@/lib/cn';
-import { Logo } from './Logo';
+import { brand } from '@/app/brand';
 
 const APP_LINKS: { to: string; label: string; step?: string; icon: IconName }[] = [
   { to: '/projet', label: 'Projet', icon: 'home' },
@@ -21,7 +21,10 @@ function UserMenu() {
   return (
     <Menu.Root>
       <Menu.Trigger className="inline-flex min-h-11 items-center gap-2 border-2 border-line-dark px-3 text-meta hover:border-paper">
-        <span aria-hidden className="grid size-6 place-items-center bg-gold font-mono text-label text-ink">
+        <span
+          aria-hidden
+          className="grid size-6 place-items-center rounded-full bg-header-accent text-[12px] font-semibold text-ink"
+        >
           {user.name.charAt(0)}
         </span>
         <span className="hidden sm:inline">{user.name}</span>
@@ -61,16 +64,24 @@ function UserMenu() {
 export function AppNav() {
   return (
     <>
-      <header data-app-header className="sticky top-0 z-40 bg-ink text-paper">
+      <header data-app-header className="sticky top-0 z-40 bg-header text-paper">
         <div className="container-pp flex min-h-16 items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <Logo to="/projet" />
+            <Link
+              to="/projet"
+              className="inline-flex min-h-11 items-center font-display text-[26px] leading-none font-bold tracking-[-0.02em] text-paper"
+              aria-label={`${brand.name}, accueil du projet`}
+            >
+              <span aria-hidden>
+                encadr<span className="text-header-accent">é</span>
+              </span>
+            </Link>
             {usingMocks ? (
               <span
-                className="eyebrow hidden border border-gold px-2 py-1 whitespace-nowrap text-gold xl:inline"
-                title="VITE_USE_MOCKS=true"
+                className="rounded border border-header-accent px-1.5 py-0.5 text-[11px] font-semibold tracking-[0.08em] whitespace-nowrap text-header-accent uppercase"
+                title="Données de démonstration"
               >
-                Données de démonstration
+                Démo
               </span>
             ) : null}
           </div>
@@ -85,13 +96,12 @@ export function AppNav() {
                       cn(
                         'flex min-h-16 items-center gap-2 border-b-4 px-2 text-meta font-semibold whitespace-nowrap lg:px-4',
                         isActive
-                          ? 'border-gold text-paper'
+                          ? 'border-header-accent text-paper'
                           : 'border-transparent text-muted-on-dark hover:text-paper',
                       )
                     }
                   >
-                    {l.step ? <span className="font-mono text-label text-gold">{l.step}</span> : null}
-                    {l.label}
+                    {l.step ? `${l.step} · ${l.label}` : l.label}
                   </NavLink>
                 </li>
               ))}
@@ -103,7 +113,7 @@ export function AppNav() {
       {/* Barre du bas sur mobile */}
       <nav
         aria-label="Étapes (mobile)"
-        className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-line-dark bg-ink md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-line-dark bg-header md:hidden"
       >
         <ul className="grid grid-cols-5">
           {APP_LINKS.map((l) => (
@@ -114,7 +124,7 @@ export function AppNav() {
                 className={({ isActive }) =>
                   cn(
                     'flex min-h-16 flex-col items-center justify-center gap-1 border-t-4 text-label font-semibold',
-                    isActive ? 'border-gold text-paper' : 'border-transparent text-muted-on-dark',
+                    isActive ? 'border-header-accent text-paper' : 'border-transparent text-muted-on-dark',
                   )
                 }
               >

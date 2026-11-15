@@ -22,6 +22,19 @@ import { downloadBlob } from '@/lib/print';
 
 const STORED: { icon: IconName; what: string; where: string; visible: string }[] = [
   {
+    icon: 'doc',
+    what: 'Analyse de scénario : texte original, corrections et validation. Suppression depuis « Effacer ma session » dans l’analyse.',
+    where: 'Session de cet onglet uniquement',
+    visible:
+      'Toi sur ce navigateur ; texte transmis au modèle configuré (Ollama ou Anthropic) uniquement à ta demande',
+  },
+  {
+    icon: 'pin',
+    what: 'Repérages confirmés : lieu, GPS, date, créneau et critères. Suppression via « Retirer ce choix » dans le repérage.',
+    where: 'Session de cet onglet ; transfert au projet sur demande',
+    visible: 'Toi sur ce navigateur ; région envoyée à Geoapify et GPS à Open-Meteo',
+  },
+  {
     icon: 'film',
     what: 'Ton projet : titre, période, scènes, lieux, personnes, planning, sélection de festivals, synopsis, page film',
     where: 'Serveur',
@@ -44,12 +57,18 @@ const STORED: { icon: IconName; what: string; where: string; visible: string }[]
 ];
 
 const NOT_STORED: { icon: IconName; text: string }[] = [
-  { icon: 'doc', text: 'Ton scénario importé : il est découpé en scènes puis n’est pas conservé.' },
+  {
+    icon: 'doc',
+    text: 'Le texte original de l’analyse n’est pas conservé par le serveur Encadré. Le transfert des scènes au projet est explicite.',
+  },
   {
     icon: 'phone',
     text: 'Les images du Coach : elles seront traitées sur ton téléphone et jamais envoyées.',
   },
-  { icon: 'sparkle', text: 'Rien de ce que tu écris ne sert à entraîner une IA.' },
+  {
+    icon: 'sparkle',
+    text: 'Encadré n’entraîne pas de modèle sur tes textes. Les conditions du fournisseur IA s’appliquent aux analyses demandées.',
+  },
   { icon: 'eye', text: 'Pas de publicité ni de traceur publicitaire.' },
 ];
 
@@ -139,8 +158,8 @@ export default function MyData() {
         {usingMocks ? (
           <p className="mt-3 flex items-start gap-2 text-meta text-muted-on-light">
             <Icon name="info" size={16} className="mt-0.5 shrink-0" />
-            Version de démonstration : le « serveur » est simulé dans ce navigateur. Rien ne quitte ton
-            ordinateur.
+            Les API historiques du projet sont simulées dans ce navigateur. L’action « Analyser mon scénario »
+            appelle le backend réel ; seul le mode démo de l’analyse reste entièrement local.
           </p>
         ) : null}
       </section>

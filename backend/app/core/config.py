@@ -1,6 +1,7 @@
 from functools import lru_cache
+from typing import Literal
 
-from pydantic import SecretStr
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -20,6 +21,14 @@ class Settings(BaseSettings):
     anthropic_api_key: SecretStr = SecretStr("")
     llm_model: str = "claude-opus-5-5"
     llm_effort: str = "medium"  # low | medium | high | xhigh | max
+    scenario_timeout_seconds: float = Field(default=90, gt=0, le=180)
+    scenario_provider: Literal["anthropic", "ollama"] = "anthropic"
+    ollama_url: str = "http://localhost:11434"
+    ollama_model: str = "qwen2.5:7b"
+    geoapify_api_key: SecretStr = SecretStr("")
+    scouting_daily_provider_budget: int = Field(default=2700, ge=1, le=100000)
+    open_meteo_url: str = "https://api.open-meteo.com/v1/forecast"
+    open_meteo_api_key: SecretStr = SecretStr("")
 
     @property
     def cors_origin_list(self) -> list[str]:

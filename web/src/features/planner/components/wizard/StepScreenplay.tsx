@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { PlannerHandoff } from '../../scenario/PlannerHandoff';
 import type { ParseScreenplayResult, Person, Scene } from '@/api/types';
 import {
   AiDraftBadge,
@@ -126,6 +127,7 @@ export function StepScreenplay({
 
   return (
     <div className="flex flex-col gap-8">
+      <PlannerHandoff onApply={(result) => apply(result, 'append')} />
       <Tabs defaultValue={draft.scenes.length ? 'manuel' : 'import'}>
         <TabsList aria-label="Comment ajouter tes scènes">
           <TabsTrigger value="import">Importer mon scénario</TabsTrigger>

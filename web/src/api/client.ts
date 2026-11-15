@@ -72,7 +72,7 @@ export function apiError(code: ApiErrorCode, status = 0, message?: string): ApiE
 export function validate<S extends z.ZodType>(schema: S, data: unknown, where: string): z.output<S> {
   const r = schema.safeParse(data);
   if (!r.success) {
-    if (import.meta.env.DEV) console.error(`[api] Réponse invalide pour ${where}`, r.error.issues);
+    // Do not log validation inputs: responses may contain private screenplay text.
     throw new ApiError(0, 'reponse_invalide', `${MESSAGES.reponse_invalide} (${where})`);
   }
   return r.data;
@@ -136,9 +136,15 @@ export async function request<S extends z.ZodType>(
   if (!res.ok) {
     let serverMessage: string | undefined;
     try {
-      const j = (await res.json()) as { message?: string; detail?: string };
+      const j = (await res.json()) as { message?: string; detail?: string; error?: { message?: string } };
       serverMessage =
-        typeof j.message === 'string' ? j.message : typeof j.detail === 'string' ? j.detail : undefined;
+        typeof j.error?.message === 'string'
+          ? j.error.message
+          : typeof j.message === 'string'
+            ? j.message
+            : typeof j.detail === 'string'
+              ? j.detail
+              : undefined;
     } catch {
       /* corps vide ou non JSON */
     }
