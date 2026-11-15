@@ -1,0 +1,214 @@
+{
+  "$defs": {
+    "Category": {
+      "enum": [
+        "shot_size",
+        "framing",
+        "horizon",
+        "angle",
+        "light",
+        "continuity",
+        "movement",
+        "smartphone",
+        "sound",
+        "documentary"
+      ],
+      "title": "Category",
+      "type": "string"
+    },
+    "Confidence": {
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ],
+      "title": "Confidence",
+      "type": "string"
+    },
+    "Measure": {
+      "enum": [
+        "roll",
+        "pitch",
+        "subject_h",
+        "center_x",
+        "center_y",
+        "headroom",
+        "luma",
+        "contrast",
+        "backlight",
+        "sun_heading",
+        "blur",
+        "shake",
+        "audio_level",
+        "none"
+      ],
+      "title": "Measure",
+      "type": "string"
+    },
+    "NumericHint": {
+      "additionalProperties": false,
+      "properties": {
+        "measure": {
+          "minLength": 1,
+          "title": "Measure",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "unit": {
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "measure",
+        "value",
+        "unit"
+      ],
+      "title": "NumericHint",
+      "type": "object"
+    },
+    "Source": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "author": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Author"
+        },
+        "url": {
+          "format": "uri",
+          "minLength": 1,
+          "title": "Url",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/SourceType"
+        }
+      },
+      "required": [
+        "title",
+        "url",
+        "type"
+      ],
+      "title": "Source",
+      "type": "object"
+    },
+    "SourceType": {
+      "enum": [
+        "book",
+        "article",
+        "official_doc",
+        "course",
+        "encyclopedia"
+      ],
+      "title": "SourceType",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Règle de cinématographie. Sans source, la règle est refusée.",
+  "properties": {
+    "id": {
+      "pattern": "^R-\\d{3}$",
+      "title": "Id",
+      "type": "string"
+    },
+    "category": {
+      "$ref": "#/$defs/Category"
+    },
+    "title_fr": {
+      "minLength": 1,
+      "title": "Title Fr",
+      "type": "string"
+    },
+    "rule_fr": {
+      "minLength": 1,
+      "title": "Rule Fr",
+      "type": "string"
+    },
+    "why_fr": {
+      "minLength": 1,
+      "title": "Why Fr",
+      "type": "string"
+    },
+    "measurable": {
+      "items": {
+        "$ref": "#/$defs/Measure"
+      },
+      "minItems": 1,
+      "title": "Measurable",
+      "type": "array"
+    },
+    "numeric_hint": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/NumericHint"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "applies_when": {
+      "items": {
+        "pattern": "^[a-z0-9]+(_[a-z0-9]+)*$",
+        "type": "string"
+      },
+      "title": "Applies When",
+      "type": "array"
+    },
+    "confidence": {
+      "$ref": "#/$defs/Confidence"
+    },
+    "sources": {
+      "items": {
+        "$ref": "#/$defs/Source"
+      },
+      "minItems": 1,
+      "title": "Sources",
+      "type": "array"
+    },
+    "notes": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Notes"
+    }
+  },
+  "required": [
+    "id",
+    "category",
+    "title_fr",
+    "rule_fr",
+    "why_fr",
+    "measurable",
+    "applies_when",
+    "confidence",
+    "sources"
+  ],
+  "title": "Rule",
+  "type": "object"
+}

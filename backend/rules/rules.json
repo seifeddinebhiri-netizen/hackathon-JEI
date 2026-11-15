@@ -1,0 +1,2204 @@
+[
+  {
+    "id": "R-001",
+    "category": "shot_size",
+    "title_fr": "Plan large pour situer le sujet",
+    "rule_fr": "Utilise un plan large quand tu veux montrer le sujet en entier avec son environnement autour de lui.",
+    "why_fr": "On comprend où il se trouve et comment il s'inscrit dans le lieu ; cela peut aussi suggérer l'isolement ou l'ampleur du décor.",
+    "measurable": [
+      "subject_h"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "wide_shot",
+      "location",
+      "establishing"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Types of Camera Shot Sizes in Film (StudioBinder)",
+        "author": null,
+        "url": "https://www.studiobinder.com/blog/types-of-camera-shots-sizes-in-film/",
+        "type": "article"
+      },
+      {
+        "title": "Long shot (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Long_shot",
+        "type": "encyclopedia"
+      }
+    ],
+    "notes": "Les limites entre plan large, moyen et rapproché ne sont pas fixes."
+  },
+  {
+    "id": "R-002",
+    "category": "shot_size",
+    "title_fr": "Très grand plan d'ensemble",
+    "rule_fr": "Place le sujet très petit dans le décor quand tu veux souligner l'échelle du lieu ou la solitude du personnage.",
+    "why_fr": "Le personnage paraît minuscule, perdu ou écrasé par l'espace, ce qui renforce la distance émotionnelle.",
+    "measurable": [
+      "subject_h"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "extreme_wide",
+      "landscape",
+      "isolation"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Types of Camera Shot Sizes in Film (StudioBinder)",
+        "author": null,
+        "url": "https://www.studiobinder.com/blog/types-of-camera-shots-sizes-in-film/",
+        "type": "article"
+      },
+      {
+        "title": "Long shot (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Long_shot",
+        "type": "encyclopedia"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "R-003",
+    "category": "shot_size",
+    "title_fr": "Plan moyen, plan neutre et polyvalent",
+    "rule_fr": "Cadre à peu près à la taille pour les conversations et les interviews afin de voir visage et gestes avec un peu de décor.",
+    "why_fr": "Le plan moyen équilibre sujet et arrière-plan et sert souvent de plan tampon dans une scène de dialogue.",
+    "measurable": [
+      "subject_h"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "dialogue",
+      "interview",
+      "medium_shot"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Types of Camera Shot Sizes in Film (StudioBinder)",
+        "author": null,
+        "url": "https://www.studiobinder.com/blog/types-of-camera-shots-sizes-in-film/",
+        "type": "article"
+      },
+      {
+        "title": "Medium shot (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Medium_shot",
+        "type": "encyclopedia"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "R-004",
+    "category": "shot_size",
+    "title_fr": "Plan rapproché poitrine pour les expressions",
+    "rule_fr": "Cadre à partir de la poitrine quand l'expression du visage compte, tout en gardant le personnage un peu à distance.",
+    "why_fr": "On lit bien les émotions et le langage corporel sans la pression d'un gros plan.",
+    "measurable": [
+      "subject_h",
+      "headroom"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "portrait",
+      "dialogue",
+      "medium_close_up"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Types of Camera Shot Sizes in Film (StudioBinder)",
+        "author": null,
+        "url": "https://www.studiobinder.com/blog/types-of-camera-shots-sizes-in-film/",
+        "type": "article"
+      },
+      {
+        "title": "The Secret Power of Close-Ups (No Film School)",
+        "author": null,
+        "url": "https://nofilmschool.com/what-close-ups-are-for",
+        "type": "article"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "R-005",
+    "category": "shot_size",
+    "title_fr": "Gros plan pour l'émotion",
+    "rule_fr": "Passe au gros plan quand tu veux faire ressentir ce que vit le personnage plutôt que ce qu'il fait.",
+    "why_fr": "Le visage rempli d'écran fait entrer le spectateur dans l'état intérieur du personnage ; un plan large montre l'action, un gros plan montre le ressenti.",
+    "measurable": [
+      "subject_h",
+      "center_y"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "portrait",
+      "emotion",
+      "close_up"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Types of Camera Shot Sizes in Film (StudioBinder)",
+        "author": null,
+        "url": "https://www.studiobinder.com/blog/types-of-camera-shots-sizes-in-film/",
+        "type": "article"
+      },
+      {
+        "title": "The Secret Power of Close-Ups (No Film School)",
+        "author": null,
+        "url": "https://nofilmschool.com/what-close-ups-are-for",
+        "type": "article"
+      },
+      {
+        "title": "Close-up (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Close-up",
+        "type": "encyclopedia"
+      }
+    ],
+    "notes": "Trop de gros plans peuvent laisser le spectateur perdu sur ce qu'il voit."
+  },
+  {
+    "id": "R-006",
+    "category": "shot_size",
+    "title_fr": "Très gros plan pour un détail",
+    "rule_fr": "Isole un petit détail (yeux, lèvres, main qui tremble) avec un très gros plan quand ce détail porte du sens.",
+    "why_fr": "Il révèle ce qui passerait inaperçu et accentue l'intensité du moment.",
+    "measurable": [
+      "subject_h",
+      "blur"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "detail",
+      "insert",
+      "extreme_close_up"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Types of Camera Shot Sizes in Film (StudioBinder)",
+        "author": null,
+        "url": "https://www.studiobinder.com/blog/types-of-camera-shots-sizes-in-film/",
+        "type": "article"
+      },
+      {
+        "title": "The Secret Power of Close-Ups (No Film School)",
+        "author": null,
+        "url": "https://nofilmschool.com/what-close-ups-are-for",
+        "type": "article"
+      }
+    ],
+    "notes": "Avec un téléphone, la mise au point à très courte distance est délicate : vérifier la netteté."
+  },
+  {
+    "id": "R-007",
+    "category": "shot_size",
+    "title_fr": "Plan d'établissement au début d'une scène",
+    "rule_fr": "Commence une scène par un plan large qui montre le lieu et les relations entre personnes et objets avant d'entrer dans le détail.",
+    "why_fr": "Le spectateur est orienté dans l'espace (lieu, parfois moment) avant l'action principale.",
+    "measurable": [
+      "subject_h"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "scene_opening",
+      "location",
+      "wide_shot"
+    ],
+    "confidence": "medium",
+    "sources": [
+      {
+        "title": "Establishing shot (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Establishing_shot",
+        "type": "encyclopedia"
+      }
+    ],
+    "notes": "Moins systématique dans le cinéma moderne ; on peut s'en passer pour garder du rythme."
+  },
+  {
+    "id": "R-008",
+    "category": "framing",
+    "title_fr": "Règle des tiers",
+    "rule_fr": "Imagine une grille de 3x3 et place le sujet important sur une ligne ou à une intersection plutôt qu'au centre.",
+    "why_fr": "Un sujet décentré donne une image plus dynamique et laisse l'oeil explorer le cadre.",
+    "measurable": [
+      "center_x",
+      "center_y"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "any",
+      "composition",
+      "grid"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Rule of thirds (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Rule_of_thirds",
+        "type": "encyclopedia"
+      },
+      {
+        "title": "The Three Important Composition and Framing Conventions in Cinematography (Wolfcrow)",
+        "author": null,
+        "url": "https://wolfcrow.com/the-three-important-composition-and-framing-conventions-in-cinematography/",
+        "type": "article"
+      }
+    ],
+    "notes": "Rule of thumb, pas une loi : une étude citée sur Wikipédia trouve que beaucoup d'images très appréciées la suivent peu. Les deux sources la présentent comme une ligne directrice."
+  },
+  {
+    "id": "R-009",
+    "category": "framing",
+    "title_fr": "Centrer le sujet : symétrie volontaire",
+    "rule_fr": "Centre le sujet seulement si tu cherches la symétrie ou un effet solennel et que le décor s'y prête.",
+    "why_fr": "Un centrage volontaire donne un côté formel et équilibré, mais un centrage par défaut peut couper l'image en deux.",
+    "measurable": [
+      "center_x"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "symmetry",
+      "formal",
+      "composition"
+    ],
+    "confidence": "medium",
+    "sources": [
+      {
+        "title": "The Three Important Composition and Framing Conventions in Cinematography (Wolfcrow)",
+        "author": null,
+        "url": "https://wolfcrow.com/the-three-important-composition-and-framing-conventions-in-cinematography/",
+        "type": "article"
+      },
+      {
+        "title": "Rule of thirds (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Rule_of_thirds",
+        "type": "encyclopedia"
+      }
+    ],
+    "notes": "Convention discutée : le centrage reste un choix légitime."
+  },
+  {
+    "id": "R-010",
+    "category": "framing",
+    "title_fr": "Les yeux vers le tiers supérieur",
+    "rule_fr": "Pour un portrait, place les yeux environ au tiers de la hauteur de l'image en partant du haut.",
+    "why_fr": "Cela donne un cadrage de visage équilibré et naturel.",
+    "measurable": [
+      "headroom",
+      "center_y"
+    ],
+    "numeric_hint": {
+      "measure": "eye_line_from_top",
+      "value": 33,
+      "unit": "percent"
+    },
+    "applies_when": [
+      "portrait",
+      "interview",
+      "headroom"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Headroom (photographic framing) (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Headroom_(photographic_framing)",
+        "type": "encyclopedia"
+      },
+      {
+        "title": "Rule of thirds (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Rule_of_thirds",
+        "type": "encyclopedia"
+      }
+    ],
+    "notes": "Valeur donnée comme repère, pas comme mesure stricte."
+  },
+  {
+    "id": "R-011",
+    "category": "framing",
+    "title_fr": "Éviter trop d'espace au-dessus de la tête",
+    "rule_fr": "Garde peu d'espace au-dessus de la tête : assez pour respirer, pas assez pour que le sujet semble flotter en bas du cadre.",
+    "why_fr": "Trop de headroom rapetisse le sujet et crée de l'espace mort ; trop peu donne une impression d'étouffement.",
+    "measurable": [
+      "headroom",
+      "subject_h"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "portrait",
+      "interview",
+      "headroom"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "The Three Important Composition and Framing Conventions in Cinematography (Wolfcrow)",
+        "author": null,
+        "url": "https://wolfcrow.com/the-three-important-composition-and-framing-conventions-in-cinematography/",
+        "type": "article"
+      },
+      {
+        "title": "Headroom (photographic framing) (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Headroom_(photographic_framing)",
+        "type": "encyclopedia"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "R-012",
+    "category": "framing",
+    "title_fr": "Moins de headroom en plan serré",
+    "rule_fr": "Plus le plan est serré, moins tu laisses d'espace au-dessus de la tête ; en très gros plan le haut du crâne peut sortir du cadre.",
+    "why_fr": "L'espace de respiration doit s'adapter à la taille de plan, sinon le cadrage paraît mal proportionné.",
+    "measurable": [
+      "headroom",
+      "subject_h"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "close_up",
+      "portrait",
+      "headroom"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Headroom (photographic framing) (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Headroom_(photographic_framing)",
+        "type": "encyclopedia"
+      },
+      {
+        "title": "The Three Important Composition and Framing Conventions in Cinematography (Wolfcrow)",
+        "author": null,
+        "url": "https://wolfcrow.com/the-three-important-composition-and-framing-conventions-in-cinematography/",
+        "type": "article"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "R-013",
+    "category": "framing",
+    "title_fr": "Espace de regard et de déplacement",
+    "rule_fr": "Laisse plus d'espace devant le sujet, du côté où il regarde ou se déplace, que derrière lui.",
+    "why_fr": "Le spectateur peut anticiper le mouvement et le regard ; sans cet espace le sujet paraît bloqué contre le bord du cadre.",
+    "measurable": [
+      "center_x"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "profile",
+      "moving_subject",
+      "lead_room",
+      "looking_room"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "The Three Important Composition and Framing Conventions in Cinematography (Wolfcrow)",
+        "author": null,
+        "url": "https://wolfcrow.com/the-three-important-composition-and-framing-conventions-in-cinematography/",
+        "type": "article"
+      },
+      {
+        "title": "Rule of thirds (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Rule_of_thirds",
+        "type": "encyclopedia"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "R-014",
+    "category": "horizon",
+    "title_fr": "Garder l'horizon droit",
+    "rule_fr": "Garde l'horizon et les lignes verticales droits, sauf si l'inclinaison est un choix clair.",
+    "why_fr": "Un horizon penché sans raison se remarque, surtout sur la mer ou une surface plane, et paraît accidentel.",
+    "measurable": [
+      "roll"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "landscape",
+      "outdoor",
+      "any"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Where to Place the Horizon (Daily Photo Tips)",
+        "author": null,
+        "url": "https://dailyphototips.com/composition/horizon-placement/",
+        "type": "article"
+      },
+      {
+        "title": "Use iPhone camera tools to set up your shot (Apple iPhone User Guide, iOS 14)",
+        "author": null,
+        "url": "https://support.apple.com/en-us/guide/iphone/iph3dc593597/14.0/ios/14.0",
+        "type": "official_doc"
+      }
+    ],
+    "notes": "Apple propose une grille dans Réglages > Appareil photo pour s'aligner."
+  },
+  {
+    "id": "R-015",
+    "category": "horizon",
+    "title_fr": "Placer l'horizon sur une ligne de tiers",
+    "rule_fr": "Mets l'horizon sur la ligne du haut ou du bas plutôt qu'au milieu, selon ce que tu veux mettre en valeur.",
+    "why_fr": "Horizon bas : le ciel domine ; horizon haut : le sol et l'avant-plan dominent. Un horizon légèrement décalé du centre paraît hésitant.",
+    "measurable": [
+      "pitch",
+      "center_y"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "landscape",
+      "outdoor",
+      "horizon"
+    ],
+    "confidence": "medium",
+    "sources": [
+      {
+        "title": "Where to Place the Horizon (Daily Photo Tips)",
+        "author": null,
+        "url": "https://dailyphototips.com/composition/horizon-placement/",
+        "type": "article"
+      },
+      {
+        "title": "Rule of thirds (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Rule_of_thirds",
+        "type": "encyclopedia"
+      }
+    ],
+    "notes": "Sources de photographie, valables pour la vidéo. Centré possible si ciel et sol ont le même intérêt (reflets, symétrie)."
+  },
+  {
+    "id": "R-016",
+    "category": "horizon",
+    "title_fr": "Plan penché pour le malaise",
+    "rule_fr": "Incline volontairement la caméra pour signaler un danger, un déséquilibre ou un point de bascule dans l'histoire.",
+    "why_fr": "L'horizon incliné déstabilise le spectateur et suggère que quelque chose ne va pas.",
+    "measurable": [
+      "roll"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "tension",
+      "dutch_angle",
+      "fiction"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Dutch Angle Shot (StudioBinder)",
+        "author": null,
+        "url": "https://www.studiobinder.com/blog/dutch-angle-shot-camera-movement/",
+        "type": "article"
+      },
+      {
+        "title": "All About Camera Angles (Videomaker)",
+        "author": null,
+        "url": "http://www.videomaker.com/article/f5/9128-all-about-camera-angles?amp=1",
+        "type": "article"
+      }
+    ],
+    "notes": "Convention de langage cinématographique, pas une loi."
+  },
+  {
+    "id": "R-017",
+    "category": "horizon",
+    "title_fr": "Plan penché : rare et dosé",
+    "rule_fr": "Réserve le plan penché à quelques moments clés ; une légère inclinaison est moins agressive qu'une forte.",
+    "why_fr": "Le trop-plein de plans penchés use l'effet ; il fonctionne mieux après des plans de cadrage normaux.",
+    "measurable": [
+      "roll"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "dutch_angle",
+      "fiction"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Dutch Angle Shot (StudioBinder)",
+        "author": null,
+        "url": "https://www.studiobinder.com/blog/dutch-angle-shot-camera-movement/",
+        "type": "article"
+      },
+      {
+        "title": "All About Camera Angles (Videomaker)",
+        "author": null,
+        "url": "http://www.videomaker.com/article/f5/9128-all-about-camera-angles?amp=1",
+        "type": "article"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "R-018",
+    "category": "horizon",
+    "title_fr": "Caméra à l'épaule : immédiateté",
+    "rule_fr": "Filme à l'épaule ou à la main pour donner un sentiment de réel et d'urgence, notamment en documentaire, reportage ou action.",
+    "why_fr": "Le léger tremblement fait sentir au spectateur qu'il est dans la scène.",
+    "measurable": [
+      "shake"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "handheld",
+      "documentary",
+      "action"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "What is a Handheld Shot? (No Film School)",
+        "author": null,
+        "url": "https://nofilmschool.com/handheld-shot",
+        "type": "article"
+      },
+      {
+        "title": "Handheld camera (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Handheld_camera",
+        "type": "encyclopedia"
+      },
+      {
+        "title": "Which Camera Movement Should You Use, and When and Why? (PremiumBeat)",
+        "author": null,
+        "url": "https://www.premiumbeat.com/blog/understanding-filmmaking-camera-movement",
+        "type": "article"
+      }
+    ],
+    "notes": "Un tremblement accidentel est souvent perçu comme amateur ; il doit rester voulu."
+  },
+  {
+    "id": "R-019",
+    "category": "horizon",
+    "title_fr": "Trépied pour calme et composition",
+    "rule_fr": "Utilise un trépied (ou un appui fixe) quand la composition et l'espace doivent porter le plan, ou pour une interview posée.",
+    "why_fr": "Un plan fixe ralentit le rythme et laisse la scène se dérouler dans un cadre stable.",
+    "measurable": [
+      "shake",
+      "roll"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "tripod",
+      "interview",
+      "static"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Which Camera Movement Should You Use, and When and Why? (PremiumBeat)",
+        "author": null,
+        "url": "https://www.premiumbeat.com/blog/understanding-filmmaking-camera-movement",
+        "type": "article"
+      },
+      {
+        "title": "What is a Handheld Shot? (No Film School)",
+        "author": null,
+        "url": "https://nofilmschool.com/handheld-shot",
+        "type": "article"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "R-020",
+    "category": "horizon",
+    "title_fr": "Ne pas abuser de la caméra à l'épaule",
+    "rule_fr": "Choisis la caméra à l'épaule selon l'effet voulu et évite de la faire trembler sans arrêt.",
+    "why_fr": "L'excès distrait, désoriente et peut donner mal au coeur au spectateur.",
+    "measurable": [
+      "shake"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "handheld",
+      "long_take"
+    ],
+    "confidence": "medium",
+    "sources": [
+      {
+        "title": "What is a Handheld Shot? (No Film School)",
+        "author": null,
+        "url": "https://nofilmschool.com/handheld-shot",
+        "type": "article"
+      },
+      {
+        "title": "Movie Making Manual / Cinematography / Moving the camera (Wikibooks)",
+        "author": null,
+        "url": "https://en.wikibooks.org/wiki/Movie_Making_Manual/Cinematography/Moving_the_camera",
+        "type": "book"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "R-021",
+    "category": "angle",
+    "title_fr": "Hauteur des yeux : angle neutre",
+    "rule_fr": "Place la caméra à hauteur des yeux du sujet pour un regard naturel et sans jugement.",
+    "why_fr": "On retrouve le point de vue habituel de l'oeil, ce qui crée de la proximité avec le sujet.",
+    "measurable": [
+      "pitch"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "eye_level",
+      "interview",
+      "portrait"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Camera Angles (StudioBinder)",
+        "author": null,
+        "url": "https://www.studiobinder.com/blog/camera-angles/",
+        "type": "article"
+      },
+      {
+        "title": "All About Camera Angles (Videomaker)",
+        "author": null,
+        "url": "http://www.videomaker.com/article/f5/9128-all-about-camera-angles?amp=1",
+        "type": "article"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "R-022",
+    "category": "angle",
+    "title_fr": "Contre-plongée : puissance",
+    "rule_fr": "Filme légèrement du dessous pour donner de l'autorité, de la force ou de l'importance au sujet.",
+    "why_fr": "Le sujet est placé au-dessus du spectateur et paraît plus imposant.",
+    "measurable": [
+      "pitch"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "low_angle",
+      "portrait",
+      "power"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Camera Angles (StudioBinder)",
+        "author": null,
+        "url": "https://www.studiobinder.com/blog/camera-angles/",
+        "type": "article"
+      },
+      {
+        "title": "All About Camera Angles (Videomaker)",
+        "author": null,
+        "url": "http://www.videomaker.com/article/f5/9128-all-about-camera-angles?amp=1",
+        "type": "article"
+      },
+      {
+        "title": "Why Filmmakers Prefer Low Angle Shots over High Angles (Wolfcrow)",
+        "author": null,
+        "url": "https://wolfcrow.com/why-filmmakers-prefer-low-angle-shots-over-high-angles/",
+        "type": "article"
+      }
+    ],
+    "notes": "Convention, pas loi : Citizen Kane (selon Wolfcrow) l'a utilisée à l'envers."
+  },
+  {
+    "id": "R-023",
+    "category": "angle",
+    "title_fr": "Plongée : fragilité",
+    "rule_fr": "Filme d'en haut pour rendre un sujet petit, vulnérable ou moins important, ou pour montrer clairement une action complexe.",
+    "why_fr": "On regarde le sujet de haut, ce qui donne de la distance et un effet de carte de la scène.",
+    "measurable": [
+      "pitch"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "high_angle",
+      "vulnerability",
+      "overview"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Camera Angles (StudioBinder)",
+        "author": null,
+        "url": "https://www.studiobinder.com/blog/camera-angles/",
+        "type": "article"
+      },
+      {
+        "title": "All About Camera Angles (Videomaker)",
+        "author": null,
+        "url": "http://www.videomaker.com/article/f5/9128-all-about-camera-angles?amp=1",
+        "type": "article"
+      },
+      {
+        "title": "Why Filmmakers Prefer Low Angle Shots over High Angles (Wolfcrow)",
+        "author": null,
+        "url": "https://wolfcrow.com/why-filmmakers-prefer-low-angle-shots-over-high-angles/",
+        "type": "article"
+      }
+    ],
+    "notes": "Convention discutée, l'effet dépend du contexte et des plans voisins."
+  },
+  {
+    "id": "R-024",
+    "category": "angle",
+    "title_fr": "Éviter de filmer un visage trop d'en haut",
+    "rule_fr": "Évite de cadrer un visage depuis très haut quand l'émotion compte.",
+    "why_fr": "Les arcades et paupières projettent de l'ombre sur les yeux et masquent l'expression.",
+    "measurable": [
+      "pitch",
+      "luma"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "portrait",
+      "emotion"
+    ],
+    "confidence": "low",
+    "sources": [
+      {
+        "title": "Why Filmmakers Prefer Low Angle Shots over High Angles (Wolfcrow)",
+        "author": null,
+        "url": "https://wolfcrow.com/why-filmmakers-prefer-low-angle-shots-over-high-angles/",
+        "type": "article"
+      }
+    ],
+    "notes": "Argument d'un seul article, en partie lié à la convention et au coût ; à utiliser comme conseil souple."
+  },
+  {
+    "id": "R-025",
+    "category": "angle",
+    "title_fr": "Plan zénithal : regard omniscient",
+    "rule_fr": "Utilise une vue de dessus à la verticale pour un effet de regard global, presque divin.",
+    "why_fr": "Le spectateur surplombe la scène, ce qui crée de la distance.",
+    "measurable": [
+      "pitch"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "overhead",
+      "top_down"
+    ],
+    "confidence": "medium",
+    "sources": [
+      {
+        "title": "Camera Angles (StudioBinder)",
+        "author": null,
+        "url": "https://www.studiobinder.com/blog/camera-angles/",
+        "type": "article"
+      }
+    ],
+    "notes": "La page source ne donne qu'une courte définition."
+  },
+  {
+    "id": "R-026",
+    "category": "light",
+    "title_fr": "Contre-jour : exposer pour le visage",
+    "rule_fr": "Si le soleil ou une fenêtre est derrière le sujet, expose pour le visage et accepte que l'arrière-plan soit brûlé.",
+    "why_fr": "Sans cela le visage reste sombre et illisible ; un visage lisible prime sur les détails d'un fond brillant.",
+    "measurable": [
+      "backlight",
+      "luma",
+      "contrast"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "backlit",
+      "portrait",
+      "interview"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Natural light (Doc Film Academy)",
+        "author": null,
+        "url": "https://www.docfilmacademy.com/blog/natural-light",
+        "type": "course"
+      },
+      {
+        "title": "10 Things to Know About Backlighting Your Subject (PremiumBeat)",
+        "author": null,
+        "url": "https://www.premiumbeat.com/blog/backlighting-your-subject",
+        "type": "article"
+      }
+    ],
+    "notes": "Sur iPhone, toucher le visage puis ajuster l'exposition."
+  },
+  {
+    "id": "R-027",
+    "category": "light",
+    "title_fr": "Silhouette volontaire",
+    "rule_fr": "Pour une silhouette, expose pour le fond lumineux et ne mets pas de lumière sur le sujet.",
+    "why_fr": "Le sujet devient une forme sombre dramatique devant un fond clair.",
+    "measurable": [
+      "backlight",
+      "luma"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "backlit",
+      "silhouette",
+      "sunset"
+    ],
+    "confidence": "medium",
+    "sources": [
+      {
+        "title": "10 Things to Know About Backlighting Your Subject (PremiumBeat)",
+        "author": null,
+        "url": "https://www.premiumbeat.com/blog/backlighting-your-subject",
+        "type": "article"
+      }
+    ],
+    "notes": "Source cite seulement l'effet, pas de réglage chiffré."
+  },
+  {
+    "id": "R-028",
+    "category": "light",
+    "title_fr": "Rabattre la lumière avec un réflecteur",
+    "rule_fr": "Utilise un réflecteur, un drap ou un mur clair pour renvoyer de la lumière sur un visage à contre-jour.",
+    "why_fr": "Cela déboûche les ombres sans matériel d'éclairage coûteux.",
+    "measurable": [
+      "backlight",
+      "contrast",
+      "luma"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "backlit",
+      "outdoor",
+      "low_budget"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Some handy do-it-yourself solutions for cinematographers challenged by small budgets (American Cinematographer / ASC)",
+        "author": "Christopher Probst",
+        "url": "https://theasc.com/articles/some-handy-do-it-yourself-solutions-for-cinematographers-challenged-by-small-budgets",
+        "type": "article"
+      },
+      {
+        "title": "10 Things to Know About Backlighting Your Subject (PremiumBeat)",
+        "author": null,
+        "url": "https://www.premiumbeat.com/blog/backlighting-your-subject",
+        "type": "article"
+      }
+    ],
+    "notes": "L'ASC cite des couvertures de survie, du carton blanc ou des miroirs (le miroir donne un rebond plus dur)."
+  },
+  {
+    "id": "R-029",
+    "category": "light",
+    "title_fr": "Lumière dure : ombres nettes et contrastées",
+    "rule_fr": "Reconnais la lumière dure (source petite, soleil direct) : elle donne des ombres nettes et du contraste, utile pour le relief et le drame.",
+    "why_fr": "Une source petite par rapport au sujet crée des ombres marquées et moins flatteuses sur les visages.",
+    "measurable": [
+      "contrast"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "hard_light",
+      "midday",
+      "outdoor"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Hard and soft light (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Hard_and_soft_light",
+        "type": "encyclopedia"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "R-030",
+    "category": "light",
+    "title_fr": "Lumière douce : plus flatteuse sur les visages",
+    "rule_fr": "Pour un portrait, cherche une lumière douce (ciel couvert, ombre ouverte, fenêtre voilée).",
+    "why_fr": "Elle enveloppe le visage, adoucit les ombres et atténue les défauts.",
+    "measurable": [
+      "contrast",
+      "luma"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "soft_light",
+      "portrait",
+      "overcast"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Hard and soft light (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Hard_and_soft_light",
+        "type": "encyclopedia"
+      },
+      {
+        "title": "Natural light (Doc Film Academy)",
+        "author": null,
+        "url": "https://www.docfilmacademy.com/blog/natural-light",
+        "type": "course"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "R-031",
+    "category": "light",
+    "title_fr": "Heure dorée",
+    "rule_fr": "Tourne dans l'heure après le lever ou avant le coucher du soleil pour une lumière chaude, douce et à ombres longues.",
+    "why_fr": "Le soleil bas donne une lumière plus chaude et moins contrastée, flatteuse pour portraits et paysages.",
+    "measurable": [
+      "sun_heading",
+      "luma",
+      "contrast"
+    ],
+    "numeric_hint": {
+      "measure": "color_temperature",
+      "value": 3500,
+      "unit": "K"
+    },
+    "applies_when": [
+      "golden_hour",
+      "outdoor",
+      "portrait"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Golden hour (photography) (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Golden_hour_(photography)",
+        "type": "encyclopedia"
+      },
+      {
+        "title": "Some handy do-it-yourself solutions for cinematographers challenged by small budgets (American Cinematographer / ASC)",
+        "author": "Christopher Probst",
+        "url": "https://theasc.com/articles/some-handy-do-it-yourself-solutions-for-cinematographers-challenged-by-small-budgets",
+        "type": "article"
+      },
+      {
+        "title": "Natural light (Doc Film Academy)",
+        "author": null,
+        "url": "https://www.docfilmacademy.com/blog/natural-light",
+        "type": "course"
+      }
+    ],
+    "notes": "Durée variable selon latitude et saison ; la définition exacte n'est pas unique."
+  },
+  {
+    "id": "R-032",
+    "category": "light",
+    "title_fr": "Soleil de midi : chercher l'ombre",
+    "rule_fr": "En plein midi, déplace-toi à l'ombre (ruelle, mur, feuillage) plutôt que de filmer en plein soleil.",
+    "why_fr": "L'ombre ouverte donne une lumière diffuse et évite les ombres dures et les zones brûlées sur le visage.",
+    "measurable": [
+      "luma",
+      "contrast"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "midday",
+      "outdoor",
+      "street",
+      "alley"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Filming in Midday Sun Without Diffusion (PremiumBeat)",
+        "author": null,
+        "url": "https://www.premiumbeat.com/blog/filming-in-midday-sun-without-diffusion",
+        "type": "article"
+      },
+      {
+        "title": "Natural light (Doc Film Academy)",
+        "author": null,
+        "url": "https://www.docfilmacademy.com/blog/natural-light",
+        "type": "course"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "R-033",
+    "category": "light",
+    "title_fr": "Sujet près d'une fenêtre",
+    "rule_fr": "En intérieur, place le sujet près d'une grande fenêtre et filme-le avec la fenêtre sur le côté ou face à lui.",
+    "why_fr": "La lumière d'une fenêtre est douce et directionnelle, donc flatteuse et gratuite.",
+    "measurable": [
+      "luma",
+      "backlight"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "indoor",
+      "window_light",
+      "interview"
+    ],
+    "confidence": "medium",
+    "sources": [
+      {
+        "title": "Natural light (Doc Film Academy)",
+        "author": null,
+        "url": "https://www.docfilmacademy.com/blog/natural-light",
+        "type": "course"
+      },
+      {
+        "title": "Tips for Documentary Film Productions (PremiumBeat)",
+        "author": null,
+        "url": "https://www.premiumbeat.com/blog/tips-for-documentary-film-productions",
+        "type": "article"
+      }
+    ],
+    "notes": "Éviter le sujet devant la fenêtre sauf recherche de silhouette."
+  },
+  {
+    "id": "R-034",
+    "category": "light",
+    "title_fr": "Direction du soleil et rues orientées",
+    "rule_fr": "Repère la direction du soleil et privilégie les rues ou axes qui donnent une lumière stable toute la journée.",
+    "why_fr": "Filmer vers le sud ou dans une rue nord-sud donne un contre-jour plus stable que l'axe est-ouest, qui ne dure qu'une demi-journée.",
+    "measurable": [
+      "sun_heading"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "outdoor",
+      "street",
+      "planning"
+    ],
+    "confidence": "medium",
+    "sources": [
+      {
+        "title": "Some handy do-it-yourself solutions for cinematographers challenged by small budgets (American Cinematographer / ASC)",
+        "author": "Christopher Probst",
+        "url": "https://theasc.com/articles/some-handy-do-it-yourself-solutions-for-cinematographers-challenged-by-small-budgets",
+        "type": "article"
+      }
+    ],
+    "notes": "Conseil d'un directeur de la photo pour les latitudes nord-américaines, à vérifier en Tunisie avec une appli de trajectoire solaire."
+  },
+  {
+    "id": "R-035",
+    "category": "light",
+    "title_fr": "Protéger les hautes lumières",
+    "rule_fr": "En lumière naturelle, protège les zones claires plutôt que d'éclaircir à tout prix l'image ; laisse les ombres tomber naturellement.",
+    "why_fr": "Une zone brûlée est irrécupérable alors que des ombres sombres paraissent naturelles.",
+    "measurable": [
+      "luma",
+      "contrast"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "outdoor",
+      "natural_light",
+      "exposure"
+    ],
+    "confidence": "medium",
+    "sources": [
+      {
+        "title": "Natural light (Doc Film Academy)",
+        "author": null,
+        "url": "https://www.docfilmacademy.com/blog/natural-light",
+        "type": "course"
+      }
+    ],
+    "notes": "Avis d'un cours en ligne ; non universel (le visage doit rester lisible)."
+  },
+  {
+    "id": "R-036",
+    "category": "continuity",
+    "title_fr": "Règle des 180 degrés",
+    "rule_fr": "Garde la caméra du même côté de la ligne imaginaire entre deux personnages pendant toute la scène.",
+    "why_fr": "Les personnages gardent leur côté dans l'image, le spectateur ne perd pas ses repères.",
+    "measurable": [
+      "none"
+    ],
+    "numeric_hint": {
+      "measure": "camera_arc",
+      "value": 180,
+      "unit": "degrees"
+    },
+    "applies_when": [
+      "dialogue",
+      "two_people",
+      "continuity"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "180-degree rule (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/180-degree_rule",
+        "type": "encyclopedia"
+      }
+    ],
+    "notes": "Convention de montage ; la transgresser est possible volontairement."
+  },
+  {
+    "id": "R-037",
+    "category": "continuity",
+    "title_fr": "Traverser la ligne proprement",
+    "rule_fr": "Si tu dois passer de l'autre côté, utilise un mouvement de caméra visible, un plan tampon sur l'axe ou change l'action.",
+    "why_fr": "Le changement de côté est alors compris par le spectateur au lieu d'être une erreur d'orientation.",
+    "measurable": [
+      "none"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "dialogue",
+      "two_people",
+      "continuity"
+    ],
+    "confidence": "medium",
+    "sources": [
+      {
+        "title": "180-degree rule (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/180-degree_rule",
+        "type": "encyclopedia"
+      }
+    ],
+    "notes": "Solutions décrites sur Wikipédia ; d'autres existent."
+  },
+  {
+    "id": "R-038",
+    "category": "continuity",
+    "title_fr": "Règle des 30 degrés",
+    "rule_fr": "Entre deux plans successifs du même sujet, déplace la caméra d'au moins 30 degrés, sinon change nettement la taille de plan.",
+    "why_fr": "Deux plans trop semblables créent un faux raccord (jump cut) qui attire l'attention sur la technique.",
+    "measurable": [
+      "none"
+    ],
+    "numeric_hint": {
+      "measure": "camera_move_between_shots",
+      "value": 30,
+      "unit": "degrees"
+    },
+    "applies_when": [
+      "editing",
+      "same_subject",
+      "continuity"
+    ],
+    "confidence": "medium",
+    "sources": [
+      {
+        "title": "30-degree rule (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/30-degree_rule",
+        "type": "encyclopedia"
+      }
+    ],
+    "notes": "Guideline : certains sources citent 25 à 30 degrés ; des jump cuts volontaires existent."
+  },
+  {
+    "id": "R-039",
+    "category": "continuity",
+    "title_fr": "Raccord de regard",
+    "rule_fr": "Quand un personnage regarde hors champ, filme ensuite ce qu'il regarde dans la direction cohérente.",
+    "why_fr": "Le spectateur relie les deux plans et comprend ce que voit le personnage.",
+    "measurable": [
+      "none"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "eyeline",
+      "dialogue",
+      "continuity"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Eyeline match (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Eyeline_match",
+        "type": "encyclopedia"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "R-040",
+    "category": "continuity",
+    "title_fr": "Champ-contrechamp cohérent",
+    "rule_fr": "Pour un dialogue, garde même objectif, même hauteur de caméra et même distance sur les deux interlocuteurs.",
+    "why_fr": "Les deux plans se raccordent mieux et le regard de chacun reste cohérent.",
+    "measurable": [
+      "pitch",
+      "subject_h"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "dialogue",
+      "shot_reverse_shot",
+      "continuity"
+    ],
+    "confidence": "medium",
+    "sources": [
+      {
+        "title": "Eyeline match (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Eyeline_match",
+        "type": "encyclopedia"
+      },
+      {
+        "title": "Shot reverse shot (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Shot_reverse_shot",
+        "type": "encyclopedia"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "R-041",
+    "category": "continuity",
+    "title_fr": "Plan par-dessus l'épaule",
+    "rule_fr": "Pour une conversation, cadre un personnage avec l'épaule et la tête de l'autre au premier plan.",
+    "why_fr": "L'épaule donne de la profondeur et rappelle la relation spatiale tout en gardant l'expression visible.",
+    "measurable": [
+      "center_x",
+      "subject_h"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "dialogue",
+      "over_the_shoulder"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Over-the-shoulder shot (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Over-the-shoulder_shot",
+        "type": "encyclopedia"
+      },
+      {
+        "title": "Shot reverse shot (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Shot_reverse_shot",
+        "type": "encyclopedia"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "R-042",
+    "category": "continuity",
+    "title_fr": "Plan de dos : suivre un personnage",
+    "rule_fr": "Filme un personnage de dos avec un plan moyen large pour partager son point de vue.",
+    "why_fr": "On voit le décor en même temps que lui et on s'identifie à son regard.",
+    "measurable": [
+      "subject_h",
+      "center_x"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "from_behind",
+      "following",
+      "pov"
+    ],
+    "confidence": "medium",
+    "sources": [
+      {
+        "title": "Types of Camera Shot Sizes in Film (StudioBinder)",
+        "author": null,
+        "url": "https://www.studiobinder.com/blog/types-of-camera-shots-sizes-in-film/",
+        "type": "article"
+      },
+      {
+        "title": "Over-the-shoulder shot (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Over-the-shoulder_shot",
+        "type": "encyclopedia"
+      }
+    ],
+    "notes": "Plan de dos pur : appuyé par StudioBinder (plan moyen large) uniquement."
+  },
+  {
+    "id": "R-043",
+    "category": "continuity",
+    "title_fr": "Plan de coupe / réaction",
+    "rule_fr": "Prévois des plans de coupe ou de réaction (visage de l'écoutant, détail de l'action).",
+    "why_fr": "Ils ajoutent émotion et contexte sans interrompre l'action et facilitent le montage.",
+    "measurable": [
+      "none"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "cutaway",
+      "reaction",
+      "editing"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "The Secret Power of Close-Ups (No Film School)",
+        "author": null,
+        "url": "https://nofilmschool.com/what-close-ups-are-for",
+        "type": "article"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "R-044",
+    "category": "movement",
+    "title_fr": "Panoramique : révéler l'espace",
+    "rule_fr": "Pivote la caméra horizontalement depuis une position fixe pour dévoiler progressivement ce qui est hors champ.",
+    "why_fr": "Le panoramique intègre graduellement l'espace hors champ dans l'image.",
+    "measurable": [
+      "roll",
+      "shake"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "pan",
+      "reveal"
+    ],
+    "confidence": "medium",
+    "sources": [
+      {
+        "title": "Panning (camera) (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Panning_(camera)",
+        "type": "encyclopedia"
+      }
+    ],
+    "notes": "Meilleure stabilité avec un appui ; pivoter sur un seul plan."
+  },
+  {
+    "id": "R-045",
+    "category": "movement",
+    "title_fr": "Panoramique régulier, appui stable",
+    "rule_fr": "Pour un panoramique propre, utilise un trépied ou monopode et pivote dans un seul plan.",
+    "why_fr": "L'appui permet de tourner sur un axe tout en restant stable sur les autres.",
+    "measurable": [
+      "shake",
+      "roll"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "pan",
+      "tripod"
+    ],
+    "confidence": "medium",
+    "sources": [
+      {
+        "title": "Panning (camera) (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Panning_(camera)",
+        "type": "encyclopedia"
+      }
+    ],
+    "notes": "Conseil issu de la photo, transposable à la vidéo."
+  },
+  {
+    "id": "R-046",
+    "category": "movement",
+    "title_fr": "Travelling : suivre un sujet",
+    "rule_fr": "Accompagne le sujet en déplaçant la caméra avec lui (marche stabilisée, gimbal) plutôt qu'en panoramiquant.",
+    "why_fr": "Le plan donne une sensation de mouvement et d'immersion tout en gardant l'attention sur le sujet.",
+    "measurable": [
+      "shake",
+      "subject_h"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "tracking",
+      "walking",
+      "following"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Tracking shot (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Tracking_shot",
+        "type": "encyclopedia"
+      }
+    ],
+    "notes": "Sur smartphone : marche fluide, genoux souples, gimbal si possible."
+  },
+  {
+    "id": "R-047",
+    "category": "movement",
+    "title_fr": "Mouvement motivé par l'histoire",
+    "rule_fr": "Ne bouge la caméra que si le mouvement sert l'histoire ; sinon préfère un plan fixe.",
+    "why_fr": "Un mouvement sans raison distrait, alors qu'un mouvement motivé renforce l'émotion.",
+    "measurable": [
+      "shake"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "any",
+      "movement"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "What is a Handheld Shot? (No Film School)",
+        "author": null,
+        "url": "https://nofilmschool.com/handheld-shot",
+        "type": "article"
+      },
+      {
+        "title": "Which Camera Movement Should You Use, and When and Why? (PremiumBeat)",
+        "author": null,
+        "url": "https://www.premiumbeat.com/blog/understanding-filmmaking-camera-movement",
+        "type": "article"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "R-048",
+    "category": "movement",
+    "title_fr": "Mouvement lent et régulier pour l'immersion",
+    "rule_fr": "Pour un mouvement fluide (gimbal, stabilisateur), garde une vitesse lente et constante.",
+    "why_fr": "Le point de vue stable place le spectateur dans la peau du personnage.",
+    "measurable": [
+      "shake"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "gimbal",
+      "smooth",
+      "immersion"
+    ],
+    "confidence": "medium",
+    "sources": [
+      {
+        "title": "Which Camera Movement Should You Use, and When and Why? (PremiumBeat)",
+        "author": null,
+        "url": "https://www.premiumbeat.com/blog/understanding-filmmaking-camera-movement",
+        "type": "article"
+      }
+    ],
+    "notes": "Source ne donne pas de valeur de vitesse."
+  },
+  {
+    "id": "R-049",
+    "category": "movement",
+    "title_fr": "Mouvement simple, bien exécuté",
+    "rule_fr": "Préfère un plan simple bien réalisé à un mouvement complexe mal maîtrisé.",
+    "why_fr": "Un opérateur débutant gagne en clarté avec peu de mouvement.",
+    "measurable": [
+      "shake"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "beginner",
+      "movement"
+    ],
+    "confidence": "medium",
+    "sources": [
+      {
+        "title": "Movie Making Manual / Cinematography / Moving the camera (Wikibooks)",
+        "author": null,
+        "url": "https://en.wikibooks.org/wiki/Movie_Making_Manual/Cinematography/Moving_the_camera",
+        "type": "book"
+      }
+    ],
+    "notes": "Conseil de manuel libre, avis plus qu'une règle."
+  },
+  {
+    "id": "R-050",
+    "category": "movement",
+    "title_fr": "Balayage rapide (whip pan)",
+    "rule_fr": "Utilise un panoramique très rapide comme transition ou pour un effet d'énergie.",
+    "why_fr": "Le flou de mouvement donne de l'urgence et rend la coupe suivante motivée.",
+    "measurable": [
+      "blur",
+      "shake"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "whip_pan",
+      "transition"
+    ],
+    "confidence": "low",
+    "sources": [
+      {
+        "title": "Whip pan (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Whip_pan",
+        "type": "encyclopedia"
+      }
+    ],
+    "notes": "Page Wikipédia signalée comme manquant de références."
+  },
+  {
+    "id": "R-051",
+    "category": "smartphone",
+    "title_fr": "Verrouiller exposition et mise au point",
+    "rule_fr": "Appuie longuement sur la zone de mise au point jusqu'à voir AE/AF Lock avant de tourner.",
+    "why_fr": "L'image ne change plus de luminosité ni de netteté quand la lumière varie ou qu'un objet passe.",
+    "measurable": [
+      "luma",
+      "blur"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "iphone",
+      "video",
+      "exposure_lock"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Use iPhone camera tools to set up your shot (Apple iPhone User Guide, iOS 14)",
+        "author": null,
+        "url": "https://support.apple.com/en-us/guide/iphone/iph3dc593597/14.0/ios/14.0",
+        "type": "official_doc"
+      }
+    ],
+    "notes": "Touche l'écran pour déverrouiller."
+  },
+  {
+    "id": "R-052",
+    "category": "smartphone",
+    "title_fr": "Régler l'exposition avec le curseur",
+    "rule_fr": "Après la mise au point, ajuste la luminosité avec le curseur d'exposition (iPhone 11 et suivants) avant de filmer.",
+    "why_fr": "Cela évite un visage trop sombre ou un ciel brûlé.",
+    "measurable": [
+      "luma",
+      "contrast",
+      "backlight"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "iphone",
+      "exposure",
+      "backlit"
+    ],
+    "confidence": "medium",
+    "sources": [
+      {
+        "title": "Use iPhone camera tools to set up your shot (Apple iPhone User Guide, iOS 14)",
+        "author": null,
+        "url": "https://support.apple.com/en-us/guide/iphone/iph3dc593597/14.0/ios/14.0",
+        "type": "official_doc"
+      }
+    ],
+    "notes": "Le réglage reste verrouillé jusqu'à la prochaine ouverture de l'app (sauf option Conserver les réglages)."
+  },
+  {
+    "id": "R-053",
+    "category": "smartphone",
+    "title_fr": "Activer la grille",
+    "rule_fr": "Active la grille dans Réglages > Appareil photo pour aligner l'horizon et placer le sujet.",
+    "why_fr": "Les lignes aident à redresser l'horizon et à appliquer la règle des tiers.",
+    "measurable": [
+      "roll",
+      "center_x",
+      "center_y"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "iphone",
+      "grid",
+      "composition"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Use iPhone camera tools to set up your shot (Apple iPhone User Guide, iOS 14)",
+        "author": null,
+        "url": "https://support.apple.com/en-us/guide/iphone/iph3dc593597/14.0/ios/14.0",
+        "type": "official_doc"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "R-054",
+    "category": "smartphone",
+    "title_fr": "Éviter le zoom numérique",
+    "rule_fr": "Évite de zoomer en numérique ; rapproche-toi du sujet ou change d'objectif.",
+    "why_fr": "Le zoom numérique recadre et agrandit l'image, avec moins de détails réels.",
+    "measurable": [
+      "subject_h",
+      "blur"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "iphone",
+      "zoom",
+      "quality"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Digital zoom (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Digital_zoom",
+        "type": "encyclopedia"
+      }
+    ],
+    "notes": "Les smartphones utilisent un zoom hybride qui réduit la perte au-delà de l'optique ; la perte reste présente."
+  },
+  {
+    "id": "R-055",
+    "category": "smartphone",
+    "title_fr": "Filmer en paysage pour le cinéma",
+    "rule_fr": "Tiens le téléphone horizontalement pour un film destiné à l'écran large, aux festivals ou à YouTube.",
+    "why_fr": "Le format horizontal correspond à la vision humaine et à la tradition du cinéma, et facilite les plans larges.",
+    "measurable": [
+      "roll"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "iphone",
+      "landscape",
+      "cinema"
+    ],
+    "confidence": "medium",
+    "sources": [
+      {
+        "title": "The Pros and Cons of Vertical Video and Working with Constraints (No Film School)",
+        "author": null,
+        "url": "https://nofilmschool.com/2018/09/pros-and-cons-vertical-video-working-constraints",
+        "type": "article"
+      }
+    ],
+    "notes": "Le vertical se justifie pour du contenu mobile ; choisir selon le public."
+  },
+  {
+    "id": "R-056",
+    "category": "smartphone",
+    "title_fr": "Nettoyer l'objectif avant de filmer",
+    "rule_fr": "Essuie l'objectif avec un chiffon doux et sec, en petits cercles, avant chaque tournage.",
+    "why_fr": "Traces de doigts et saletés augmentent le flou lumineux (flare), surtout contre une source de lumière.",
+    "measurable": [
+      "blur",
+      "contrast",
+      "backlight"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "iphone",
+      "lens",
+      "backlit"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Light appears as linear or spread when taking pictures (Samsung Support)",
+        "author": null,
+        "url": "https://www.samsung.com/sg/support/mobile-devices/light-appears-as-linear-or-spread-when-taking-pictures-in-samsung-mobile-device",
+        "type": "official_doc"
+      }
+    ],
+    "notes": "Source Samsung ; vaut pour tout téléphone."
+  },
+  {
+    "id": "R-057",
+    "category": "smartphone",
+    "title_fr": "Vitesse d'obturation = environ 2x la cadence",
+    "rule_fr": "Si ton app permet de régler l'obturation, mets une vitesse d'environ le double de la cadence (24 i/s -> 1/48).",
+    "why_fr": "Cela donne un flou de mouvement naturel ; plus rapide, le mouvement devient saccadé.",
+    "measurable": [
+      "blur",
+      "luma"
+    ],
+    "numeric_hint": {
+      "measure": "shutter_angle",
+      "value": 180,
+      "unit": "degrees"
+    },
+    "applies_when": [
+      "smartphone",
+      "video",
+      "shutter"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "What is the 180 Degree Shutter Rule (StudioBinder)",
+        "author": null,
+        "url": "https://www.studiobinder.com/blog/what-is-the-180-degree-shutter-rule/",
+        "type": "article"
+      },
+      {
+        "title": "What is Shutter Speed (StudioBinder)",
+        "author": null,
+        "url": "https://www.studiobinder.com/blog/what-is-shutter-speed/",
+        "type": "article"
+      }
+    ],
+    "notes": "L'appareil photo iPhone par défaut ne propose pas ce réglage ; une app tierce est probablement nécessaire (non vérifié dans une source officielle Apple). StudioBinder note que 1/50 est souvent utilisé faute de 1/48."
+  },
+  {
+    "id": "R-058",
+    "category": "smartphone",
+    "title_fr": "Distorsion à courte distance",
+    "rule_fr": "Évite de filmer un visage de très près avec un objectif grand angle.",
+    "why_fr": "Le nez et les traits paraissent déformés ; reculer et utiliser une focale plus longue est plus flatteur.",
+    "measurable": [
+      "subject_h"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "iphone",
+      "portrait",
+      "wide_lens"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Perspective distortion (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Perspective_distortion",
+        "type": "encyclopedia"
+      },
+      {
+        "title": "Close-up (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Close-up",
+        "type": "encyclopedia"
+      }
+    ],
+    "notes": "Wikipédia cite 85 à 135 mm (équivalent 35 mm) comme focale flatteuse en photo."
+  },
+  {
+    "id": "R-059",
+    "category": "sound",
+    "title_fr": "Micro près de la source",
+    "rule_fr": "Rapproche le micro de la bouche du sujet au maximum, juste hors cadre.",
+    "why_fr": "Un micro proche réduit le bruit de fond et l'écho ; un micro loin ne peut pas être « rapproché » en post.",
+    "measurable": [
+      "audio_level"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "dialogue",
+      "interview",
+      "microphone"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "7 Tips to Help You Avoid Common Audio Pitfalls (No Film School)",
+        "author": null,
+        "url": "https://nofilmschool.com/tips-avoid-common-audio-pitfalls",
+        "type": "article"
+      },
+      {
+        "title": "Don't F*** Up Your Audio (Henri Rapp)",
+        "author": "Henri Rapp",
+        "url": "https://henrirapp.com/dont-f-up-your-audio/",
+        "type": "article"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "R-060",
+    "category": "sound",
+    "title_fr": "Protéger le micro du vent",
+    "rule_fr": "Mets une bonnette ou protection anti-vent sur le micro en extérieur, même par petite brise.",
+    "why_fr": "Le vent produit un grondement difficile à supprimer ensuite.",
+    "measurable": [
+      "audio_level"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "outdoor",
+      "wind",
+      "microphone"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "How to reduce wind noise when filming outdoors (Elgato)",
+        "author": null,
+        "url": "https://www.elgato.com/explorer/products/wave/how-to-reduce-wind-noise-when-filming-outdoors/",
+        "type": "article"
+      },
+      {
+        "title": "7 Tips to Help You Avoid Common Audio Pitfalls (No Film School)",
+        "author": null,
+        "url": "https://nofilmschool.com/tips-avoid-common-audio-pitfalls",
+        "type": "article"
+      }
+    ],
+    "notes": "Sur téléphone, couvrir le micro avec ta main ou le corps peut aider mais n'est pas dans les sources."
+  },
+  {
+    "id": "R-061",
+    "category": "sound",
+    "title_fr": "Filtre coupe-bas contre le grondement",
+    "rule_fr": "Active un filtre passe-haut à l'enregistrement ou au montage si du vent a pollué le son.",
+    "why_fr": "Il retire les basses fréquences où se trouve la majorité du grondement du vent.",
+    "measurable": [
+      "audio_level"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "wind",
+      "editing"
+    ],
+    "confidence": "medium",
+    "sources": [
+      {
+        "title": "How to reduce wind noise when filming outdoors (Elgato)",
+        "author": null,
+        "url": "https://www.elgato.com/explorer/products/wave/how-to-reduce-wind-noise-when-filming-outdoors/",
+        "type": "article"
+      },
+      {
+        "title": "Don't F*** Up Your Audio (Henri Rapp)",
+        "author": "Henri Rapp",
+        "url": "https://henrirapp.com/dont-f-up-your-audio/",
+        "type": "article"
+      }
+    ],
+    "notes": "Ne répare qu'en partie un son très venté."
+  },
+  {
+    "id": "R-062",
+    "category": "sound",
+    "title_fr": "Enregistrer le ton de salle",
+    "rule_fr": "Enregistre un ton de salle (silence du lieu) à chaque lieu, avec le micro au même endroit.",
+    "why_fr": "Il sert à combler les coupures du dialogue et à lisser les différences entre plans.",
+    "measurable": [
+      "audio_level"
+    ],
+    "numeric_hint": {
+      "measure": "room_tone_duration_outdoor_min",
+      "value": 60,
+      "unit": "seconds"
+    },
+    "applies_when": [
+      "room_tone",
+      "editing",
+      "indoor"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "7 Tips to Help You Avoid Common Audio Pitfalls (No Film School)",
+        "author": null,
+        "url": "https://nofilmschool.com/tips-avoid-common-audio-pitfalls",
+        "type": "article"
+      },
+      {
+        "title": "Don't F*** Up Your Audio (Henri Rapp)",
+        "author": "Henri Rapp",
+        "url": "https://henrirapp.com/dont-f-up-your-audio/",
+        "type": "article"
+      },
+      {
+        "title": "Three Easy-To-Follow Tips For Utilising Ambience Tracks (RODE)",
+        "author": null,
+        "url": "https://rode.com/en-au/about/news-info/three-easy-to-follow-tips-for-utilising-ambience-tracks",
+        "type": "article"
+      }
+    ],
+    "notes": "Durée donnée : 30 s en intérieur stable, au moins 1 min dehors."
+  },
+  {
+    "id": "R-063",
+    "category": "sound",
+    "title_fr": "Repérer et couper les bruits parasites",
+    "rule_fr": "Repère les sources de bruit (frigo, climatisation, musique, travaux) et coupe ou éloigne-les avant de tourner.",
+    "why_fr": "Il est difficile de retirer ces bruits en post.",
+    "measurable": [
+      "audio_level"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "indoor",
+      "outdoor",
+      "noise"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "7 Tips to Help You Avoid Common Audio Pitfalls (No Film School)",
+        "author": null,
+        "url": "https://nofilmschool.com/tips-avoid-common-audio-pitfalls",
+        "type": "article"
+      },
+      {
+        "title": "Don't F*** Up Your Audio (Henri Rapp)",
+        "author": "Henri Rapp",
+        "url": "https://henrirapp.com/dont-f-up-your-audio/",
+        "type": "article"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "R-064",
+    "category": "sound",
+    "title_fr": "Enregistrer des ambiances séparées",
+    "rule_fr": "Enregistre quelques dizaines de secondes d'ambiance du lieu (son seul) en plus des plans.",
+    "why_fr": "Cela enrichit la bande-son et sauve des raccords.",
+    "measurable": [
+      "audio_level"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "ambience",
+      "documentary",
+      "editing"
+    ],
+    "confidence": "medium",
+    "sources": [
+      {
+        "title": "Three Easy-To-Follow Tips For Utilising Ambience Tracks (RODE)",
+        "author": null,
+        "url": "https://rode.com/en-au/about/news-info/three-easy-to-follow-tips-for-utilising-ambience-tracks",
+        "type": "article"
+      },
+      {
+        "title": "Tips for Documentary Film Productions (PremiumBeat)",
+        "author": null,
+        "url": "https://www.premiumbeat.com/blog/tips-for-documentary-film-productions",
+        "type": "article"
+      }
+    ],
+    "notes": "Valeurs de durée variables selon les sources."
+  },
+  {
+    "id": "R-065",
+    "category": "sound",
+    "title_fr": "Éviter la saturation",
+    "rule_fr": "Baisse le niveau d'enregistrement si le son sature (écrêtage).",
+    "why_fr": "Les pics écrêtés sont perdus et ne se récupèrent pas vraiment.",
+    "measurable": [
+      "audio_level"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "recording",
+      "loud",
+      "levels"
+    ],
+    "confidence": "medium",
+    "sources": [
+      {
+        "title": "Clipping (audio) (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Audio_clipping",
+        "type": "encyclopedia"
+      }
+    ],
+    "notes": "Wikipédia ne donne pas de niveau cible."
+  },
+  {
+    "id": "R-066",
+    "category": "documentary",
+    "title_fr": "Profiter des heures douces dehors",
+    "rule_fr": "Planifie les extérieurs dans les heures qui suivent le lever et précèdent le coucher du soleil.",
+    "why_fr": "C'est la lumière la plus belle et la moins chère.",
+    "measurable": [
+      "luma",
+      "sun_heading"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "outdoor",
+      "documentary",
+      "low_budget"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Some handy do-it-yourself solutions for cinematographers challenged by small budgets (American Cinematographer / ASC)",
+        "author": "Christopher Probst",
+        "url": "https://theasc.com/articles/some-handy-do-it-yourself-solutions-for-cinematographers-challenged-by-small-budgets",
+        "type": "article"
+      },
+      {
+        "title": "Natural light (Doc Film Academy)",
+        "author": null,
+        "url": "https://www.docfilmacademy.com/blog/natural-light",
+        "type": "course"
+      },
+      {
+        "title": "Tips for Documentary Film Productions (PremiumBeat)",
+        "author": null,
+        "url": "https://www.premiumbeat.com/blog/tips-for-documentary-film-productions",
+        "type": "article"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "R-067",
+    "category": "documentary",
+    "title_fr": "Ruelles et ombre en plein jour",
+    "rule_fr": "Dans une médina ou rue étroite, utilise l'ombre des murs et des ruelles à midi.",
+    "why_fr": "L'ombre ambiante donne une lumière diffuse sans matériel.",
+    "measurable": [
+      "luma",
+      "contrast"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "medina",
+      "street",
+      "midday"
+    ],
+    "confidence": "medium",
+    "sources": [
+      {
+        "title": "Filming in Midday Sun Without Diffusion (PremiumBeat)",
+        "author": null,
+        "url": "https://www.premiumbeat.com/blog/filming-in-midday-sun-without-diffusion",
+        "type": "article"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "R-068",
+    "category": "documentary",
+    "title_fr": "Rebonds bon marché",
+    "rule_fr": "Utilise un drap clair, un carton ou un miroir pour renvoyer la lumière sur un visage.",
+    "why_fr": "Ces solutions coûtent peu et déboûchent les ombres.",
+    "measurable": [
+      "contrast",
+      "backlight"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "low_budget",
+      "outdoor",
+      "reflector"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Some handy do-it-yourself solutions for cinematographers challenged by small budgets (American Cinematographer / ASC)",
+        "author": "Christopher Probst",
+        "url": "https://theasc.com/articles/some-handy-do-it-yourself-solutions-for-cinematographers-challenged-by-small-budgets",
+        "type": "article"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "R-069",
+    "category": "documentary",
+    "title_fr": "Filmer le lieu en plans de coupe",
+    "rule_fr": "Filme aussi l'environnement (rue, mains, détails) en plus du sujet.",
+    "why_fr": "Ces plans donnent un sentiment de lieu et facilitent le montage.",
+    "measurable": [
+      "subject_h"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "documentary",
+      "b_roll",
+      "location"
+    ],
+    "confidence": "high",
+    "sources": [
+      {
+        "title": "Tips for Documentary Film Productions (PremiumBeat)",
+        "author": null,
+        "url": "https://www.premiumbeat.com/blog/tips-for-documentary-film-productions",
+        "type": "article"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "R-070",
+    "category": "documentary",
+    "title_fr": "Interview : lumière naturelle côté fenêtre",
+    "rule_fr": "Place l'interviewé près d'une fenêtre, en lumière de côté, ou dehors à l'ombre ouverte le matin ou l'après-midi.",
+    "why_fr": "Évite les ombres dures de midi sans matériel d'éclairage.",
+    "measurable": [
+      "luma",
+      "backlight"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "interview",
+      "documentary",
+      "window_light"
+    ],
+    "confidence": "medium",
+    "sources": [
+      {
+        "title": "Tips for Documentary Film Productions (PremiumBeat)",
+        "author": null,
+        "url": "https://www.premiumbeat.com/blog/tips-for-documentary-film-productions",
+        "type": "article"
+      },
+      {
+        "title": "Natural light (Doc Film Academy)",
+        "author": null,
+        "url": "https://www.docfilmacademy.com/blog/natural-light",
+        "type": "course"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "R-071",
+    "category": "documentary",
+    "title_fr": "Caméra à l'épaule en documentaire",
+    "rule_fr": "Accepte la caméra à l'épaule en documentaire de rue pour suivre l'action sans installer de trépied.",
+    "why_fr": "Le style réaliste est une tradition du documentaire.",
+    "measurable": [
+      "shake"
+    ],
+    "numeric_hint": null,
+    "applies_when": [
+      "documentary",
+      "handheld",
+      "street"
+    ],
+    "confidence": "medium",
+    "sources": [
+      {
+        "title": "What is a Handheld Shot? (No Film School)",
+        "author": null,
+        "url": "https://nofilmschool.com/handheld-shot",
+        "type": "article"
+      },
+      {
+        "title": "Handheld camera (Wikipedia)",
+        "author": null,
+        "url": "https://en.wikipedia.org/wiki/Handheld_camera",
+        "type": "encyclopedia"
+      }
+    ],
+    "notes": "Tradition liée au cinéma direct et au reportage selon Wikipédia ; la stabilité d'un téléphone n'est pas traitée par les sources."
+  }
+]

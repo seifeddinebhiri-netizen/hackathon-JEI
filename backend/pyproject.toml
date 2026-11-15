@@ -1,0 +1,27 @@
+[project]
+name = "premier-plan-api"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "anthropic>=2.8.0",
+    "asyncpg>=0.32.0",
+    "fastapi>=0.162.7",
+    "pydantic-settings>=2.16.3",
+    "structlog>=26.1.0",
+    "supabase>=2.34.1",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.5.0",
+    "ruff>=0.17.5",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
