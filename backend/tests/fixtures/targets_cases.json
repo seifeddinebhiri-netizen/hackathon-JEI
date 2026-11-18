@@ -1,0 +1,5570 @@
+{
+  "calibration": {
+    "version": "v0-default",
+    "third_tol": 0.06,
+    "rules": {
+      "no_subject": [
+        "none"
+      ],
+      "has_head": [
+        "person",
+        "face"
+      ],
+      "moving": [
+        "pan",
+        "tilt",
+        "tracking"
+      ]
+    },
+    "tables": {
+      "subject_h": {
+        "ECU": [
+          0.85,
+          1.0
+        ],
+        "CU": [
+          0.6,
+          0.85
+        ],
+        "MCU": [
+          0.4,
+          0.6
+        ],
+        "MS": [
+          0.3,
+          0.45
+        ],
+        "MWS": [
+          0.2,
+          0.35
+        ],
+        "WS": [
+          0.05,
+          0.2
+        ]
+      },
+      "headroom": {
+        "ECU": [
+          0.0,
+          0.05
+        ],
+        "CU": [
+          0.03,
+          0.1
+        ],
+        "MCU": [
+          0.05,
+          0.12
+        ],
+        "MS": [
+          0.06,
+          0.14
+        ],
+        "MWS": [
+          0.08,
+          0.18
+        ],
+        "WS": [
+          0.1,
+          0.3
+        ]
+      },
+      "center_x": {
+        "left_third": 0.3333333333333333,
+        "center": 0.5,
+        "right_third": 0.6666666666666666
+      },
+      "pitch": {
+        "eye_level": [
+          -4.0,
+          4.0
+        ],
+        "low": [
+          8.0,
+          30.0
+        ],
+        "high": [
+          -30.0,
+          -8.0
+        ]
+      },
+      "roll_abs": {
+        "level": [
+          0.0,
+          2.0
+        ],
+        "dutch": [
+          8.0,
+          25.0
+        ]
+      },
+      "luma": {
+        "dark": [
+          0.15,
+          0.35
+        ],
+        "balanced": [
+          0.35,
+          0.6
+        ],
+        "bright": [
+          0.6,
+          0.85
+        ]
+      },
+      "contrast": {
+        "low": [
+          0.0,
+          0.15
+        ],
+        "medium_low": [
+          0.15,
+          0.3
+        ],
+        "medium": [
+          0.3,
+          0.5
+        ],
+        "high": [
+          0.5,
+          1.0
+        ]
+      },
+      "backlight_ratio_max": {
+        "avoid": 1.5,
+        "accept": 3.0,
+        "intentional": null
+      },
+      "sun_offset_abs": {
+        "front": [
+          0.0,
+          30.0
+        ],
+        "side": [
+          60.0,
+          120.0
+        ],
+        "behind": [
+          150.0,
+          180.0
+        ]
+      },
+      "shake_max": {
+        "tripod": 0.02,
+        "handheld": 0.12
+      }
+    },
+    "vocabulary": [
+      {
+        "key": "size",
+        "label_fr": "Taille de plan",
+        "options": [
+          {
+            "value": "ECU",
+            "label_fr": "Très gros plan (détail)"
+          },
+          {
+            "value": "CU",
+            "label_fr": "Gros plan (visage)"
+          },
+          {
+            "value": "MCU",
+            "label_fr": "Plan rapproché (poitrine)"
+          },
+          {
+            "value": "MS",
+            "label_fr": "Plan moyen (taille)"
+          },
+          {
+            "value": "MWS",
+            "label_fr": "Plan américain (cuisses)"
+          },
+          {
+            "value": "WS",
+            "label_fr": "Plan large (lieu)"
+          }
+        ]
+      },
+      {
+        "key": "subject_kind",
+        "label_fr": "Ce qu'on filme",
+        "options": [
+          {
+            "value": "person",
+            "label_fr": "Une personne"
+          },
+          {
+            "value": "face",
+            "label_fr": "Un visage"
+          },
+          {
+            "value": "hands",
+            "label_fr": "Des mains"
+          },
+          {
+            "value": "object",
+            "label_fr": "Un objet"
+          },
+          {
+            "value": "none",
+            "label_fr": "Pas de sujet précis (décor)"
+          }
+        ]
+      },
+      {
+        "key": "subject_view",
+        "label_fr": "Vue du sujet",
+        "options": [
+          {
+            "value": "front",
+            "label_fr": "De face"
+          },
+          {
+            "value": "side",
+            "label_fr": "De profil"
+          },
+          {
+            "value": "back",
+            "label_fr": "De dos"
+          },
+          {
+            "value": "not_applicable",
+            "label_fr": "Sans objet"
+          }
+        ]
+      },
+      {
+        "key": "subject_position",
+        "label_fr": "Place dans l'image",
+        "options": [
+          {
+            "value": "left_third",
+            "label_fr": "Tiers gauche"
+          },
+          {
+            "value": "center",
+            "label_fr": "Au centre"
+          },
+          {
+            "value": "right_third",
+            "label_fr": "Tiers droit"
+          }
+        ]
+      },
+      {
+        "key": "camera_angle",
+        "label_fr": "Hauteur de la caméra",
+        "options": [
+          {
+            "value": "eye_level",
+            "label_fr": "À hauteur des yeux"
+          },
+          {
+            "value": "low",
+            "label_fr": "En contre-plongée (vers le haut)"
+          },
+          {
+            "value": "high",
+            "label_fr": "En plongée (vers le bas)"
+          }
+        ]
+      },
+      {
+        "key": "tilt",
+        "label_fr": "Horizon",
+        "options": [
+          {
+            "value": "level",
+            "label_fr": "Droit"
+          },
+          {
+            "value": "dutch",
+            "label_fr": "Penché (volontairement)"
+          }
+        ]
+      },
+      {
+        "key": "light_contrast",
+        "label_fr": "Contraste de la lumière",
+        "options": [
+          {
+            "value": "low",
+            "label_fr": "Très doux"
+          },
+          {
+            "value": "medium_low",
+            "label_fr": "Doux"
+          },
+          {
+            "value": "medium",
+            "label_fr": "Moyen"
+          },
+          {
+            "value": "high",
+            "label_fr": "Fort"
+          }
+        ]
+      },
+      {
+        "key": "exposure",
+        "label_fr": "Luminosité de l'image",
+        "options": [
+          {
+            "value": "dark",
+            "label_fr": "Sombre"
+          },
+          {
+            "value": "balanced",
+            "label_fr": "Équilibrée"
+          },
+          {
+            "value": "bright",
+            "label_fr": "Claire"
+          }
+        ]
+      },
+      {
+        "key": "backlight",
+        "label_fr": "Contre-jour",
+        "options": [
+          {
+            "value": "avoid",
+            "label_fr": "À éviter"
+          },
+          {
+            "value": "accept",
+            "label_fr": "Toléré"
+          },
+          {
+            "value": "intentional",
+            "label_fr": "Voulu (silhouette)"
+          }
+        ]
+      },
+      {
+        "key": "sun_relative",
+        "label_fr": "Soleil par rapport au sujet",
+        "options": [
+          {
+            "value": "front",
+            "label_fr": "Dans mon dos (sujet éclairé)"
+          },
+          {
+            "value": "side",
+            "label_fr": "De côté"
+          },
+          {
+            "value": "behind",
+            "label_fr": "Derrière le sujet"
+          },
+          {
+            "value": "not_applicable",
+            "label_fr": "Sans objet (intérieur)"
+          }
+        ]
+      },
+      {
+        "key": "stability",
+        "label_fr": "Appui",
+        "options": [
+          {
+            "value": "tripod",
+            "label_fr": "Sur trépied"
+          },
+          {
+            "value": "handheld",
+            "label_fr": "À main levée"
+          }
+        ]
+      },
+      {
+        "key": "movement",
+        "label_fr": "Mouvement",
+        "options": [
+          {
+            "value": "static",
+            "label_fr": "Caméra fixe"
+          },
+          {
+            "value": "pan",
+            "label_fr": "Panoramique (pivoter)"
+          },
+          {
+            "value": "tilt",
+            "label_fr": "Tilt (haut/bas)"
+          },
+          {
+            "value": "tracking",
+            "label_fr": "Travelling (suivre)"
+          }
+        ]
+      }
+    ]
+  },
+  "cases": [
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "ECU",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.85,
+          "max": 1.0
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.0,
+          "max": 0.05
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "CU",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.03,
+          "max": 0.1
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MCU",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.4,
+          "max": 0.6
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.05,
+          "max": 0.12
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MWS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.2,
+          "max": 0.35
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.08,
+          "max": 0.18
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "WS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.05,
+          "max": 0.2
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.1,
+          "max": 0.3
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "face",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "hands",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "object",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "none",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": null,
+        "center_x": null,
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "side",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "back",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "not_applicable",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "left_third",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.2733333333333333,
+          "max": 0.3933333333333333
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "right_third",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.6066666666666667,
+          "max": 0.7266666666666666
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "low",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": 8.0,
+          "max": 30.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "high",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -30.0,
+          "max": -8.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "dutch",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "low",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.0,
+          "max": 0.15
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium_low",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.15,
+          "max": 0.3
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "high",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.5,
+          "max": 1.0
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "dark",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.15,
+          "max": 0.35
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "bright",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "accept",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 3.0,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "intentional",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": null,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "front",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": {
+          "min": 0.0,
+          "max": 30.0
+        },
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "side",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": {
+          "min": 60.0,
+          "max": 120.0
+        },
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "behind",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": {
+          "min": 150.0,
+          "max": 180.0
+        },
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "tripod",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.02
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "pan"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "tilt"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "tracking"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "WS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "right_third",
+        "camera_angle": "low",
+        "tilt": "level",
+        "light_contrast": "medium_low",
+        "exposure": "dark",
+        "backlight": "intentional",
+        "sun_relative": "front",
+        "stability": "tripod",
+        "movement": "tracking"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": 8.0,
+          "max": 30.0
+        },
+        "subject_h": {
+          "min": 0.05,
+          "max": 0.2
+        },
+        "center_x": {
+          "min": 0.6066666666666667,
+          "max": 0.7266666666666666
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.1,
+          "max": 0.3
+        },
+        "luma": {
+          "min": 0.15,
+          "max": 0.35
+        },
+        "contrast": {
+          "min": 0.15,
+          "max": 0.3
+        },
+        "backlight_ratio_max": null,
+        "sun_offset_abs_deg": {
+          "min": 0.0,
+          "max": 30.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "ECU",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "left_third",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium_low",
+        "exposure": "bright",
+        "backlight": "intentional",
+        "sun_relative": "not_applicable",
+        "stability": "tripod",
+        "movement": "tracking"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.85,
+          "max": 1.0
+        },
+        "center_x": {
+          "min": 0.2733333333333333,
+          "max": 0.3933333333333333
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.0,
+          "max": 0.05
+        },
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.15,
+          "max": 0.3
+        },
+        "backlight_ratio_max": null,
+        "sun_offset_abs_deg": null,
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "MWS",
+        "subject_kind": "hands",
+        "subject_view": "front",
+        "subject_position": "left_third",
+        "camera_angle": "high",
+        "tilt": "dutch",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "side",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": -30.0,
+          "max": -8.0
+        },
+        "subject_h": {
+          "min": 0.2,
+          "max": 0.35
+        },
+        "center_x": {
+          "min": 0.2733333333333333,
+          "max": 0.3933333333333333
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": {
+          "min": 60.0,
+          "max": 120.0
+        },
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "ECU",
+        "subject_kind": "object",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "low",
+        "tilt": "dutch",
+        "light_contrast": "low",
+        "exposure": "bright",
+        "backlight": "accept",
+        "sun_relative": "front",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": 8.0,
+          "max": 30.0
+        },
+        "subject_h": {
+          "min": 0.85,
+          "max": 1.0
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.0,
+          "max": 0.15
+        },
+        "backlight_ratio_max": 3.0,
+        "sun_offset_abs_deg": {
+          "min": 0.0,
+          "max": 30.0
+        },
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MWS",
+        "subject_kind": "hands",
+        "subject_view": "back",
+        "subject_position": "right_third",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "low",
+        "exposure": "bright",
+        "backlight": "avoid",
+        "sun_relative": "behind",
+        "stability": "tripod",
+        "movement": "pan"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.2,
+          "max": 0.35
+        },
+        "center_x": {
+          "min": 0.6066666666666667,
+          "max": 0.7266666666666666
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.0,
+          "max": 0.15
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": {
+          "min": 150.0,
+          "max": 180.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "ECU",
+        "subject_kind": "object",
+        "subject_view": "back",
+        "subject_position": "center",
+        "camera_angle": "high",
+        "tilt": "dutch",
+        "light_contrast": "medium_low",
+        "exposure": "balanced",
+        "backlight": "accept",
+        "sun_relative": "side",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": -30.0,
+          "max": -8.0
+        },
+        "subject_h": {
+          "min": 0.85,
+          "max": 1.0
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.15,
+          "max": 0.3
+        },
+        "backlight_ratio_max": 3.0,
+        "sun_offset_abs_deg": {
+          "min": 60.0,
+          "max": 120.0
+        },
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MWS",
+        "subject_kind": "face",
+        "subject_view": "side",
+        "subject_position": "left_third",
+        "camera_angle": "low",
+        "tilt": "dutch",
+        "light_contrast": "medium",
+        "exposure": "bright",
+        "backlight": "intentional",
+        "sun_relative": "side",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": 8.0,
+          "max": 30.0
+        },
+        "subject_h": {
+          "min": 0.2,
+          "max": 0.35
+        },
+        "center_x": {
+          "min": 0.2733333333333333,
+          "max": 0.3933333333333333
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.08,
+          "max": 0.18
+        },
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": null,
+        "sun_offset_abs_deg": {
+          "min": 60.0,
+          "max": 120.0
+        },
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "CU",
+        "subject_kind": "person",
+        "subject_view": "back",
+        "subject_position": "center",
+        "camera_angle": "low",
+        "tilt": "level",
+        "light_contrast": "medium_low",
+        "exposure": "bright",
+        "backlight": "intentional",
+        "sun_relative": "behind",
+        "stability": "tripod",
+        "movement": "tracking"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": 8.0,
+          "max": 30.0
+        },
+        "subject_h": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.03,
+          "max": 0.1
+        },
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.15,
+          "max": 0.3
+        },
+        "backlight_ratio_max": null,
+        "sun_offset_abs_deg": {
+          "min": 150.0,
+          "max": 180.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "object",
+        "subject_view": "side",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "bright",
+        "backlight": "intentional",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "tilt"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": null,
+        "sun_offset_abs_deg": null,
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "CU",
+        "subject_kind": "face",
+        "subject_view": "not_applicable",
+        "subject_position": "left_third",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium_low",
+        "exposure": "bright",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "tripod",
+        "movement": "tracking"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "center_x": {
+          "min": 0.2733333333333333,
+          "max": 0.3933333333333333
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.03,
+          "max": 0.1
+        },
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.15,
+          "max": 0.3
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "none",
+        "subject_view": "not_applicable",
+        "subject_position": "right_third",
+        "camera_angle": "low",
+        "tilt": "level",
+        "light_contrast": "low",
+        "exposure": "bright",
+        "backlight": "intentional",
+        "sun_relative": "behind",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": 8.0,
+          "max": 30.0
+        },
+        "subject_h": null,
+        "center_x": null,
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.0,
+          "max": 0.15
+        },
+        "backlight_ratio_max": null,
+        "sun_offset_abs_deg": {
+          "min": 150.0,
+          "max": 180.0
+        },
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MCU",
+        "subject_kind": "object",
+        "subject_view": "side",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "dutch",
+        "light_contrast": "medium_low",
+        "exposure": "bright",
+        "backlight": "avoid",
+        "sun_relative": "behind",
+        "stability": "tripod",
+        "movement": "pan"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.4,
+          "max": 0.6
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.15,
+          "max": 0.3
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": {
+          "min": 150.0,
+          "max": 180.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "MCU",
+        "subject_kind": "face",
+        "subject_view": "front",
+        "subject_position": "right_third",
+        "camera_angle": "low",
+        "tilt": "dutch",
+        "light_contrast": "low",
+        "exposure": "dark",
+        "backlight": "accept",
+        "sun_relative": "behind",
+        "stability": "tripod",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": 8.0,
+          "max": 30.0
+        },
+        "subject_h": {
+          "min": 0.4,
+          "max": 0.6
+        },
+        "center_x": {
+          "min": 0.6066666666666667,
+          "max": 0.7266666666666666
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.05,
+          "max": 0.12
+        },
+        "luma": {
+          "min": 0.15,
+          "max": 0.35
+        },
+        "contrast": {
+          "min": 0.0,
+          "max": 0.15
+        },
+        "backlight_ratio_max": 3.0,
+        "sun_offset_abs_deg": {
+          "min": 150.0,
+          "max": 180.0
+        },
+        "shake_max": 0.02
+      }
+    },
+    {
+      "intent": {
+        "size": "CU",
+        "subject_kind": "none",
+        "subject_view": "front",
+        "subject_position": "left_third",
+        "camera_angle": "high",
+        "tilt": "dutch",
+        "light_contrast": "low",
+        "exposure": "bright",
+        "backlight": "avoid",
+        "sun_relative": "side",
+        "stability": "handheld",
+        "movement": "pan"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": -30.0,
+          "max": -8.0
+        },
+        "subject_h": null,
+        "center_x": null,
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.0,
+          "max": 0.15
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": {
+          "min": 60.0,
+          "max": 120.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "MCU",
+        "subject_kind": "none",
+        "subject_view": "not_applicable",
+        "subject_position": "left_third",
+        "camera_angle": "high",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "intentional",
+        "sun_relative": "behind",
+        "stability": "handheld",
+        "movement": "tracking"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -30.0,
+          "max": -8.0
+        },
+        "subject_h": null,
+        "center_x": null,
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": null,
+        "sun_offset_abs_deg": {
+          "min": 150.0,
+          "max": 180.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "ECU",
+        "subject_kind": "face",
+        "subject_view": "side",
+        "subject_position": "left_third",
+        "camera_angle": "low",
+        "tilt": "level",
+        "light_contrast": "medium_low",
+        "exposure": "bright",
+        "backlight": "avoid",
+        "sun_relative": "front",
+        "stability": "tripod",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": 8.0,
+          "max": 30.0
+        },
+        "subject_h": {
+          "min": 0.85,
+          "max": 1.0
+        },
+        "center_x": {
+          "min": 0.2733333333333333,
+          "max": 0.3933333333333333
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.0,
+          "max": 0.05
+        },
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.15,
+          "max": 0.3
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": {
+          "min": 0.0,
+          "max": 30.0
+        },
+        "shake_max": 0.02
+      }
+    },
+    {
+      "intent": {
+        "size": "CU",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "bright",
+        "backlight": "accept",
+        "sun_relative": "side",
+        "stability": "tripod",
+        "movement": "tracking"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.03,
+          "max": 0.1
+        },
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 3.0,
+        "sun_offset_abs_deg": {
+          "min": 60.0,
+          "max": 120.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "CU",
+        "subject_kind": "object",
+        "subject_view": "not_applicable",
+        "subject_position": "left_third",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "high",
+        "exposure": "balanced",
+        "backlight": "accept",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "center_x": {
+          "min": 0.2733333333333333,
+          "max": 0.3933333333333333
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.5,
+          "max": 1.0
+        },
+        "backlight_ratio_max": 3.0,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "WS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "high",
+        "tilt": "dutch",
+        "light_contrast": "low",
+        "exposure": "dark",
+        "backlight": "avoid",
+        "sun_relative": "side",
+        "stability": "handheld",
+        "movement": "pan"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": -30.0,
+          "max": -8.0
+        },
+        "subject_h": {
+          "min": 0.05,
+          "max": 0.2
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.1,
+          "max": 0.3
+        },
+        "luma": {
+          "min": 0.15,
+          "max": 0.35
+        },
+        "contrast": {
+          "min": 0.0,
+          "max": 0.15
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": {
+          "min": 60.0,
+          "max": 120.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "face",
+        "subject_view": "back",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "high",
+        "exposure": "bright",
+        "backlight": "avoid",
+        "sun_relative": "front",
+        "stability": "tripod",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.5,
+          "max": 1.0
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": {
+          "min": 0.0,
+          "max": 30.0
+        },
+        "shake_max": 0.02
+      }
+    },
+    {
+      "intent": {
+        "size": "CU",
+        "subject_kind": "face",
+        "subject_view": "not_applicable",
+        "subject_position": "center",
+        "camera_angle": "low",
+        "tilt": "level",
+        "light_contrast": "high",
+        "exposure": "dark",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "tripod",
+        "movement": "tracking"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": 8.0,
+          "max": 30.0
+        },
+        "subject_h": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.03,
+          "max": 0.1
+        },
+        "luma": {
+          "min": 0.15,
+          "max": 0.35
+        },
+        "contrast": {
+          "min": 0.5,
+          "max": 1.0
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "MCU",
+        "subject_kind": "object",
+        "subject_view": "back",
+        "subject_position": "center",
+        "camera_angle": "high",
+        "tilt": "dutch",
+        "light_contrast": "medium_low",
+        "exposure": "dark",
+        "backlight": "accept",
+        "sun_relative": "side",
+        "stability": "tripod",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": -30.0,
+          "max": -8.0
+        },
+        "subject_h": {
+          "min": 0.4,
+          "max": 0.6
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.15,
+          "max": 0.35
+        },
+        "contrast": {
+          "min": 0.15,
+          "max": 0.3
+        },
+        "backlight_ratio_max": 3.0,
+        "sun_offset_abs_deg": {
+          "min": 60.0,
+          "max": 120.0
+        },
+        "shake_max": 0.02
+      }
+    },
+    {
+      "intent": {
+        "size": "WS",
+        "subject_kind": "hands",
+        "subject_view": "front",
+        "subject_position": "left_third",
+        "camera_angle": "high",
+        "tilt": "dutch",
+        "light_contrast": "medium_low",
+        "exposure": "dark",
+        "backlight": "intentional",
+        "sun_relative": "front",
+        "stability": "tripod",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": -30.0,
+          "max": -8.0
+        },
+        "subject_h": {
+          "min": 0.05,
+          "max": 0.2
+        },
+        "center_x": {
+          "min": 0.2733333333333333,
+          "max": 0.3933333333333333
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.15,
+          "max": 0.35
+        },
+        "contrast": {
+          "min": 0.15,
+          "max": 0.3
+        },
+        "backlight_ratio_max": null,
+        "sun_offset_abs_deg": {
+          "min": 0.0,
+          "max": 30.0
+        },
+        "shake_max": 0.02
+      }
+    },
+    {
+      "intent": {
+        "size": "MWS",
+        "subject_kind": "person",
+        "subject_view": "side",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "low",
+        "exposure": "bright",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "tilt"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.2,
+          "max": 0.35
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.08,
+          "max": 0.18
+        },
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.0,
+          "max": 0.15
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "CU",
+        "subject_kind": "hands",
+        "subject_view": "side",
+        "subject_position": "center",
+        "camera_angle": "low",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "accept",
+        "sun_relative": "front",
+        "stability": "tripod",
+        "movement": "tracking"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": 8.0,
+          "max": 30.0
+        },
+        "subject_h": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 3.0,
+        "sun_offset_abs_deg": {
+          "min": 0.0,
+          "max": 30.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "MWS",
+        "subject_kind": "none",
+        "subject_view": "front",
+        "subject_position": "left_third",
+        "camera_angle": "high",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "dark",
+        "backlight": "accept",
+        "sun_relative": "front",
+        "stability": "tripod",
+        "movement": "tilt"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -30.0,
+          "max": -8.0
+        },
+        "subject_h": null,
+        "center_x": null,
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.15,
+          "max": 0.35
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 3.0,
+        "sun_offset_abs_deg": {
+          "min": 0.0,
+          "max": 30.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "MCU",
+        "subject_kind": "face",
+        "subject_view": "not_applicable",
+        "subject_position": "right_third",
+        "camera_angle": "high",
+        "tilt": "dutch",
+        "light_contrast": "low",
+        "exposure": "bright",
+        "backlight": "intentional",
+        "sun_relative": "behind",
+        "stability": "tripod",
+        "movement": "pan"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": -30.0,
+          "max": -8.0
+        },
+        "subject_h": {
+          "min": 0.4,
+          "max": 0.6
+        },
+        "center_x": {
+          "min": 0.6066666666666667,
+          "max": 0.7266666666666666
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.05,
+          "max": 0.12
+        },
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.0,
+          "max": 0.15
+        },
+        "backlight_ratio_max": null,
+        "sun_offset_abs_deg": {
+          "min": 150.0,
+          "max": 180.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "MCU",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "right_third",
+        "camera_angle": "high",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "intentional",
+        "sun_relative": "side",
+        "stability": "handheld",
+        "movement": "pan"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -30.0,
+          "max": -8.0
+        },
+        "subject_h": {
+          "min": 0.4,
+          "max": 0.6
+        },
+        "center_x": {
+          "min": 0.6066666666666667,
+          "max": 0.7266666666666666
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.05,
+          "max": 0.12
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": null,
+        "sun_offset_abs_deg": {
+          "min": 60.0,
+          "max": 120.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "WS",
+        "subject_kind": "hands",
+        "subject_view": "not_applicable",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "high",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "front",
+        "stability": "handheld",
+        "movement": "pan"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.05,
+          "max": 0.2
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.5,
+          "max": 1.0
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": {
+          "min": 0.0,
+          "max": 30.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "WS",
+        "subject_kind": "hands",
+        "subject_view": "side",
+        "subject_position": "right_third",
+        "camera_angle": "low",
+        "tilt": "dutch",
+        "light_contrast": "low",
+        "exposure": "dark",
+        "backlight": "avoid",
+        "sun_relative": "side",
+        "stability": "tripod",
+        "movement": "tilt"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": 8.0,
+          "max": 30.0
+        },
+        "subject_h": {
+          "min": 0.05,
+          "max": 0.2
+        },
+        "center_x": {
+          "min": 0.6066666666666667,
+          "max": 0.7266666666666666
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.15,
+          "max": 0.35
+        },
+        "contrast": {
+          "min": 0.0,
+          "max": 0.15
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": {
+          "min": 60.0,
+          "max": 120.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "MWS",
+        "subject_kind": "none",
+        "subject_view": "side",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "behind",
+        "stability": "tripod",
+        "movement": "pan"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": null,
+        "center_x": null,
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": {
+          "min": 150.0,
+          "max": 180.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "WS",
+        "subject_kind": "person",
+        "subject_view": "back",
+        "subject_position": "right_third",
+        "camera_angle": "low",
+        "tilt": "level",
+        "light_contrast": "medium_low",
+        "exposure": "dark",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "tripod",
+        "movement": "pan"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": 8.0,
+          "max": 30.0
+        },
+        "subject_h": {
+          "min": 0.05,
+          "max": 0.2
+        },
+        "center_x": {
+          "min": 0.6066666666666667,
+          "max": 0.7266666666666666
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.1,
+          "max": 0.3
+        },
+        "luma": {
+          "min": 0.15,
+          "max": 0.35
+        },
+        "contrast": {
+          "min": 0.15,
+          "max": 0.3
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "WS",
+        "subject_kind": "hands",
+        "subject_view": "not_applicable",
+        "subject_position": "right_third",
+        "camera_angle": "high",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "dark",
+        "backlight": "intentional",
+        "sun_relative": "front",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -30.0,
+          "max": -8.0
+        },
+        "subject_h": {
+          "min": 0.05,
+          "max": 0.2
+        },
+        "center_x": {
+          "min": 0.6066666666666667,
+          "max": 0.7266666666666666
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.15,
+          "max": 0.35
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": null,
+        "sun_offset_abs_deg": {
+          "min": 0.0,
+          "max": 30.0
+        },
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "face",
+        "subject_view": "side",
+        "subject_position": "center",
+        "camera_angle": "low",
+        "tilt": "dutch",
+        "light_contrast": "medium_low",
+        "exposure": "dark",
+        "backlight": "avoid",
+        "sun_relative": "side",
+        "stability": "handheld",
+        "movement": "tilt"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": 8.0,
+          "max": 30.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.06,
+          "max": 0.14
+        },
+        "luma": {
+          "min": 0.15,
+          "max": 0.35
+        },
+        "contrast": {
+          "min": 0.15,
+          "max": 0.3
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": {
+          "min": 60.0,
+          "max": 120.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "MCU",
+        "subject_kind": "person",
+        "subject_view": "back",
+        "subject_position": "center",
+        "camera_angle": "high",
+        "tilt": "dutch",
+        "light_contrast": "medium",
+        "exposure": "dark",
+        "backlight": "avoid",
+        "sun_relative": "behind",
+        "stability": "tripod",
+        "movement": "tilt"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": -30.0,
+          "max": -8.0
+        },
+        "subject_h": {
+          "min": 0.4,
+          "max": 0.6
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.05,
+          "max": 0.12
+        },
+        "luma": {
+          "min": 0.15,
+          "max": 0.35
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": {
+          "min": 150.0,
+          "max": 180.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "ECU",
+        "subject_kind": "person",
+        "subject_view": "not_applicable",
+        "subject_position": "center",
+        "camera_angle": "high",
+        "tilt": "dutch",
+        "light_contrast": "high",
+        "exposure": "bright",
+        "backlight": "intentional",
+        "sun_relative": "front",
+        "stability": "handheld",
+        "movement": "pan"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": -30.0,
+          "max": -8.0
+        },
+        "subject_h": {
+          "min": 0.85,
+          "max": 1.0
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.0,
+          "max": 0.05
+        },
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.5,
+          "max": 1.0
+        },
+        "backlight_ratio_max": null,
+        "sun_offset_abs_deg": {
+          "min": 0.0,
+          "max": 30.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "MCU",
+        "subject_kind": "person",
+        "subject_view": "not_applicable",
+        "subject_position": "left_third",
+        "camera_angle": "high",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "behind",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -30.0,
+          "max": -8.0
+        },
+        "subject_h": {
+          "min": 0.4,
+          "max": 0.6
+        },
+        "center_x": {
+          "min": 0.2733333333333333,
+          "max": 0.3933333333333333
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.05,
+          "max": 0.12
+        },
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": {
+          "min": 150.0,
+          "max": 180.0
+        },
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "WS",
+        "subject_kind": "hands",
+        "subject_view": "back",
+        "subject_position": "right_third",
+        "camera_angle": "low",
+        "tilt": "dutch",
+        "light_contrast": "high",
+        "exposure": "bright",
+        "backlight": "accept",
+        "sun_relative": "side",
+        "stability": "tripod",
+        "movement": "tracking"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": 8.0,
+          "max": 30.0
+        },
+        "subject_h": {
+          "min": 0.05,
+          "max": 0.2
+        },
+        "center_x": {
+          "min": 0.6066666666666667,
+          "max": 0.7266666666666666
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.5,
+          "max": 1.0
+        },
+        "backlight_ratio_max": 3.0,
+        "sun_offset_abs_deg": {
+          "min": 60.0,
+          "max": 120.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "WS",
+        "subject_kind": "object",
+        "subject_view": "side",
+        "subject_position": "right_third",
+        "camera_angle": "high",
+        "tilt": "dutch",
+        "light_contrast": "high",
+        "exposure": "bright",
+        "backlight": "avoid",
+        "sun_relative": "behind",
+        "stability": "handheld",
+        "movement": "pan"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": -30.0,
+          "max": -8.0
+        },
+        "subject_h": {
+          "min": 0.05,
+          "max": 0.2
+        },
+        "center_x": {
+          "min": 0.6066666666666667,
+          "max": 0.7266666666666666
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.5,
+          "max": 1.0
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": {
+          "min": 150.0,
+          "max": 180.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "none",
+        "subject_view": "back",
+        "subject_position": "center",
+        "camera_angle": "low",
+        "tilt": "dutch",
+        "light_contrast": "medium_low",
+        "exposure": "bright",
+        "backlight": "accept",
+        "sun_relative": "side",
+        "stability": "tripod",
+        "movement": "tilt"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": 8.0,
+          "max": 30.0
+        },
+        "subject_h": null,
+        "center_x": null,
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.15,
+          "max": 0.3
+        },
+        "backlight_ratio_max": 3.0,
+        "sun_offset_abs_deg": {
+          "min": 60.0,
+          "max": 120.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "MWS",
+        "subject_kind": "none",
+        "subject_view": "back",
+        "subject_position": "left_third",
+        "camera_angle": "eye_level",
+        "tilt": "dutch",
+        "light_contrast": "medium_low",
+        "exposure": "dark",
+        "backlight": "avoid",
+        "sun_relative": "front",
+        "stability": "tripod",
+        "movement": "pan"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": null,
+        "center_x": null,
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.15,
+          "max": 0.35
+        },
+        "contrast": {
+          "min": 0.15,
+          "max": 0.3
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": {
+          "min": 0.0,
+          "max": 30.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "none",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "low",
+        "tilt": "level",
+        "light_contrast": "high",
+        "exposure": "balanced",
+        "backlight": "accept",
+        "sun_relative": "side",
+        "stability": "tripod",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": 8.0,
+          "max": 30.0
+        },
+        "subject_h": null,
+        "center_x": null,
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.5,
+          "max": 1.0
+        },
+        "backlight_ratio_max": 3.0,
+        "sun_offset_abs_deg": {
+          "min": 60.0,
+          "max": 120.0
+        },
+        "shake_max": 0.02
+      }
+    },
+    {
+      "intent": {
+        "size": "ECU",
+        "subject_kind": "object",
+        "subject_view": "side",
+        "subject_position": "left_third",
+        "camera_angle": "high",
+        "tilt": "dutch",
+        "light_contrast": "low",
+        "exposure": "bright",
+        "backlight": "avoid",
+        "sun_relative": "front",
+        "stability": "handheld",
+        "movement": "pan"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": -30.0,
+          "max": -8.0
+        },
+        "subject_h": {
+          "min": 0.85,
+          "max": 1.0
+        },
+        "center_x": {
+          "min": 0.2733333333333333,
+          "max": 0.3933333333333333
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.0,
+          "max": 0.15
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": {
+          "min": 0.0,
+          "max": 30.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "none",
+        "subject_view": "back",
+        "subject_position": "center",
+        "camera_angle": "high",
+        "tilt": "dutch",
+        "light_contrast": "high",
+        "exposure": "dark",
+        "backlight": "intentional",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "tilt"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": -30.0,
+          "max": -8.0
+        },
+        "subject_h": null,
+        "center_x": null,
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.15,
+          "max": 0.35
+        },
+        "contrast": {
+          "min": 0.5,
+          "max": 1.0
+        },
+        "backlight_ratio_max": null,
+        "sun_offset_abs_deg": null,
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "CU",
+        "subject_kind": "hands",
+        "subject_view": "not_applicable",
+        "subject_position": "right_third",
+        "camera_angle": "eye_level",
+        "tilt": "dutch",
+        "light_contrast": "high",
+        "exposure": "dark",
+        "backlight": "intentional",
+        "sun_relative": "behind",
+        "stability": "tripod",
+        "movement": "tilt"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "center_x": {
+          "min": 0.6066666666666667,
+          "max": 0.7266666666666666
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.15,
+          "max": 0.35
+        },
+        "contrast": {
+          "min": 0.5,
+          "max": 1.0
+        },
+        "backlight_ratio_max": null,
+        "sun_offset_abs_deg": {
+          "min": 150.0,
+          "max": 180.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "MCU",
+        "subject_kind": "hands",
+        "subject_view": "front",
+        "subject_position": "left_third",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "high",
+        "exposure": "bright",
+        "backlight": "avoid",
+        "sun_relative": "side",
+        "stability": "tripod",
+        "movement": "tracking"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.4,
+          "max": 0.6
+        },
+        "center_x": {
+          "min": 0.2733333333333333,
+          "max": 0.3933333333333333
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.5,
+          "max": 1.0
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": {
+          "min": 60.0,
+          "max": 120.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "hands",
+        "subject_view": "not_applicable",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "high",
+        "exposure": "balanced",
+        "backlight": "intentional",
+        "sun_relative": "front",
+        "stability": "handheld",
+        "movement": "tracking"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.5,
+          "max": 1.0
+        },
+        "backlight_ratio_max": null,
+        "sun_offset_abs_deg": {
+          "min": 0.0,
+          "max": 30.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "ECU",
+        "subject_kind": "hands",
+        "subject_view": "back",
+        "subject_position": "center",
+        "camera_angle": "low",
+        "tilt": "level",
+        "light_contrast": "high",
+        "exposure": "dark",
+        "backlight": "accept",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": 8.0,
+          "max": 30.0
+        },
+        "subject_h": {
+          "min": 0.85,
+          "max": 1.0
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.15,
+          "max": 0.35
+        },
+        "contrast": {
+          "min": 0.5,
+          "max": 1.0
+        },
+        "backlight_ratio_max": 3.0,
+        "sun_offset_abs_deg": null,
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "hands",
+        "subject_view": "not_applicable",
+        "subject_position": "right_third",
+        "camera_angle": "eye_level",
+        "tilt": "dutch",
+        "light_contrast": "medium_low",
+        "exposure": "bright",
+        "backlight": "intentional",
+        "sun_relative": "front",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.6066666666666667,
+          "max": 0.7266666666666666
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.15,
+          "max": 0.3
+        },
+        "backlight_ratio_max": null,
+        "sun_offset_abs_deg": {
+          "min": 0.0,
+          "max": 30.0
+        },
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "ECU",
+        "subject_kind": "object",
+        "subject_view": "side",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "accept",
+        "sun_relative": "side",
+        "stability": "handheld",
+        "movement": "tilt"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.85,
+          "max": 1.0
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 3.0,
+        "sun_offset_abs_deg": {
+          "min": 60.0,
+          "max": 120.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "MCU",
+        "subject_kind": "object",
+        "subject_view": "back",
+        "subject_position": "center",
+        "camera_angle": "low",
+        "tilt": "level",
+        "light_contrast": "high",
+        "exposure": "dark",
+        "backlight": "intentional",
+        "sun_relative": "front",
+        "stability": "handheld",
+        "movement": "pan"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": 8.0,
+          "max": 30.0
+        },
+        "subject_h": {
+          "min": 0.4,
+          "max": 0.6
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.15,
+          "max": 0.35
+        },
+        "contrast": {
+          "min": 0.5,
+          "max": 1.0
+        },
+        "backlight_ratio_max": null,
+        "sun_offset_abs_deg": {
+          "min": 0.0,
+          "max": 30.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "WS",
+        "subject_kind": "person",
+        "subject_view": "front",
+        "subject_position": "left_third",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "low",
+        "exposure": "bright",
+        "backlight": "avoid",
+        "sun_relative": "side",
+        "stability": "tripod",
+        "movement": "tracking"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.05,
+          "max": 0.2
+        },
+        "center_x": {
+          "min": 0.2733333333333333,
+          "max": 0.3933333333333333
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.1,
+          "max": 0.3
+        },
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.0,
+          "max": 0.15
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": {
+          "min": 60.0,
+          "max": 120.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "WS",
+        "subject_kind": "person",
+        "subject_view": "side",
+        "subject_position": "center",
+        "camera_angle": "high",
+        "tilt": "dutch",
+        "light_contrast": "medium",
+        "exposure": "dark",
+        "backlight": "intentional",
+        "sun_relative": "front",
+        "stability": "tripod",
+        "movement": "tilt"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": -30.0,
+          "max": -8.0
+        },
+        "subject_h": {
+          "min": 0.05,
+          "max": 0.2
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.1,
+          "max": 0.3
+        },
+        "luma": {
+          "min": 0.15,
+          "max": 0.35
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": null,
+        "sun_offset_abs_deg": {
+          "min": 0.0,
+          "max": 30.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "ECU",
+        "subject_kind": "none",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "high",
+        "tilt": "dutch",
+        "light_contrast": "high",
+        "exposure": "bright",
+        "backlight": "avoid",
+        "sun_relative": "front",
+        "stability": "tripod",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": -30.0,
+          "max": -8.0
+        },
+        "subject_h": null,
+        "center_x": null,
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.5,
+          "max": 1.0
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": {
+          "min": 0.0,
+          "max": 30.0
+        },
+        "shake_max": 0.02
+      }
+    },
+    {
+      "intent": {
+        "size": "WS",
+        "subject_kind": "hands",
+        "subject_view": "front",
+        "subject_position": "right_third",
+        "camera_angle": "eye_level",
+        "tilt": "dutch",
+        "light_contrast": "high",
+        "exposure": "bright",
+        "backlight": "accept",
+        "sun_relative": "front",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": {
+          "min": 0.05,
+          "max": 0.2
+        },
+        "center_x": {
+          "min": 0.6066666666666667,
+          "max": 0.7266666666666666
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.5,
+          "max": 1.0
+        },
+        "backlight_ratio_max": 3.0,
+        "sun_offset_abs_deg": {
+          "min": 0.0,
+          "max": 30.0
+        },
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "object",
+        "subject_view": "front",
+        "subject_position": "center",
+        "camera_angle": "low",
+        "tilt": "dutch",
+        "light_contrast": "medium_low",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "behind",
+        "stability": "handheld",
+        "movement": "tracking"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": 8.0,
+          "max": 30.0
+        },
+        "subject_h": {
+          "min": 0.3,
+          "max": 0.45
+        },
+        "center_x": {
+          "min": 0.44,
+          "max": 0.56
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.15,
+          "max": 0.3
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": {
+          "min": 150.0,
+          "max": 180.0
+        },
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "MS",
+        "subject_kind": "none",
+        "subject_view": "back",
+        "subject_position": "center",
+        "camera_angle": "eye_level",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "tilt"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": -4.0,
+          "max": 4.0
+        },
+        "subject_h": null,
+        "center_x": null,
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "ECU",
+        "subject_kind": "object",
+        "subject_view": "back",
+        "subject_position": "left_third",
+        "camera_angle": "low",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "balanced",
+        "backlight": "accept",
+        "sun_relative": "behind",
+        "stability": "handheld",
+        "movement": "static"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": 8.0,
+          "max": 30.0
+        },
+        "subject_h": {
+          "min": 0.85,
+          "max": 1.0
+        },
+        "center_x": {
+          "min": 0.2733333333333333,
+          "max": 0.3933333333333333
+        },
+        "center_y": null,
+        "headroom": null,
+        "luma": {
+          "min": 0.35,
+          "max": 0.6
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": 3.0,
+        "sun_offset_abs_deg": {
+          "min": 150.0,
+          "max": 180.0
+        },
+        "shake_max": 0.12
+      }
+    },
+    {
+      "intent": {
+        "size": "MWS",
+        "subject_kind": "face",
+        "subject_view": "front",
+        "subject_position": "left_third",
+        "camera_angle": "high",
+        "tilt": "dutch",
+        "light_contrast": "high",
+        "exposure": "bright",
+        "backlight": "avoid",
+        "sun_relative": "not_applicable",
+        "stability": "handheld",
+        "movement": "tracking"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "pitch_deg": {
+          "min": -30.0,
+          "max": -8.0
+        },
+        "subject_h": {
+          "min": 0.2,
+          "max": 0.35
+        },
+        "center_x": {
+          "min": 0.2733333333333333,
+          "max": 0.3933333333333333
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.08,
+          "max": 0.18
+        },
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.5,
+          "max": 1.0
+        },
+        "backlight_ratio_max": 1.5,
+        "sun_offset_abs_deg": null,
+        "shake_max": null
+      }
+    },
+    {
+      "intent": {
+        "size": "ECU",
+        "subject_kind": "person",
+        "subject_view": "back",
+        "subject_position": "left_third",
+        "camera_angle": "low",
+        "tilt": "level",
+        "light_contrast": "medium",
+        "exposure": "bright",
+        "backlight": "intentional",
+        "sun_relative": "behind",
+        "stability": "handheld",
+        "movement": "tilt"
+      },
+      "targets": {
+        "roll_abs_deg": {
+          "min": 0.0,
+          "max": 2.0
+        },
+        "pitch_deg": {
+          "min": 8.0,
+          "max": 30.0
+        },
+        "subject_h": {
+          "min": 0.85,
+          "max": 1.0
+        },
+        "center_x": {
+          "min": 0.2733333333333333,
+          "max": 0.3933333333333333
+        },
+        "center_y": null,
+        "headroom": {
+          "min": 0.0,
+          "max": 0.05
+        },
+        "luma": {
+          "min": 0.6,
+          "max": 0.85
+        },
+        "contrast": {
+          "min": 0.3,
+          "max": 0.5
+        },
+        "backlight_ratio_max": null,
+        "sun_offset_abs_deg": {
+          "min": 150.0,
+          "max": 180.0
+        },
+        "shake_max": null
+      }
+    }
+  ]
+}

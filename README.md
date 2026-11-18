@@ -92,7 +92,7 @@ flowchart LR
 | Caméra et mesures | `getUserMedia`, `DeviceMotion`/`DeviceOrientation`, canvas, Web Audio, MediaPipe Tasks Vision |
 | Backend | Python 3.12, FastAPI, Pydantic v2, `uvicorn`, `structlog` |
 | Base de données | Supabase (authentification, Postgres, pgvector pour la recherche par similarité) |
-| LLM | API Anthropic (sorties structurées validées par Pydantic) |
+| LLM | API Google Gemini (offre gratuite pendant le hackathon), sorties structurées validées par Pydantic. Le modèle se règle par `LLM_MODEL` |
 | Météo et soleil | Open-Meteo, SunCalc |
 | Passeport | WeasyPrint ou ReportLab (PDF), `c2patool` (C2PA) |
 | Déploiement | Vercel (front), Render ou Railway (backend), HTTPS obligatoire pour la caméra |
@@ -197,6 +197,16 @@ Pour chaque plan, deux niveaux :
 
 La réponse inclut aussi les **règles citées avec leurs sources**, et la mention *« Brouillon IA : à valider »*.
 
+**Espaces de travail.** Le cinéaste traite une scène (un plan) par espace de travail : quand il a fini une scène, il crée un nouvel espace pour la suivante, et les autres restent tels quels (scène, plan proposé, modifications, étiquettes). Les espaces sont d'abord gardés dans le téléphone (ils marchent hors ligne), puis enregistrés sur le compte de l'utilisateur pour survivre à la déconnexion et se retrouver sur un autre appareil. Si deux appareils modifient le même espace, le serveur refuse l'envoi périmé et la modification la plus récente gagne.
+
+**Un seul plan par scène, fixe ou en mouvement.** L'IA propose **un seul plan** (un seul « Brouillon IA : à valider »), avec deux prompts distincts côté serveur :
+- **Plan fixe** : un cadrage à viser (horizon, angle, position du sujet, espace au-dessus de la tête, lumière, contraste, contre-jour, tremblement).
+- **Plan en mouvement** : l'utilisateur indique la **durée estimée** de la scène, et l'IA décrit la prise comme une **chronologie de passages en secondes** (par exemple « de 0 à 3 s : visage au centre ; de 3 à 10 s : plus de visage, la caméra passe de la contre-plongée à la plongée ; ou le sujet passe de la droite vers la gauche »). Chaque passage a ses propres cibles, qui glissent du début vers la fin s'il évolue. Tout est suivi comme dans un plan fixe ; seul le tremblement est écarté, car la rotation d'un panoramique est voulue. L'IA écrit aussi une explication claire (« Pendant 10 secondes, tu pars de la gauche… ») et l'application la complète par un résumé généré à partir des choix, donc toujours cohérent avec les chiffres. Les secondes se comptent depuis le début de l'enregistrement, ou d'une répétition sans enregistrer.
+
+L'utilisateur peut tout modifier en mots (cadrage, texte, limites entre passages, couper ou supprimer un passage) ; les chiffres se recalculent sur le téléphone.
+
+**Téléphone fixé sur une vraie caméra.** Le cinéaste indique si le téléphone est au-dessus ou en dessous de sa caméra, et règle une légère inclinaison (vers le haut ou le bas) qui corrige le calcul de l'angle. Seul l'angle est corrigé : la différence de position et de champ de vision entre le téléphone et la caméra n'est pas modélisée, donc les voyants de cadrage sont approximatifs dans ce montage.
+
 **Pourquoi un vocabulaire fermé plutôt que des nombres du LLM ?** Les LLM sont peu fiables pour produire des valeurs numériques calibrées. En ne leur demandant que des choix sémantiques, nous gardons le contrôle des nombres, nous pouvons les calibrer sur le terrain, et chaque choix correspond à une mesure que le téléphone sait réellement faire.
 
 **Calibration.** Les valeurs numériques actuelles sont des **réglages de départ (v0)**, choisis par l'équipe, et **non des faits issus de sources**. Elles seront calibrées par des essais de tournage. La version est indiquée dans chaque réponse (`calibration: "v0-default"`). Seuls les tiers (1/3) et l'emplacement des yeux au tiers supérieur s'appuient sur des règles sourcées de notre base.
@@ -230,11 +240,10 @@ Le Coach fonctionne **sur l'appareil, sans réseau**. **Nous n'entraînons aucun
 
 ## 5. Données et vie privée
 
-- **Seul le texte de la scène quitte le téléphone.** Les images de la caméra sont traitées sur l'appareil, rien n'est envoyé.
-- **Rétention zéro par défaut** : le serveur ne conserve rien tant que l'utilisateur n'a pas choisi de sauvegarder un projet.
+- **Seul le texte de la scène et ses étiquettes (ambiance, style, intention...) quittent le téléphone**, pour demander le plan à l'IA. Les images de la caméra sont traitées sur l'appareil, rien n'est envoyé.
+- **Les espaces de travail sont enregistrés sur le compte** (base Supabase) quand l'utilisateur est connecté : la scène saisie (y compris le texte et les étiquettes), le plan proposé, ses modifications et ses étiquettes de mouvement. Chaque ligne appartient à un seul utilisateur, le serveur vérifie la propriété à chaque requête, et l'utilisateur peut supprimer un espace (ou son compte : tout est supprimé avec lui). Les images de la caméra et les vidéos, elles, ne sont jamais envoyées.
 - **Le texte des scènes n'est jamais écrit dans les journaux** du serveur : seuls la méthode, le chemin, la durée et un identifiant de requête sont enregistrés.
-- **Pas d'entraînement sur les données** des utilisateurs.
-- Le fournisseur de LLM est un sous-traitant externe : ses conditions (non-entraînement, rétention) doivent être vérifiées avant toute promesse publique. `[à confirmer avant la finale]`
+- **Attention : offre gratuite de l'IA.** Nous utilisons l'offre gratuite de l'API Gemini. D'après nos informations, Google peut utiliser les textes envoyés par ce canal pour améliorer ses produits. **Nous ne promettons donc pas « aucun entraînement sur les données »** tant que le service n'est pas passé sur une offre payante. L'interface demande à l'utilisateur de ne pas y écrire d'informations confidentielles. `[à confirmer sur les conditions officielles de Google avant la finale]`
 - Le **droit de supprimer** : `DELETE /projects/{id}` supprime un projet sauvegardé.
 
 ---
@@ -246,7 +255,7 @@ Le Coach fonctionne **sur l'appareil, sans réseau**. **Nous n'entraînons aucun
 3. **Aucune invention.** Pas de statistique, de nom de festival, de date ni de tarif inventés. Ce qui n'est pas vérifié est marqué `[à vérifier]`.
 4. **Honnêteté sur l'IA.** Le Passeport accepte le statut « Non divulgué » et ne prétend jamais qu'un film est « légal » ou « sûr ».
 5. **Pas de prédiction de sélection.** Le classement des festivals mesure la compatibilité avec leurs critères, pas les chances d'être sélectionné.
-6. **Vie privée par conception.** Traitement sur l'appareil, rétention zéro, détection de visage sans identification.
+6. **Vie privée par conception.** Images et vidéos traitées sur l'appareil, jamais envoyées ; détection de visage sans identification. Le texte de la scène part vers un fournisseur d'IA externe, et il est enregistré avec l'espace de travail sur le compte de l'utilisateur : il en est prévenu avant d'envoyer, et peut tout supprimer.
 7. **Limites assumées.** Les seuils de calibration sont des réglages de départ ; la qualité de la derja n'est pas garantie ; la signature C2PA de démonstration utilise un certificat de test.
 8. **Points non vérifiés à ce jour** : la date et la portée de l'AI Act européen, et la règle du CNC. Nous ne les affirmons pas.
 
@@ -260,8 +269,10 @@ Documentation interactive en local : `http://localhost:8000/docs`.
 |---|---|---|---|
 | GET | `/health` | commun | fait |
 | GET | `/health/ready` | commun (test de la base) | fait |
-| POST | `/shot-spec` | 1. Cadrage | fait (testé avec un faux LLM ; appel réel à valider) |
-| GET | `/calibration` | 1. Cadrage (recalcul hors ligne côté client) | prévu |
+| POST | `/shot-spec` | 1. Cadrage | fait, **branché au Coach** (Gemini). Exige un jeton Supabase, limité par utilisateur. Appel réel à valider avec une clé |
+| GET | `/calibration` | 1. Cadrage (recalcul hors ligne côté client) | fait, public. Tables mots → nombres et libellés français |
+| GET | `/me` | commun | fait (profil de l'utilisateur connecté) |
+| GET / PUT / DELETE | `/workspaces`, `/workspaces/{id}` | 1. Cadrage (espaces de travail) | fait. Jeton exigé, 12 espaces au maximum par utilisateur, détection des écritures périmées (409) |
 | POST / GET / DELETE | `/projects`, `/projects/{id}` | commun | prévu |
 | POST | `/plan/suggest` | 2. Planification | prévu |
 | POST | `/passport` | 3. Passeport | prévu |
@@ -325,6 +336,8 @@ uv run python -m scripts.validate_rules rules/rules.json
 - Les **seuils numériques** du Coach sont des réglages de départ, à calibrer sur le terrain.
 - Les règles de **moindre confiance** sont marquées comme telles, et plusieurs thèmes sont peu sourcés : iPhone (fréquence d'images, distorsion), documentaire en médina, son avec micro de téléphone, plan de dos. Nous les compléterons par l'expérience de terrain de l'équipe, en la citant comme telle.
 - Un conseil de lumière de la base provient d'une source nord-américaine (direction du soleil dans les rues) : **à vérifier en Tunisie**.
+- **Connexion réelle (Supabase) et plan par l'IA (Gemini) : branchés mais non testés avec de vraies clés** au moment de l'écriture. Planification, Passeport et Kit Festival restent sur des données simulées côté front.
+- Les **voyants de taille** (plan du corps entier) ne sont pas mesurés : il manque un modèle de pose.
 - Aucun chiffre de performance (précision, vitesse, satisfaction) n'est annoncé : nous n'avons pas encore mené d'évaluation. Elle fera l'objet d'un protocole sur des extraits tournés par l'équipe.
 
 ---

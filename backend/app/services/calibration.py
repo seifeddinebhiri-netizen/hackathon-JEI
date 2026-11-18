@@ -10,8 +10,9 @@ from app.schemas.shot_spec import (
     CameraAngle,
     Contrast,
     Exposure,
+    Movement,
     Range,
-    ShotIntent,
+    ShotChoices,
     ShotSize,
     ShotTargets,
     Stability,
@@ -78,6 +79,9 @@ SUN_OFFSET_ABS = {
     SunRelative.behind: (150.0, 180.0),
 }
 
+# Mouvements de caméra : le tremblement n'a pas de sens quand la caméra bouge exprès.
+MOVING_MOVEMENTS = (Movement.pan, Movement.tilt, Movement.tracking)
+
 SHAKE_MAX = {Stability.tripod: 0.02, Stability.handheld: 0.12}
 
 
@@ -85,7 +89,11 @@ def _r(pair: tuple[float, float]) -> Range:
     return Range(min=pair[0], max=pair[1])
 
 
-def compute_targets(shot: ShotIntent) -> ShotTargets:
+def compute_targets(shot: ShotChoices) -> ShotTargets:
+    """Mots -> cibles chiffrées. Tous les contrôles s'appliquent, y compris pour un plan en mouvement
+    (dont le cadrage change au fil de la chronologie). Seul le tremblement est écarté quand la caméra
+    bouge exprès : la rotation voulue d'un panoramique ne doit pas être signalée comme instabilité."""
+    moving = shot.movement in MOVING_MOVEMENTS
     has_subject = shot.subject_kind != SubjectKind.none
     has_head = shot.subject_kind in (SubjectKind.person, SubjectKind.face)
     cx = CENTER_X[shot.subject_position]
@@ -100,9 +108,7 @@ def compute_targets(shot: ShotIntent) -> ShotTargets:
         contrast=_r(CONTRAST[shot.light_contrast]),
         backlight_ratio_max=BACKLIGHT_RATIO_MAX[shot.backlight],
         sun_offset_abs_deg=(
-            _r(SUN_OFFSET_ABS[shot.sun_relative])
-            if shot.sun_relative in SUN_OFFSET_ABS
-            else None
+            _r(SUN_OFFSET_ABS[shot.sun_relative]) if shot.sun_relative in SUN_OFFSET_ABS else None
         ),
-        shake_max=SHAKE_MAX[shot.stability],
+        shake_max=None if moving else SHAKE_MAX[shot.stability],
     )

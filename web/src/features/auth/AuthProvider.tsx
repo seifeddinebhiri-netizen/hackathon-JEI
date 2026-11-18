@@ -99,7 +99,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo<AuthContextValue>(
-    () => ({ user: session?.user ?? null, session, loading, signIn, signInDemo, signOut, setCurrentProject }),
+    () => ({
+      user: session?.user ?? null,
+      session,
+      loading,
+      initializing: false,
+      authMode: 'simulated',
+      canSignUp: false,
+      demoAvailable: true,
+      signIn,
+      signUp: async () => {
+        throw new Error('La création de compte demande la connexion réelle (Supabase).');
+      },
+      signInDemo,
+      signOut,
+      setCurrentProject,
+    }),
     [session, loading, signIn, signInDemo, signOut, setCurrentProject],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -59,6 +59,9 @@ Le message est affiché tel quel à l'utilisateur ; sans message, le front en af
 | `verifyPassport` | GET `/verify/{id}` | Page publique des festivals | confirmé |
 | `searchFestivals` | GET `/festivals` | Recherche, filtres, classement | confirmé |
 | `getFestival` | GET `/festivals/{id}` | Fiche d'un festival | backend prêt |
+| `generateShotSpec` | POST `/shot-spec` | Coach : plan de prise de vue par l'IA (jeton Supabase exigé, 20 par heure et par utilisateur) | **confirmé, branché** |
+| `listWorkspaces` / `putWorkspace` / `deleteWorkspace` | GET `/workspaces`, PUT / DELETE `/workspaces/{id}` | Coach : espaces de travail enregistrés sur le compte (jeton exigé) | **confirmé, branché** |
+| `getCalibration` | GET `/calibration` | Coach : tables « mots → nombres » et libellés (public) | **confirmé, branché** |
 | `createSubtitleDraft` | POST `/subtitles/{projectId}/draft` | Audio/vidéo → brouillon FR + EN | backend prêt |
 | `getSubtitleDraft` | GET `/subtitles/{projectId}` | Brouillon de sous-titres | backend prêt |
 | `saveSubtitles` | PUT `/subtitles/{projectId}` | Enregistrer les lignes | backend prêt |
@@ -115,8 +118,9 @@ Réponse 200 : `Project`. Erreurs : 401, 403, 404.
 ```
 `festival_shortlist[].status` (« Où j'en suis ») · **confirmé côté front** : `a_preparer` (en préparation) | `pret` (prêt à
 soumettre) | `soumis` (soumis sur le site officiel) | `reponse_recue` | `prochain_appel` (appel clos, pour la prochaine
-édition). Ces cinq valeurs sont validées par le schéma zod du front. Le backend ne gère pas encore les projets :
-la mise à jour du statut passe par `PATCH /projects/{id}`, qui reste servi par le mock. `checklist[].done` sert aux pièces cochées à la main (affiche,
+édition). Ces cinq valeurs sont validées par le schéma zod du front. Le backend enregistre `festival_shortlist`
+tel quel (liste JSON, `PATCH /projects/{id}`), sans valider ces valeurs ; en mode mixte, `updateProject` reste simulé
+tant qu'il n'est pas listé dans `VITE_REAL_ENDPOINTS`. `checklist[].done` sert aux pièces cochées à la main (affiche,
 biographie, format…) et à la déclaration IA validée.
 
 `forbidden_days` accepte des dates ISO (`"2026-11-21"`) ou des jours de semaine en français, en minuscules (`"vendredi"`).
@@ -471,3 +475,64 @@ date prend le premier créneau libre (ou son horaire solaire) ; déposée sur la
 (`finalizeDay`, `src/features/planner/lib/rules.ts`) et enregistre le planning avec `PATCH /projects/{id}` (`schedule`).
 Les actions sur les conflits (« Marquer comme obtenue », « Déplacer au … ? ») passent aussi par ce `PATCH`. Si le backend applique d'autres règles, il doit
 renvoyer un `Schedule` de même forme. La disponibilité des acteurs n'est pas prise en compte dans cette version.
+
+
+---
+
+## Coach : plan de prise de vue
+
+Types : `ShotSpecRequest`, `ShotSpec`, `Calibration` (`src/api/types.ts`). Ces deux routes sont réelles même quand le reste est simulé
+(`VITE_REAL_COACH=true`, par défaut dès que Supabase est configuré).
+
+### `generateShotSpec` — POST `/shot-spec`
+
+Corps (`ShotSpecRequest`) : seule `description` (10 à 2000 caractères) est obligatoire. Les étiquettes améliorent le plan :
+`setting` (`INT`/`EXT`/`interior`/`exterior`/`unknown`), `moment` (`jour`/`nuit`/`aube`/`heure_doree`), `location`, `characters[]` (8 max),
+`mood[]` (5 max), `visual_style`, `intention`, `light`, `support` (`handheld`/`tripod`/`unknown`),
+`motion` (`fixed`/`moving`/`unknown` : plan fixe ou en mouvement), `duration_s` (2 à 120 s, **obligatoire si `motion` = `moving`**), `scene_id`.
+
+Réponse 200 (`ShotSpec`) : `shots[]` avec, pour chacun, `intent` (choix en vocabulaire fermé + `label_fr`, `why_fr`, `advice_fr`, `rule_ids`),
+`targets` (cibles chiffrées) et `rules[]` (titre, confiance, sources). `status` vaut « Brouillon IA : à valider ».
+
+**Un seul plan par scène** : `shots` contient exactement un élément. Deux prompts côté serveur : `motion` = `moving` donne un plan en mouvement,
+tout le reste un plan fixe (`movement` = `static`).
+
+**Plan en mouvement** : `shots[0].timeline` = `{ duration_s, how_fr, segments[] }`. `how_fr` explique en français comment la scène sera filmée,
+avec les secondes. Chaque passage : `{ id, start_s, end_s, description_fr, at_start, at_end, targets_start, targets_end }` ; les passages se suivent
+sans trou de 0 à `duration_s`. `at_end` (et `targets_end`) n'existent que si le cadrage évolue pendant le passage (ex. angle de contre-plongée à plongée,
+sujet de la droite vers la gauche) : le téléphone fait alors glisser les cibles du début vers la fin. Un passage sans personne a `subject_kind` = `none`
+(`center_x`, `headroom`, `subject_h` valent `null`). `shake_max` vaut `null` pendant un mouvement voulu (`pan`, `tilt`, `tracking`). `intent` et `targets`
+du plan décrivent le premier passage. Les secondes se comptent depuis le début de l'enregistrement.
+
+Erreurs : 401 (jeton), 422 (corps invalide), 429 (limite : `trop_de_requetes`), 502 (réponse de l'IA invalide), 503 (clé ou modèle d'IA indisponible).
+Durée : jusqu'à ~30 s ; le front attend 60 s.
+
+### `getCalibration` — GET `/calibration` · public
+
+Tables du backend (`subject_h`, `headroom`, `center_x`, `pitch`, `roll_abs`, `luma`, `contrast`, `backlight_ratio_max`, `sun_offset_abs`, `shake_max`),
+règles (`no_subject`, `has_head`) et `vocabulary` : pour chaque champ du plan, son libellé français et ses options.
+Le front garde ce JSON dans le téléphone et recalcule les cibles quand l'utilisateur modifie un mot (`computeTargets`), sans réseau.
+Un jeu d'essai commun (`backend/tests/fixtures/targets_cases.json`, copié dans `web/src/features/coach/plan/fixtures/`) garantit que Python et TypeScript donnent les mêmes nombres.
+Si `calibration.py` change : `cd backend && uv run python -m scripts.export_targets_fixture`.
+
+### Format des erreurs du backend
+
+`{ "code": "non_autorise", "message": "…" }` : le front lit `message` à la racine.
+
+
+### Espaces de travail — GET `/workspaces`, PUT / DELETE `/workspaces/{id}`
+
+Un espace = une scène : `{ id, name, data, version, created_at, updated_at }`. `data` = `{ request, spec, overrides, notes }`
+(la scène saisie, le plan de l'IA, les mots modifiés par l'utilisateur, les étiquettes de mouvement). `id` est un **UUID créé par
+l'appareil** (un espace peut être créé hors ligne puis envoyé).
+
+- `GET /workspaces` : les espaces de l'utilisateur, du plus ancien au plus récent.
+- `PUT /workspaces/{id}` avec `{ name, data, base_version }` : crée (`base_version: null`) ou met à jour (`base_version` = version connue).
+  Réponse 200 : l'espace enregistré, `version` augmentée. **409 `conflit`** si `base_version` n'est plus la version du serveur
+  (un autre appareil a modifié l'espace, ou l'espace a été supprimé) : le front récupère la liste et la fusion tranche (le plus récent gagne).
+  Autres erreurs : 403 (espace d'un autre utilisateur), 413 (`data` > 256 Ko), 422 (nom vide ou de plus de 40 caractères, UUID invalide,
+  ou `limite_atteinte` : 12 espaces au maximum).
+- `DELETE /workspaces/{id}` : idempotent (200 même si déjà supprimé).
+
+Le front garde les espaces dans le téléphone (clé `pp-coach-workspaces-v1:<utilisateur>`), n'envoie que ceux qui ont un plan, et
+ne synchronise qu'avec un vrai compte et un vrai backend.

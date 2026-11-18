@@ -4,3 +4,5 @@ dev-dist
 .env
 .env.local
 *.tsbuildinfo
+# Copié depuis node_modules par scripts/copy-mediapipe.mjs (≈ 30 Mo)
+public/mediapipe

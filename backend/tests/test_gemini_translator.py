@@ -173,7 +173,7 @@ def test_slow_transcription_over_global_timeout_returns_504(client, monkeypatch)
     app.state.translator, _ = gemini([OK])
     r = post_draft(client)
     assert r.status_code == 504
-    err = r.json()["error"]
+    err = r.json()
     assert err["code"] == "draft_timeout" and "trop de temps" in err["message"]
     assert client.get("/subtitles/demo").json()["lines"] == []  # rien d'enregistré
 

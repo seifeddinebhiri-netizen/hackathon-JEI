@@ -70,7 +70,7 @@ def test_missing_key_returns_503(client):
     )
     r = post(client)
     assert r.status_code == 503
-    assert r.json()["error"]["code"] == "translation_unavailable"
+    assert r.json()["code"] == "translation_unavailable"
 
     app.state.translator = None  # LLM_PROVIDER inconnu
     assert post(client).status_code == 503
@@ -80,7 +80,7 @@ def test_provider_error_returns_502_in_french(client):
     app.state.translator = FakeTranslator(reply=RuntimeError("quota"))
     r = post(client)
     assert r.status_code == 502
-    err = r.json()["error"]
+    err = r.json()
     assert err["code"] == "translation_failed" and "traduction" in err["message"]
 
     app.state.translator = FakeTranslator(reply="pas du JSON")

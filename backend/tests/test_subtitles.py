@@ -346,7 +346,7 @@ def test_temp_file_deleted_after_success_and_error(client):
     app.state.transcriber = failing
     r = post_draft(client)
     assert r.status_code == 502
-    assert r.json()["error"]["code"] == "transcription_failed"
+    assert r.json()["code"] == "transcription_failed"
     assert failing.seen_path is not None and not failing.seen_path.parent.exists()
 
 
@@ -354,7 +354,7 @@ def test_file_too_large_returns_413(client, monkeypatch):
     monkeypatch.setattr(get_settings(), "subtitle_max_upload_mb", 1)
     r = post_draft(client, content=b"0" * (1024 * 1024 + 10))
     assert r.status_code == 413
-    assert r.json()["error"]["code"] == "file_too_large"
+    assert r.json()["code"] == "file_too_large"
     assert app.state.transcriber.calls == []
 
 
@@ -362,7 +362,7 @@ def test_missing_provider_returns_503_before_transcription(client):
     app.state.translator = None
     r = post_draft(client)
     assert r.status_code == 503
-    assert r.json()["error"]["code"] == "translation_unavailable"
+    assert r.json()["code"] == "translation_unavailable"
     assert app.state.transcriber.calls == []
 
 
