@@ -57,8 +57,9 @@ Le message est affiché tel quel à l'utilisateur ; sans message, le front en af
 | `signC2pa` | POST `/c2pa/sign` | Signer le fichier final | confirmé |
 | `verifyPassport` | GET `/verify/{id}` | Page publique des festivals | confirmé |
 | `searchFestivals` | GET `/festivals` | Recherche, filtres, classement | confirmé |
-| `getSubtitleDraft` | GET `/subtitles/{projectId}` | Brouillon de sous-titres | à confirmer |
-| `saveSubtitles` | PUT `/subtitles/{projectId}` | Enregistrer les lignes | à confirmer |
+| `createSubtitleDraft` | POST `/subtitles/{projectId}/draft` | Audio/vidéo → brouillon FR + EN | backend prêt |
+| `getSubtitleDraft` | GET `/subtitles/{projectId}` | Brouillon de sous-titres | backend prêt |
+| `saveSubtitles` | PUT `/subtitles/{projectId}` | Enregistrer les lignes | backend prêt |
 | `getSynopsisFeedback` | POST `/synopsis/feedback` | Questions du coach | confirmé |
 | `getPublicFilm` | GET `/films/{id}/public` | Page film publique | à confirmer |
 | — | POST `/shot-spec` | Coach : conseils de prise de vue | **futur** |
@@ -311,21 +312,58 @@ Réponse 200 : `FestivalMatch[]`. Avec un film, triés par score décroissant ; 
 Règles : une fiche sans `source_url` ou sans `checked_at` n'est pas affichée. Le score indique la compatibilité
 avec les critères du festival ; il ne prédit pas la sélection. Pas de soumission ni de paiement via l'API.
 
-### `getSubtitleDraft` — GET `/subtitles/{projectId}` · à confirmer
+### `createSubtitleDraft` — POST `/subtitles/{projectId}/draft` · backend prêt
 
-Réponse 200 (`SubtitleDraft`) ; `lines` vide s'il n'y a pas encore de brouillon.
+`multipart/form-data` :
+- `file` (obligatoire) : audio ou vidéo du film, `SUBTITLE_MAX_UPLOAD_MB` maximum (200 Mo par défaut) ;
+- `language_code` (facultatif) : `aeb` pour la derja ; absent = langue détectée automatiquement ;
+- `keyterms` (facultatif) : noms des personnages et des lieux séparés par des virgules (`"Nour, Amira, Kerkennah"`),
+  50 au maximum, 5 mots et 50 caractères au plus chacun ; aide la transcription à les reconnaître ;
+- `characters` (facultatif) : personnages séparés par des virgules, donnés au traducteur comme contexte.
+
+Flux : transcription (ElevenLabs Scribe v2) → découpage en sous-titres → traduction FR + EN (Gemini ou Ollama,
+avec le glossaire derja) → règles de sous-titrage. Le fichier est supprimé du serveur dès la transcription finie,
+même en cas d'erreur ; l'audio n'est jamais stocké. Remplace le brouillon existant du projet. Réponse 200 : `SubtitleDraft`.
+Cette requête peut durer une à plusieurs minutes.
+
+Erreurs : `413` fichier trop volumineux · `422` fichier vide ou aucune parole détectée · `502` le service de
+transcription a échoué · `503` transcription ou traduction non configurée sur le serveur.
+
+Une ligne que le traducteur n'a pas pu traduire reste dans le brouillon avec `fr` et `en` vides, `confidence: "faible"`
+et une `note` : la requête n'échoue pas pour une ligne.
+
+### `getSubtitleDraft` — GET `/subtitles/{projectId}` · backend prêt
+
+Réponse 200 (`SubtitleDraft`) ; `lines` vide (et `processing` absent) s'il n'y a pas encore de brouillon.
 ```json
 { "project_id": "demo-maree-basse", "source_lang": "derja",
-  "lines": [{ "id": "st-8", "start": "00:02:44,000", "end": "00:02:46,800", "source": "Ya3tik essa7a, Nour.",
-              "fr": "Merci, Nour.", "en": "Thank you, Nour.", "confidence": "faible",
+  "lines": [{ "id": "l8", "start": "00:02:44,000", "end": "00:02:46,800", "source": "Ya3tik essa7a, Nour.",
+              "fr": "Merci, Nour.", "en": "Thank you, Nour.", "confidence": "elevee",
               "note": "« Ya3tik essa7a » : littéralement « que Dieu te donne la santé ». Remerciement courant…",
-              "validated": false }] }
+              "validated": false,
+              "speaker": "S1", "glossary_used": ["ya3tik-essa7a"],
+              "warnings": [{ "rule": "lecture_rapide", "detail": "FR : 19 car./s pour 2,8 s (limite 17)" }] }],
+  "processing": { "transcriber": "elevenlabs/scribe_v2", "translator": "gemini/gemini-3.8-flash",
+                  "created_at": "2026-11-18T15:02:11.204Z" } }
 ```
-Horodatage au format SRT (`HH:MM:SS,mmm`). Le front exporte le `.srt` lui-même, seulement si toutes les lignes sont validées.
+- Horodatage au format SRT (`HH:MM:SS,mmm`). Le front exporte le `.srt` lui-même, seulement si toutes les lignes sont validées.
+- `confidence` : `elevee` | `moyenne` | `faible`. Calculée par le serveur à partir de celle du traducteur, abaissée
+  d'un cran si la transcription est incertaine, et d'un cran si une tournure est signalée (`note`) sans entrée du
+  glossaire. Jamais au-dessus de ce qu'indique le traducteur.
+- Champs facultatifs (absents si vides, jamais `null`) : `en`, `note`, `speaker` (`S1`, `S2`… dans l'ordre
+  d'apparition), `processing`. Toujours présents dans les réponses du serveur : `warnings` (liste, éventuellement vide)
+  et `glossary_used` (ids du glossaire derja utilisés).
+- `warnings[].rule` : `lecture_rapide` (plus de 17 car./s), `trop_de_lignes` (plus de 2 lignes de 42 car.),
+  `ligne_trop_longue` (un mot dépasse 42 car.), `duree_courte` (moins de 1 s), `duree_longue` (plus de 7 s),
+  `chevauchement` (moins de 80 ms après la ligne précédente). `detail` est un texte en français à afficher tel quel.
+- `processing` : outils utilisés, repris par le Passeport IA.
 
-### `saveSubtitles` — PUT `/subtitles/{projectId}` · à confirmer
+### `saveSubtitles` — PUT `/subtitles/{projectId}` · backend prêt
 
-Corps : `{ "lines": SubtitleLine[] }` (liste complète). Réponse 200 : `SubtitleDraft`.
+Corps : `{ "lines": SubtitleLine[] }` (liste complète, ids uniques). Réponse 200 : `SubtitleDraft`.
+Le serveur garde `source_lang` et `processing` du brouillon, ne modifie pas les horodatages et recalcule `warnings`
+(les avertissements envoyés par le front sont ignorés pour ces règles). `422` si deux lignes ont le même `id` ou si un
+horodatage n'est pas au format SRT.
 
 ### `getSynopsisFeedback` — POST `/synopsis/feedback` · confirmé
 

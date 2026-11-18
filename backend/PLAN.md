@@ -9,6 +9,23 @@
   - Après une modification de `data/festivals.json` : `uv run python -m scripts.build_festival_seed`, puis relancer le seed (upsert)
   - Sans `DATABASE_URL`, l'API lit directement `data/festivals.json` (dev local, tests)
   - `deadline_status` (`ouverte` / `passee` / `a_confirmer`) est calculé à la lecture, jamais stocké
+- **Kit Festival, sous-titres** : `POST /subtitles/{id}/draft` (audio/vidéo → transcription ElevenLabs Scribe v2 → découpage → traduction FR + EN par Gemini ou Ollama → règles), `GET` et `PUT /subtitles/{id}` ; glossaire derja `data/glossaire_derja.json` (8 entrées à relire par l'équipe) ; tests avec faux fournisseurs
+  - Supabase : appliquer `supabase/migrations/20261118150000_subtitle_drafts.sql` (RLS sans policy : accès serveur uniquement)
+  - Sans `DATABASE_URL`, les brouillons restent en mémoire (perdus au redémarrage)
+  - Réglages : `ELEVENLABS_API_KEY`, `LLM_PROVIDER`, `GEMINI_API_KEY` / `GEMINI_MODEL` ou `OLLAMA_URL` / `OLLAMA_MODEL`, `SUBTITLE_MAX_UPLOAD_MB`
+
+## Sous-titres : où vont les données
+
+- **Audio → ElevenLabs** (transcription). Le fichier est envoyé à ElevenLabs et y est conservé selon leurs conditions ;
+  le mode sans conservation (zero retention) est réservé aux clients entreprise. Côté serveur, le fichier est écrit dans
+  un dossier temporaire et supprimé dans un `finally`, succès ou erreur : on ne stocke jamais l'audio.
+- **Texte → Gemini** (traduction, `LLM_PROVIDER=gemini`). Avec la version gratuite de l'API, Google peut utiliser le
+  contenu envoyé : **données de TEST uniquement**, jamais les dialogues d'un vrai film sans accord écrit de l'équipe du film.
+- **Option Ollama** (`LLM_PROVIDER=ollama`) : le modèle tourne sur la machine, le texte ne sort pas.
+  L'audio, lui, part toujours chez ElevenLabs.
+- **Stockage** : seul le brouillon texte (lignes, traductions, outils utilisés) est gardé, dans `subtitle_drafts`.
+- **Logs** : jamais le texte des répliques ni les clés ; seulement durée de l'audio, nombre de lignes, fournisseurs,
+  temps de traitement.
 
 ## Next, in order
 1. Fill `.env` (Supabase keys, `DATABASE_URL`, `ANTHROPIC_API_KEY`) and test a real scene with curl; review the plans and tune the prompt.
