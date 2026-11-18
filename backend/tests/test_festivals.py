@@ -180,7 +180,7 @@ def test_get_one_and_404():
         assert client.get("/festivals/clermont-international").json()["country"] == "France"
         r = client.get("/festivals/inconnu")
         assert r.status_code == 404
-        assert r.json()["error"]["code"] == "festival_not_found"
+        assert r.json()["code"] == "festival_not_found"
 
 
 def test_invalid_params_rejected():
