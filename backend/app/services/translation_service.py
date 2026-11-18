@@ -15,7 +15,7 @@ from typing import Protocol
 
 import httpx
 import structlog
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 from app.core.config import Settings
 from app.schemas.subtitle import Cue, TranslatedLine, TranslationBatch, TranslationContext
@@ -122,8 +122,14 @@ class PromptTranslator(ABC):
     available: bool
 
     @abstractmethod
-    async def _complete(self, system: str, user: str) -> str:
-        """Renvoie le texte JSON produit par le modèle."""
+    async def _complete(
+        self, system: str, user: str, schema: type[BaseModel] = TranslationBatch
+    ) -> str:
+        """Renvoie le texte JSON produit par le modèle, selon le schéma demandé."""
+
+    async def complete(self, system: str, user: str, schema: type[BaseModel]) -> str:
+        """Appel brut pour un autre usage (ex. synopsis). Lève l'erreur du fournisseur."""
+        return await self._complete(system, user, schema)
 
     async def _attempt(
         self, batch: list[Cue], context: TranslationContext
@@ -164,7 +170,9 @@ class GeminiTranslator(PromptTranslator):
             self._client = genai.Client(api_key=self._key)
         return self._client
 
-    async def _complete(self, system: str, user: str) -> str:
+    async def _complete(
+        self, system: str, user: str, schema: type[BaseModel] = TranslationBatch
+    ) -> str:
         from google.genai import types
 
         resp = await self._get_client().aio.models.generate_content(
@@ -173,7 +181,7 @@ class GeminiTranslator(PromptTranslator):
             config=types.GenerateContentConfig(
                 system_instruction=system,
                 response_mime_type="application/json",
-                response_schema=TranslationBatch,
+                response_schema=schema,
                 temperature=0.2,
             ),
         )
@@ -188,7 +196,9 @@ class OllamaTranslator(PromptTranslator):
         self.available = bool(self._url and self._model)
         self._client = client
 
-    async def _complete(self, system: str, user: str) -> str:
+    async def _complete(
+        self, system: str, user: str, schema: type[BaseModel] = TranslationBatch
+    ) -> str:
         client = self._client or httpx.AsyncClient(timeout=httpx.Timeout(300, connect=10))
         try:
             resp = await client.post(
@@ -199,7 +209,7 @@ class OllamaTranslator(PromptTranslator):
                         {"role": "system", "content": system},
                         {"role": "user", "content": user},
                     ],
-                    "format": TranslationBatch.model_json_schema(),
+                    "format": schema.model_json_schema(),
                     "stream": False,
                     "options": {"temperature": 0.2},
                 },
