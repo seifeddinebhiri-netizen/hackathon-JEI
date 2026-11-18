@@ -116,3 +116,18 @@ le message et « Réessayer » doivent apparaître), vide.
 - Les modifications sont optimistes (planning, sélection, sous-titres) : en cas d'échec, l'écran revient à l'état
   précédent et un message s'affiche.
 - 401 : la session est expirée ; avec Supabase, rafraîchir le jeton (`autoRefreshToken`) ou renvoyer vers `/connexion`.
+
+
+## 7. État du branchement (Coach et connexion)
+
+- **Connexion réelle** : `SupabaseAuthProvider` (création de compte + connexion). Active dès que `VITE_SUPABASE_URL` et
+  `VITE_SUPABASE_ANON_KEY` sont renseignés ; sinon la connexion simulée reste en place. Désactiver « Confirm email » dans Supabase
+  (Authentication > Sign In / Providers > Email) pour les essais.
+- **Coach réel, reste simulé** : avec `VITE_USE_MOCKS=true` et `VITE_REAL_COACH=true`, seuls `generateShotSpec` et `getCalibration`
+  appellent le backend (`src/api/index.ts`). Projet, Planner, Passeport et Festival restent des mocks.
+- **Tester sur téléphone** : la page est en https (`npm run dev:phone`), le backend en http : le navigateur bloque cet appel (contenu mixte).
+  Mets `VITE_API_URL=/api` : le serveur de dev relaie `/api/*` vers `http://localhost:8000` (voir `vite.config.ts`).
+- Le jeton Supabase part dans `Authorization: Bearer …` ; le backend le vérifie (`SUPABASE_JWT_SECRET`, ou les clés publiques si le projet
+  utilise les nouvelles clés asymétriques).
+- **Espaces de travail du Coach** : exécuter la migration `backend/migrations/0004_workspaces.sql` dans Supabase. Sans elle,
+  `GET /workspaces` échoue et le Coach affiche « Enregistrement sur ton compte impossible » (les espaces restent dans le téléphone).

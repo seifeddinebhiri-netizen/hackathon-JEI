@@ -8,6 +8,7 @@ export type ApiErrorCode =
   | 'interdit'
   | 'introuvable'
   | 'conflit'
+  | 'trop_de_requetes'
   | 'trop_volumineux'
   | 'invalide'
   | 'serveur'
@@ -37,6 +38,7 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   interdit: "Tu n'as pas accès à cette ressource.",
   introuvable: 'Élément introuvable.',
   conflit: 'Ces données ont été modifiées ailleurs. Recharge la page.',
+  trop_de_requetes: 'Trop de demandes en peu de temps. Réessaie dans un instant.',
   trop_volumineux: 'Fichier trop volumineux.',
   invalide: 'Certaines informations envoyées ne sont pas valides.',
   serveur: 'Le serveur a rencontré un problème. Réessaie dans un instant.',
@@ -54,13 +56,15 @@ export function errorFromStatus(status: number, serverMessage?: string): ApiErro
           ? 'introuvable'
           : status === 409
             ? 'conflit'
-            : status === 413
-              ? 'trop_volumineux'
-              : status === 400 || status === 422
-                ? 'invalide'
-                : status >= 500
-                  ? 'serveur'
-                  : 'inconnu';
+            : status === 429
+              ? 'trop_de_requetes'
+              : status === 413
+                ? 'trop_volumineux'
+                : status === 400 || status === 422
+                  ? 'invalide'
+                  : status >= 500
+                    ? 'serveur'
+                    : 'inconnu';
   return new ApiError(status, code, serverMessage || MESSAGES[code]);
 }
 
@@ -102,7 +106,10 @@ export async function request<S extends z.ZodType>(
   path: string,
   opts: RequestOptions<S>,
 ): Promise<z.output<S>> {
-  const url = new URL(path.replace(/^\//, ''), env.apiUrl.endsWith('/') ? env.apiUrl : `${env.apiUrl}/`);
+  // `VITE_API_URL` peut être relative (ex. « /api », relayée par le serveur de dev) : on la résout
+  // par rapport à la page.
+  const base = new URL(env.apiUrl.endsWith('/') ? env.apiUrl : `${env.apiUrl}/`, window.location.origin);
+  const url = new URL(path.replace(/^\//, ''), base);
   for (const [k, v] of Object.entries(opts.query ?? {})) {
     if (v !== undefined && v !== '') url.searchParams.set(k, String(v));
   }

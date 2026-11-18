@@ -17,6 +17,7 @@ import type * as T from '../types';
 import aiTools from './data/ai-tools.json';
 import { buildFestivals } from './data/festivals';
 import { getDb, persist, uid } from './db';
+import { mockCalibration, mockShotSpec } from './coach';
 import { mockParseScreenplay } from './parser';
 import { mockSchedule } from './scheduler';
 import { mockWeatherDay, mockWeatherRange } from './weather';
@@ -296,7 +297,60 @@ function checkPassportLocal(p: T.Passport): T.PassportCheck {
 }
 
 // --- API simulée ---------------------------------------------------------------------
+// --- Espaces de travail du Coach : simulés dans le navigateur (jamais utilisés sans compte réel) ---
+const MOCK_WS_KEY = 'pp-mock-workspaces';
+const readMockWorkspaces = (): T.WorkspaceRecord[] => {
+  try {
+    return JSON.parse(localStorage.getItem(MOCK_WS_KEY) ?? '[]') as T.WorkspaceRecord[];
+  } catch {
+    return [];
+  }
+};
+const writeMockWorkspaces = (list: T.WorkspaceRecord[]) => {
+  try {
+    localStorage.setItem(MOCK_WS_KEY, JSON.stringify(list));
+  } catch {
+    /* stockage indisponible */
+  }
+};
+
 export const mockApi: Api = {
+  listWorkspaces: () =>
+    simulate('GET /workspaces', z.array(S.workspaceRecordSchema), () => readMockWorkspaces(), 0.3),
+  putWorkspace: (id, input) =>
+    simulate(
+      'PUT /workspaces/{id}',
+      S.workspaceRecordSchema,
+      () => {
+        const list = readMockWorkspaces();
+        const current = list.find((w) => w.id === id);
+        if ((current?.version ?? null) !== input.base_version) throw apiError('conflit', 409);
+        const now = new Date().toISOString();
+        const next: T.WorkspaceRecord = {
+          id,
+          name: input.name,
+          data: input.data,
+          version: (current?.version ?? 0) + 1,
+          created_at: current?.created_at ?? now,
+          updated_at: now,
+        };
+        writeMockWorkspaces([...list.filter((w) => w.id !== id), next]);
+        return next;
+      },
+      0.3,
+    ),
+  deleteWorkspace: (id) =>
+    simulate(
+      'DELETE /workspaces/{id}',
+      S.okSchema,
+      () => {
+        writeMockWorkspaces(readMockWorkspaces().filter((w) => w.id !== id));
+        return { ok: true };
+      },
+      0.3,
+    ),
+  generateShotSpec: (input) => simulate('POST /shot-spec', S.shotSpecSchema, () => mockShotSpec(input), 3),
+  getCalibration: () => simulate('GET /calibration', S.calibrationSchema, () => mockCalibration, 0.3),
   createProject: (input) =>
     simulate('POST /projects', S.projectSchema, () => {
       const p: T.Project = {

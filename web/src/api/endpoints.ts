@@ -55,6 +55,38 @@ export async function getWeather(q: T.WeatherQuery): Promise<T.WeatherDay[]> {
   return request('/planner/weather', { query: q, schema: z.array(S.weatherDaySchema) });
 }
 
+/** Plan de prise de vue proposé par l'IA (Gemini) pour une scène. Peut durer plusieurs secondes. */
+export async function generateShotSpec(input: T.ShotSpecRequest): Promise<T.ShotSpec> {
+  return request('/shot-spec', {
+    method: 'POST',
+    body: input,
+    schema: S.shotSpecSchema,
+    timeoutMs: UPLOAD_TIMEOUT_MS,
+  });
+}
+
+/** Tables mots → nombres, pour recalculer les cibles quand l'utilisateur modifie le plan. */
+export async function getCalibration(): Promise<T.Calibration> {
+  return request('/calibration', { schema: S.calibrationSchema });
+}
+
+/** Les espaces de travail du Coach de l'utilisateur connecté. */
+export async function listWorkspaces(): Promise<T.WorkspaceRecord[]> {
+  return request('/workspaces', { schema: z.array(S.workspaceRecordSchema) });
+}
+
+export async function putWorkspace(id: string, input: T.WorkspaceInput): Promise<T.WorkspaceRecord> {
+  return request(`/workspaces/${encodeURIComponent(id)}`, {
+    method: 'PUT',
+    body: input,
+    schema: S.workspaceRecordSchema,
+  });
+}
+
+export async function deleteWorkspace(id: string): Promise<{ ok: true }> {
+  return request(`/workspaces/${encodeURIComponent(id)}`, { method: 'DELETE', schema: S.okSchema });
+}
+
 export async function getAiTools(): Promise<T.AiTool[]> {
   return request('/ai-tools', { schema: z.array(S.aiToolSchema) });
 }
@@ -131,6 +163,11 @@ export type Api = {
   generateSchedule: typeof generateSchedule;
   getWeather: typeof getWeather;
   getAiTools: typeof getAiTools;
+  generateShotSpec: typeof generateShotSpec;
+  getCalibration: typeof getCalibration;
+  listWorkspaces: typeof listWorkspaces;
+  putWorkspace: typeof putWorkspace;
+  deleteWorkspace: typeof deleteWorkspace;
   getProjectPassport: typeof getProjectPassport;
   savePassport: typeof savePassport;
   checkPassport: typeof checkPassport;

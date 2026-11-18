@@ -17,9 +17,15 @@ class Settings(BaseSettings):
     supabase_jwt_secret: SecretStr = SecretStr("")
     database_url: SecretStr = SecretStr("")
 
-    anthropic_api_key: SecretStr = SecretStr("")
-    llm_model: str = "claude-opus-5-5"
-    llm_effort: str = "medium"  # low | medium | high | xhigh | max
+    gemini_api_key: SecretStr = SecretStr("")
+    shot_spec_rate_limit: int = 20  # requêtes par fenêtre et par utilisateur
+    shot_spec_rate_window_s: int = 3600
+    # Modèle Gemini : à vérifier dans Google AI Studio (les modèles gratuits changent souvent).
+    llm_model: str = "gemini-2.5-flash"
+    llm_temperature: float = 0.4
+    # `v1beta` : la sortie structurée y est prise en charge ; le SDK utilise `v1` (stable) par défaut.
+    llm_api_version: str = "v1beta"
+    llm_timeout_s: int = 45
 
     @property
     def cors_origin_list(self) -> list[str]:

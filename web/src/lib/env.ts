@@ -11,11 +11,15 @@ function num(v: string | undefined, fallback: number): number {
 export const env = {
   apiUrl: (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:8000',
   useMocks: bool(import.meta.env.VITE_USE_MOCKS as string | undefined, true),
+  /** Coach branché au vrai backend (plan par l'IA) même quand le reste est simulé. */
+  realCoach: bool(import.meta.env.VITE_REAL_COACH as string | undefined, !!import.meta.env.VITE_SUPABASE_URL),
   mockLatencyMs: num(import.meta.env.VITE_MOCK_LATENCY_MS as string | undefined, 600),
   mockFailRate: num(import.meta.env.VITE_MOCK_FAIL_RATE as string | undefined, 0),
   publicAppUrl:
     (import.meta.env.VITE_PUBLIC_APP_URL as string | undefined) ??
     (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173'),
   supabaseUrl: (import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? '',
+  demoEmail: (import.meta.env.VITE_DEMO_EMAIL as string | undefined) ?? '',
+  demoPassword: (import.meta.env.VITE_DEMO_PASSWORD as string | undefined) ?? '',
   supabaseAnonKey: (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) ?? '',
 } as const;

@@ -19,6 +19,11 @@ const realApi: Api = {
   generateSchedule: real.generateSchedule,
   getWeather: real.getWeather,
   getAiTools: real.getAiTools,
+  generateShotSpec: real.generateShotSpec,
+  getCalibration: real.getCalibration,
+  listWorkspaces: real.listWorkspaces,
+  putWorkspace: real.putWorkspace,
+  deleteWorkspace: real.deleteWorkspace,
   getProjectPassport: real.getProjectPassport,
   savePassport: real.savePassport,
   checkPassport: real.checkPassport,
@@ -32,7 +37,19 @@ const realApi: Api = {
   getPublicFilm: real.getPublicFilm,
 };
 
-export const api: Api = env.useMocks ? mockApi : realApi;
+// Le Coach peut parler au vrai backend (plan par l'IA) pendant que le reste reste simulé.
+const coachApi: Partial<Api> = env.realCoach
+  ? {
+      generateShotSpec: real.generateShotSpec,
+      getCalibration: real.getCalibration,
+      listWorkspaces: real.listWorkspaces,
+      putWorkspace: real.putWorkspace,
+      deleteWorkspace: real.deleteWorkspace,
+    }
+  : {};
+
+export const api: Api = env.useMocks ? { ...mockApi, ...coachApi } : realApi;
+export const coachIsReal = !env.useMocks || env.realCoach;
 export const usingMocks = env.useMocks;
 
 export type { Api } from './endpoints';

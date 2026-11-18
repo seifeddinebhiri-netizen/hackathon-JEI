@@ -308,3 +308,165 @@ export type SynopsisFeedbackInput = { kind: SynopsisKind; text: string; limit_ch
 
 export type User = { id: string; email: string; name: string; is_demo: boolean; project_id?: string };
 export type Session = { access_token: string; expires_at: string; user: User };
+
+// ---------------------------------------------------------------------------
+// Coach : plan de prise de vue (POST /shot-spec) et calibration (GET /calibration)
+// ---------------------------------------------------------------------------
+export type ShotSize = 'ECU' | 'CU' | 'MCU' | 'MS' | 'MWS' | 'WS';
+export type SubjectKind = 'person' | 'face' | 'hands' | 'object' | 'none';
+export type SubjectView = 'front' | 'side' | 'back' | 'not_applicable';
+export type SubjectPosition = 'left_third' | 'center' | 'right_third';
+export type CameraAngle = 'eye_level' | 'low' | 'high';
+export type Tilt = 'level' | 'dutch';
+export type LightContrast = 'low' | 'medium_low' | 'medium' | 'high';
+export type Exposure = 'dark' | 'balanced' | 'bright';
+export type BacklightPolicy = 'avoid' | 'accept' | 'intentional';
+export type SunRelative = 'front' | 'side' | 'behind' | 'not_applicable';
+export type Stability = 'tripod' | 'handheld';
+export type Movement = 'static' | 'pan' | 'tilt' | 'tracking';
+
+/** Les champs à choix fermé d'un plan : ce que l'utilisateur lit et modifie en mots. */
+export type ShotChoices = {
+  size: ShotSize;
+  subject_kind: SubjectKind;
+  subject_view: SubjectView;
+  subject_position: SubjectPosition;
+  camera_angle: CameraAngle;
+  tilt: Tilt;
+  light_contrast: LightContrast;
+  exposure: Exposure;
+  backlight: BacklightPolicy;
+  sun_relative: SunRelative;
+  stability: Stability;
+  movement: Movement;
+};
+export type ShotIntent = ShotChoices & {
+  label_fr: string;
+  why_fr: string;
+  rule_ids: string[];
+  advice_fr: string[];
+};
+
+export type NumRange = { min: number; max: number };
+/** Cibles chiffrées d'un plan, calculées par la calibration (mêmes noms que le backend). */
+export type ShotTargets = {
+  roll_abs_deg: NumRange;
+  /** null : plan en mouvement, pas d'angle fixe à viser. */
+  pitch_deg: NumRange | null;
+  subject_h: NumRange | null;
+  center_x: NumRange | null;
+  center_y: NumRange | null;
+  headroom: NumRange | null;
+  luma: NumRange;
+  contrast: NumRange;
+  backlight_ratio_max: number | null;
+  sun_offset_abs_deg: NumRange | null;
+  /** null : plan en mouvement (la caméra bouge exprès). */
+  shake_max: number | null;
+};
+
+export type RuleSource = { title: string; author: string | null; url: string; type: string };
+export type RuleRef = { id: string; title_fr: string; confidence: string; sources: RuleSource[] };
+/** Un passage d'un plan en mouvement. Les secondes se comptent depuis le début de la prise. */
+export type TimelineSegment = {
+  id: string;
+  start_s: number;
+  end_s: number;
+  /** Ce qui se passe à l'image et comment la caméra bouge pendant ce passage. */
+  description_fr: string;
+  at_start: ShotChoices;
+  /** Cadrage à la fin du passage s'il évolue en douceur (sinon null). */
+  at_end: ShotChoices | null;
+  targets_start: ShotTargets;
+  targets_end: ShotTargets | null;
+};
+export type Timeline = {
+  duration_s: number;
+  /** Comment la scène sera filmée, en phrases (écrit par l'IA). */
+  how_fr: string;
+  segments: TimelineSegment[];
+};
+export type PlanShot = {
+  id: string;
+  intent: ShotIntent;
+  targets: ShotTargets;
+  rules: RuleRef[];
+  /** Seulement pour un plan en mouvement ; `intent` et `targets` décrivent alors le premier passage. */
+  timeline?: Timeline | null;
+};
+export type ShotSpec = {
+  scene_id: string;
+  /** « Brouillon IA : à valider » */
+  status: string;
+  calibration: string;
+  model: string;
+  generated_at: string;
+  shots: PlanShot[];
+};
+
+export type SceneSettingInput = 'interior' | 'exterior' | 'unknown' | 'INT' | 'EXT';
+export type SupportInput = 'handheld' | 'tripod' | 'unknown';
+/** Une scène et ses étiquettes. Seule `description` est obligatoire. */
+export type ShotSpecRequest = {
+  description: string;
+  scene_id?: string;
+  setting?: SceneSettingInput;
+  moment?: SceneMoment;
+  location?: string;
+  characters?: string[];
+  mood?: string[];
+  visual_style?: string;
+  intention?: string;
+  light?: string;
+  support?: SupportInput;
+  /** Plan fixe ou en mouvement (panoramique, tilt, travelling). */
+  motion?: 'fixed' | 'moving' | 'unknown';
+  /** Durée estimée de la scène en secondes (2 à 120) : obligatoire pour un plan en mouvement. */
+  duration_s?: number;
+};
+
+type Pair = [number, number];
+export type CalibrationField = {
+  key: keyof ShotChoices;
+  label_fr: string;
+  options: { value: string; label_fr: string }[];
+};
+/** Tables de conversion « mots → nombres » : le téléphone recalcule les cibles hors ligne. */
+export type Calibration = {
+  version: string;
+  third_tol: number;
+  rules: { no_subject: string[]; has_head: string[]; moving: string[] };
+  tables: {
+    subject_h: Record<string, Pair>;
+    headroom: Record<string, Pair>;
+    center_x: Record<string, number>;
+    pitch: Record<string, Pair>;
+    roll_abs: Record<string, Pair>;
+    luma: Record<string, Pair>;
+    contrast: Record<string, Pair>;
+    backlight_ratio_max: Record<string, number | null>;
+    sun_offset_abs: Record<string, Pair>;
+    shake_max: Record<string, number>;
+  };
+  vocabulary: CalibrationField[];
+};
+
+// ---------------------------------------------------------------------------
+// Coach : espaces de travail synchronisés avec le compte (GET/PUT/DELETE /workspaces)
+// ---------------------------------------------------------------------------
+/** Un espace de travail tel que le serveur le garde. `data` = { request, spec, overrides, notes }. */
+export type WorkspaceRecord = {
+  id: string;
+  name: string;
+  data: Record<string, unknown>;
+  /** Augmente à chaque enregistrement : sert à détecter deux appareils qui modifient le même espace. */
+  version: number;
+  created_at: string;
+  updated_at: string;
+};
+export type WorkspaceInput = {
+  name: string;
+  data: Record<string, unknown>;
+  /** Version sur laquelle la modification est fondée ; null pour créer l'espace. */
+  base_version: number | null;
+};

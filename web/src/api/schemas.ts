@@ -295,3 +295,131 @@ export const publicFilmSchema: z.ZodType<T.PublicFilm> = z.object({
 });
 
 export const okSchema = z.object({ ok: z.literal(true) });
+
+// --- Coach : plan de prise de vue et calibration ------------------------------------
+const numRange = z.object({ min: z.number(), max: z.number() });
+
+export const shotChoicesShape = {
+  size: z.enum(['ECU', 'CU', 'MCU', 'MS', 'MWS', 'WS']),
+  subject_kind: z.enum(['person', 'face', 'hands', 'object', 'none']),
+  subject_view: z.enum(['front', 'side', 'back', 'not_applicable']),
+  subject_position: z.enum(['left_third', 'center', 'right_third']),
+  camera_angle: z.enum(['eye_level', 'low', 'high']),
+  tilt: z.enum(['level', 'dutch']),
+  light_contrast: z.enum(['low', 'medium_low', 'medium', 'high']),
+  exposure: z.enum(['dark', 'balanced', 'bright']),
+  backlight: z.enum(['avoid', 'accept', 'intentional']),
+  sun_relative: z.enum(['front', 'side', 'behind', 'not_applicable']),
+  stability: z.enum(['tripod', 'handheld']),
+  movement: z.enum(['static', 'pan', 'tilt', 'tracking']),
+};
+
+export const shotIntentSchema: z.ZodType<T.ShotIntent> = z.object({
+  ...shotChoicesShape,
+  label_fr: z.string(),
+  why_fr: z.string(),
+  rule_ids: z.array(z.string()),
+  advice_fr: z.array(z.string()),
+});
+
+export const shotTargetsSchema: z.ZodType<T.ShotTargets> = z.object({
+  roll_abs_deg: numRange,
+  pitch_deg: numRange.nullable(),
+  subject_h: numRange.nullable(),
+  center_x: numRange.nullable(),
+  center_y: numRange.nullable(),
+  headroom: numRange.nullable(),
+  luma: numRange,
+  contrast: numRange,
+  backlight_ratio_max: z.number().nullable(),
+  sun_offset_abs_deg: numRange.nullable(),
+  shake_max: z.number().nullable(),
+});
+
+const ruleSourceSchema = z.object({
+  title: z.string(),
+  author: z.string().nullable(),
+  url: z.string(),
+  type: z.string(),
+});
+const shotChoicesObject = z.object(shotChoicesShape);
+
+export const timelineSegmentSchema: z.ZodType<T.TimelineSegment> = z.object({
+  id: z.string(),
+  start_s: z.number(),
+  end_s: z.number(),
+  description_fr: z.string(),
+  at_start: shotChoicesObject,
+  at_end: shotChoicesObject.nullable(),
+  targets_start: shotTargetsSchema,
+  targets_end: shotTargetsSchema.nullable(),
+});
+
+export const timelineSchema: z.ZodType<T.Timeline> = z.object({
+  duration_s: z.number().positive(),
+  how_fr: z.string(),
+  segments: z.array(timelineSegmentSchema).min(1),
+});
+
+export const planShotSchema: z.ZodType<T.PlanShot> = z.object({
+  id: z.string(),
+  intent: shotIntentSchema,
+  targets: shotTargetsSchema,
+  rules: z.array(
+    z.object({
+      id: z.string(),
+      title_fr: z.string(),
+      confidence: z.string(),
+      sources: z.array(ruleSourceSchema),
+    }),
+  ),
+  timeline: timelineSchema.nullable().optional(),
+});
+export const shotSpecSchema: z.ZodType<T.ShotSpec> = z.object({
+  scene_id: z.string(),
+  status: z.string(),
+  calibration: z.string(),
+  model: z.string(),
+  generated_at: z.string(),
+  shots: z.array(planShotSchema),
+});
+
+const pair = z.tuple([z.number(), z.number()]);
+export const calibrationSchema: z.ZodType<T.Calibration> = z.object({
+  version: z.string(),
+  third_tol: z.number(),
+  rules: z.object({
+    no_subject: z.array(z.string()),
+    has_head: z.array(z.string()),
+    moving: z.array(z.string()),
+  }),
+  tables: z.object({
+    subject_h: z.record(z.string(), pair),
+    headroom: z.record(z.string(), pair),
+    center_x: z.record(z.string(), z.number()),
+    pitch: z.record(z.string(), pair),
+    roll_abs: z.record(z.string(), pair),
+    luma: z.record(z.string(), pair),
+    contrast: z.record(z.string(), pair),
+    backlight_ratio_max: z.record(z.string(), z.number().nullable()),
+    sun_offset_abs: z.record(z.string(), pair),
+    shake_max: z.record(z.string(), z.number()),
+  }),
+  vocabulary: z.array(
+    z.object({
+      key: z.enum(Object.keys(shotChoicesShape) as [keyof T.ShotChoices, ...(keyof T.ShotChoices)[]]),
+      label_fr: z.string(),
+      options: z.array(z.object({ value: z.string(), label_fr: z.string() })),
+    }),
+  ),
+});
+
+// --- Coach : espaces de travail -------------------------------------------------------
+export const workspaceRecordSchema: z.ZodType<T.WorkspaceRecord> = z.object({
+  id: z.string(),
+  name: z.string(),
+  data: z.record(z.string(), z.unknown()),
+  version: z.number().int().positive(),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
