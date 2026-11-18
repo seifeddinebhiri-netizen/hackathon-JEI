@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router';
 import { BabaJamil } from '@/components/BabaJamil';
 import type { DepartmentDeclaration, Passport as PassportT, Project } from '@/api/types';
 import { Button, ErrorState, Icon, LoadingBlock, PageHeader, Skeleton } from '@/components/ui';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { safeReturnPath } from '@/features/festival/lib/retour';
 import { AiLabel } from '@/features/passport/components/AiLabel';
 import { DepartmentCard } from '@/features/passport/components/DepartmentCard';
 import { DepartmentNav } from '@/features/passport/components/DepartmentNav';
@@ -18,6 +20,9 @@ function directorOf(project: Project, fallback: string): string {
 
 function PassportEditor({ project, initial }: { project: Project; initial: PassportT | null }) {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  // Venu d'un dossier du Kit Festival : on y revient à la fin
+  const retour = safeReturnPath(useSearchParams()[0].get('retour'));
   const tools = useAiTools();
   const save = useSavePassport();
   const [declarations, setDeclarations] = useState<DepartmentDeclaration[]>(initial?.declarations ?? []);
@@ -89,6 +94,13 @@ function PassportEditor({ project, initial }: { project: Project; initial: Passp
       </div>
 
       <div className="flex flex-col gap-6 lg:col-span-7 lg:col-start-6 lg:row-span-2 lg:row-start-1">
+        {retour ? (
+          <p className="flex items-start gap-2 border-2 border-ink bg-gold-soft p-3 text-meta">
+            <Icon name="info" size={16} className="mt-0.5 shrink-0" />
+            Tu viens de ton dossier de festival. Réponds pour les {DEPARTMENTS.length} départements, puis «
+            Terminer et revenir à mon dossier ».
+          </p>
+        ) : null}
         <BabaJamil
           pose="declarer"
           taille="s"
@@ -131,6 +143,15 @@ function PassportEditor({ project, initial }: { project: Project; initial: Passp
           {current < DEPARTMENTS.length - 1 ? (
             <Button iconRight="arrowRight" onClick={() => setCurrent((c) => c + 1)}>
               Département suivant
+            </Button>
+          ) : retour ? (
+            <Button
+              iconRight="arrowRight"
+              className="whitespace-normal! text-left"
+              disabled={declared < DEPARTMENTS.length || autosave.state === 'saving'}
+              onClick={() => void autosave.flush().then(() => navigate(retour))}
+            >
+              Terminer et revenir à mon dossier
             </Button>
           ) : (
             <Button

@@ -133,7 +133,7 @@ const DEADLINES = [
 
 export function FestivalCapture() {
   return (
-    <CaptureFrame path="festival?onglet=selection" tilt="right">
+    <CaptureFrame path="festival/dossiers" tilt="right">
       <p className="font-display text-[18px] font-bold">Ma sélection</p>
       <div className="relative mt-4 ml-2 border-l-2 border-ink pl-5">
         {DEADLINES.map((f) => (
