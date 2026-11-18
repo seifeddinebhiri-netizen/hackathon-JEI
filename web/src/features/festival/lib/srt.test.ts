@@ -43,7 +43,7 @@ describe('srt', () => {
 describe('export .srt', () => {
   it('nomme le fichier DarHmeti_EN.srt', () => {
     expect(srtFileName('Dar Hmeti', 'en')).toBe('DarHmeti_EN.srt');
-    expect(srtFileName('Marée basse', 'fr')).toBe('MareeBasse_FR.srt');
+    expect(srtFileName('Café des Nattes', 'fr')).toBe('CafeDesNattes_FR.srt');
     expect(srtFileName('', 'en')).toBe('SousTitres_EN.srt');
   });
 

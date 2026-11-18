@@ -77,7 +77,7 @@ Le message est affiché tel quel à l'utilisateur ; sans message, le front en af
 
 Corps (`CreateProjectInput`) :
 ```json
-{ "title": "Marée basse", "format": "court", "city": "Tunis",
+{ "title": "Dar Hmeti", "format": "court", "city": "Tunis",
   "shooting_window": { "from": "2026-11-19", "to": "2026-12-08" }, "max_hours_per_day": 8 }
 ```
 Réponse 201 : `Project` (listes vides). Erreurs : 400/422.
@@ -87,7 +87,7 @@ Réponse 201 : `Project` (listes vides). Erreurs : 400/422.
 Réponse 200 : `Project`. Erreurs : 401, 403, 404.
 ```json
 {
-  "id": "demo-maree-basse", "title": "Marée basse", "format": "court", "city": "Tunis",
+  "id": "demo-maree-basse", "title": "Dar Hmeti", "format": "court", "city": "Tunis",
   "shooting_window": { "from": "2026-11-19", "to": "2026-12-08" }, "max_hours_per_day": 8,
   "locations": [{
     "id": "loc-medina", "name": "Médina : ruelle et café", "address": "Médina de Tunis, [adresse exacte à compléter]",
@@ -248,7 +248,7 @@ pas le travail du réalisateur. `non_divulgue` est un statut valide.
 
 Création (sans `id`) ou mise à jour (avec `id`). Corps (`SavePassportInput`) :
 ```json
-{ "id": "pass-4ff7045785", "project_id": "demo-maree-basse", "film_title": "Marée basse", "director": "Yassine",
+{ "id": "pass-4ff7045785", "project_id": "demo-maree-basse", "film_title": "Dar Hmeti", "director": "Yassine",
   "declarations": [
     { "department": "scenario", "used_ai": false, "what": "", "human_decisions": "Écrit par le réalisateur." },
     { "department": "montage", "used_ai": true, "tool_id": "tool-montage-a",
@@ -277,7 +277,7 @@ Réponse 200 : `{ "url": "https://…/passeport.pdf" }`, ouverte dans un nouvel 
 
 ### `signC2pa` — POST `/c2pa/sign` · confirmé
 
-Corps : `{ "passport_id": "pass-4ff7045785", "file_name": "maree-basse-v-finale.mp4" }`.
+Corps : `{ "passport_id": "pass-4ff7045785", "file_name": "dar-hmeti-v-finale.mp4" }`.
 Réponse 200 :
 ```json
 { "signed": true, "manifest_id": "c2pa-…", "signed_at": "2026-11-14T16:10:00+01:00", "simulated": true }
@@ -412,7 +412,7 @@ Corps : `{ "kind": "court", "text": "Amira, 24 ans, apprend…", "limit_chars": 
 
 `{id}` = identifiant du projet. Construit à partir du projet (`synopsis`, `film_page`, `people`) et du Passeport.
 ```json
-{ "id": "demo-maree-basse", "title": "Marée basse", "director": "Yassine",
+{ "id": "demo-maree-basse", "title": "Dar Hmeti", "director": "Yassine",
   "synopsis_short": "…", "synopsis_long": "…",
   "stills": ["/photos/ruelle.jpg", "/photos/porte.jpg"],
   "credits": [{ "role": "Amira", "name": "[Actrice 1]" }, { "role": "Réalisation", "name": "Yassine" }],

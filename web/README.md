@@ -25,7 +25,7 @@ npm install
 npm run dev             # http://localhost:5173
 ```
 
-Pour la démo, cliquer sur « Continuer en démo » sur la page de connexion : le projet fictif « Marée basse »
+Pour la démo, cliquer sur « Continuer en démo » sur la page de connexion : le projet fictif « Dar Hmeti »
 (court métrage tourné à Tunis) est prêt. La page **Mes données** permet de le remettre dans son état de départ.
 
 ## Scripts

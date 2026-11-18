@@ -114,7 +114,7 @@ export function PassportCapture() {
   return (
     <CaptureFrame path="passeport" tilt="left">
       <AiLabel
-        filmTitle="Marée basse"
+        filmTitle="Dar Hmeti"
         director="Yassine"
         badgeCode={`${brand.badgePrefix}-7K3Q-2M`}
         declarations={SAMPLE}
