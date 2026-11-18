@@ -112,6 +112,7 @@ async def parse_screenplay(text: str, llm: ScreenplayLLM | None) -> ParseScreenp
     warnings: list[str] = []
     ai_used = False
     ai_failed = False
+    ai_error = ""
 
     # --- 1. Découpage ---------------------------------------------------------
     chunks = split_scenes(text)
@@ -126,8 +127,8 @@ async def parse_screenplay(text: str, llm: ScreenplayLLM | None) -> ParseScreenp
             try:
                 boundaries = await enrich.segment(llm, units)
                 ai_used = bool(boundaries)
-            except LLMUnavailable:
-                ai_failed = True
+            except LLMUnavailable as exc:
+                ai_failed, ai_error = True, str(exc)
             except Exception as exc:  # noqa: BLE001 — on garde le texte entier
                 log.warning("screenplay_ai_error", step="segment", error=type(exc).__name__)
                 ai_failed = True
@@ -190,8 +191,8 @@ async def parse_screenplay(text: str, llm: ScreenplayLLM | None) -> ParseScreenp
                 llm, refs, all_chars, {k: d.name for k, d in loc_drafts.items()}
             )
             ai_used = True
-        except LLMUnavailable:
-            ai_failed = True
+        except LLMUnavailable as exc:
+            ai_failed, ai_error = True, str(exc)
         except Exception as exc:  # noqa: BLE001 — réponse inattendue : on garde le résultat par règles
             log.warning("screenplay_ai_error", error=type(exc).__name__)
             ai_failed = True
@@ -256,9 +257,10 @@ async def parse_screenplay(text: str, llm: ScreenplayLLM | None) -> ParseScreenp
 
     # --- 5. Avertissements lisibles par un scénariste ---------------------------
     if ai_failed:
+        reason = f" ({ai_error.rstrip('.')})" if ai_error else ""
         warnings.append(
-            "Analyse IA indisponible : découpage automatique simple, sans résumés ni descriptions "
-            "de lieux. Tu peux relancer plus tard."
+            f"Analyse IA indisponible{reason} : découpage automatique simple, sans résumés ni "
+            "descriptions de lieux. Tu peux relancer plus tard."
         )
     if any(c.interior_exterior for c in chunks):
         warnings.append(

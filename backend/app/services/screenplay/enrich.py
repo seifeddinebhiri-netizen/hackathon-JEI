@@ -99,12 +99,12 @@ class Enrichment:
     dropped: int = 0  # nombre d'annotations rejetées par la vérification
 
 
-def _batches(scenes: list[SceneForAI]) -> list[list[SceneForAI]]:
+def _batches(scenes: list[SceneForAI], limit: int = MAX_BATCH_CHARS) -> list[list[SceneForAI]]:
     out: list[list[SceneForAI]] = [[]]
     size = 0
     for s in scenes:
         n = min(len(s.body), MAX_SCENE_CHARS) + 300
-        if out[-1] and size + n > MAX_BATCH_CHARS:
+        if out[-1] and size + n > limit:
             out.append([])
             size = 0
         out[-1].append(s)
@@ -214,7 +214,8 @@ async def analyze(
     llm: ScreenplayLLM, scenes: list[SceneForAI], characters: list[str], locations: dict[str, str]
 ) -> Enrichment:
     acc = Enrichment()
-    sem = asyncio.Semaphore(MAX_CONCURRENCY)
+    sem = asyncio.Semaphore(getattr(llm, "max_concurrency", MAX_CONCURRENCY))
+    limit = getattr(llm, "max_batch_chars", MAX_BATCH_CHARS)
 
     async def run(batch: list[SceneForAI]) -> tuple[list[SceneForAI], LLMScreenplayAnalysis]:
         async with sem:
@@ -225,18 +226,18 @@ async def analyze(
             )
             return batch, res
 
-    for batch, res in await asyncio.gather(*(run(b) for b in _batches(scenes))):
+    for batch, res in await asyncio.gather(*(run(b) for b in _batches(scenes, limit))):
         validate_analysis(res, batch, characters, acc)
     return acc
 
 
-def validate_boundaries(seg: LLMSegmentation, units: list[str]) -> list[dict]:
-    n = len(units)
-    first = 1
+def validate_boundaries(seg: LLMSegmentation, lo: int, hi: int) -> list[dict]:
+    """Garde les bornes comprises entre les segments `lo` et `hi` (inclus), triées, sans doublon.
+    La première borne est ramenée à `lo` pour ne perdre aucune phrase."""
     seen: set[int] = set()
     out = []
     for b in sorted(seg.scenes, key=lambda b: b.start_line):
-        if not 1 <= b.start_line <= n or b.start_line in seen:
+        if not lo <= b.start_line <= hi or b.start_line in seen:
             continue
         seen.add(b.start_line)
         out.append(
@@ -249,16 +250,54 @@ def validate_boundaries(seg: LLMSegmentation, units: list[str]) -> list[dict]:
             }
         )
     if out:
-        out[0]["start_line"] = min(out[0]["start_line"], first)
-    return out[:200]
+        out[0]["start_line"] = lo
+    return out
+
+
+def _windows(units: list[str], limit: int) -> list[tuple[int, int]]:
+    """Passages consécutifs de `limit` caractères au plus (indices 0-based, fin exclue)."""
+    out, start, size = [], 0, 0
+    for i, u in enumerate(units):
+        n = len(u) + 8
+        if i > start and size + n > limit:
+            out.append((start, i))
+            start, size = i, 0
+        size += n
+    out.append((start, len(units)))
+    return out
 
 
 async def segment(llm: ScreenplayLLM, units: list[str]) -> list[dict]:
-    numbered = "\n".join(f"{i}: {u}" for i, u in enumerate(units, start=1))
-    seg = await llm.parse_structured(
-        system=SEGMENT_SYSTEM,
-        user=f"<texte>\n{escape(numbered)}\n</texte>\n\nDécoupe ce texte en scènes de tournage.",
-        output_format=LLMSegmentation,
-        max_tokens=12000,
-    )
-    return validate_boundaries(seg, units)
+    """Bornes de scènes sur un récit. Un long texte est envoyé par passages successifs
+    (modèle local à contexte court) ; la numérotation reste celle du texte entier."""
+    limit = getattr(llm, "max_batch_chars", MAX_BATCH_CHARS)
+    bounds: list[dict] = []
+    for lo, hi in _windows(units, limit):
+        numbered = "\n".join(f"{i}: {u}" for i, u in enumerate(units[lo:hi], start=lo + 1))
+        context = ""
+        if bounds:
+            last = bounds[-1]
+            context = (
+                f"Ce passage continue le précédent. La scène en cours se passe à « {last['place']} »"
+                f" ({last['setting']}, {last['moment']}). Si le passage commence dans la même "
+                "scène, ta première scène reprend ce lieu.\n"
+            )
+        seg = await llm.parse_structured(
+            system=SEGMENT_SYSTEM,
+            user=f"{context}<texte>\n{escape(numbered)}\n</texte>\n\n"
+            f"Découpe ce texte en scènes de tournage. La première scène commence au segment {lo + 1}.",
+            output_format=LLMSegmentation,
+            max_tokens=12000,
+        )
+        part = validate_boundaries(seg, lo + 1, hi)
+        # Début de passage dans la scène précédente : pas une nouvelle scène.
+        prev = bounds[-1] if bounds else None
+        if (
+            prev
+            and part
+            and norm_key(part[0]["place"]) == norm_key(prev["place"])
+            and norm_key(part[0]["room"] or "") == norm_key(prev["room"] or "")
+        ):
+            part = part[1:]
+        bounds += part
+    return bounds[:200]
