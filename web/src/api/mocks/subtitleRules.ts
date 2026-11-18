@@ -18,7 +18,12 @@ const RULES = new Set<T.SubtitleRule>([
   'duree_courte',
   'duree_longue',
   'chevauchement',
+  'omission_possible',
 ]);
+const OMISSION_RATIO = 0.5;
+const OMISSION_MIN_SOURCE = 15;
+const SENTENCE_END = /[.?!؟…]+/;
+const HESITATION = /(^|\s)(?:آ+|ا{3,}|(?:e|eu|euh|hm+|mm+)h*)(?=\s|$)/giu;
 
 const frNum = (x: number) => x.toFixed(1).replace('.', ',');
 
@@ -64,6 +69,31 @@ function textWarnings(label: string, raw: string, duration: number): T.SubtitleW
   return out;
 }
 
+const sentences = (text: string) => text.split(SENTENCE_END).filter((p) => /[\p{L}\p{N}]/u.test(p)).length;
+
+/** Traduction bien plus courte que la source, ou avec moins de phrases (fin non traduite ?). */
+function omissionWarnings(source: string, label: string, raw: string): T.SubtitleWarning[] {
+  const text = raw.split(/\s+/).filter(Boolean).join(' ');
+  if (!text) return [];
+  const src = source.replace(HESITATION, ' ').split(/\s+/).filter(Boolean).join(' ');
+  if (src.length >= OMISSION_MIN_SOURCE && text.length < OMISSION_RATIO * src.length)
+    return [
+      {
+        rule: 'omission_possible',
+        detail: `${label} : ${text.length} car. pour environ ${src.length} attendus`,
+      },
+    ];
+  const [inSrc, inOut] = [sentences(src), sentences(text)];
+  if (inOut < inSrc)
+    return [
+      {
+        rule: 'omission_possible',
+        detail: `${label} : ${inOut} phrase${inOut > 1 ? 's' : ''} pour ${inSrc} dans la source (fin de ligne non traduite ?)`,
+      },
+    ];
+  return [];
+}
+
 export function checkRules(lines: T.SubtitleLine[]): T.SubtitleLine[] {
   let prevEnd: number | null = null;
   return lines.map((line) => {
@@ -87,6 +117,10 @@ export function checkRules(lines: T.SubtitleLine[]): T.SubtitleLine[] {
         detail: `${frNum(duration)} s à l'écran (maximum ${frNum(MAX_DURATION_S)} s)`,
       });
     warnings.push(...textWarnings('FR', line.fr, duration), ...textWarnings('EN', line.en ?? '', duration));
+    warnings.push(
+      ...omissionWarnings(line.source, 'FR', line.fr),
+      ...omissionWarnings(line.source, 'EN', line.en ?? ''),
+    );
     prevEnd = end;
     return { ...line, warnings, glossary_used: line.glossary_used ?? [] };
   });

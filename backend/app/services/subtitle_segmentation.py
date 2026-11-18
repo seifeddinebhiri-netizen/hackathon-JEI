@@ -5,9 +5,14 @@ Un nouveau sous-titre commence si :
 - la personne qui parle change ;
 - le mot précédent finit par . ? ! et la pause dépasse PUNCT_PAUSE_S ;
 - le texte ne tiendrait plus sur MAX_LINES lignes de MAX_LINE_CHARS caractères.
+
+Chaque sous-titre note aussi ses mots douteux : probabilité ASR < LOW_WORD_PROB, ou mot
+isolé dans une autre écriture que ses voisins (arabe / latin) avec une probabilité
+< SUSPECT_SWITCH_PROB (ex. un mot espagnol transcrit au milieu de la derja).
 """
 
 import math
+import re
 
 from app.schemas.subtitle import Cue, Word
 
@@ -16,6 +21,11 @@ PUNCT_PAUSE_S = 0.3
 MAX_LINE_CHARS = 42
 MAX_LINES = 2
 _STRONG_PUNCT = (".", "?", "!", "؟")
+LOW_WORD_PROB = 0.5
+SUSPECT_SWITCH_PROB = 0.8
+_ARABIC = re.compile(r"[\u0600-\u06FF]")
+_LATIN = re.compile(r"[A-Za-zÀ-ÖØ-öø-ÿ]")
+_EDGE_PUNCT = ".,;:!?؟،«»\"'()…-"
 
 
 def srt_time(seconds: float) -> str:
@@ -64,8 +74,43 @@ def _speaker_label(speaker_id: str | None, labels: dict[str, str]) -> str | None
     return labels[speaker_id]
 
 
+def _prob(word: Word) -> float:
+    return math.exp(min(0.0, word.logprob))
+
+
+def _script(text: str) -> str | None:
+    """« arabe », « latin » ou None (chiffres, ponctuation). L'arabizi compte comme latin."""
+    arabic, latin = len(_ARABIC.findall(text)), len(_LATIN.findall(text))
+    if not arabic and not latin:
+        return None
+    return "arabe" if arabic >= latin else "latin"
+
+
+def doubtful_words(words: list[Word]) -> tuple[list[str], list[str]]:
+    """(mots incertains, mots isolés dans une autre écriture), sans doublon."""
+    uncertain: list[str] = []
+    mixed: list[str] = []
+    scripts = [_script(w.text) for w in words]
+    for i, word in enumerate(words):
+        text = word.text.strip().strip(_EDGE_PUNCT)
+        if not text:
+            continue
+        prob = _prob(word)
+        if prob < LOW_WORD_PROB:
+            if text not in uncertain:
+                uncertain.append(text)
+            continue
+        own = scripts[i]
+        neighbors = [scripts[j] for j in (i - 1, i + 1) if 0 <= j < len(words) and scripts[j]]
+        isolated = own is not None and neighbors and all(n != own for n in neighbors)
+        if isolated and prob < SUSPECT_SWITCH_PROB and text not in mixed:
+            mixed.append(text)
+    return uncertain, mixed
+
+
 def _make_cue(index: int, words: list[Word], labels: dict[str, str]) -> Cue:
-    confidence = sum(math.exp(min(0.0, w.logprob)) for w in words) / len(words)
+    confidence = sum(_prob(w) for w in words) / len(words)
+    uncertain, mixed = doubtful_words(words)
     return Cue(
         id=f"l{index}",
         start=srt_time(words[0].start),
@@ -73,6 +118,8 @@ def _make_cue(index: int, words: list[Word], labels: dict[str, str]) -> Cue:
         source=" ".join(w.text.strip() for w in words),
         speaker=_speaker_label(words[0].speaker_id, labels),
         asr_confidence=round(confidence, 3),
+        uncertain_words=uncertain,
+        mixed_words=mixed,
     )
 
 

@@ -281,6 +281,7 @@ export const subtitleWarningSchema: z.ZodType<T.SubtitleWarning> = z.object({
     'duree_courte',
     'duree_longue',
     'chevauchement',
+    'omission_possible',
   ]),
   detail: z.string(),
 });
@@ -298,6 +299,8 @@ export const subtitleLineSchema: z.ZodType<T.SubtitleLine> = z.object({
   speaker: z.string().optional(),
   warnings: z.array(subtitleWarningSchema).optional(),
   glossary_used: z.array(z.string()).optional(),
+  fr_court: z.string().optional(),
+  en_court: z.string().optional(),
 });
 
 export const subtitleDraftSchema: z.ZodType<T.SubtitleDraft> = z.object({

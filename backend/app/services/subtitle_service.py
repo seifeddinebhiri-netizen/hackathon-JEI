@@ -36,7 +36,7 @@ from app.schemas.subtitle import (
     TranslationContext,
 )
 from app.services import glossary_service, subtitle_rules
-from app.services.subtitle_segmentation import segment
+from app.services.subtitle_segmentation import parse_srt_time, segment
 from app.services.transcription_service import DERJA_LANGUAGE_CODE, Transcriber
 from app.services.translation_service import (
     BATCH_SIZE,
@@ -56,7 +56,13 @@ _LEVELS: list[Confidence] = ["faible", "moyenne", "elevee"]
 
 # --- Confiance finale --------------------------------------------------------------
 def final_confidence(
-    llm: Confidence, asr_confidence: float, note: str | None, glossary_used: list[str]
+    llm: Confidence,
+    asr_confidence: float,
+    note: str | None,
+    glossary_used: list[str],
+    uncertain_words: list[str] | None = None,
+    mixed_words: list[str] | None = None,
+    omission: bool = False,
 ) -> Confidence:
     """Part du LLM, baisse d'un cran par signal de doute ; jamais au-dessus du LLM."""
     level = _LEVELS.index(llm)
@@ -64,7 +70,34 @@ def final_confidence(
         level -= 1
     if note and not glossary_used:  # tournure signalée par le LLM, absente du glossaire
         level -= 1
+    if uncertain_words:  # un mot au moins sous LOW_WORD_PROB
+        level -= 1
+    if mixed_words:  # mot isolé dans une autre écriture, peu sûr
+        level -= 1
+    if omission:  # avertissement omission_possible
+        level -= 1
     return _LEVELS[max(0, level)]
+
+
+def doubt_note(note: str | None, cue: Cue) -> str | None:
+    """Ajoute à la note du LLM les mots douteux de la transcription."""
+    parts = [note] if note else []
+    if cue.uncertain_words:
+        parts.append("mot incertain : " + ", ".join(cue.uncertain_words))
+    if cue.mixed_words:
+        parts.append("mot isolé dans une autre langue, à vérifier : " + ", ".join(cue.mixed_words))
+    return " · ".join(parts) or None
+
+
+def short_suggestion(full: str, short: str | None, duration_s: float) -> str | None:
+    """Garde la version courte seulement si la complète est trop rapide à lire et si la
+    courte respecte la limite. Jamais appliquée : c'est une suggestion pour le relecteur."""
+    if not short or duration_s <= 0:
+        return None
+    limit = int(duration_s * subtitle_rules.MAX_CPS)
+    if len(full) <= limit or len(short) > limit or len(short) >= len(full):
+        return None
+    return short
 
 
 # --- Stockage ----------------------------------------------------------------------
@@ -304,19 +337,33 @@ async def _build_draft(
             fr=tr.fr,
             en=tr.en,
             confidence=final_confidence(
-                tr.confidence, cue.asr_confidence, tr.note, tr.glossary_used
+                tr.confidence,
+                cue.asr_confidence,
+                tr.note,
+                tr.glossary_used,
+                cue.uncertain_words,
+                cue.mixed_words,
             ),
-            note=tr.note,
+            note=doubt_note(tr.note, cue),
             validated=False,
             speaker=cue.speaker,
             glossary_used=tr.glossary_used,
         )
         for cue, tr in zip(cues, translations, strict=True)
     ]
+    lines = subtitle_rules.apply_rules(lines)
+    # Après les règles (durées corrigées) : omission et versions courtes.
+    for line, tr in zip(lines, translations, strict=True):
+        if any(w.rule == "omission_possible" for w in line.warnings):
+            level = _LEVELS.index(line.confidence)
+            line.confidence = _LEVELS[max(0, level - 1)]
+        duration = parse_srt_time(line.end) - parse_srt_time(line.start)
+        line.fr_court = short_suggestion(line.fr, tr.fr_court, duration)
+        line.en_court = short_suggestion(line.en or "", tr.en_court, duration)
     draft = SubtitleDraft(
         project_id=project_id,
         source_lang=_source_lang(language_code, transcript.language_code),
-        lines=subtitle_rules.apply_rules(lines),
+        lines=lines,
         processing=SubtitleProcessing(
             transcriber=transcriber.name,
             translator=translator_name,
@@ -333,6 +380,11 @@ async def _build_draft(
         lines=len(draft.lines),
         warnings=sum(len(line.warnings) for line in draft.lines),
         low_confidence=sum(1 for line in draft.lines if line.confidence == "faible"),
+        doubtful_words=sum(len(c.uncertain_words) + len(c.mixed_words) for c in cues),
+        omissions=sum(
+            1 for line in draft.lines for w in line.warnings if w.rule == "omission_possible"
+        ),
+        short_suggestions=sum(1 for line in draft.lines if line.fr_court or line.en_court),
         transcriber=transcriber.name,
         translator=translator_name,
         transcription_s=round(transcribed_at - started, 1),

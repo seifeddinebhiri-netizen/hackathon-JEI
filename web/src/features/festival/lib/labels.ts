@@ -90,6 +90,7 @@ export const RULE_LABELS: Record<SubtitleRule, string> = {
   duree_courte: 'Affichée trop peu de temps',
   duree_longue: 'Affichée trop longtemps',
   chevauchement: 'Trop proche de la ligne précédente',
+  omission_possible: 'Traduction peut-être incomplète',
 };
 
 export const RANKING_DISCLAIMER =

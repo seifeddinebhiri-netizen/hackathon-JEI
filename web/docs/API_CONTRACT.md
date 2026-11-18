@@ -381,14 +381,20 @@ Réponse 200 (`SubtitleDraft`) ; `lines` vide (et `processing` absent) s'il n'y 
 ```
 - Horodatage au format SRT (`HH:MM:SS,mmm`). Le front exporte le `.srt` lui-même, seulement si toutes les lignes sont validées.
 - `confidence` : `elevee` | `moyenne` | `faible`. Calculée par le serveur à partir de celle du traducteur, abaissée
-  d'un cran si la transcription est incertaine, et d'un cran si une tournure est signalée (`note`) sans entrée du
-  glossaire. Jamais au-dessus de ce qu'indique le traducteur.
+  d'un cran pour chaque signal de doute : transcription incertaine en moyenne ; tournure signalée (`note`) sans entrée
+  du glossaire ; un mot transcrit avec une probabilité < 0,5 ; un mot isolé dans une autre écriture (arabe / latin)
+  et peu sûr (< 0,8) ; avertissement `omission_possible`. Jamais au-dessus de ce qu'indique le traducteur.
+  Les mots douteux sont cités dans `note` (« mot incertain : خراج », « mot isolé dans une autre langue, à vérifier : … »).
 - Champs facultatifs (absents si vides, jamais `null`) : `en`, `note`, `speaker` (`S1`, `S2`… dans l'ordre
-  d'apparition), `processing`. Toujours présents dans les réponses du serveur : `warnings` (liste, éventuellement vide)
+  d'apparition), `processing`, `fr_court` / `en_court` (version condensée proposée quand la ligne dépasse 17 car./s
+  et que la version courte respecte la limite). Ce sont des **suggestions** : le serveur ne remplace jamais `fr` ou
+  `en`. Le front les propose ; s'il les accepte, il envoie `fr` = ancienne `fr_court` sans `fr_court`. Toujours présents dans les réponses du serveur : `warnings` (liste, éventuellement vide)
   et `glossary_used` (ids du glossaire derja utilisés).
 - `warnings[].rule` : `lecture_rapide` (plus de 17 car./s), `trop_de_lignes` (plus de 2 lignes de 42 car.),
   `ligne_trop_longue` (un mot dépasse 42 car.), `duree_courte` (moins de 1 s), `duree_longue` (plus de 7 s),
-  `chevauchement` (moins de 80 ms après la ligne précédente). `detail` est un texte en français à afficher tel quel.
+  `chevauchement` (moins de 80 ms après la ligne précédente), `omission_possible` (traduction de moins de 50 % de la
+  longueur de la source, hésitations retirées, ou avec moins de phrases que la source : fin de ligne non traduite ?).
+  `detail` est un texte en français à afficher tel quel.
 - `processing` : outils utilisés, repris par le Passeport IA.
 
 ### `saveSubtitles` — PUT `/subtitles/{projectId}` · backend prêt

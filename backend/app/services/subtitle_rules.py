@@ -3,7 +3,13 @@
 Corrections automatiques : chevauchement (on décale le début), durée trop courte
 (on rallonge si la place existe). Le reste devient un avertissement sur la ligne,
 vérifié sur le texte français et sur le texte anglais.
+
+omission_possible : la traduction fait moins de OMISSION_RATIO de la longueur de la
+source (hésitations retirées), ou compte moins de phrases que la source (la fin de la
+ligne n'a peut-être pas été traduite).
 """
+
+import re
 
 from app.schemas.subtitle import SubtitleLine, SubtitleWarning
 from app.services.subtitle_segmentation import MAX_LINE_CHARS, parse_srt_time, srt_time, wrap
@@ -14,6 +20,11 @@ MAX_CPS = 17  # caractères par seconde
 MIN_DURATION_S = 1.0
 MAX_DURATION_S = 7.0
 MIN_GAP_S = 0.08
+OMISSION_RATIO = 0.5  # longueur minimale de la traduction, par rapport à la source
+OMISSION_MIN_SOURCE = 15  # en dessous, la longueur seule ne dit rien
+_SENTENCE_END = re.compile(r"[.?!؟…]+")
+_HESITATION = re.compile(r"(?:^|\s)(?:آ+|ا{3,}|(?:e|eu|euh|hm+|mm+)h*)(?=\s|$)", re.IGNORECASE)
+_LETTER = re.compile(r"\w")
 
 # Règles recalculées à chaque passage (les autres avertissements éventuels sont gardés).
 RULES = {
@@ -23,6 +34,7 @@ RULES = {
     "duree_courte",
     "duree_longue",
     "chevauchement",
+    "omission_possible",
 }
 
 
@@ -82,6 +94,35 @@ def _text_warnings(label: str, text: str, duration: float) -> list[SubtitleWarni
     return out
 
 
+def _sentences(text: str) -> int:
+    return sum(1 for part in _SENTENCE_END.split(text) if _LETTER.search(part))
+
+
+def _omission_warnings(source: str, label: str, text: str) -> list[SubtitleWarning]:
+    text = " ".join(text.split())
+    if not text:
+        return []  # ligne vide : déjà signalée par la confiance « faible » et la note
+    src = " ".join(_HESITATION.sub(" ", source).split())
+    expected = len(src)
+    if expected >= OMISSION_MIN_SOURCE and len(text) < OMISSION_RATIO * expected:
+        return [
+            SubtitleWarning(
+                rule="omission_possible",
+                detail=f"{label} : {len(text)} car. pour environ {expected} attendus",
+            )
+        ]
+    src_sentences, out_sentences = _sentences(src), _sentences(text)
+    if out_sentences < src_sentences:
+        return [
+            SubtitleWarning(
+                rule="omission_possible",
+                detail=f"{label} : {out_sentences} phrase{'s' if out_sentences > 1 else ''} "
+                f"pour {src_sentences} dans la source (fin de ligne non traduite ?)",
+            )
+        ]
+    return []
+
+
 def check(lines: list[SubtitleLine]) -> None:
     """Recalcule les avertissements de règles sur chaque ligne (sans changer les temps)."""
     prev_end: float | None = None
@@ -113,6 +154,8 @@ def check(lines: list[SubtitleLine]) -> None:
             )
         warnings += _text_warnings("FR", line.fr, duration)
         warnings += _text_warnings("EN", line.en or "", duration)
+        warnings += _omission_warnings(line.source, "FR", line.fr)
+        warnings += _omission_warnings(line.source, "EN", line.en or "")
         line.warnings = warnings
         prev_end = end
 

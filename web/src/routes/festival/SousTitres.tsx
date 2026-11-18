@@ -28,6 +28,52 @@ import { riskScore } from '@/features/festival/lib/watch';
 import { downloadSrt, exportBlocker, srtFileName, type SrtLang } from '@/features/festival/lib/srt';
 import { cn } from '@/lib/cn';
 
+/** Version condensée proposée par l'IA : rien ne change tant que la personne ne l'accepte pas. */
+function ShortSuggestion({
+  lang,
+  label,
+  text,
+  busy,
+  onUse,
+  onDismiss,
+}: {
+  lang: 'fr' | 'en';
+  label: string;
+  text: string;
+  busy: boolean;
+  onUse: () => void;
+  onDismiss: () => void;
+}) {
+  return (
+    <div className="flex flex-col items-start gap-2 border-l-4 border-gold bg-gold-soft/60 p-3 text-meta">
+      <p>
+        <strong>Version courte proposée ({text.length} car.) : </strong>
+        <span lang={lang}>{text}</span>
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={onUse}
+          disabled={busy}
+          aria-label={`Utiliser la version courte en ${label}`}
+        >
+          Utiliser
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={onDismiss}
+          disabled={busy}
+          aria-label={`Ignorer la version courte en ${label}`}
+        >
+          Ignorer
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function LineCard({
   line,
   edited,
@@ -76,12 +122,36 @@ function LineCard({
         {line.source}
       </p>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        <Field label="Français">
-          <Input value={fr} onChange={(e) => setFr(e.target.value)} onBlur={commit} />
-        </Field>
-        <Field label="Anglais">
-          <Input lang="en" value={en} onChange={(e) => setEn(e.target.value)} onBlur={commit} />
-        </Field>
+        <div className="flex flex-col gap-2">
+          <Field label="Français">
+            <Input value={fr} onChange={(e) => setFr(e.target.value)} onBlur={commit} />
+          </Field>
+          {line.fr_court ? (
+            <ShortSuggestion
+              lang="fr"
+              label="français"
+              text={line.fr_court}
+              busy={busy}
+              onUse={() => onSave({ fr: line.fr_court, fr_court: undefined })}
+              onDismiss={() => onSave({ fr_court: undefined })}
+            />
+          ) : null}
+        </div>
+        <div className="flex flex-col gap-2">
+          <Field label="Anglais">
+            <Input lang="en" value={en} onChange={(e) => setEn(e.target.value)} onBlur={commit} />
+          </Field>
+          {line.en_court ? (
+            <ShortSuggestion
+              lang="en"
+              label="anglais"
+              text={line.en_court}
+              busy={busy}
+              onUse={() => onSave({ en: line.en_court, en_court: undefined })}
+              onDismiss={() => onSave({ en_court: undefined })}
+            />
+          ) : null}
+        </div>
       </div>
       {line.note ? (
         <p className="flex items-start gap-2 border-l-4 border-gold bg-gold-soft/60 p-3 text-meta">
@@ -319,7 +389,7 @@ function Review({
             <ol className="flex flex-col gap-4">
               {shown.map((l) => (
                 <LineCard
-                  key={`${l.id}-${l.fr}-${l.en ?? ''}`}
+                  key={`${l.id}-${l.fr}-${l.en ?? ''}-${l.fr_court ?? ''}-${l.en_court ?? ''}`}
                   line={l}
                   edited={edited.has(l.id)}
                   busy={save.isPending}

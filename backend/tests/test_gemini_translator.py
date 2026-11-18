@@ -42,10 +42,12 @@ class FakeModels:
         self.script = list(script)
         self.calls: list[str] = []
         self.configs = []
+        self.contents: list[str] = []
 
     async def generate_content(self, model, contents, config):
         self.calls.append(model)
         self.configs.append(config)
+        self.contents.append(contents)
         step = self.script.pop(0)
         if step == HANG:
             await asyncio.Event().wait()

@@ -231,6 +231,9 @@ export type SubtitleLine = {
   warnings?: SubtitleWarning[];
   /** Ids du glossaire derja utilisés pour cette ligne. */
   glossary_used?: string[];
+  /** Version condensée proposée quand la ligne est trop rapide à lire : suggestion, jamais appliquée seule. */
+  fr_court?: string;
+  en_court?: string;
 };
 export type SubtitleRule =
   | 'lecture_rapide'
@@ -238,7 +241,8 @@ export type SubtitleRule =
   | 'ligne_trop_longue'
   | 'duree_courte'
   | 'duree_longue'
-  | 'chevauchement';
+  | 'chevauchement'
+  | 'omission_possible';
 export type SubtitleWarning = { rule: SubtitleRule; detail: string };
 export type SubtitleProcessing = { transcriber: string; translator: string; created_at: string };
 export type SynopsisFeedback = { questions: string[] }; // jamais de texte réécrit
