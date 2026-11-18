@@ -3,3 +3,6 @@ videos/
 
 # Slides de soumission : local uniquement (photos des témoins)
 slides/
+
+# Essais réels du backend : local uniquement (vraies personnes, repo public)
+backend/_essais/
