@@ -344,7 +344,9 @@ Réponse 200 : `Festival` (même forme que ci-dessus, sans score). Erreur 404 :
 
 `multipart/form-data` :
 - `file` (obligatoire) : audio ou vidéo du film, `SUBTITLE_MAX_UPLOAD_MB` maximum (200 Mo par défaut) ;
-- `language_code` (facultatif) : `aeb` pour la derja ; absent = langue détectée automatiquement ;
+- `language_code` (facultatif) : code ISO-639-1 ou ISO-639-3 accepté par ElevenLabs Scribe. Pour la derja, `ara`
+  (Scribe n'a pas de code de dialecte ; `aeb` est converti en `ara` par le serveur). `source_lang` vaut alors `derja`.
+  Absent = langue détectée automatiquement ;
 - `keyterms` (facultatif) : noms des personnages et des lieux séparés par des virgules (`"Nour, Amira, Kerkennah"`),
   50 au maximum, 5 mots et 50 caractères au plus chacun ; aide la transcription à les reconnaître ;
 - `characters` (facultatif) : personnages séparés par des virgules, donnés au traducteur comme contexte.

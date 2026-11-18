@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { encodeWav, wavName } from './audio';
+import { encodeWav, transcriptionLanguage, wavName } from './audio';
+
+describe('langue de transcription', () => {
+  it('la case derja envoie « ara » (Scribe refuse « aeb »), sinon détection automatique', () => {
+    expect(transcriptionLanguage(true)).toBe('ara');
+    expect(transcriptionLanguage(false)).toBeUndefined();
+  });
+});
 
 describe('extraction audio : WAV mono 16 kHz', () => {
   it('écrit un en-tête WAV PCM 16 bits mono', async () => {

@@ -65,6 +65,14 @@ export async function extractAudioWav(file: File): Promise<Blob> {
   return encodeWav(rendered.getChannelData(0), TARGET_RATE);
 }
 
+/**
+ * Code de langue envoyé pour la transcription. ElevenLabs Scribe n'a pas de code de dialecte
+ * (« aeb » est refusé) : la derja part en « ara » (arabe). L'écran garde le libellé « derja ».
+ */
+export function transcriptionLanguage(derja: boolean): 'ara' | undefined {
+  return derja ? 'ara' : undefined;
+}
+
 /** « film final.mov » → « film final.wav » */
 export function wavName(fileName: string): string {
   return `${fileName.replace(/\.[^.]+$/, '') || 'son'}.wav`;

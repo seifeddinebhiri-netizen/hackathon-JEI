@@ -346,7 +346,7 @@ export type CreateSubtitleDraftInput = {
   project_id: string;
   audio: Blob;
   file_name: string;
-  /** `aeb` pour la derja ; absent = détection automatique. */
+  /** `ara` pour la derja (Scribe n'a pas de code de dialecte) ; absent = détection automatique. */
   language_code?: string;
   keyterms?: string[];
   characters?: string[];

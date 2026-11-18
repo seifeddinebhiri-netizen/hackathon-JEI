@@ -3,7 +3,7 @@ import type { CreateSubtitleDraftInput, Project } from '@/api/types';
 import { mockFallback, usingMocks, realEndpointsInMockMode } from '@/api';
 import { Button, Checkbox, ErrorState, Field, FileDrop, Icon, Input, Spinner } from '@/components/ui';
 import { useCreateSubtitleDraft, useExampleSubtitleDraft } from '../hooks/useFestivals';
-import { AudioExtractError, extractAudioWav, wavName } from '../lib/audio';
+import { AudioExtractError, extractAudioWav, transcriptionLanguage, wavName } from '../lib/audio';
 import { setSessionVideo } from '../lib/videoSession';
 
 const MEDIA_EXTENSIONS = ['.mp4', '.mov', '.m4v', '.webm', '.mkv', '.mp3', '.wav', '.m4a', '.aac', '.ogg'];
@@ -53,7 +53,7 @@ export function SubtitleImport({
         project_id: project.id,
         audio,
         file_name: wavName(file.name),
-        language_code: derja ? 'aeb' : undefined,
+        language_code: transcriptionLanguage(derja),
         keyterms: keyterms
           .split(',')
           .map((k) => k.trim())

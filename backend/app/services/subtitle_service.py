@@ -37,7 +37,7 @@ from app.schemas.subtitle import (
 )
 from app.services import glossary_service, subtitle_rules
 from app.services.subtitle_segmentation import segment
-from app.services.transcription_service import Transcriber
+from app.services.transcription_service import DERJA_LANGUAGE_CODE, Transcriber
 from app.services.translation_service import (
     BATCH_SIZE,
     Translator,
@@ -199,7 +199,7 @@ async def _translate(
 
 def _source_lang(requested: str | None, detected: str | None) -> str:
     code = (requested or detected or "").lower()
-    return DEFAULT_SOURCE_LANG if code in ("", "aeb") else code
+    return DEFAULT_SOURCE_LANG if code in ("", "aeb", "derja", DERJA_LANGUAGE_CODE) else code
 
 
 async def create_draft(
