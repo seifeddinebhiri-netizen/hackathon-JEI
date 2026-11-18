@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     # `v1beta` : la sortie structurée y est prise en charge ; le SDK utilise `v1` (stable) par défaut.
     llm_api_version: str = "v1beta"
     llm_timeout_s: int = 45
+    # DÉVELOPPEMENT SEULEMENT : journalise le prompt complet et la réponse brute (texte des scènes inclus).
+    llm_debug_log: bool = False
 
     # Sous-titres : transcription (ElevenLabs Scribe) puis traduction (Gemini ou Ollama)
     elevenlabs_api_key: SecretStr = SecretStr("")

@@ -37,6 +37,7 @@ class LLMService:
             self._client = None
         self._model = settings.llm_model
         self._temperature = settings.llm_temperature
+        self._debug = settings.llm_debug_log
 
     @property
     def model(self) -> str:
@@ -56,7 +57,13 @@ class LLMService:
         if self._client is None:
             raise LLMUnavailable("GEMINI_API_KEY non configurée.")
         try:
-            # Le texte de la scène n'est jamais journalisé.
+            # Le texte de la scène n'est journalisé que si LLM_DEBUG_LOG=true (développement).
+            if self._debug:
+                print(
+                    f"\n===== PROMPT ENVOYÉ À L'IA ({schema.__name__}, {self._model}) =====\n"
+                    f"--- SYSTEM ---\n{system}\n--- USER ---\n{user}\n",
+                    flush=True,
+                )
             response = await self._client.aio.models.generate_content(
                 model=self._model,
                 contents=user,
@@ -97,6 +104,11 @@ class LLMService:
             input_tokens=getattr(usage, "prompt_token_count", None),
             output_tokens=getattr(usage, "candidates_token_count", None),
         )
+        if self._debug:
+            print(
+                f"\n===== RÉPONSE BRUTE DE L'IA =====\n{response.text}\n===== FIN =====\n",
+                flush=True,
+            )
         parsed = response.parsed
         if not isinstance(parsed, schema):
             try:
