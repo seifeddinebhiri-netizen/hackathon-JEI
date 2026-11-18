@@ -41,6 +41,7 @@ from app.services.transcription_service import DERJA_LANGUAGE_CODE, Transcriber
 from app.services.translation_service import (
     BATCH_SIZE,
     Translator,
+    set_deadline,
     track_models,
     used_translator_name,
 )
@@ -214,9 +215,11 @@ async def create_draft(
     characters: list[str] | None = None,
     timeout_s: float | None = None,
 ) -> SubtitleDraft:
-    """Brouillon complet, borné par timeout_s : au-delà, 504 (le fichier temporaire est
-    supprimé par le `finally` de _build_draft, rien n'est enregistré)."""
+    """Brouillon complet, borné par timeout_s : au-delà (transcription trop lente : la
+    traduction, elle, s'arrête avant le budget), 504. Le fichier temporaire est
+    supprimé par le `finally` de _build_draft ; rien n'est enregistré."""
     started = time.monotonic()
+    set_deadline(timeout_s)  # Gemini s'arrête avant : lignes « faible » plutôt qu'un 504
     try:
         async with asyncio.timeout(timeout_s) as deadline:
             return await _build_draft(

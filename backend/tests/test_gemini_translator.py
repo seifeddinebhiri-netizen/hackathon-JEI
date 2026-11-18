@@ -13,11 +13,13 @@ from structlog.testing import capture_logs
 from app.core.config import Settings, get_settings
 from app.main import app
 from app.schemas.subtitle import Cue, TranslationContext
-from app.services import subtitle_service
+from app.services import subtitle_service, translation_service
 from app.services.subtitle_segmentation import srt_time
 from app.services.translation_service import (
     FALLBACK_NOTE,
     GeminiTranslator,
+    set_deadline,
+    thinking_level_for,
     track_models,
     used_translator_name,
 )
@@ -159,11 +161,62 @@ def test_draft_reports_fallback_model_in_processing(client):
     assert r.json()["processing"]["translator"] == "gemini/secours"
 
 
-def test_draft_over_global_timeout_returns_504(client, monkeypatch):
+def test_slow_transcription_over_global_timeout_returns_504(client, monkeypatch):
+    class SlowTranscriber(FakeTranscriber):
+        async def transcribe(self, *args):
+            await asyncio.Event().wait()
+
     monkeypatch.setattr(get_settings(), "subtitle_draft_timeout_s", 0.1)
-    app.state.translator, _ = gemini([HANG] * 8, timeout_s=10)
+    app.state.transcriber = SlowTranscriber()
+    app.state.translator, _ = gemini([OK])
     r = post_draft(client)
     assert r.status_code == 504
     err = r.json()["error"]
     assert err["code"] == "draft_timeout" and "trop de temps" in err["message"]
     assert client.get("/subtitles/demo").json()["lines"] == []  # rien d'enregistré
+
+
+def test_504_and_deadline_exceeded_are_transient():
+    deadline = errors.ServerError(504, {"error": {"code": 504, "status": "DEADLINE_EXCEEDED"}})
+    tr, models = gemini([unavailable(504), deadline, OK])
+    out, name = asyncio.run(run(tr))
+    assert out[0].fr == "Ça va ?"
+    assert models.calls == ["principal", "principal", "principal"]  # pas de bascule
+    assert name == "gemini/principal"
+
+
+def test_thinking_level_minimal_and_floor():
+    tr, models = gemini([OK])
+    asyncio.run(run(tr))
+    assert models.configs[0].thinking_config.thinking_level == "MINIMAL"
+    assert thinking_level_for("gemini-3.8-flash", "minimal") == "low"
+    assert thinking_level_for("gemini-3.1-flash-lite", "minimal") == "minimal"
+    assert thinking_level_for("x", "") is None
+
+
+def test_call_timeout_is_capped_by_remaining_budget(monkeypatch):
+    monkeypatch.setattr(translation_service, "BUDGET_MARGIN_S", 0.1)
+    monkeypatch.setattr(translation_service, "MIN_REMAINING_S", 0.5)
+    tr, models = gemini([HANG, OK, OK, OK], timeout_s=5)
+
+    async def scenario():
+        set_deadline(1.0)
+        return await run(tr)
+
+    started = time.monotonic()
+    out, _ = asyncio.run(scenario())
+    assert time.monotonic() - started < 1.0  # ~0,9 s : jamais les 5 s de GEMINI_TIMEOUT_S
+    assert models.calls == ["principal"]  # il restait < 0,5 s : pas de nouvel essai
+    assert models.configs[0].http_options.timeout == pytest.approx(900, abs=30)
+    assert out[0].confidence == "faible"
+
+
+def test_almost_exhausted_budget_gives_200_with_low_lines(client, monkeypatch):
+    monkeypatch.setattr(translation_service, "BUDGET_MARGIN_S", 0.1)
+    monkeypatch.setattr(translation_service, "MIN_REMAINING_S", 0.5)
+    monkeypatch.setattr(get_settings(), "subtitle_draft_timeout_s", 1.0)
+    app.state.translator, models = gemini([HANG] * 8, timeout_s=0.6)
+    r = post_draft(client)
+    assert r.status_code == 200, r.text
+    assert all(li["fr"] == "" and li["confidence"] == "faible" for li in r.json()["lines"])
+    assert models.calls == ["principal"]  # un seul essai, puis budget jugé insuffisant

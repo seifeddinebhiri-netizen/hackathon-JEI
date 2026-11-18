@@ -8,8 +8,10 @@ Traduction par lots de BATCH_SIZE lignes. La sortie est validée avec Pydantic ;
 invalide ou manquante est redemandée une fois, puis reste vide en confiance « faible ».
 Une ligne ne fait jamais échouer toute la requête. Le texte n'est jamais loggé.
 
-Gemini : délai maximal par appel (GEMINI_TIMEOUT_S) ; 503, 429 ou délai dépassé →
-2 nouveaux essais (après 2 s puis 5 s), puis un essai sur GEMINI_FALLBACK_MODEL.
+Gemini : thinking réduit (GEMINI_THINKING) ; délai par appel = min(GEMINI_TIMEOUT_S, budget
+restant - 10 s) ; 503, 429, 504, DEADLINE_EXCEEDED ou délai dépassé → 2 nouveaux essais
+(après 2 s puis 5 s), puis un essai sur GEMINI_FALLBACK_MODEL. Plus aucun essai quand il reste
+moins de 15 s sur le budget global (set_deadline) : on finit en lignes « faible », jamais en 504.
 Les modèles qui ont réellement répondu sont notés (track_models) pour processing.translator.
 """
 
@@ -31,7 +33,12 @@ log = structlog.get_logger()
 
 BATCH_SIZE = 20
 RETRY_DELAYS_S = (2.0, 5.0)  # attentes avant le 2e et le 3e essai du modèle principal
-TRANSIENT_CODES = {429, 503}
+TRANSIENT_CODES = {429, 503, 504}
+TRANSIENT_STATUSES = {"UNAVAILABLE", "RESOURCE_EXHAUSTED", "DEADLINE_EXCEEDED"}
+BUDGET_MARGIN_S = 10.0  # laissé après le dernier appel (règles, enregistrement, réponse)
+MIN_REMAINING_S = 15.0  # en dessous, on ne lance plus d'appel
+# D'après la doc Gemini, gemini-3.8-flash n'a pas le niveau « minimal » : son minimum est « low ».
+_THINKING_FLOOR = {"gemini-3.8-flash": "low"}
 FALLBACK_NOTE = "Traduction automatique indisponible pour cette ligne : à traduire à la main."
 
 SYSTEM_PROMPT = """\
@@ -147,7 +154,35 @@ def used_translator_name(translator: "Translator", used: list[str]) -> str:
 
 
 def _is_transient(exc: Exception) -> bool:
-    return isinstance(exc, TimeoutError) or getattr(exc, "code", None) in TRANSIENT_CODES
+    return (
+        isinstance(exc, TimeoutError)
+        or getattr(exc, "code", None) in TRANSIENT_CODES
+        or getattr(exc, "status", None) in TRANSIENT_STATUSES
+    )
+
+
+# Échéance du budget global (time.monotonic()), posée par la requête de brouillon.
+_deadline: ContextVar[float | None] = ContextVar("translation_deadline", default=None)
+
+
+def set_deadline(budget_s: float | None) -> None:
+    """Les appels Gemini de la tâche en cours respecteront ce budget (None = sans limite)."""
+    _deadline.set(time.monotonic() + budget_s if budget_s else None)
+
+
+def _remaining_s() -> float | None:
+    deadline = _deadline.get()
+    return None if deadline is None else deadline - time.monotonic()
+
+
+def thinking_level_for(model: str, wanted: str) -> str | None:
+    """Niveau de thinking envoyé ; « minimal » remonte à « low » pour les modèles sans minimal."""
+    wanted = wanted.strip().lower()
+    if not wanted or wanted == "defaut":
+        return None
+    if wanted == "minimal":
+        return _THINKING_FLOOR.get(model, wanted)
+    return wanted
 
 
 class PromptTranslator(ABC):
@@ -202,6 +237,7 @@ class GeminiTranslator(PromptTranslator):
         fallback = settings.gemini_fallback_model.strip()
         self._fallback = fallback if fallback != self._model else ""
         self._timeout_s = settings.gemini_timeout_s
+        self._thinking = settings.gemini_thinking
         self._retry_delays = tuple(retry_delays)
         self.name = f"gemini/{self._model}"
         self.available = bool(self._key and self._model)
@@ -219,64 +255,85 @@ class GeminiTranslator(PromptTranslator):
     ) -> str:
         from google.genai import types
 
-        config = types.GenerateContentConfig(
-            system_instruction=system,
-            response_mime_type="application/json",
-            response_schema=schema,
-            temperature=0.2,
-            # Délai du SDK (en ms) en plus d'asyncio.wait_for. Pas de retry_options :
-            # le SDK ne relance pas lui-même, les relances sont décidées ci-dessous.
-            http_options=types.HttpOptions(timeout=int(self._timeout_s * 1000)),
-        )
-        plan = [(self._model, len(self._retry_delays) + 1)]
+        def config_for(model: str, timeout_s: float):
+            level = thinking_level_for(model, self._thinking)
+            return types.GenerateContentConfig(
+                system_instruction=system,
+                response_mime_type="application/json",
+                response_schema=schema,
+                temperature=0.2,
+                thinking_config=types.ThinkingConfig(thinking_level=level) if level else None,
+                # Délai du SDK (en ms) en plus d'asyncio.wait_for. Pas de retry_options :
+                # le SDK ne relance pas lui-même, les relances sont décidées ci-dessous.
+                http_options=types.HttpOptions(timeout=int(timeout_s * 1000)),
+            )
+
+        # (modèle, attente avant l'essai) : principal ×3, puis secours ×1.
+        plan = [(self._model, 0.0)] + [(self._model, d) for d in self._retry_delays]
         if self._fallback:
-            plan.append((self._fallback, 1))
+            plan.append((self._fallback, 0.0))
         started = time.monotonic()
         attempts = 0
+        skip: str | None = None  # modèle en erreur durable : plus d'essai dessus
         last: Exception | None = None
-        for model, tries in plan:
-            for i in range(tries):
-                if i:
-                    await asyncio.sleep(self._retry_delays[i - 1])
-                attempts += 1
-                try:
-                    resp = await asyncio.wait_for(
-                        self._get_client().aio.models.generate_content(
-                            model=model, contents=user, config=config
-                        ),
-                        timeout=self._timeout_s,
-                    )
-                except Exception as exc:  # noqa: BLE001 — décidé ci-dessous
-                    last = exc
-                    transient = _is_transient(exc)
-                    log.warning(
-                        "gemini_call_failed",
-                        model=model,
-                        attempt=attempts,
-                        error=type(exc).__name__,
-                        status=getattr(exc, "code", None),
-                        transient=transient,
-                        duration_s=round(time.monotonic() - started, 1),
-                    )
-                    if not transient:
-                        break  # erreur durable : pas de nouvel essai sur ce modèle
-                    continue
-                _record_model(f"gemini/{model}")
-                log.info(
-                    "gemini_call_ok",
-                    model=model,
-                    fallback=model != self._model,
+        for model, delay in plan:
+            if model == skip:
+                continue
+            remaining = _remaining_s()
+            if remaining is not None and remaining - delay < MIN_REMAINING_S:
+                log.warning(
+                    "gemini_budget_exhausted",
                     attempts=attempts,
+                    remaining_s=round(remaining, 1),
                     duration_s=round(time.monotonic() - started, 1),
                 )
-                return resp.text or ""
+                break
+            if delay:
+                await asyncio.sleep(delay)
+            timeout_s = self._timeout_s
+            remaining = _remaining_s()
+            if remaining is not None:
+                timeout_s = min(timeout_s, remaining - BUDGET_MARGIN_S)
+            attempts += 1
+            try:
+                resp = await asyncio.wait_for(
+                    self._get_client().aio.models.generate_content(
+                        model=model, contents=user, config=config_for(model, timeout_s)
+                    ),
+                    timeout=timeout_s,
+                )
+            except Exception as exc:  # noqa: BLE001 — décidé ci-dessous
+                last = exc
+                transient = _is_transient(exc)
+                log.warning(
+                    "gemini_call_failed",
+                    model=model,
+                    attempt=attempts,
+                    error=type(exc).__name__,
+                    status=getattr(exc, "code", None),
+                    transient=transient,
+                    timeout_s=round(timeout_s, 1),
+                    duration_s=round(time.monotonic() - started, 1),
+                )
+                if not transient:
+                    skip = model
+                continue
+            _record_model(f"gemini/{model}")
+            log.info(
+                "gemini_call_ok",
+                model=model,
+                fallback=model != self._model,
+                attempts=attempts,
+                duration_s=round(time.monotonic() - started, 1),
+            )
+            return resp.text or ""
         log.error(
             "gemini_all_failed",
-            models=[m for m, _ in plan],
+            models=list(dict.fromkeys(m for m, _ in plan)),
             attempts=attempts,
             duration_s=round(time.monotonic() - started, 1),
         )
-        raise last or RuntimeError("gemini: aucun essai")
+        raise last or TimeoutError("gemini: budget épuisé avant tout essai")
 
 
 class OllamaTranslator(PromptTranslator):
