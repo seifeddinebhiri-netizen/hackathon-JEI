@@ -21,6 +21,15 @@ class Settings(BaseSettings):
     llm_model: str = "claude-opus-5-5"
     llm_effort: str = "medium"  # low | medium | high | xhigh | max
 
+    # Sous-titres : transcription (ElevenLabs Scribe) puis traduction (Gemini ou Ollama)
+    elevenlabs_api_key: SecretStr = SecretStr("")
+    llm_provider: str = "gemini"  # gemini | ollama
+    gemini_api_key: SecretStr = SecretStr("")
+    gemini_model: str = ""
+    ollama_url: str = "http://localhost:11434"
+    ollama_model: str = ""
+    subtitle_max_upload_mb: int = 200
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
