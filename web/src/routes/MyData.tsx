@@ -202,7 +202,7 @@ export default function MyData() {
           <div className="flex flex-col items-start gap-2 border-2 border-dashed border-ink/40 p-4">
             <p className="font-semibold">Démonstration</p>
             <p className="text-meta text-muted-on-light">
-              Remet le projet « Marée basse » et l’exemple de Passeport dans leur état de départ.
+              Remet le projet « Dar Hmeti » et l’exemple de Passeport dans leur état de départ.
             </p>
             <Button
               variant="ghost"

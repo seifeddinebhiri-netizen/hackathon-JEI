@@ -32,9 +32,13 @@ class Settings(BaseSettings):
     llm_provider: str = "gemini"  # gemini | ollama
     gemini_api_key: SecretStr = SecretStr("")
     gemini_model: str = ""
+    gemini_fallback_model: str = "gemini-3.5-flash"  # essayé une fois si le principal échoue
+    gemini_timeout_s: float = 45  # délai maximal par appel Gemini
+    gemini_thinking: str = "minimal"  # thinking_level : minimal | low | medium | high
     ollama_url: str = "http://localhost:11434"
     ollama_model: str = ""
     subtitle_max_upload_mb: int = 200
+    subtitle_draft_timeout_s: float = 180  # délai maximal de POST /subtitles/{id}/draft
 
     @property
     def cors_origin_list(self) -> list[str]:

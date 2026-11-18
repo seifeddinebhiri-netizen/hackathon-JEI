@@ -36,6 +36,9 @@ class Cue(BaseModel):
     source: str
     speaker: str | None = None
     asr_confidence: float = Field(ge=0, le=1)
+    # Mots dont la transcription est douteuse (signalés au relecteur, jamais envoyés ailleurs)
+    uncertain_words: list[str] = []  # probabilité ASR < 0,5
+    mixed_words: list[str] = []  # mot isolé dans une autre écriture, peu sûr
 
 
 # --- Glossaire ---------------------------------------------------------------------
@@ -69,6 +72,9 @@ class TranslatedLine(BaseModel):
     confidence: Confidence
     note: str | None = None
     glossary_used: list[str] = []
+    # Version condensée proposée quand la ligne serait trop rapide à lire (suggestion)
+    fr_court: str | None = None
+    en_court: str | None = None
 
 
 class TranslationBatch(BaseModel):
@@ -95,6 +101,9 @@ class SubtitleLine(BaseModel):
     speaker: str | None = None
     warnings: list[SubtitleWarning] = []
     glossary_used: list[str] = []
+    # Suggestions condensées (lecture trop rapide) : jamais appliquées sans validation humaine
+    fr_court: str | None = None
+    en_court: str | None = None
 
 
 class SubtitleProcessing(BaseModel):

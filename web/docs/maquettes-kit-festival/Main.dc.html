@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Kit Festival · Catalogue</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F2F2EF}
+a{color:#121110}a:hover{color:#C8102E}
+input:focus-visible,button:focus-visible,a:focus-visible,select:focus-visible{outline:3px solid #FFC82E;outline-offset:2px}
+</style>
+</helmet>
+<div style="background: #F2F2EF; color: #121110; font-family: Inter, system-ui, sans-serif; font-size: 16px; min-height: 100%">
+
+  <!-- Barre de navigation de l'app -->
+  <header style="background: #121110; color: #FFFFFF">
+    <div style="max-width: 1440px; margin: 0 auto; padding: 0 64px; min-height: 64px; display: flex; flex-wrap: wrap; align-items: center; gap: 24px; justify-content: space-between">
+      <a href="#" style="display: flex; align-items: center; gap: 12px; text-decoration: none; color: #FFFFFF; padding: 8px 10px; border-left: 2px solid #E4202E; border-top: 2px solid #E4202E">
+        <span style="font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 500; letter-spacing: -0.02em"><span style="color: #B8B4AC">en</span>cadr<span style="color: #FFC82E">é</span></span>
+      </a>
+      <nav aria-label="Étapes" style="display: flex; flex-wrap: wrap; gap: 28px; font-size: 14px; font-weight: 600">
+        <a href="#" style="color: #B8B4AC; text-decoration: none; padding: 20px 0">Projet</a>
+        <a href="#" style="color: #B8B4AC; text-decoration: none; padding: 20px 0"><span style="color: #FFC82E; font-family: 'JetBrains Mono', monospace">1</span> Planifier</a>
+        <a href="#" style="color: #B8B4AC; text-decoration: none; padding: 20px 0"><span style="color: #FFC82E; font-family: 'JetBrains Mono', monospace">2</span> Tourner</a>
+        <a href="#" style="color: #B8B4AC; text-decoration: none; padding: 20px 0"><span style="color: #FFC82E; font-family: 'JetBrains Mono', monospace">3</span> Déclarer</a>
+        <a href="#" aria-current="page" style="color: #FFFFFF; text-decoration: none; padding: 20px 0 17px; border-bottom: 3px solid #FFC82E"><span style="color: #FFC82E; font-family: 'JetBrains Mono', monospace">4</span> Diffuser</a>
+      </nav>
+      <div style="display: flex; align-items: center; gap: 10px; border: 2px solid #3A3733; padding: 6px 12px; font-size: 14px; font-weight: 600">
+        <span style="width: 24px; height: 24px; background: #FFC82E; color: #121110; display: inline-flex; align-items: center; justify-content: center; font-size: 12px">Y</span>Yassine
+      </div>
+    </div>
+  </header>
+
+  <main style="max-width: 1440px; margin: 0 auto; padding: 40px 64px 80px; box-sizing: border-box">
+
+    <!-- En-tête de page -->
+    <p style="margin: 0 0 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #55524C">Étape 4 · Diffuser</p>
+    <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px">
+      <div style="flex: 1 1 520px; min-width: 0">
+        <h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 56px; line-height: 1; letter-spacing: -0.02em; font-weight: 700">Kit Festival</h1>
+        <p style="margin: 14px 0 0; font-size: 18px; line-height: 1.5; color: #55524C; max-width: 720px">Trouve les festivals faits pour ton film, puis prépare chaque dossier pièce par pièce. Tu t'inscris toujours sur le site officiel du festival.</p>
+      </div>
+    </div>
+
+    <!-- Onglets du kit -->
+    <nav aria-label="Kit Festival" style="margin-top: 28px; display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 2px solid #121110">
+      <a href="#" aria-current="page" style="display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 18px; background: #121110; color: #FFFFFF; text-decoration: none; font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase">Catalogue <span style="background: #FFC82E; color: #121110; padding: 1px 7px">{{total}}</span></a>
+      <a href="Dossiers.dc.html" style="display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 18px; color: #121110; text-decoration: none; font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase">Mes dossiers <span style="border: 2px solid #121110; padding: 0 6px">3</span></a>
+      <span style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 12px; font-size: 13px; color: #55524C">Sous-titres, synopsis et page film s'ouvrent depuis chaque dossier.</span>
+    </nav>
+
+    <!-- Ton film -->
+    <section aria-label="Ton film" style="margin-top: 24px; background: #121110; color: #FFFFFF; padding: 18px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 16px 32px; box-shadow: 6px 6px 0 #FFC82E">
+      <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #FFC82E">Ton film</span>
+      <span style="font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700">Dar Hmeti</span>
+      <span style="display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 14px; color: #B8B4AC">
+        <span><strong style="color: #FFFFFF">15 min</strong> · fiction</span>
+        <span>Langue : <strong style="color: #FFFFFF">derja</strong></span>
+        <span>IA déclarée : <strong style="color: #FFFFFF">1 département</strong> (montage)</span>
+      </span>
+      <span style="margin-left: auto; display: flex; flex-wrap: wrap; gap: 12px; align-items: center">
+        <a href="#" style="color: #FFFFFF; font-size: 14px; font-weight: 600">Modifier</a>
+        <button type="button" aria-pressed="{{rankPressed}}" onClick="{{toggleRank}}" style="{{rankStyle}}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 6h10M4 12h7M4 18h4M17 4v16M17 20l-3-3M17 20l3-3"></path></svg>{{rankLabel}}
+        </button>
+      </span>
+    </section>
+
+    <!-- Recherche + tri -->
+    <div style="margin-top: 28px; display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch">
+      <label for="q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Rechercher un festival</label>
+      <div style="flex: 1 1 480px; min-width: 0; display: flex; align-items: center; gap: 12px; background: #FFFFFF; border: 2px solid #121110; padding: 0 16px; min-height: 56px; box-shadow: 3px 3px 0 #121110">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#121110" stroke-width="2" aria-hidden="true"><circle cx="10" cy="10" r="6.5"></circle><path d="M15 15l6 6"></path></svg>
+        <input id="q" type="search" value="{{query}}" onInput="{{onSearch}}" placeholder="Nom du festival, ville ou pays (ex. Kélibia, Bruxelles, Égypte)" style="flex: 1; min-width: 0; border: 0; outline: none; font: inherit; font-size: 16px; background: transparent; min-height: 52px">
+      </div>
+      <label style="display: flex; align-items: center; gap: 10px; background: #FFFFFF; border: 2px solid #121110; padding: 0 14px; min-height: 56px; font-size: 14px; font-weight: 600">Trier
+        <select style="font: inherit; font-weight: 500; border: 0; background: transparent; min-height: 44px">
+          <option>Date limite la plus proche</option>
+          <option>Inscription la moins chère</option>
+        </select>
+      </label>
+    </div>
+
+    <div style="margin-top: 28px; display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-start">
+
+      <!-- Filtres -->
+      <aside aria-label="Filtres" style="flex: 1 1 260px; max-width: 300px; background: #FFFFFF; border: 2px solid #121110; padding: 22px 20px; box-sizing: border-box">
+        <h2 style="margin: 0 0 6px; font-family: 'Space Grotesk', sans-serif; font-size: 22px; letter-spacing: -0.02em">Filtres</h2>
+        <p style="margin: 0 0 18px; font-size: 13px; color: #55524C">{{count}} festivals affichés sur {{total}}</p>
+
+        <div style="display: flex; flex-direction: column; gap: 4px; padding-bottom: 16px; border-bottom: 2px solid #D9D7D1">
+          <label style="display: flex; align-items: center; gap: 12px; min-height: 44px; font-size: 15px; font-weight: 500; cursor: pointer">
+            <input type="checkbox" checked="{{openOnly}}" onChange="{{toggleOpen}}" style="width: 20px; height: 20px; accent-color: #121110">Appels ouverts seulement
+          </label>
+          <label style="display: flex; align-items: center; gap: 12px; min-height: 44px; font-size: 15px; font-weight: 500; cursor: pointer">
+            <input type="checkbox" checked="{{compatOnly}}" onChange="{{toggleCompat}}" style="width: 20px; height: 20px; accent-color: #121110">Compatibles avec mon film
+          </label>
+          <label style="display: flex; align-items: center; gap: 12px; min-height: 44px; font-size: 15px; font-weight: 500; cursor: pointer">
+            <input type="checkbox" checked="{{frOnly}}" onChange="{{toggleFr}}" style="width: 20px; height: 20px; accent-color: #121110">Sous-titres français acceptés
+          </label>
+        </div>
+
+        <fieldset style="border: 0; margin: 16px 0 0; padding: 0">
+          <legend style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px">Région</legend>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px">
+            <sc-for list="{{regions}}" as="r" hint-placeholder-count="4">
+              <button type="button" aria-pressed="{{r.pressed}}" onClick="{{r.pick}}" style="{{r.style}}">{{r.label}}</button>
+            </sc-for>
+          </div>
+        </fieldset>
+
+        <div style="margin-top: 22px; padding: 14px; background: #FFF0C2; color: #5C4400; font-size: 13px; line-height: 1.5; display: flex; gap: 10px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5C4400" stroke-width="2" aria-hidden="true" style="flex: none; margin-top: 1px"><rect x="3" y="3" width="18" height="18"></rect><path d="M12 8v5M12 16v1"></path></svg>
+          <span>La compatibilité compare ton film au règlement écrit. Elle ne prédit pas la sélection.</span>
+        </div>
+      </aside>
+
+      <!-- Résultats -->
+      <section aria-label="Festivals" style="flex: 999 1 560px; min-width: 0">
+        <div style="margin: 0 0 16px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px">
+          <p style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700">{{count}} festivals</p>
+          <p style="margin: 0; font-size: 14px; color: #55524C">{{sortNote}}</p>
+        </div>
+
+        <sc-if value="{{empty}}" hint-placeholder-val="{{ false }}">
+          <div style="border: 2px dashed #121110; padding: 32px; background: #FFFFFF">
+            <p style="margin: 0; font-weight: 600">Aucun festival ne correspond à ces filtres.</p>
+            <p style="margin: 8px 0 0; color: #55524C">Décoche « Appels ouverts seulement » pour voir aussi les festivals à préparer pour l'an prochain.</p>
+          </div>
+        </sc-if>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px">
+          <sc-for list="{{items}}" as="f" hint-placeholder-count="6">
+            <article style="background: #FFFFFF; border: 2px solid #121110; display: flex; flex-direction: column">
+
+              <!-- Vignette : pas de logo officiel, une plaque typographique -->
+              <div style="{{f.tileStyle}}">
+                <div aria-hidden="true" style="height: 10px; background: repeating-linear-gradient(90deg, transparent 0 10px, rgba(242,242,239,0.85) 10px 18px); margin: 8px 0 0"></div>
+                <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 0 20px">
+                  <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.85">{{f.city}} · {{f.country}}</span>
+                  <span style="font-family: 'Space Grotesk', sans-serif; font-size: 34px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.05">{{f.short}}</span>
+                </div>
+                <div aria-hidden="true" style="height: 10px; background: repeating-linear-gradient(90deg, transparent 0 10px, rgba(242,242,239,0.85) 10px 18px); margin: 0 0 8px"></div>
+              </div>
+
+              <div style="padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 12px; flex: 1">
+                <div style="display: flex; flex-wrap: wrap; gap: 8px">
+                  <sc-if value="{{f.isOpen}}" hint-placeholder-val="{{ true }}">
+                    <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; background: #DDEFE3; color: #14532D; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="2.4" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>Appel ouvert · J-{{f.days}}
+                    </span>
+                  </sc-if>
+                  <sc-if value="{{f.isTbc}}" hint-placeholder-val="{{ false }}">
+                    <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; background: #FFF0C2; color: #5C4400; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5C4400" stroke-width="2.4" aria-hidden="true"><path d="M9 9a3 3 0 1 1 4 2.8c-.7.3-1 .8-1 1.5V14M12 17.5v.5"></path></svg>Date à confirmer
+                    </span>
+                  </sc-if>
+                  <sc-if value="{{f.isClosed}}" hint-placeholder-val="{{ false }}">
+                    <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; background: #E2E0D9; color: #121110; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#121110" stroke-width="2.4" aria-hidden="true"><rect x="5" y="11" width="14" height="9"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>Appel clos
+                    </span>
+                  </sc-if>
+                  <span style="{{f.aiStyle}}">{{f.aiLabel}}</span>
+                </div>
+
+                <h3 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 20px; line-height: 1.2; letter-spacing: -0.01em">{{f.name}}</h3>
+
+                <dl style="margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; font-size: 13px">
+                  <div><dt style="color: #55524C">Date limite</dt><dd style="margin: 2px 0 0; font-weight: 600">{{f.deadlineText}}</dd></div>
+                  <div><dt style="color: #55524C">Inscription</dt><dd style="margin: 2px 0 0; font-weight: 600">{{f.fee}}</dd></div>
+                  <div><dt style="color: #55524C">Durée max.</dt><dd style="margin: 2px 0 0; font-weight: 600">{{f.maxText}}</dd></div>
+                  <div><dt style="color: #55524C">Sous-titres</dt><dd style="margin: 2px 0 0; font-weight: 600">{{f.subs}}</dd></div>
+                </dl>
+
+                <sc-if value="{{f.isClosed}}" hint-placeholder-val="{{ false }}">
+                  <p style="margin: 0; font-size: 13px; line-height: 1.45; color: #55524C">{{f.nextCall}}</p>
+                </sc-if>
+
+                <sc-if value="{{f.compatOk}}" hint-placeholder-val="{{ true }}">
+                  <p style="margin: 0; display: flex; gap: 8px; align-items: flex-start; font-size: 14px; color: #14532D; font-weight: 600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="2.4" aria-hidden="true" style="flex: none"><path d="M4 12l5 5L20 6"></path></svg>{{f.compatText}}</p>
+                </sc-if>
+                <sc-if value="{{f.compatBad}}" hint-placeholder-val="{{ false }}">
+                  <p style="margin: 0; display: flex; gap: 8px; align-items: flex-start; font-size: 14px; color: #7F1020; font-weight: 600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7F1020" stroke-width="2.4" aria-hidden="true" style="flex: none"><path d="M6 6l12 12M18 6L6 18"></path></svg>{{f.compatText}}</p>
+                </sc-if>
+                <sc-if value="{{f.compatUnknown}}" hint-placeholder-val="{{ false }}">
+                  <p style="margin: 0; display: flex; gap: 8px; align-items: flex-start; font-size: 14px; color: #5C4400; font-weight: 600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5C4400" stroke-width="2.4" aria-hidden="true" style="flex: none"><path d="M12 4l9 16H3z"></path><path d="M12 10v4M12 17v.5"></path></svg>{{f.compatText}}</p>
+                </sc-if>
+
+                <p style="margin: auto 0 0; padding-top: 10px; border-top: 2px solid #D9D7D1; font-size: 12px; color: #55524C">Source vérifiée le 18 nov. 2026</p>
+
+                <div style="display: flex; flex-wrap: wrap; gap: 10px">
+                  <a href="Fiche.dc.html" style="flex: 1 1 auto; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 14px; border: 2px solid #121110; color: #121110; text-decoration: none; font-size: 14px; font-weight: 600">Voir la fiche</a>
+                  <a href="Fiche.dc.html" style="flex: 1 1 auto; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 14px; background: #C8102E; color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600">{{f.cta}}</a>
+                </div>
+              </div>
+            </article>
+          </sc-for>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { query: '', openOnly: true, compatOnly: false, frOnly: false, region: 'toutes', rank: true };
+  }
+  renderVals() {
+    const FILM_MIN = 15;
+    const s = this.state;
+    const data = [
+      { id: 'eclats', short: 'Éclats d’Écran', name: 'Les Éclats d’Écran · Paris', city: 'Paris', country: 'France', region: 'europe', status: 'open', days: 22, deadline: '10 déc. 2026', fee: '25 €', max: 30, subs: 'Français', fr: true, ai: 'muet', tile: 'ink' },
+      { id: 'angers', short: 'Cinémas d’Afrique', name: 'Festival Cinémas d’Afrique', city: 'Angers', country: 'France', region: 'afrique', status: 'open', days: 43, deadline: '31 déc. 2026', fee: 'Non mentionné', max: 60, subs: 'Français', fr: true, ai: 'muet', tile: 'red' },
+      { id: 'alex', short: 'Alexandria Shorts', name: 'Alexandria Short Film Festival · Compétition arabe', city: 'Alexandrie', country: 'Égypte', region: 'arabe', status: 'open', days: 44, deadline: '1 janv. 2027', fee: '12 $', max: 30, subs: 'Anglais, arabe', fr: false, ai: 'section', tile: 'gold' },
+      { id: 'bsff', short: 'BSFF Next Gen', name: 'Brussels Short Film Festival · Next Generation (films d’écoles)', city: 'Bruxelles', country: 'Belgique', region: 'europe', status: 'open', days: 57, deadline: '14 janv. 2027', fee: '11 € puis 15 €', max: 30, subs: 'Anglais', fr: false, ai: 'muet', tile: 'ink' },
+      { id: 'afo', short: 'À Films Ouverts', name: 'À Films Ouverts · Concours contre le racisme', city: 'Bruxelles', country: 'Belgique', region: 'europe', status: 'open', days: 65, deadline: '22 janv. 2027', fee: 'Gratuit', max: 5, subs: 'Français', fr: true, ai: 'declarer', tile: 'red' },
+      { id: 'vienna', short: 'Vienna Shorts', name: 'Vienna Shorts · Fiction & Documentary', city: 'Vienne', country: 'Autriche', region: 'europe', status: 'open', days: 74, deadline: '31 janv. 2027', fee: '19 € puis 29 €', max: 30, subs: 'Anglais', fr: false, ai: 'declarer', tile: 'ink' },
+      { id: 'cinef', short: 'La Cinef', name: 'Festival de Cannes · La Cinef (films d’écoles)', city: 'Cannes', country: 'France', region: 'europe', status: 'open', days: 89, deadline: '15 févr. 2027', fee: 'Non précisé', max: 60, subs: 'Non précisé', fr: false, ai: 'muet', tile: 'gold' },
+      { id: 'nuits', short: 'Nuits MED', name: 'Les Nuits MED · Courts métrages méditerranéens', city: 'Bastia', country: 'France', region: 'europe', status: 'open', days: 103, deadline: '1 mars 2027', fee: 'Non précisé', max: null, subs: 'Non précisé', fr: false, ai: 'muet', tile: 'red' },
+      { id: 'fifak', short: 'FIFAK', name: 'Festival International du Film Amateur de Kélibia', city: 'Kélibia', country: 'Tunisie', region: 'afrique', status: 'tbc', deadline: 'À confirmer', fee: 'Non précisé', max: 30, subs: 'Non précisé', fr: false, ai: 'muet', tile: 'gold' },
+      { id: 'ficam', short: 'FICAM', name: 'FICAM · Cinéma d’animation de Meknès', city: 'Meknès', country: 'Maroc', region: 'afrique', status: 'tbc', deadline: 'À confirmer', fee: 'Non précisé', max: null, subs: 'Non précisé', fr: false, ai: 'muet', tile: 'ink' },
+      { id: 'clermont', short: 'Clermont-Ferrand', name: 'Festival du court métrage de Clermont-Ferrand · Internationale', city: 'Clermont-Fd', country: 'France', region: 'europe', status: 'closed', deadline: 'Clos le 24 sept. 2026', next: 'Prochain appel (édition 2028) attendu à l’été 2027.', fee: '13 €', max: 40, subs: 'Anglais, français', fr: true, ai: 'declarer', tile: 'red' },
+      { id: 'jcc', short: 'JCC', name: 'Journées Cinématographiques de Carthage · Courts métrages', city: 'Tunis', country: 'Tunisie', region: 'arabe', status: 'closed', deadline: 'Clos le 22 sept. 2026', next: 'Appel 2027 pas encore publié : on te prévient dès qu’il sort.', fee: 'Non précisé', max: null, subs: 'Non précisé', fr: false, ai: 'muet', tile: 'ink' },
+      { id: 'fespaco', short: 'FESPACO', name: 'FESPACO · Ouagadougou', city: 'Ouagadougou', country: 'Burkina Faso', region: 'afrique', status: 'closed', deadline: 'Clos le 20 sept. 2026', next: 'Festival tous les deux ans : prochain appel pour l’édition 2029.', fee: '≈ 50 €', max: null, subs: 'Non précisé', fr: false, ai: 'muet', tile: 'gold' }
+    ];
+
+    const tiles = {
+      ink: 'height: 150px; display: flex; flex-direction: column; background: #121110; color: #FFFFFF',
+      red: 'height: 150px; display: flex; flex-direction: column; background: #E4202E; color: #FFFFFF',
+      gold: 'height: 150px; display: flex; flex-direction: column; background: #FFC82E; color: #121110'
+    };
+    const chip = 'display: inline-flex; align-items: center; padding: 4px 8px; font-family: JetBrains Mono, monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; ';
+    const ai = {
+      declarer: { label: 'IA à déclarer', style: chip + 'background: #FFE7A3; color: #5C4400' },
+      section: { label: 'Section IA à part', style: chip + 'background: #FFE7A3; color: #5C4400' },
+      muet: { label: 'Règlement muet sur l’IA', style: chip + 'background: #FFFFFF; color: #55524C; outline: 2px dashed #D9D7D1; outline-offset: -2px' }
+    };
+
+    const q = s.query.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    const items = data
+      .map((f) => {
+        const compatOk = f.max !== null && FILM_MIN <= f.max;
+        const compatBad = f.max !== null && FILM_MIN > f.max;
+        return {
+          ...f,
+          isOpen: f.status === 'open',
+          isTbc: f.status === 'tbc',
+          isClosed: f.status === 'closed',
+          deadlineText: f.deadline,
+          nextCall: f.next || '',
+          maxText: f.max === null ? 'Non précisée' : f.max + ' min',
+          tileStyle: tiles[f.tile],
+          aiLabel: ai[f.ai].label,
+          aiStyle: ai[f.ai].style,
+          compatOk,
+          compatBad,
+          compatUnknown: f.max === null,
+          compatText: compatOk
+            ? 'Compatible : ' + FILM_MIN + ' min pour ' + f.max + ' min max.'
+            : compatBad
+              ? 'Trop long : ce festival accepte ' + f.max + ' min max.'
+              : 'Durée max. non précisée : vérifie le règlement.',
+          cta: f.status === 'closed' ? 'Préparer pour 2027' : 'Préparer mon dossier'
+        };
+      })
+      .filter((f) => !s.openOnly || f.isOpen)
+      .filter((f) => !s.compatOnly || f.compatOk)
+      .filter((f) => !s.frOnly || f.fr)
+      .filter((f) => s.region === 'toutes' || f.region === s.region)
+      .filter((f) => !q || (f.name + ' ' + f.city + ' ' + f.country).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').includes(q));
+
+    const statusOrder = { open: 0, tbc: 1, closed: 2 };
+    const fit = (f) => (f.compatOk ? 0 : f.compatUnknown ? 1 : 2);
+    items.sort((a, b) =>
+      (s.rank ? fit(a) - fit(b) : 0) ||
+      statusOrder[a.status] - statusOrder[b.status] ||
+      (a.days || 0) - (b.days || 0)
+    );
+
+    const regionDefs = [
+      { id: 'toutes', label: 'Toutes' },
+      { id: 'afrique', label: 'Maghreb & Afrique' },
+      { id: 'arabe', label: 'Monde arabe' },
+      { id: 'europe', label: 'Europe' }
+    ];
+    const pill = 'min-height: 44px; padding: 0 12px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; border: 2px solid #121110; ';
+    const regions = regionDefs.map((r) => ({
+      label: r.label,
+      pressed: s.region === r.id ? 'true' : 'false',
+      style: pill + (s.region === r.id ? 'background: #121110; color: #FFFFFF' : 'background: #FFFFFF; color: #121110'),
+      pick: () => this.setState({ region: r.id })
+    }));
+
+    const rankBase = 'display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; border: 2px solid #FFC82E; ';
+    return {
+      items,
+      rankPressed: s.rank ? 'true' : 'false',
+      rankLabel: s.rank ? 'Classés selon mon film' : 'Classer selon mon film',
+      rankStyle: rankBase + (s.rank ? 'background: #FFC82E; color: #121110' : 'background: transparent; color: #FFC82E'),
+      toggleRank: () => this.setState({ rank: !s.rank }),
+      sortNote: s.rank
+        ? 'Classés selon Dar Hmeti : compatibles d’abord, puis par date limite.'
+        : 'Triés par date limite.',
+      count: items.length,
+      total: data.length,
+      empty: items.length === 0,
+      query: s.query,
+      openOnly: s.openOnly,
+      compatOnly: s.compatOnly,
+      frOnly: s.frOnly,
+      regions,
+      onSearch: (e) => this.setState({ query: e.target.value }),
+      toggleOpen: () => this.setState({ openOnly: !s.openOnly }),
+      toggleCompat: () => this.setState({ compatOnly: !s.compatOnly }),
+      toggleFr: () => this.setState({ frOnly: !s.frOnly })
+    };
+  }
+}
+</script>
+</body>
+</html>

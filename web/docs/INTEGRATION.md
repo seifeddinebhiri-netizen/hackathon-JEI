@@ -9,6 +9,25 @@ Checklist pour brancher le front sur le backend FastAPI et sur Supabase Auth. Le
 - [ ] Redémarrer `npm run dev` ou reconstruire (`npm run build`) : les variables `VITE_*` sont figées au build.
 - [ ] Vérifier que le badge « Données de démonstration » a disparu de la barre de navigation.
 
+### Mode mixte : brancher le backend fonction par fonction
+
+Avec `VITE_USE_MOCKS=true`, `VITE_REAL_ENDPOINTS` liste les fonctions de `src/api/endpoints.ts` qui passent quand
+même par le vrai backend (noms séparés par des virgules) ; toutes les autres restent simulées. Exemple, Kit Festival :
+
+```
+VITE_USE_MOCKS=true
+VITE_REAL_ENDPOINTS=searchFestivals,getFestival
+```
+
+- Aiguillage : `src/api/mixed.ts` (testé dans `src/api/mixed.test.ts`). Un nom inconnu est ignoré et signalé dans la
+  console en développement.
+- Avec `VITE_USE_MOCKS=false`, la liste est ignorée : tout passe par le backend.
+- Les mocks gardent la même forme que le backend (même type `Api`, mêmes schémas zod) : basculer une fonction ne
+  change aucun écran. Les festivals simulés sont une copie de `backend/data/festivals.json` avec la même logique de
+  classement (`src/api/mocks/festivals.ts`) : à recopier quand le fichier du backend change.
+- Lancer le backend : `cd backend && uv run uvicorn app.main:app --port 8000` (CORS : `CORS_ORIGINS` doit contenir
+  l'origine du front, `http://localhost:5173` par défaut).
+
 Où regarder en cas de problème : `src/api/client.ts` (URL, en-têtes, délais, erreurs), `src/api/endpoints.ts`
 (une fonction par route), `src/api/schemas.ts` (validation des réponses ; en développement, la console affiche le
 détail de chaque réponse non conforme : `[api] Réponse invalide pour …`).
@@ -84,6 +103,9 @@ Le faux fournisseur (`src/features/auth/AuthProvider.tsx`) a déjà l'interface 
 | Feuille de service publique | Futur : lien à jeton (`GET /projects/{id}/days/{date}/public`) |
 | Photos de la page film | Futur : `POST /films/{id}/stills` |
 | `GET /passport/{id}/pdf` | Renvoie une URL (fichier signé ou temporaire) |
+| `ShortlistItem.status` | **À confirmer** : `a_preparer` \| `pret` \| `soumis` \| `reponse_recue` \| `prochain_appel` (« Où j'en suis ») |
+| `POST /synopsis/translate` | **À confirmer** : traduction anglaise du synopsis de l'auteur (mock seulement pour l'instant) |
+| Version anglaise du synopsis, réponse « Déclaration IA » par festival | Gardées dans le navigateur pour l'instant (pas dans `Project`) |
 
 ## 6. Tester chaque écran
 
@@ -103,15 +125,26 @@ le message et « Réessayer » doivent apparaître), vide.
 - [ ] `/coach` : QR code (avec `VITE_PUBLIC_APP_URL` accessible depuis un téléphone), version mobile.
 - [ ] `/passeport` : 8 départements, outil hors catalogue, contrôle avant PDF, PDF, badge PNG/SVG, signature C2PA.
 - [ ] `/verifier/:id` : sans être connecté ; identifiant inconnu → « Passeport introuvable ».
-- [ ] `/festival` : filtres, classement, ajout à la sélection, dossier, sous-titres (export `.srt` bloqué tant que
-      tout n'est pas validé), synopsis (questions du coach), page film.
+- [ ] `/festival` (Catalogue) : avec `VITE_REAL_ENDPOINTS=searchFestivals,getFestival`, les 20 festivals du backend ;
+      appels ouverts, compatibles, sous-titres FR, région, recherche (ville, pays, sans accents), « Classer selon mon
+      film », « Préparer mon dossier » / « Préparer pour 2027 ». Anciennes URL `?onglet=…` redirigées.
+- [ ] `/festival/:id` (Fiche) : compatibilité renvoyée par le serveur, panneau « Ton dossier » ; id inconnu → 404.
+- [ ] `/festival/dossiers` : pièces triées bloquant → à faire → prêt, « Où j'en suis », colonne « Mes pièces ».
+- [ ] `/festival/sous-titres` : import (le son est extrait dans le navigateur, seul le WAV part), relecture,
+      « À vérifier d'abord », export `.srt` bloqué tant que tout n'est pas validé (`DarHmeti_EN.srt`, UTF-8).
+- [ ] `/festival/sous-titres/regarder` : vidéo locale, arrêt sur les lignes à risque, raccourcis, frise.
+- [ ] `/festival/synopsis` : compteur, limites (exemples marqués), questions du coach, version anglaise.
+- [ ] `/festival/dossiers/:id/declaration-ia` : Passeport fait / pas encore / importer ; « Déclarer maintenant »
+      renvoie au dossier à la fin du Passeport (`?retour=`).
+- [ ] `/festival/page-film` : photos, bande-annonce, lien public.
 - [ ] `/film/:id` : sans être connecté.
 - [ ] `/mes-donnees` : export JSON, suppression (le lien de vérification renvoie ensuite 404).
 
 ## 7. Gestion des erreurs
 
-- Toutes les erreurs passent par `ApiError` (`status`, `code`, `message`). Le `message` du serveur (`message` ou
-  `detail`) est affiché tel quel : l'écrire en français, sans jargon.
+- Toutes les erreurs passent par `ApiError` (`status`, `code`, `message`). Le message du serveur
+  (`{ "error": { "code", "message" } }`, ou `message`, ou `detail`) est affiché tel quel : l'écrire en français,
+  sans jargon.
 - Les requêtes ne sont pas réessayées sur les erreurs 4xx ni sur les réponses non conformes ; les autres le sont une fois.
 - Les modifications sont optimistes (planning, sélection, sous-titres) : en cas d'échec, l'écran revient à l'état
   précédent et un message s'affiche.

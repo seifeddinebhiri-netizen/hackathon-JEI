@@ -5,7 +5,7 @@
  * - chaque réponse passe par le même schéma zod que le vrai backend
  */
 import { z } from 'zod';
-import { differenceInCalendarDays, eachDayOfInterval, formatISO, parseISO } from 'date-fns';
+import { eachDayOfInterval, formatISO, parseISO } from 'date-fns';
 import { brand } from '@/app/brand';
 import { env } from '@/lib/env';
 import { isoDay } from '@/lib/format';
@@ -15,7 +15,9 @@ import type { Api } from '../endpoints';
 import * as S from '../schemas';
 import type * as T from '../types';
 import aiTools from './data/ai-tools.json';
-import { buildFestivals } from './data/festivals';
+import { loadFestivals, searchFestivalsLocal } from './festivals';
+import { checkRules } from './subtitleRules';
+import demoSubtitles from './data/subtitles.json';
 import { getDb, persist, uid } from './db';
 import { mockCalibration, mockShotSpec } from './coach';
 import { mockParseScreenplay } from './parser';
@@ -139,71 +141,6 @@ function quickSlotsFor(req: T.QuickSlotRequest): T.QuickSlotsResponse {
   return { place, slots: slots.slice(0, 8) };
 }
 
-// --- Festivals -------------------------------------------------------------------
-function rankFestival(f: T.Festival, film?: T.FilmProfile): T.FestivalMatch {
-  const reasons: string[] = [];
-  const warnings: string[] = [];
-  let score = 3;
-  if (film) {
-    if (f.max_duration_min !== undefined) {
-      if (film.duration_min <= f.max_duration_min) {
-        score++;
-        reasons.push(`Durée compatible (${film.duration_min} min pour ${f.max_duration_min} min maximum).`);
-      } else {
-        score = 1;
-        warnings.push(`Durée au-delà du maximum (${f.max_duration_min} min).`);
-      }
-    }
-    if (film.declared_ai_departments > 0) {
-      if (f.ai_policy === 'interdite') {
-        score = 1;
-        warnings.push('Le festival refuse les films avec IA générative, et ton Passeport en déclare.');
-      } else if (f.ai_policy === 'a_declarer') {
-        reasons.push('Le festival demande une déclaration IA : ton Passeport IA la prépare.');
-      } else {
-        reasons.push('Le festival accepte l’usage de l’IA.');
-      }
-    }
-  }
-  if (f.fee.toLowerCase() === 'gratuit') {
-    score++;
-    reasons.push('Inscription gratuite.');
-  }
-  if (f.subtitle_langs.includes('fr'))
-    reasons.push('Sous-titres français acceptés : brouillon disponible dans l’onglet Sous-titres.');
-  else warnings.push(`Sous-titres demandés en : ${f.subtitle_langs.join(', ')}.`);
-  const left = differenceInCalendarDays(parseISO(f.deadline), new Date());
-  if (left < 0) {
-    score = 1;
-    warnings.push('Date limite dépassée.');
-  } else if (left <= 14) {
-    score--;
-    warnings.push(`Date limite dans ${left} jours : dossier à préparer vite.`);
-  }
-  const clamped = Math.max(1, Math.min(5, score)) as T.FestivalMatch['score'];
-  return { festival: f, score: clamped, reasons: reasons.slice(0, 3), warnings };
-}
-
-function searchFestivalsLocal(p: T.FestivalSearchParams): T.FestivalMatch[] {
-  const q = norm(p.q ?? '');
-  return buildFestivals()
-    .filter((f) => f.source_url && f.checked_at)
-    .filter((f) => !q || norm(`${f.name} ${f.country}`).includes(q))
-    .filter((f) => !p.country || f.country === p.country)
-    .filter(
-      (f) =>
-        !p.max_duration_min || f.max_duration_min === undefined || f.max_duration_min <= p.max_duration_min,
-    )
-    .filter((f) => !p.fee || (p.fee === 'gratuit') === (f.fee.toLowerCase() === 'gratuit'))
-    .filter((f) => !p.deadline_before || f.deadline <= p.deadline_before)
-    .filter((f) => !p.subtitle_lang || f.subtitle_langs.includes(p.subtitle_lang))
-    .filter((f) => !p.ai_policy || f.ai_policy === p.ai_policy)
-    .map((f) => rankFestival(f, p.film))
-    .sort(
-      (a, b) => (p.film ? b.score - a.score : 0) || a.festival.deadline.localeCompare(b.festival.deadline),
-    );
-}
-
 // --- Synopsis : uniquement des questions -------------------------------------------
 function synopsisQuestions(input: T.SynopsisFeedbackInput): T.SynopsisFeedback {
   const text = input.text.trim();
@@ -234,6 +171,23 @@ function synopsisQuestions(input: T.SynopsisFeedbackInput): T.SynopsisFeedback {
   }
   q.push('Un programmateur qui ne connaît pas la Tunisie comprendrait-il le contexte ?');
   return { questions: q.slice(0, 4) };
+}
+
+// --- Synopsis : traduction (mock) ---------------------------------------------------
+/** Traductions connues des textes de démonstration ; sinon, traduction simulée signalée comme telle. */
+const DEMO_TRANSLATIONS: Record<string, string> = {
+  'Slim veut vendre le café de son père à Tunis, mais sa sœur Amira refuse de le laisser partir.':
+    'Slim wants to sell his father’s café in Tunis, but his sister Amira refuses to let it go.',
+  'Dans la médina de Tunis, Slim a vendu en secret le café que leur père a tenu pendant quarante ans. Quand sa sœur Amira l’apprend, une dispute éclate entre les murs blancs du café. Pendant une nuit, ils vident les étagères, retrouvent les photos, les dettes et les promesses. Au matin, Amira comprend pourquoi Slim est parti, et Slim comprend ce qu’il a vendu.':
+    'In the Tunis medina, Slim has secretly sold the café their father ran for forty years. When his sister Amira finds out, a fight breaks out within the café’s white walls. Over one night, they empty the shelves and find the photos, the debts and the promises. By morning, Amira understands why Slim left, and Slim understands what he sold.',
+};
+function translateLocal(input: T.SynopsisTranslateInput): T.SynopsisTranslation {
+  const text = input.text.trim();
+  if (!text) throw apiError('invalide', 422, 'Aucun texte à traduire.');
+  return {
+    text:
+      DEMO_TRANSLATIONS[text] ?? `[Traduction simulée : la démo ne traduit que le texte d’exemple] ${text}`,
+  };
 }
 
 // --- Passeport ---------------------------------------------------------------------
@@ -499,10 +453,40 @@ export const mockApi: Api = {
   searchFestivals: (params) =>
     simulate('GET /festivals', z.array(S.festivalMatchSchema), () => searchFestivalsLocal(params)),
 
+  getFestival: (id) =>
+    simulate(`GET /festivals/${id}`, S.festivalSchema, () => {
+      const f = loadFestivals().find((x) => x.id === id);
+      if (!f) throw apiError('introuvable', 404, 'Festival introuvable.');
+      return f;
+    }),
+
+  createSubtitleDraft: (input) =>
+    simulate(
+      `POST /subtitles/${input.project_id}/draft`,
+      S.subtitleDraftSchema,
+      () => {
+        if (!input.audio.size) throw apiError('invalide', 422, 'Le fichier est vide.');
+        // Mock : le son n'est pas analysé ; on renvoie le brouillon de démonstration, rien n'est validé.
+        const demo = structuredClone(demoSubtitles) as T.SubtitleDraft;
+        const d: T.SubtitleDraft = {
+          ...demo,
+          project_id: input.project_id,
+          processing: { ...demo.processing!, created_at: formatISO(new Date()) },
+          lines: checkRules(demo.lines.map((l) => ({ ...l, validated: false }))),
+        };
+        getDb().subtitles[input.project_id] = d;
+        persist();
+        return d;
+      },
+      5,
+    ),
+
   getSubtitleDraft: (projectId) =>
     simulate(`GET /subtitles/${projectId}`, S.subtitleDraftSchema, () => {
       const d = getDb().subtitles[projectId];
-      return d ?? { project_id: projectId, source_lang: 'derja', lines: [] };
+      return d
+        ? { ...d, lines: checkRules(d.lines) }
+        : { project_id: projectId, source_lang: 'derja', lines: [] };
     }),
 
   saveSubtitles: (projectId, lines) =>
@@ -510,11 +494,16 @@ export const mockApi: Api = {
       `PUT /subtitles/${projectId}`,
       S.subtitleDraftSchema,
       () => {
+        if (new Set(lines.map((l) => l.id)).size !== lines.length)
+          throw apiError('invalide', 422, 'Deux lignes ont le même identifiant.');
         const db = getDb();
+        const prev = db.subtitles[projectId];
+        // Comme le serveur : source_lang et processing gardés, avertissements recalculés.
         const d: T.SubtitleDraft = {
           project_id: projectId,
-          source_lang: db.subtitles[projectId]?.source_lang ?? 'derja',
-          lines,
+          source_lang: prev?.source_lang ?? 'derja',
+          lines: checkRules(lines),
+          ...(prev?.processing ? { processing: prev.processing } : {}),
         };
         db.subtitles[projectId] = d;
         persist();
@@ -525,6 +514,9 @@ export const mockApi: Api = {
 
   getSynopsisFeedback: (input) =>
     simulate('POST /synopsis/feedback', S.synopsisFeedbackSchema, () => synopsisQuestions(input)),
+
+  translateSynopsis: (input) =>
+    simulate('POST /synopsis/translate', S.synopsisTranslationSchema, () => translateLocal(input), 1.5),
 
   getPublicFilm: (id) =>
     simulate(`GET /films/${id}/public`, S.publicFilmSchema, () => {

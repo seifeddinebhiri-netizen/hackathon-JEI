@@ -154,16 +154,30 @@ export type Passport = {
 // ---------------------------------------------------------------------------
 // Festival
 // ---------------------------------------------------------------------------
-export type AiPolicy = 'acceptee' | 'a_declarer' | 'interdite';
+/**
+ * Politique IA telle qu'écrite dans le règlement. `non_precisee` : le règlement ne dit rien
+ * (statut honnête, pas une autorisation). `section_dediee` : films faits par IA dans une section à part.
+ */
+export type AiPolicy = 'acceptee' | 'a_declarer' | 'interdite' | 'section_dediee' | 'non_precisee';
+/** Calculé par le serveur à la lecture (jamais stocké). */
+export type DeadlineStatus = 'ouverte' | 'passee' | 'a_confirmer';
 export type Festival = {
   id: string;
   name: string;
   country: string;
-  deadline: string;
+  city?: string | null;
+  edition?: string | null;
+  /** Date ISO ; null si la date de la prochaine édition n'est pas connue. */
+  deadline: string | null;
+  deadline_status: DeadlineStatus;
+  /** Ex. « Appel 2027 pas encore publié. » */
+  deadline_note?: string | null;
   fee: string;
-  max_duration_min?: number;
+  max_duration_min: number | null;
   subtitle_langs: string[];
   ai_policy: AiPolicy;
+  ai_policy_detail?: string | null;
+  eligibility?: string | null;
   requirements: FestivalRequirement[];
   source_url: string;
   checked_at: string;
@@ -180,7 +194,7 @@ export type FestivalRequirement = {
     | 'droits_musique'
     | 'format';
   detail: string;
-  limit_chars?: number;
+  limit_chars?: number | null;
 };
 export type FestivalMatch = {
   festival: Festival;
@@ -194,9 +208,11 @@ export type FilmProfile = {
   genre: string;
   declared_ai_departments: number;
 };
+/** « Où j'en suis » pour un dossier. La soumission se fait toujours sur le site officiel. */
+export type ShortlistStatus = 'a_preparer' | 'pret' | 'soumis' | 'reponse_recue' | 'prochain_appel';
 export type ShortlistItem = {
   festival_id: string;
-  status: 'a_preparer' | 'pret' | 'soumis';
+  status: ShortlistStatus;
   checklist: { requirement: FestivalRequirement; done: boolean }[];
 };
 export type SubtitleLine = {
@@ -209,7 +225,26 @@ export type SubtitleLine = {
   confidence: 'elevee' | 'moyenne' | 'faible';
   note?: string;
   validated: boolean;
+  /** S1, S2… dans l'ordre d'apparition (absent si inconnu). */
+  speaker?: string;
+  /** Règles de sous-titrage non respectées (recalculées par le serveur). */
+  warnings?: SubtitleWarning[];
+  /** Ids du glossaire derja utilisés pour cette ligne. */
+  glossary_used?: string[];
+  /** Version condensée proposée quand la ligne est trop rapide à lire : suggestion, jamais appliquée seule. */
+  fr_court?: string;
+  en_court?: string;
 };
+export type SubtitleRule =
+  | 'lecture_rapide'
+  | 'trop_de_lignes'
+  | 'ligne_trop_longue'
+  | 'duree_courte'
+  | 'duree_longue'
+  | 'chevauchement'
+  | 'omission_possible';
+export type SubtitleWarning = { rule: SubtitleRule; detail: string };
+export type SubtitleProcessing = { transcriber: string; translator: string; created_at: string };
 export type SynopsisFeedback = { questions: string[] }; // jamais de texte réécrit
 export type PublicFilm = {
   id: string;
@@ -297,14 +332,35 @@ export type FestivalSearchParams = {
   deadline_before?: string;
   subtitle_lang?: string;
   ai_policy?: AiPolicy;
+  /** Seulement les appels ouverts (deadline_status = ouverte). */
+  open_only?: boolean;
   /** Si fourni, le serveur classe les festivals pour ce film. */
   film?: FilmProfile;
 };
 
-export type SubtitleDraft = { project_id: string; source_lang: string; lines: SubtitleLine[] };
+export type SubtitleDraft = {
+  project_id: string;
+  source_lang: string;
+  lines: SubtitleLine[];
+  /** Outils utilisés (absent tant qu'il n'y a pas de brouillon). */
+  processing?: SubtitleProcessing;
+};
+/** POST /subtitles/{projectId}/draft : seul le son (WAV extrait dans le navigateur) est envoyé. */
+export type CreateSubtitleDraftInput = {
+  project_id: string;
+  audio: Blob;
+  file_name: string;
+  /** `ara` pour la derja (Scribe n'a pas de code de dialecte) ; absent = détection automatique. */
+  language_code?: string;
+  keyterms?: string[];
+  characters?: string[];
+};
 
 export type SynopsisKind = 'phrase' | 'court' | 'long';
 export type SynopsisFeedbackInput = { kind: SynopsisKind; text: string; limit_chars?: number };
+/** POST /synopsis/translate (à confirmer) : traduction du texte de l'auteur, rien d'ajouté ni réécrit. */
+export type SynopsisTranslateInput = { kind: SynopsisKind; text: string; target_lang: 'en' };
+export type SynopsisTranslation = { text: string };
 
 export type User = { id: string; email: string; name: string; is_demo: boolean; project_id?: string };
 export type Session = { access_token: string; expires_at: string; user: User };

@@ -207,7 +207,7 @@ export function PdfAndSign({ passport }: { passport: Passport }) {
               );
             }}
           >
-            <Field label="Nom du fichier final" hint="Ex. maree-basse-v-finale.mp4" required>
+            <Field label="Nom du fichier final" hint="Ex. dar-hmeti-v-finale.mp4" required>
               <Input value={fileName} onChange={(e) => setFileName(e.target.value)} required />
             </Field>
             <div className="flex justify-end gap-3">

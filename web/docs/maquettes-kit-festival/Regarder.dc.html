@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sous-titres · Regarder et valider</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#121110}
+a{color:#FFFFFF}a:hover{color:#FFC82E}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #FFC82E;outline-offset:2px}
+</style>
+</helmet>
+<div style="background: #121110; color: #FFFFFF; font-family: Inter, system-ui, sans-serif; font-size: 16px; min-height: 100%">
+
+  <!-- Barre du mode -->
+  <header style="border-bottom: 2px solid #3A3733">
+    <div style="max-width: 1440px; margin: 0 auto; padding: 0 48px; min-height: 64px; display: flex; flex-wrap: wrap; align-items: center; gap: 16px 28px">
+      <a href="SousTitres.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 14px; font-weight: 600; text-decoration: none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>Retour à la liste
+      </a>
+      <p style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700">Regarder et valider · Dar Hmeti</p>
+      <p style="margin: 0 0 0 auto; font-size: 14px; color: #B8B4AC"><strong style="color: #FFFFFF">{{seen}} / {{total}} lignes vues</strong> · {{stops}} arrêts à vérifier</p>
+      <div role="group" aria-label="Langue affichée" style="display: inline-flex; border: 2px solid #3A3733">
+        <button type="button" aria-pressed="{{enPressed}}" onClick="{{showEn}}" style="{{enStyle}}">EN</button>
+        <button type="button" aria-pressed="{{frPressed}}" onClick="{{showFr}}" style="{{frStyle}}">FR</button>
+      </div>
+    </div>
+  </header>
+
+  <main style="max-width: 1440px; margin: 0 auto; padding: 24px 48px 48px; box-sizing: border-box; display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start">
+
+    <!-- Lecteur -->
+    <section aria-label="Lecteur" style="flex: 999 1 640px; min-width: 0">
+      <div style="position: relative; aspect-ratio: 16 / 9; background: #1F1D1B; border: 2px solid #3A3733; display: flex; align-items: flex-end; justify-content: center">
+        <span style="position: absolute; top: 14px; left: 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.1em; color: #B8B4AC">[TON FILM · LU DEPUIS TON ORDINATEUR]</span>
+        <span style="position: absolute; top: 14px; right: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #FFC82E">{{cur.start}}</span>
+        <sc-if value="{{paused}}" hint-placeholder-val="{{ false }}">
+          <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 8px 14px; background: #FFC82E; color: #121110; font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase">{{pauseLabel}}</span>
+        </sc-if>
+        <p style="margin: 0 32px 28px; padding: 6px 12px; background: rgba(18,17,16,0.78); font-size: 24px; line-height: 1.35; text-align: center">{{shown}}</p>
+      </div>
+
+      <!-- Commandes -->
+      <div style="margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center">
+        <button type="button" onClick="{{prev}}" aria-label="Ligne précédente" style="min-width: 48px; min-height: 48px; border: 2px solid #FFFFFF; background: transparent; color: #FFFFFF; display: inline-flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+        <button type="button" onClick="{{togglePlay}}" style="min-height: 48px; padding: 0 22px; border: 2px solid #FFC82E; background: #FFC82E; color: #121110; font: inherit; font-weight: 600; display: inline-flex; align-items: center; gap: 10px">
+          <sc-if value="{{playing}}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="#121110" aria-hidden="true"><rect x="6" y="5" width="4" height="14"></rect><rect x="14" y="5" width="4" height="14"></rect></svg></sc-if>
+          <sc-if value="{{notPlaying}}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="#121110" aria-hidden="true"><path d="M7 5l12 7-12 7z"></path></svg></sc-if>
+          {{playLabel}} <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; opacity: 0.75">Espace</span>
+        </button>
+        <button type="button" onClick="{{next}}" aria-label="Ligne suivante" style="min-width: 48px; min-height: 48px; border: 2px solid #FFFFFF; background: transparent; color: #FFFFFF; display: inline-flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></button>
+        <span style="margin-left: auto; font-size: 13px; color: #B8B4AC">Les lignes que tu laisses passer sont validées. La lecture s'arrête seule sur les lignes à vérifier.</span>
+      </div>
+
+      <!-- Frise des lignes -->
+      <div aria-label="Frise des sous-titres" style="margin-top: 18px; display: flex; gap: 4px">
+        <sc-for list="{{strip}}" as="b" hint-placeholder-count="9">
+          <button type="button" onClick="{{b.go}}" aria-label="{{b.aria}}" style="{{b.style}}"></button>
+        </sc-for>
+      </div>
+      <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 13px; color: #B8B4AC">
+        <span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 14px; height: 14px; background: #DDEFE3"></span>Vue et validée</span>
+        <span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 14px; height: 14px; background: #3A3733"></span>Pas encore vue</span>
+        <span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 14px; height: 14px; background: #3A3733; outline: 3px dashed #FFC82E; outline-offset: -3px"></span>Arrêt prévu</span>
+        <span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 14px; height: 14px; background: #FFC82E"></span>Ligne en cours</span>
+      </div>
+    </section>
+
+    <!-- Panneau de la ligne -->
+    <aside aria-label="Ligne en cours" style="flex: 1 1 380px; max-width: 460px; background: #FFFFFF; color: #121110; padding: 22px; box-sizing: border-box; box-shadow: 6px 6px 0 #FFC82E">
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #55524C">{{cur.start}} → {{cur.end}}</span>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase">{{cur.speaker}}</span>
+      </div>
+      <sc-if value="{{cur.isStop}}" hint-placeholder-val="{{ true }}">
+        <p style="margin: 12px 0 0; padding: 10px 12px; background: #FFF0C2; color: #5C4400; font-size: 14px; font-weight: 600; display: flex; gap: 8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5C4400" stroke-width="2.4" aria-hidden="true" style="flex: none"><path d="M12 4l9 16H3z"></path><path d="M12 10v4M12 17v.5"></path></svg>{{cur.reason}}</p>
+      </sc-if>
+      <p style="margin: 14px 0 4px; font-size: 13px; color: #55524C">Ce qui est dit</p>
+      <p style="margin: 0; font-size: 18px; font-weight: 600">{{cur.source}}</p>
+
+      <label style="display: flex; flex-direction: column; gap: 6px; margin-top: 16px; font-size: 13px; font-weight: 600">Anglais
+        <input type="text" value="{{cur.en}}" onInput="{{editEn}}" onFocus="{{pauseForEdit}}" style="font: inherit; font-size: 16px; font-weight: 400; min-height: 48px; padding: 0 12px; border: 2px solid #121110">
+      </label>
+      <label style="display: flex; flex-direction: column; gap: 6px; margin-top: 12px; font-size: 13px; font-weight: 600">Français
+        <input type="text" value="{{cur.fr}}" onInput="{{editFr}}" onFocus="{{pauseForEdit}}" style="font: inherit; font-size: 16px; font-weight: 400; min-height: 48px; padding: 0 12px; border: 2px solid #121110">
+      </label>
+      <sc-if value="{{cur.hasNote}}" hint-placeholder-val="{{ false }}">
+        <p style="margin: 12px 0 0; padding: 10px 12px; background: #FFF0C2; color: #5C4400; font-size: 13px; line-height: 1.5"><strong>Glossaire :</strong> {{cur.note}}</p>
+      </sc-if>
+
+      <div style="margin-top: 18px; display: flex; flex-direction: column; gap: 10px">
+        <button type="button" onClick="{{validateNext}}" style="min-height: 52px; padding: 0 16px; border: 2px solid #C8102E; background: #C8102E; color: #FFFFFF; font: inherit; font-weight: 600; display: flex; align-items: center; justify-content: space-between">Valider et continuer <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; opacity: 0.85">Entrée</span></button>
+        <div style="display: flex; gap: 10px">
+          <button type="button" onClick="{{replay}}" style="flex: 1; min-height: 44px; border: 2px solid #121110; background: #FFFFFF; font: inherit; font-size: 14px; font-weight: 600">Revoir · R</button>
+          <button type="button" style="flex: 1; min-height: 44px; border: 2px solid #121110; background: #FFFFFF; font: inherit; font-size: 14px; font-weight: 600">Plus court (IA)</button>
+        </div>
+      </div>
+      <p style="margin: 14px 0 0; font-size: 12px; color: #55524C">Raccourcis : Espace lecture · Entrée valider · E modifier · R revoir · ← → ligne</p>
+    </aside>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { idx: 0, playing: false, lang: 'en', done: {}, edits: {}, pausedByStop: false };
+    this.lines = [
+      { id: 'l1', start: '00:00:12,400', end: '00:00:14,900', speaker: 'Slim', source: 'Sbe7 el khir ya khali.', fr: 'Bonjour, mon oncle.', en: 'Morning, uncle.' },
+      { id: 'l2', start: '00:00:15,300', end: '00:00:18,200', speaker: 'Slim', source: 'El 9ahwa mabi3a, Amira.', fr: 'Le café est vendu, Amira.', en: 'The café is sold, Amira.' },
+      { id: 'l3', start: '00:00:19,000', end: '00:00:21,600', speaker: 'Amira', source: 'Chnowa? Ba3etha?', fr: 'Quoi ? Tu l’as vendu ?', en: 'What? You sold it?' },
+      { id: 'l4', start: '00:00:22,100', end: '00:00:23,900', speaker: 'Slim', source: 'Ma3andich el 9alb nkamel, Amira, walla.', fr: 'Je n’ai plus le cœur à continuer, Amira, je te jure.', en: 'I don’t have the heart to go on anymore, Amira, I swear.', stop: 'Trop rapide à lire : 31 car./s (limite 17)', note: '« Ma3andich el 9alb » : plus le courage, plus l’envie.' },
+      { id: 'l5', start: '00:01:02,000', end: '00:01:04,300', speaker: 'Amira', source: 'Yezzi ya Slim!', fr: 'Ça suffit, Slim !', en: 'Enough, Slim!' },
+      { id: 'l6', start: '00:01:05,000', end: '00:01:08,700', speaker: 'Slim', source: 'Enti dima t7ebi tkouni 3la 7a9.', fr: 'Tu veux toujours avoir raison.', en: 'You always want to be right.', stop: 'Différent du scénario : à vérifier' },
+      { id: 'l7', start: '00:02:40,500', end: '00:02:43,000', speaker: 'Nour', source: 'Rabbi yesahel.', fr: 'Que Dieu te facilite la route.', en: 'May God ease your way.', stop: 'Confiance faible : formule de politesse', note: 'Selon le ton : « Bon courage », « Bonne route ».' },
+      { id: 'l8', start: '00:02:44,000', end: '00:02:46,800', speaker: 'Amira', source: 'Ya3tik essa7a, Nour.', fr: 'Merci, Nour.', en: 'Thank you, Nour.', note: '« Ya3tik essa7a » : ici, merci.' },
+      { id: 'l9', start: '00:02:47,200', end: '00:02:49,500', speaker: '?', source: 'Barcha 7kayet, khalli 3la ba3d.', fr: 'Plein d’histoires, on verra plus tard.', en: 'Lots of stories, later.', stop: 'Absente du scénario : réplique improvisée ?' }
+    ];
+  }
+  componentDidMount() {
+    this.timer = setInterval(() => this.tick(), 1600);
+  }
+  componentWillUnmount() {
+    clearInterval(this.timer);
+  }
+  tick() {
+    const s = this.state;
+    if (!s.playing) return;
+    const line = this.lines[s.idx];
+    if (line.stop && !s.done[line.id]) {
+      this.setState({ playing: false, pausedByStop: true });
+      return;
+    }
+    const done = { ...s.done, [line.id]: true };
+    if (s.idx >= this.lines.length - 1) {
+      this.setState({ done, playing: false, pausedByStop: false });
+      return;
+    }
+    const nextIdx = s.idx + 1;
+    const nextLine = this.lines[nextIdx];
+    this.setState({ done, idx: nextIdx });
+    if (nextLine.stop && !done[nextLine.id]) this.setState({ playing: false, pausedByStop: true });
+  }
+  renderVals() {
+    const s = this.state;
+    const lines = this.lines;
+    const raw = lines[s.idx];
+    const e = s.edits[raw.id] || {};
+    const cur = {
+      ...raw,
+      en: e.en !== undefined ? e.en : raw.en,
+      fr: e.fr !== undefined ? e.fr : raw.fr,
+      isStop: !!raw.stop && !s.done[raw.id],
+      reason: raw.stop || '',
+      hasNote: !!raw.note,
+      note: raw.note || ''
+    };
+    const seen = lines.filter((l) => s.done[l.id]).length;
+    const stops = lines.filter((l) => l.stop && !s.done[l.id]).length;
+    const go = (i) => this.setState({ idx: i, playing: false, pausedByStop: false });
+
+    const strip = lines.map((l, i) => {
+      let style = 'flex: 1; height: 40px; min-width: 24px; cursor: pointer; padding: 0; border: 0; ';
+      if (i === s.idx) style += 'background: #FFC82E';
+      else if (s.done[l.id]) style += 'background: #DDEFE3';
+      else if (l.stop) style += 'background: #3A3733; outline: 3px dashed #FFC82E; outline-offset: -3px';
+      else style += 'background: #3A3733';
+      return { style, go: () => go(i), aria: 'Ligne ' + (i + 1) + ' · ' + l.start };
+    });
+
+    const tab = 'min-height: 40px; padding: 0 12px; border: 0; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; ';
+    const allDone = seen === lines.length;
+    return {
+      cur,
+      seen,
+      total: lines.length,
+      stops,
+      strip,
+      shown: s.lang === 'en' ? cur.en : cur.fr,
+      playing: s.playing,
+      notPlaying: !s.playing,
+      playLabel: s.playing ? 'Pause' : allDone ? 'Tout est vu' : 'Lecture',
+      paused: !s.playing && (s.pausedByStop || allDone),
+      pauseLabel: allDone ? 'Tout est validé · export possible' : 'Arrêt : ligne à vérifier',
+      enPressed: s.lang === 'en' ? 'true' : 'false',
+      frPressed: s.lang === 'fr' ? 'true' : 'false',
+      enStyle: tab + (s.lang === 'en' ? 'background: #FFFFFF; color: #121110' : 'background: transparent; color: #FFFFFF'),
+      frStyle: tab + (s.lang === 'fr' ? 'background: #FFFFFF; color: #121110' : 'background: transparent; color: #FFFFFF'),
+      showEn: () => this.setState({ lang: 'en' }),
+      showFr: () => this.setState({ lang: 'fr' }),
+      togglePlay: () => this.setState({ playing: !s.playing, pausedByStop: false }),
+      prev: () => go(Math.max(0, s.idx - 1)),
+      next: () => go(Math.min(lines.length - 1, s.idx + 1)),
+      replay: () => this.setState({ playing: false }),
+      pauseForEdit: () => this.setState({ playing: false }),
+      editEn: (ev) => this.setState({ edits: { ...s.edits, [raw.id]: { ...e, en: ev.target.value } } }),
+      editFr: (ev) => this.setState({ edits: { ...s.edits, [raw.id]: { ...e, fr: ev.target.value } } }),
+      validateNext: () => {
+        const done = { ...s.done, [raw.id]: true };
+        const last = s.idx >= lines.length - 1;
+        this.setState({ done, idx: last ? s.idx : s.idx + 1, playing: !last, pausedByStop: false });
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>
