@@ -1,8 +1,13 @@
-"""Client LLM du découpage de scénario : Ollama (local) ou Anthropic.
+"""Client LLM du découpage de scénario : Ollama (local), Gemini ou Anthropic.
 
 Indépendant de `LLMService` pour ne pas modifier ce fichier. Choix du fournisseur :
-- `SCREENPLAY_LLM=ollama` ou `SCREENPLAY_LLM=anthropic` dans `.env` pour forcer ;
-- sinon : Anthropic si `ANTHROPIC_API_KEY` est rempli, Ollama dans les autres cas.
+- `SCREENPLAY_LLM=ollama`, `gemini` ou `anthropic` dans `.env` pour forcer ;
+- sinon : Anthropic si `ANTHROPIC_API_KEY` est rempli, Gemini si `GEMINI_API_KEY` est rempli,
+  Ollama dans les autres cas.
+
+Gemini : `GEMINI_API_KEY` (Google AI Studio), `GEMINI_MODEL` (défaut gemini-3.8-flash).
+Attention : sur l'offre gratuite, Google peut utiliser les textes envoyés pour améliorer ses
+produits ; le texte du scénario quitte l'ordinateur. Ollama le garde en local.
 
 Ollama : `OLLAMA_BASE_URL` (ou `OLLAMA_URL` / `OLLAMA_HOST`, défaut http://localhost:11434),
 `OLLAMA_MODEL` (défaut : le premier modèle installé), `OLLAMA_NUM_CTX` (défaut 8192),
@@ -41,15 +46,41 @@ def _env() -> dict[str, str]:
     return values
 
 
+def inline_refs(schema: dict) -> dict:
+    """Remplace les `$ref` vers `$defs` par leur contenu (schéma autonome, accepté partout)."""
+    defs = schema.get("$defs", {})
+
+    def walk(node):
+        if isinstance(node, dict):
+            if "$ref" in node and node["$ref"].startswith("#/$defs/"):
+                target = dict(defs[node["$ref"].split("/")[-1]])
+                extra = {k: v for k, v in node.items() if k != "$ref"}
+                return walk({**target, **extra})
+            return {k: walk(v) for k, v in node.items() if k != "$defs"}
+        if isinstance(node, list):
+            return [walk(v) for v in node]
+        return node
+
+    return walk(schema)
+
+
 class ScreenplayLLM:
     def __init__(self, settings: Settings, env: dict[str, str] | None = None):
         env = _env() if env is None else env
         key = settings.anthropic_api_key.get_secret_value()
         forced = env.get("SCREENPLAY_LLM", "").strip().lower()
-        self.provider = forced or ("anthropic" if key else "ollama")
+        gemini_key = env.get("GEMINI_API_KEY") or env.get("GOOGLE_API_KEY") or ""
+        auto = "anthropic" if key else ("gemini" if gemini_key else "ollama")
+        self.provider = forced or auto
         self._effort = settings.llm_effort
 
-        if self.provider == "anthropic":
+        if self.provider == "gemini":
+            self._gemini_key = gemini_key
+            self._model = env.get("GEMINI_MODEL") or "gemini-3.8-flash"
+            self._timeout = float(env.get("GEMINI_TIMEOUT", "180"))
+            self.max_batch_chars = 60_000
+            self.max_concurrency = 2  # l'offre gratuite limite les requêtes par minute
+        elif self.provider == "anthropic":
             from anthropic import AsyncAnthropic
 
             self._anthropic = AsyncAnthropic(api_key=key) if key else None
@@ -83,7 +114,66 @@ class ScreenplayLLM:
         """Sortie structurée validée par Pydantic. Le texte du scénario n'est jamais journalisé."""
         if self.provider == "anthropic":
             return await self._anthropic_parse(system, user, output_format, max_tokens)
+        if self.provider == "gemini":
+            return await self._gemini_parse(system, user, output_format)
         return await self._ollama_parse(system, user, output_format)
+
+    # --- Gemini -------------------------------------------------------------------
+
+    async def _gemini_parse(self, system: str, user: str, output_format: type[T]) -> T:
+        if not self._gemini_key:
+            raise LLMUnavailable("GEMINI_API_KEY non configurée.")
+        url = (
+            f"https://generativelanguage.googleapis.com/v1beta/models/{self._model}:generateContent"
+        )
+        body = {
+            "systemInstruction": {"parts": [{"text": system}]},
+            "contents": [{"role": "user", "parts": [{"text": user}]}],
+            "generationConfig": {
+                "responseMimeType": "application/json",
+                "responseJsonSchema": inline_refs(output_format.model_json_schema()),
+            },
+        }
+        try:
+            async with httpx.AsyncClient(
+                timeout=httpx.Timeout(self._timeout, connect=10)
+            ) as client:
+                for attempt in (1, 2):
+                    r = await client.post(
+                        url, json=body, headers={"x-goog-api-key": self._gemini_key}
+                    )
+                    if r.status_code == 429:
+                        raise LLMUnavailable("quota Gemini atteint, réessaie dans une minute")
+                    if r.status_code in (400, 401, 403):
+                        raise LLMUnavailable(
+                            f"Gemini refuse la requête ({r.status_code}) : vérifie GEMINI_API_KEY "
+                            f"et GEMINI_MODEL (« {self._model} »)"
+                        )
+                    if r.status_code == 404:
+                        raise LLMUnavailable(f"modèle Gemini « {self._model} » introuvable")
+                    r.raise_for_status()
+                    data = r.json()
+                    usage = data.get("usageMetadata", {})
+                    log.info(
+                        "llm_call",
+                        provider="gemini",
+                        purpose=output_format.__name__,
+                        model=self._model,
+                        attempt=attempt,
+                        input_tokens=usage.get("promptTokenCount"),
+                        output_tokens=usage.get("candidatesTokenCount"),
+                    )
+                    try:
+                        parts = data["candidates"][0]["content"]["parts"]
+                        text = "".join(p.get("text", "") for p in parts)
+                        return output_format.model_validate_json(text)
+                    except (ValidationError, KeyError, IndexError, TypeError):
+                        log.warning("gemini_invalid_json", purpose=output_format.__name__)
+        except httpx.TimeoutException as exc:
+            raise LLMUnavailable("Gemini n'a pas répondu à temps") from exc
+        except httpx.HTTPError as exc:
+            raise LLMUnavailable(f"Erreur Gemini : {type(exc).__name__}") from exc
+        raise LLMUnavailable("Gemini n'a pas produit de réponse exploitable.")
 
     # --- Ollama -------------------------------------------------------------------
 

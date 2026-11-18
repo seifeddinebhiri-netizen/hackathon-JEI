@@ -104,3 +104,36 @@ async def test_long_text_is_sent_in_windows_with_global_numbers():
     # les débuts de passage dans le même lieu ne créent pas de scène
     assert [b["place"] for b in bounds] == ["Cinéma", "Rue"]
     assert bounds[0]["start_line"] == 1
+
+
+def test_gemini_selected_by_key_and_schema_inlined():
+    from app.services.screenplay.llm import inline_refs
+
+    g = ScreenplayLLM(_settings(), env={"GEMINI_API_KEY": "g"})
+    assert g.provider == "gemini" and g.model == "gemini-3.8-flash"
+    schema = inline_refs(LLMSegmentation.model_json_schema())
+    assert "$defs" not in json.dumps(schema) and "$ref" not in json.dumps(schema)
+    assert "start_line" in json.dumps(schema)
+
+
+@pytest.mark.asyncio
+async def test_gemini_call_and_quota(monkeypatch):
+    seen = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        out = {"candidates": [{"content": {"parts": [{"text": json.dumps(SEG)}]}}]}
+        return httpx.Response(200, json=out)
+
+    _patch(monkeypatch, handler)
+    g = ScreenplayLLM(_settings(), env={"GEMINI_API_KEY": "g", "GEMINI_MODEL": "m"})
+    out = await g.parse_structured(system="s", user="u", output_format=LLMSegmentation)
+    assert out.scenes[0].place == "Cinéma"
+    assert seen[0].url.path.endswith("/models/m:generateContent")
+    assert seen[0].headers["x-goog-api-key"] == "g"
+    cfg = json.loads(seen[0].content)["generationConfig"]
+    assert cfg["responseMimeType"] == "application/json"
+
+    _patch(monkeypatch, lambda r: httpx.Response(429, json={}))
+    with pytest.raises(LLMUnavailable, match="quota"):
+        await g.parse_structured(system="s", user="u", output_format=LLMSegmentation)
