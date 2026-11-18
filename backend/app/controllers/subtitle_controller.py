@@ -24,16 +24,18 @@ async def create_draft(
 ) -> SubtitleDraft:
     """POST /subtitles/{project_id}/draft : transcription + traduction → brouillon à relire."""
     state = request.app.state
+    settings = get_settings()
     return await subtitle_service.create_draft(
         state.db_pool,
         state.transcriber,
         state.translator,
         project_id,
         file,
-        get_settings().subtitle_max_upload_mb,
+        settings.subtitle_max_upload_mb,
         language_code=(language_code or "").strip() or None,
         keyterms=_split(keyterms),
         characters=_split(characters),
+        timeout_s=settings.subtitle_draft_timeout_s,
     )
 
 

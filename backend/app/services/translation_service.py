@@ -7,10 +7,17 @@ Deux fournisseurs, même prompt, choisis par LLM_PROVIDER :
 Traduction par lots de BATCH_SIZE lignes. La sortie est validée avec Pydantic ; une ligne
 invalide ou manquante est redemandée une fois, puis reste vide en confiance « faible ».
 Une ligne ne fait jamais échouer toute la requête. Le texte n'est jamais loggé.
+
+Gemini : délai maximal par appel (GEMINI_TIMEOUT_S) ; 503, 429 ou délai dépassé →
+2 nouveaux essais (après 2 s puis 5 s), puis un essai sur GEMINI_FALLBACK_MODEL.
+Les modèles qui ont réellement répondu sont notés (track_models) pour processing.translator.
 """
 
+import asyncio
 import json
+import time
 from abc import ABC, abstractmethod
+from contextvars import ContextVar
 from typing import Protocol
 
 import httpx
@@ -23,6 +30,8 @@ from app.schemas.subtitle import Cue, TranslatedLine, TranslationBatch, Translat
 log = structlog.get_logger()
 
 BATCH_SIZE = 20
+RETRY_DELAYS_S = (2.0, 5.0)  # attentes avant le 2e et le 3e essai du modèle principal
+TRANSIENT_CODES = {429, 503}
 FALLBACK_NOTE = "Traduction automatique indisponible pour cette ligne : à traduire à la main."
 
 SYSTEM_PROMPT = """\
@@ -115,11 +124,39 @@ def fallback_line(cue_id: str) -> TranslatedLine:
     return TranslatedLine(id=cue_id, fr="", en="", confidence="faible", note=FALLBACK_NOTE)
 
 
+# Modèles qui ont réellement répondu pendant la tâche en cours (une requête = une tâche).
+_models_used: ContextVar[list[str] | None] = ContextVar("translation_models_used", default=None)
+
+
+def track_models() -> list[str]:
+    """Commence à noter les modèles utilisés ; la liste se remplit pendant la traduction."""
+    used: list[str] = []
+    _models_used.set(used)
+    return used
+
+
+def _record_model(name: str) -> None:
+    used = _models_used.get()
+    if used is not None and name not in used:
+        used.append(name)
+
+
+def used_translator_name(translator: "Translator", used: list[str]) -> str:
+    """« gemini/principal », « gemini/secours » ou les deux ; sinon le nom du traducteur."""
+    return " + ".join(used) if used else translator.name
+
+
+def _is_transient(exc: Exception) -> bool:
+    return isinstance(exc, TimeoutError) or getattr(exc, "code", None) in TRANSIENT_CODES
+
+
 class PromptTranslator(ABC):
     """Prompt, validation et nouvel essai communs ; chaque fournisseur fait l'appel brut."""
 
     name: str
     available: bool
+    # False quand _complete gère déjà ses relances : un appel en échec n'est pas relancé ici.
+    retry_failed_call: bool = True
 
     @abstractmethod
     async def _complete(
@@ -133,22 +170,23 @@ class PromptTranslator(ABC):
 
     async def _attempt(
         self, batch: list[Cue], context: TranslationContext
-    ) -> dict[str, TranslatedLine]:
+    ) -> tuple[dict[str, TranslatedLine], bool]:
+        """Lignes valides, et True si l'appel lui-même a échoué."""
         try:
             raw = await self._complete(SYSTEM_PROMPT, build_user_prompt(batch, context))
         except Exception as exc:  # noqa: BLE001 — erreur fournisseur : on garde le brouillon
             log.error("translation_call_failed", provider=self.name, error=type(exc).__name__)
-            return {}
-        return parse_output(raw, [c.id for c in batch], {e.id for e in context.glossary})
+            return {}, True
+        return parse_output(raw, [c.id for c in batch], {e.id for e in context.glossary}), False
 
     async def translate(
         self, batch: list[Cue], context: TranslationContext
     ) -> list[TranslatedLine]:
-        got = await self._attempt(batch, context)
+        got, call_failed = await self._attempt(batch, context)
         missing = [c for c in batch if c.id not in got]
-        if missing:
+        if missing and (self.retry_failed_call or not call_failed):
             log.warning("translation_retry", provider=self.name, lines=len(missing))
-            got.update(await self._attempt(missing, context))
+            got.update((await self._attempt(missing, context))[0])
         failed = sum(1 for c in batch if c.id not in got)
         if failed:
             log.warning("translation_lines_failed", provider=self.name, lines=failed)
@@ -156,9 +194,15 @@ class PromptTranslator(ABC):
 
 
 class GeminiTranslator(PromptTranslator):
-    def __init__(self, settings: Settings, client=None):
+    retry_failed_call = False  # relances et modèle de secours gérés dans _complete
+
+    def __init__(self, settings: Settings, client=None, retry_delays=RETRY_DELAYS_S):
         self._key = settings.gemini_api_key.get_secret_value()
         self._model = settings.gemini_model
+        fallback = settings.gemini_fallback_model.strip()
+        self._fallback = fallback if fallback != self._model else ""
+        self._timeout_s = settings.gemini_timeout_s
+        self._retry_delays = tuple(retry_delays)
         self.name = f"gemini/{self._model}"
         self.available = bool(self._key and self._model)
         self._client = client
@@ -175,17 +219,64 @@ class GeminiTranslator(PromptTranslator):
     ) -> str:
         from google.genai import types
 
-        resp = await self._get_client().aio.models.generate_content(
-            model=self._model,
-            contents=user,
-            config=types.GenerateContentConfig(
-                system_instruction=system,
-                response_mime_type="application/json",
-                response_schema=schema,
-                temperature=0.2,
-            ),
+        config = types.GenerateContentConfig(
+            system_instruction=system,
+            response_mime_type="application/json",
+            response_schema=schema,
+            temperature=0.2,
+            # Délai du SDK (en ms) en plus d'asyncio.wait_for. Pas de retry_options :
+            # le SDK ne relance pas lui-même, les relances sont décidées ci-dessous.
+            http_options=types.HttpOptions(timeout=int(self._timeout_s * 1000)),
         )
-        return resp.text or ""
+        plan = [(self._model, len(self._retry_delays) + 1)]
+        if self._fallback:
+            plan.append((self._fallback, 1))
+        started = time.monotonic()
+        attempts = 0
+        last: Exception | None = None
+        for model, tries in plan:
+            for i in range(tries):
+                if i:
+                    await asyncio.sleep(self._retry_delays[i - 1])
+                attempts += 1
+                try:
+                    resp = await asyncio.wait_for(
+                        self._get_client().aio.models.generate_content(
+                            model=model, contents=user, config=config
+                        ),
+                        timeout=self._timeout_s,
+                    )
+                except Exception as exc:  # noqa: BLE001 — décidé ci-dessous
+                    last = exc
+                    transient = _is_transient(exc)
+                    log.warning(
+                        "gemini_call_failed",
+                        model=model,
+                        attempt=attempts,
+                        error=type(exc).__name__,
+                        status=getattr(exc, "code", None),
+                        transient=transient,
+                        duration_s=round(time.monotonic() - started, 1),
+                    )
+                    if not transient:
+                        break  # erreur durable : pas de nouvel essai sur ce modèle
+                    continue
+                _record_model(f"gemini/{model}")
+                log.info(
+                    "gemini_call_ok",
+                    model=model,
+                    fallback=model != self._model,
+                    attempts=attempts,
+                    duration_s=round(time.monotonic() - started, 1),
+                )
+                return resp.text or ""
+        log.error(
+            "gemini_all_failed",
+            models=[m for m, _ in plan],
+            attempts=attempts,
+            duration_s=round(time.monotonic() - started, 1),
+        )
+        raise last or RuntimeError("gemini: aucun essai")
 
 
 class OllamaTranslator(PromptTranslator):
