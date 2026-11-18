@@ -3,7 +3,7 @@
   "source_lang": "derja",
   "processing": {
     "transcriber": "elevenlabs/scribe_v2",
-    "translator": "gemini/gemini-3.8-flash",
+    "translator": "gemini/gemini-3.1-flash-lite",
     "created_at": "2026-11-18T15:02:11.204Z"
   },
   "lines": [
@@ -53,6 +53,8 @@
       "source": "Ma3andich el 9alb nkamel, Amira, walla.",
       "fr": "Je n’ai plus le cœur à continuer, Amira, je te jure.",
       "en": "I don’t have the heart to go on anymore, Amira, I swear.",
+      "fr_court": "Je n’ai plus le cœur, Amira.",
+      "en_court": "I can’t go on, Amira.",
       "confidence": "moyenne",
       "note": "« Ma3andich el 9alb » : littéralement « je n’ai pas le cœur ». Sens : plus le courage, plus l’envie.",
       "validated": false,

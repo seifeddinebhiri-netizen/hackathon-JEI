@@ -1,5 +1,5 @@
 /**
- * Mode « Regarder et valider » : logique pure, testée sans navigateur.
+ * Lecture avec vidéo sur l'écran de relecture (« regarder et valider ») : logique pure, testée sans navigateur.
  * - une ligne vue en entier pendant une lecture continue est validée ;
  * - la lecture s'arrête au début d'une ligne à risque (confiance faible ou avertissement de règle),
  *   tant qu'elle n'est ni validée ni déjà signalée pendant cette séance.

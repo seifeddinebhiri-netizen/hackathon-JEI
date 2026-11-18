@@ -130,9 +130,11 @@ le message et « Réessayer » doivent apparaître), vide.
       film », « Préparer mon dossier » / « Préparer pour 2027 ». Anciennes URL `?onglet=…` redirigées.
 - [ ] `/festival/:id` (Fiche) : compatibilité renvoyée par le serveur, panneau « Ton dossier » ; id inconnu → 404.
 - [ ] `/festival/dossiers` : pièces triées bloquant → à faire → prêt, « Où j'en suis », colonne « Mes pièces ».
-- [ ] `/festival/sous-titres` : import (le son est extrait dans le navigateur, seul le WAV part), relecture,
-      « À vérifier d'abord », export `.srt` bloqué tant que tout n'est pas validé (`DarHmeti_EN.srt`, UTF-8).
-- [ ] `/festival/sous-titres/regarder` : vidéo locale, arrêt sur les lignes à risque, raccourcis, frise.
+- [ ] `/festival/sous-titres` (écran unique de relecture) : import (le son est extrait dans le navigateur, seul le
+      WAV part) ; lecteur avec sous-titre incrusté (avec ou sans vidéo, vidéo gardée pour la session de l'onglet),
+      arrêt sur les lignes à risque, panneau de la ligne (note, avertissements, version courte), raccourcis, frise
+      avec « À vérifier d'abord » ; export `.srt` bloqué tant que tout n'est pas validé (`DarHmeti_EN.srt`, UTF-8).
+      L'ancienne URL `/festival/sous-titres/regarder` redirige ici.
 - [ ] `/festival/synopsis` : compteur, limites (exemples marqués), questions du coach, version anglaise.
 - [ ] `/festival/dossiers/:id/declaration-ia` : Passeport fait / pas encore / importer ; « Déclarer maintenant »
       renvoie au dossier à la fin du Passeport (`?retour=`).

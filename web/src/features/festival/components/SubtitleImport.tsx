@@ -4,7 +4,7 @@ import { mockFallback, usingMocks, realEndpointsInMockMode } from '@/api';
 import { Button, Checkbox, ErrorState, Field, FileDrop, Icon, Input, Spinner } from '@/components/ui';
 import { useCreateSubtitleDraft, useExampleSubtitleDraft } from '../hooks/useFestivals';
 import { AudioExtractError, extractAudioWav, transcriptionLanguage, wavName } from '../lib/audio';
-import { setSessionVideo } from '../lib/videoSession';
+import { useVideoSession } from '../video/videoSession';
 
 const MEDIA_EXTENSIONS = ['.mp4', '.mov', '.m4v', '.webm', '.mkv', '.mp3', '.wav', '.m4a', '.aac', '.ogg'];
 const PRIVACY_MESSAGE =
@@ -32,6 +32,7 @@ export function SubtitleImport({
   onDone?: () => void;
 }) {
   const create = useCreateSubtitleDraft();
+  const video = useVideoSession();
   const example = useExampleSubtitleDraft();
   const [lastInput, setLastInput] = useState<CreateSubtitleDraftInput | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -63,8 +64,8 @@ export function SubtitleImport({
       };
       setLastInput(input);
       await create.mutateAsync(input);
-      // La vidéo reste disponible pour « Regarder et valider » pendant cette visite (jamais stockée)
-      if (file.type.startsWith('video/')) setSessionVideo(file);
+      // La vidéo reste disponible pour la relecture pendant cette session de l’onglet (jamais envoyée)
+      if (file.type.startsWith('video/')) video.setFile(file);
       onDone?.();
     } catch (e) {
       setError(e);
