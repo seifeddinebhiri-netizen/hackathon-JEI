@@ -1,10 +1,10 @@
 """Scénario → scènes, lieux, personnages (contrat de POST /planner/parse).
 
 1. Lecture du fichier ou du texte (reader).
-2. Découpage sur les en-têtes INT./EXT. (chunker), sans IA. Sans en-tête : l'IA propose des
-   bornes de lignes, le texte reste coupé par le programme.
-3. Personnages qui parlent et lieux, par règles (extractor).
-4. Si l'IA est disponible : titres, résumés, personnages silencieux, fusion des graphies d'un même
+2. Découpage sur les en-têtes INT./EXT. (chunker), sans IA. Sans en-tête (un récit) : le texte
+   est coupé en phrases, l'IA choisit où commencent les scènes, le programme coupe.
+3. Personnages qui parlent et lieux, par règles (extractor). Dans un récit, les prénoms.
+4. Si l'IA est disponible : titres, résumés, personnages présents, fusion des graphies d'un même
    personnage, description de chaque lieu pour la recherche de lieux (RAG). Tout est vérifié.
 5. Si l'IA échoue, on renvoie le résultat par règles avec un avertissement : jamais d'erreur 5xx.
 """
@@ -23,12 +23,15 @@ from app.services.screenplay.chunker import (
     chunks_from_boundaries,
     display_name,
     norm_key,
+    prose_units,
     split_scenes,
     whole_text_chunk,
 )
 from app.services.screenplay.extractor import (
     first_action_line,
+    full_sentence,
     group_locations,
+    prose_names,
     speaking_characters,
 )
 from app.services.screenplay.llm import ScreenplayLLM
@@ -39,6 +42,7 @@ log = structlog.get_logger()
 LINES_PER_PAGE = 55
 CHARS_PER_PAGE = 1_100
 HOURS_PER_PAGE = 2.0  # un court-métrage indépendant tourne ~4 à 5 pages par journée de 10 h
+MAX_HOURS_PER_SCENE = 10.0  # au-delà, ce n'est plus une scène mais plusieurs : on plafonne
 
 
 def _uid(prefix: str) -> str:
@@ -53,7 +57,7 @@ def page_eighths(chunk: Chunk) -> int:
 
 
 def estimated_hours(eighths: int) -> float:
-    return max(0.5, math.ceil(eighths / 8 * HOURS_PER_PAGE * 2) / 2)
+    return min(MAX_HOURS_PER_SCENE, max(0.5, math.ceil(eighths / 8 * HOURS_PER_PAGE * 2) / 2))
 
 
 def _resolve_moments(chunks: list[Chunk]) -> list[bool]:
@@ -111,25 +115,36 @@ async def parse_screenplay(text: str, llm: ScreenplayLLM | None) -> ParseScreenp
 
     # --- 1. Découpage ---------------------------------------------------------
     chunks = split_scenes(text)
+    prose = False
     if not chunks:
+        lines = text.splitlines()
+        probe = whole_text_chunk(lines)
+        prose = not speaking_characters(probe)  # pas de noms au-dessus des répliques : un récit
+        units = prose_units(text) if prose else lines
         boundaries: list[dict] = []
         if llm is not None:
             try:
-                boundaries = await enrich.segment(llm, text)
+                boundaries = await enrich.segment(llm, units)
                 ai_used = bool(boundaries)
             except LLMUnavailable:
                 ai_failed = True
+            except Exception as exc:  # noqa: BLE001 — on garde le texte entier
+                log.warning("screenplay_ai_error", step="segment", error=type(exc).__name__)
+                ai_failed = True
         if boundaries:
-            chunks = chunks_from_boundaries(text, boundaries)
+            chunks = chunks_from_boundaries(units, boundaries)
             warnings.append(
-                "Le texte n'a pas d'en-têtes de scène (INT. / EXT.) : l'IA a proposé le découpage. "
-                "Vérifie où commence chaque scène."
+                "L'IA a découpé ton texte en scènes. Vérifie où commence chaque scène, et fusionne "
+                "ou sépare si besoin."
             )
         else:
-            chunks = [whole_text_chunk(text)]
+            chunks = [whole_text_chunk(units)]
             warnings.append(
-                "Aucun en-tête de scène (INT. / EXT.) trouvé : tout le texte forme une seule scène. "
-                "Ajoute des en-têtes ou découpe à la main."
+                "Ton texte n'est pas encore découpé : sans l'IA, il forme une seule scène. "
+                "Active l'IA pour le découper, ou ajoute des en-têtes (INT. CAFÉ - JOUR)."
+                if prose
+                else "Aucun en-tête de scène (INT. / EXT.) trouvé : tout le texte forme une seule "
+                "scène. Ajoute des en-têtes ou découpe à la main."
             )
 
     moment_guessed = _resolve_moments(chunks)
@@ -145,6 +160,14 @@ async def parse_screenplay(text: str, llm: ScreenplayLLM | None) -> ParseScreenp
         for n in names:
             if n not in all_chars:
                 all_chars.append(n)
+    # Récit : pas de noms au-dessus des répliques, on repère les prénoms qui reviennent.
+    named_in_scene: list[list[str]] = [[] for _ in chunks]
+    if prose:
+        candidates = prose_names([u for c in chunks for u in c.body_lines])
+        all_chars += [n for n in candidates if n not in all_chars]
+        for i, c in enumerate(chunks):
+            body = " " + c.body + " "
+            named_in_scene[i] = [n for n in candidates if enrich.mentioned(n, body)]
 
     # --- 3. IA : annotations vérifiées ----------------------------------------
     enr = enrich.Enrichment()
@@ -188,11 +211,13 @@ async def parse_screenplay(text: str, llm: ScreenplayLLM | None) -> ParseScreenp
         key = norm_key(c.place) or "lieu a preciser"
         loc = loc_drafts[key]
         talking = list(dict.fromkeys(canon(n) for n in speaking[i]))
-        present = list(dict.fromkeys(talking + [canon(n) for n in enr.silent.get(num, [])]))
+        # Avec l'IA : les personnages présents (vérifiés). Sans : les prénoms cités dans la scène.
+        others = enr.present[num] if num in enr.present else named_in_scene[i]
+        present = list(dict.fromkeys(talking + [canon(n) for n in others]))
         for n in present:
             if n not in final_chars:
                 final_chars.append(n)
-        action = first_action_line(c, speaking[i])
+        action = full_sentence(c.body_lines, first_action_line(c, speaking[i]))
         eighths = page_eighths(c)
         scenes.append(
             Scene(
@@ -247,6 +272,16 @@ async def parse_screenplay(text: str, llm: ScreenplayLLM | None) -> ParseScreenp
         warnings.append(
             f"{nb_guessed} scène(s) sans moment clair (jour, nuit…) : on a repris celui de la scène "
             "d'avant. Vérifie-les."
+        )
+    if prose and not enr.present:
+        warnings.append(
+            "Personnages repérés d'après les prénoms du texte (ceux qui sont seulement cités "
+            "sont aussi comptés) : vérifie-les."
+        )
+    if any(s.estimated_hours >= MAX_HOURS_PER_SCENE for s in scenes):
+        warnings.append(
+            f"Au moins une scène est très longue : sa durée est plafonnée à "
+            f"{MAX_HOURS_PER_SCENE:g} h. Elle contient sans doute plusieurs scènes."
         )
     if any(not s.characters for s in scenes):
         warnings.append("Certaines scènes n'ont aucun personnage détecté : vérifie-les.")

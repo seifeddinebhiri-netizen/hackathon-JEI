@@ -79,8 +79,11 @@ class LLMSceneInfo(BaseModel):
     number: str = Field(description="Numéro de scène, recopié tel quel depuis l'entrée")
     title_fr: str = Field(description="Titre court (≤ 8 mots) qui dit ce qui se passe")
     summary_fr: str = Field(description="Résumé factuel en 1 à 2 phrases, sans interprétation")
-    silent_characters: list[str] = Field(
-        description="Personnages présents dans la scène sans y parler, écrits comme dans le texte"
+    characters_present: list[str] = Field(
+        description=(
+            "Personnages nommés physiquement présents dans la scène, qu'ils parlent ou non, "
+            "écrits exactement comme dans le texte. Pas ceux qui sont seulement évoqués."
+        )
     )
     location_brief_fr: str = Field(
         description=(
@@ -113,10 +116,18 @@ class LLMScreenplayAnalysis(BaseModel):
 
 class LLMBoundary(BaseModel):
     start_line: int = Field(
-        description="Numéro de la première ligne de la scène (numérotation fournie)"
+        description="Numéro du premier segment de la scène (numérotation fournie)"
     )
     setting: SceneSetting
-    place: str = Field(description="Lieu, en quelques mots, tel que le texte le suggère")
+    place: str = Field(
+        description=(
+            "Lieu principal, avec le MÊME nom pour toutes les scènes qui s'y passent "
+            "(ex. « Cinéma Le Rivage »)"
+        )
+    )
+    room: str | None = Field(
+        None, description="Partie du lieu si le texte la précise (ex. « Hall », « Cabine »)"
+    )
     moment: SceneMoment
 
 

@@ -65,7 +65,7 @@ _CONTINUITY = re.compile(
 # Mots qui signalent un extérieur quand l'en-tête ne dit pas INT/EXT.
 _OUTDOOR = re.compile(
     r"(?<!\w)(rue|ruelle|route|plage|mer|port|jardin|parc|for[êe]t|montagne|d[ée]sert|champ|"
-    r"terrasse|toit|place|march[ée]|souk|cour|quai|pont|parking|stade|oasis|colline|corniche|"
+    r"terrasse|toit|march[ée]|souk|quai|trottoir|pont|parking|stade|oasis|colline|corniche|"
     r"street|beach|garden|park|road|roof|شارع|بحر|شاطئ)(?!\w)",
     re.IGNORECASE,
 )
@@ -220,12 +220,47 @@ def split_scenes(text: str) -> list[Chunk]:
     return chunks
 
 
-def chunks_from_boundaries(text: str, boundaries: list[dict]) -> list[Chunk]:
-    """Découpe un texte libre (sans en-têtes) à partir de bornes de lignes proposées par l'IA.
+_SENTENCE_END = re.compile(r"(?<=[.!?…»])\s+(?=[«—–\-\"A-ZÀ-ÖØ-Þ0-9])")
+_DIALOGUE_START = re.compile(r"^\s*[—–]\s|^\s*-\s|^\s*«")
 
-    `boundaries` : [{start_line, setting, place, moment}], déjà validées et triées.
+
+def prose_units(text: str) -> list[str]:
+    """Récit → une phrase par unité.
+
+    Les retours à la ligne d'un PDF coupent les phrases n'importe où : on recolle les lignes,
+    on garde une coupure avant chaque réplique (« — Tu viens ? ») et après chaque paragraphe
+    vide, puis on coupe en phrases. Le texte n'est pas modifié, seulement re-segmenté.
     """
-    lines = text.splitlines()
+    paragraphs: list[str] = []
+    current: list[str] = []
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line:
+            if current:
+                paragraphs.append(" ".join(current))
+                current = []
+            continue
+        if _DIALOGUE_START.match(line) and current:
+            paragraphs.append(" ".join(current))
+            current = []
+        current.append(line)
+    if current:
+        paragraphs.append(" ".join(current))
+    units: list[str] = []
+    for para in paragraphs:
+        # Une réplique de plusieurs phrases donne plusieurs unités : la suivante n'a pas de
+        # tiret, mais elle reste dans la même scène, seules les bornes comptent.
+        units.extend(s.strip() for s in _SENTENCE_END.split(para) if s.strip())
+    return units
+
+
+def chunks_from_boundaries(units: list[str], boundaries: list[dict]) -> list[Chunk]:
+    """Découpe un récit (sans en-têtes) à partir des bornes proposées par l'IA.
+
+    `units` : sortie de `prose_units`. `boundaries` : [{start_line, setting, place, room,
+    moment}], déjà validées et triées ; start_line est un numéro d'unité (1-indexé).
+    """
+    lines = units
     chunks = []
     for k, b in enumerate(boundaries):
         start = b["start_line"]
@@ -238,7 +273,7 @@ def chunks_from_boundaries(text: str, boundaries: list[dict]) -> list[Chunk]:
                 setting=b["setting"],
                 setting_guessed=True,
                 place=b["place"] or "Lieu à préciser",
-                room=None,
+                room=b.get("room") or None,
                 moment=b["moment"],
                 moment_raw="",
                 interior_exterior=False,
@@ -249,20 +284,21 @@ def chunks_from_boundaries(text: str, boundaries: list[dict]) -> list[Chunk]:
     return chunks
 
 
-def whole_text_chunk(text: str) -> Chunk:
+def whole_text_chunk(units: list[str]) -> Chunk:
+    head = " ".join(units[:2])[:300]  # le début seulement : le lieu de départ
     return Chunk(
         index=0,
         number="1",
         heading="",
-        setting=_setting_of(None, text[:400])[0],
+        setting=_setting_of(None, head)[0],
         setting_guessed=True,
         place="Lieu à préciser",
         room=None,
-        moment=detect_moment(text[:400]),
+        moment=detect_moment(head),
         moment_raw="",
         interior_exterior=False,
         start_line=1,
-        body_lines=text.splitlines(),
+        body_lines=units,
     )
 
 

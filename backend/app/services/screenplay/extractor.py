@@ -113,3 +113,193 @@ def first_action_line(chunk: Chunk, characters: list[str]) -> str:
             continue
         return line
     return ""
+
+
+# --- Récit (pas de noms au-dessus des répliques) --------------------------------
+
+_NOT_NAMES = {
+    "le",
+    "la",
+    "les",
+    "un",
+    "une",
+    "des",
+    "du",
+    "de",
+    "il",
+    "elle",
+    "ils",
+    "elles",
+    "on",
+    "je",
+    "tu",
+    "nous",
+    "vous",
+    "ce",
+    "cet",
+    "cette",
+    "ces",
+    "mais",
+    "et",
+    "puis",
+    "quand",
+    "dans",
+    "sur",
+    "au",
+    "aux",
+    "à",
+    "en",
+    "pour",
+    "avec",
+    "sans",
+    "ça",
+    "cela",
+    "c",
+    "qui",
+    "que",
+    "quoi",
+    "où",
+    "comment",
+    "pourquoi",
+    "oui",
+    "non",
+    "monsieur",
+    "madame",
+    "mademoiselle",
+    "mme",
+    "m",
+    "dr",
+    "lundi",
+    "mardi",
+    "mercredi",
+    "jeudi",
+    "vendredi",
+    "samedi",
+    "dimanche",
+    "janvier",
+    "février",
+    "mars",
+    "avril",
+    "mai",
+    "juin",
+    "juillet",
+    "août",
+    "septembre",
+    "octobre",
+    "novembre",
+    "décembre",
+    "dieu",
+    "allah",
+    "ah",
+    "oh",
+    "eh",
+    "bon",
+    "bien",
+    "alors",
+    "après",
+    "avant",
+    "pendant",
+    "depuis",
+    "ici",
+    "là",
+    "voilà",
+    "tiens",
+    "laisse",
+    "plus",
+    "rien",
+    "tout",
+    "toute",
+    "chaque",
+    "personne",
+    "quelqu",
+    "lui",
+    "leur",
+    "son",
+    "sa",
+    "ses",
+    "mon",
+    "ma",
+    "mes",
+    "ton",
+    "ta",
+    "tes",
+    "votre",
+    "notre",
+    "y",
+    "si",
+    "ni",
+    "ou",
+    "donc",
+    "car",
+    "enfin",
+    "trop",
+    "très",
+    "encore",
+    "déjà",
+    "aussi",
+    "même",
+    "seul",
+    "tunis",
+    "paris",
+    "france",
+    "tunisie",
+}
+_ARTICLES = {"le", "la", "les", "l", "un", "une", "du", "des", "au", "aux", "cinéma", "café", "rue"}
+_WORD = re.compile(r"[A-Za-zÀ-ÖØ-öø-ÿ][\w’'-]*")
+_BOUNDARY = re.compile(r"[.!?…:«»—–\"]\s*$")
+
+
+def prose_names(units: list[str], min_count: int = 2) -> list[str]:
+    """Prénoms probables d'un récit, à faire vérifier.
+
+    Un mot à majuscule qui n'est ni un mot courant ni un nom de lieu (« le Rivage »), vu au moins
+    une fois au milieu d'une phrase (sinon c'est juste une majuscule de début de phrase), et au
+    moins `min_count` fois en tout.
+    """
+    counts: dict[str, int] = {}
+    total: dict[str, int] = {}
+    order: list[str] = []
+    for unit in units:
+        prev_word = ""
+        for m in _WORD.finditer(unit):
+            raw = m.group(0)
+            before = unit[: m.start()]
+            start_of_sentence = not before.strip() or _BOUNDARY.search(before)
+            # « L’eau », « C’est » : le mot utile est après l’apostrophe
+            parts = re.split(r"[’']", raw)
+            w = parts[-1].rstrip("-") if len(parts) > 1 else raw.rstrip("-")
+            elided = len(parts) > 1
+            if (
+                w[:1].isupper()
+                and not w.isupper()
+                and not elided
+                and w.lower() not in _NOT_NAMES
+                and prev_word.lower() not in _ARTICLES
+                and len(w) >= 3
+            ):
+                total[w] = total.get(w, 0) + 1
+                if not start_of_sentence:
+                    if w not in counts:
+                        order.append(w)
+                    counts[w] = counts.get(w, 0) + 1
+            prev_word = w
+    return [w for w in order if total[w] >= min_count]
+
+
+def full_sentence(units: list[str], first: str, limit: int = 220) -> str:
+    """La phrase complète qui commence par `first` (les lignes d'un PDF coupent les phrases)."""
+    if not first:
+        return ""
+    if first.endswith((".", "!", "?", "…", "»")) or len(first) >= limit:
+        return first[:limit]
+    try:
+        i = units.index(first)
+    except ValueError:
+        return first
+    out = first
+    for nxt in units[i + 1 :]:
+        if not nxt.strip() or out.endswith((".", "!", "?", "…")) or len(out) >= limit:
+            break
+        out += " " + nxt.strip()
+    m = re.match(r"^(.+?[.!?…])(\s|$)", out)
+    return (m.group(1) if m else out)[:limit]

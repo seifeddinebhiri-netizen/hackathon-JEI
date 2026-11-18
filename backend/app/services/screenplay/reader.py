@@ -94,10 +94,34 @@ _NOISE = re.compile(
 )
 
 
+def _drop_running_headers(lines: list[str]) -> list[str]:
+    """Retire l'en-tête ou le pied de page répété d'un PDF (titre du récit sur chaque page).
+
+    Une ligne courte, répétée au moins 3 fois, sans ponctuation finale et pas en capitales
+    (« AMIRA » est un nom de personnage qui revient, pas un en-tête).
+    """
+    counts: dict[str, int] = {}
+    for ln in lines:
+        k = ln.strip()
+        if k:
+            counts[k] = counts.get(k, 0) + 1
+    noise = {
+        k
+        for k, n in counts.items()
+        if n >= 3
+        and len(k) <= 60
+        and not k.isupper()
+        and not k.endswith((".", "!", "?", "…", ":", "»"))
+        and not k.startswith(("—", "-", "(", "«"))
+    }
+    return [ln for ln in lines if ln.strip() not in noise]
+
+
 def clean(text: str) -> str:
     text = unicodedata.normalize("NFC", text).replace(" ", " ").replace("\t", "    ")
     lines = [ln.rstrip() for ln in text.splitlines()]
     lines = [ln for ln in lines if not _NOISE.match(ln)]
+    lines = _drop_running_headers(lines)
     return re.sub(r"\n{4,}", "\n\n\n", "\n".join(lines)).strip()
 
 

@@ -9,8 +9,8 @@ from app.core.errors import register_error_handlers
 from app.routes.screenplay import router as screenplay_router
 from app.schemas.screenplay import LLMScreenplayAnalysis, LLMSegmentation
 from app.services.llm_service import LLMUnavailable
-from app.services.screenplay.chunker import parse_heading, split_scenes
-from app.services.screenplay.extractor import speaking_characters
+from app.services.screenplay.chunker import parse_heading, prose_units, split_scenes
+from app.services.screenplay.extractor import prose_names, speaking_characters
 from app.services.screenplay.pipeline import parse_screenplay
 from app.services.screenplay.reader import clean, read_screenplay
 
@@ -129,7 +129,7 @@ async def test_no_heading_without_ai_gives_one_scene():
     r = await parse_screenplay("Amira marche seule sur la plage au coucher du soleil.", llm=None)
     assert len(r.scenes) == 1
     assert r.scenes[0].moment == "heure_doree"
-    assert any("Aucun en-tête" in w for w in r.warnings)
+    assert any("Active l'IA" in w for w in r.warnings)
 
 
 # --- Pipeline avec IA (faux LLM) -------------------------------------------------
@@ -142,28 +142,28 @@ def _analysis(**over):
                 "number": "1",
                 "title_fr": "Slim rattrape Amira au port",
                 "summary_fr": "Amira hésite devant le ferry ; Slim arrive en courant.",
-                "silent_characters": ["Dockers", "Fantôme"],  # absent du texte : rejeté
+                "characters_present": ["Dockers", "Fantôme"],  # absent du texte : rejeté
                 "location_brief_fr": "Un quai de port avec un grand ferry, à l'aube.",
             },
             {
                 "number": "2",
                 "title_fr": "Petit-déjeuner tendu",
                 "summary_fr": "La mère se plaint du départ d'Amira.",
-                "silent_characters": [],
+                "characters_present": [],
                 "location_brief_fr": "Une cuisine familiale tunisienne modeste.",
             },
             {
                 "number": "3",
                 "title_fr": "Amira fait sa valise",
                 "summary_fr": "Amira plie ses vêtements sous le regard de Nour.",
-                "silent_characters": ["Nour"],  # présente, ne parle pas : gardée
+                "characters_present": ["Amira", "Nour"],  # Nour ne parle pas : gardée
                 "location_brief_fr": "Une petite chambre.",
             },
             {
                 "number": "99",  # n'existe pas : ignoré
                 "title_fr": "x",
                 "summary_fr": "x",
-                "silent_characters": [],
+                "characters_present": [],
                 "location_brief_fr": "x",
             },
         ],
@@ -303,3 +303,107 @@ def test_route_empty_input():
         r = client.post("/planner/parse", data={"text": "   "})
     assert r.status_code == 400
     assert r.json()["error"]["code"] == "empty_input"
+
+
+# --- Récit (le cas principal : on écrit une histoire, l'outil découpe) ----------------
+
+RECIT = """
+À cinq heures quarante du matin, Yacine pose son enregistreur dans l’allée du cinéma Le
+Rivage. Une goutte tombe dans un seau. Nadia, sa mère, lui fait signe de monter.
+— Tu comptes vraiment passer la journée ici ?
+— J’ai promis quelque chose pour ce soir.
+La dernière séance
+C’est Inès qui a sonné. Elle tend à Nadia une enveloppe. Yacine descend.
+— C’est quoi, dessus ?
+La dernière séance
+À seize heures, Yacine traverse la rue avec Inès jusqu’à la boulangerie. Hédia les attend.
+La dernière séance
+"""
+
+
+def test_prose_units_rejoin_pdf_lines_and_drop_running_header():
+    units = prose_units(clean(RECIT))
+    assert units[0].endswith("cinéma Le Rivage.")
+    assert "La dernière séance" not in " ".join(units)
+    assert "— Tu comptes vraiment passer la journée ici ?" in units
+
+
+def test_prose_names_skip_sentence_starts_and_places():
+    names = prose_names(prose_units(clean(RECIT)), min_count=1)
+    assert {"Yacine", "Nadia", "Inès"} <= set(names)
+    assert "Rivage" not in names and "Une" not in names and "C’est" not in names
+
+
+@pytest.mark.asyncio
+async def test_prose_without_ai_one_scene_with_names():
+    r = await parse_screenplay(clean(RECIT), llm=None)
+    assert len(r.scenes) == 1
+    assert {"Yacine", "Nadia", "Inès"} <= set(r.characters)
+    assert r.scenes[0].setting == "INT"  # « à sa place » ne rend plus la scène extérieure
+    assert any("Active l'IA" in w for w in r.warnings)
+
+
+@pytest.mark.asyncio
+async def test_prose_with_ai_is_cut_on_sentences():
+    units = prose_units(clean(RECIT))
+    hall = next(i for i, u in enumerate(units, 1) if u.startswith("C’est Inès"))
+    rue = next(i for i, u in enumerate(units, 1) if u.startswith("À seize heures"))
+    seg = {
+        "scenes": [
+            {
+                "start_line": 1,
+                "setting": "INT",
+                "place": "Cinéma Le Rivage",
+                "room": "Salle",
+                "moment": "aube",
+            },
+            {
+                "start_line": hall,
+                "setting": "INT",
+                "place": "Cinéma Le Rivage",
+                "room": "Hall",
+                "moment": "aube",
+            },
+            {
+                "start_line": rue,
+                "setting": "EXT",
+                "place": "Rue du cinéma",
+                "room": None,
+                "moment": "jour",
+            },
+        ]
+    }
+    analysis = {
+        "scenes": [
+            {
+                "number": "1",
+                "title_fr": "Yacine enregistre la salle vide",
+                "summary_fr": "Yacine enregistre le son de la salle ; sa mère arrive.",
+                "characters_present": ["Yacine", "Nadia"],
+                "location_brief_fr": "Petite salle.",
+            },
+            {
+                "number": "3",
+                "title_fr": "Vers la boulangerie",
+                "summary_fr": "Ils traversent.",
+                "characters_present": [
+                    "Yacine",
+                    "Inès",
+                    "Hédia",
+                    "Mourad",
+                ],  # Mourad absent du texte
+                "location_brief_fr": "Rue mouillée.",
+            },
+        ],
+        "character_groups": [],
+        "locations": [],
+    }
+    r = await parse_screenplay(clean(RECIT), llm=FakeLLM([seg, analysis]))
+    assert r.ai_used and len(r.scenes) == 3
+    assert r.scenes[0].characters == ["Yacine", "Nadia"]
+    assert r.scenes[2].characters == ["Yacine", "Inès", "Hédia"]
+    assert r.scenes[1].title.startswith("C’est Inès qui a sonné")  # pas annotée : règles
+    assert [s.moment for s in r.scenes] == ["aube", "aube", "jour"]
+    cinema = next(loc for loc in r.locations if loc.name == "Cinéma Le Rivage")
+    assert cinema.rooms == ["Salle", "Hall"] and cinema.scene_numbers == ["1", "2"]
+    assert r.scenes[0].summary.startswith("Yacine enregistre")
