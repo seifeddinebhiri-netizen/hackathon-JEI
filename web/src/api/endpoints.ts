@@ -3,7 +3,7 @@
  * mocks/handlers.ts expose EXACTEMENT la même signature (type `Api`).
  */
 import { z } from 'zod';
-import { request, UPLOAD_TIMEOUT_MS } from './client';
+import { request, SUBTITLE_DRAFT_TIMEOUT_MS, UPLOAD_TIMEOUT_MS } from './client';
 import * as S from './schemas';
 import type * as T from './types';
 
@@ -87,16 +87,35 @@ export async function verifyPassport(id: string): Promise<T.VerifyResult> {
 }
 
 export async function searchFestivals(params: T.FestivalSearchParams): Promise<T.FestivalMatch[]> {
-  const { film, ...rest } = params;
+  const { film, open_only, ...rest } = params;
   return request('/festivals', {
     query: {
       ...rest,
+      open_only: open_only ? 'true' : undefined,
       film_duration_min: film?.duration_min,
       film_language: film?.language,
       film_genre: film?.genre,
       film_ai_departments: film?.declared_ai_departments,
     },
     schema: z.array(S.festivalMatchSchema),
+  });
+}
+
+export async function getFestival(id: string): Promise<T.Festival> {
+  return request(`/festivals/${encodeURIComponent(id)}`, { schema: S.festivalSchema });
+}
+
+export async function createSubtitleDraft(input: T.CreateSubtitleDraftInput): Promise<T.SubtitleDraft> {
+  const fd = new FormData();
+  fd.append('file', input.audio, input.file_name);
+  if (input.language_code) fd.append('language_code', input.language_code);
+  if (input.keyterms?.length) fd.append('keyterms', input.keyterms.join(', '));
+  if (input.characters?.length) fd.append('characters', input.characters.join(', '));
+  return request(`/subtitles/${encodeURIComponent(input.project_id)}/draft`, {
+    method: 'POST',
+    formData: fd,
+    schema: S.subtitleDraftSchema,
+    timeoutMs: SUBTITLE_DRAFT_TIMEOUT_MS,
   });
 }
 
@@ -114,6 +133,10 @@ export async function saveSubtitles(projectId: string, lines: T.SubtitleLine[]):
 
 export async function getSynopsisFeedback(input: T.SynopsisFeedbackInput): Promise<T.SynopsisFeedback> {
   return request('/synopsis/feedback', { method: 'POST', body: input, schema: S.synopsisFeedbackSchema });
+}
+
+export async function translateSynopsis(input: T.SynopsisTranslateInput): Promise<T.SynopsisTranslation> {
+  return request('/synopsis/translate', { method: 'POST', body: input, schema: S.synopsisTranslationSchema });
 }
 
 export async function getPublicFilm(id: string): Promise<T.PublicFilm> {
@@ -138,8 +161,11 @@ export type Api = {
   signC2pa: typeof signC2pa;
   verifyPassport: typeof verifyPassport;
   searchFestivals: typeof searchFestivals;
+  getFestival: typeof getFestival;
+  createSubtitleDraft: typeof createSubtitleDraft;
   getSubtitleDraft: typeof getSubtitleDraft;
   saveSubtitles: typeof saveSubtitles;
   getSynopsisFeedback: typeof getSynopsisFeedback;
+  translateSynopsis: typeof translateSynopsis;
   getPublicFilm: typeof getPublicFilm;
 };

@@ -8,7 +8,8 @@ import { buildDemoProject } from './data/project';
 import subtitles from './data/subtitles.json';
 import { env } from '@/lib/env';
 
-const KEY = 'pp-mock-db-v1';
+// v2 : Kit Festival (Dar Hmeti, vrais festivals, statuts de dossier) ; l'ancienne forme est ignorée.
+const KEY = 'pp-mock-db-v2';
 
 export type MockDb = {
   projects: Record<string, Project>;
@@ -72,11 +73,49 @@ function examplePassport(): Passport {
   };
 }
 
+/** Passeport du film de démo : une seule IA déclarée (montage, assistance). */
+function demoPassport(projectId: string): Passport {
+  const none = (department: Passport['declarations'][number]['department']) => ({
+    department,
+    used_ai: false,
+    what: '',
+    human_decisions: '',
+  });
+  return {
+    id: 'pass-dar-hmeti',
+    project_id: projectId,
+    film_title: 'Dar Hmeti',
+    director: 'Yassine',
+    c2pa_signed: false,
+    badge_code: `${brand.badgePrefix}-DRHM-T1`,
+    verify_url: `${env.publicAppUrl}/verifier/pass-dar-hmeti`,
+    updated_at: '2026-11-10T18:00:00+01:00',
+    declarations: [
+      { ...none('scenario'), human_decisions: 'Écrit entièrement par Yassine.' },
+      none('image'),
+      {
+        department: 'montage',
+        used_ai: true,
+        tool_id: 'tool-montage-a',
+        what: 'Nettoyage du son des dialogues pendant le montage.',
+        level: 'assistance',
+        human_decisions: 'Choix des prises, rythme et ordre des séquences.',
+      },
+      none('son_voix'),
+      none('musique'),
+      none('vfx'),
+      none('sous_titres'),
+      none('affiche_promo'),
+    ],
+  };
+}
+
 function seed(): MockDb {
   const p = buildDemoProject();
+  const pass = demoPassport(p.id);
   return {
     projects: { [p.id]: p },
-    passports: { exemple: examplePassport() },
+    passports: { exemple: examplePassport(), [pass.id]: pass },
     subtitles: { [p.id]: structuredClone(subtitles) as SubtitleDraft },
   };
 }

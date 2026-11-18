@@ -8,9 +8,19 @@ function num(v: string | undefined, fallback: number): number {
   return Number.isFinite(n) && v !== '' && v !== undefined ? n : fallback;
 }
 
+/** Liste séparée par des virgules → noms nettoyés (« a, b ,,c » → [a, b, c]). */
+export function list(v: string | undefined): string[] {
+  return (v ?? '')
+    .split(',')
+    .map((x) => x.trim())
+    .filter(Boolean);
+}
+
 export const env = {
   apiUrl: (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:8000',
   useMocks: bool(import.meta.env.VITE_USE_MOCKS as string | undefined, true),
+  /** Avec les mocks : fonctions de src/api/endpoints.ts qui passent quand même par le vrai backend. */
+  realEndpoints: list(import.meta.env.VITE_REAL_ENDPOINTS as string | undefined),
   mockLatencyMs: num(import.meta.env.VITE_MOCK_LATENCY_MS as string | undefined, 600),
   mockFailRate: num(import.meta.env.VITE_MOCK_FAIL_RATE as string | undefined, 0),
   publicAppUrl:

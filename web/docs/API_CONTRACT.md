@@ -21,7 +21,8 @@ Statuts : **confirmé** (validé avec l'équipe backend), **à confirmer** (prop
 
 ### Erreurs
 
-Corps : `{ "message": "…en français…" }` (ou `{ "detail": "…" }`, format FastAPI : les deux sont lus).
+Corps du backend encadré : `{ "error": { "code": "festival_not_found", "message": "…en français…" } }`. Le front lit
+`error.message`, puis `message`, puis `detail` (format FastAPI par défaut).
 Le message est affiché tel quel à l'utilisateur ; sans message, le front en affiche un par défaut.
 
 | Statut | Code front | Message par défaut |
@@ -57,10 +58,12 @@ Le message est affiché tel quel à l'utilisateur ; sans message, le front en af
 | `signC2pa` | POST `/c2pa/sign` | Signer le fichier final | confirmé |
 | `verifyPassport` | GET `/verify/{id}` | Page publique des festivals | confirmé |
 | `searchFestivals` | GET `/festivals` | Recherche, filtres, classement | confirmé |
+| `getFestival` | GET `/festivals/{id}` | Fiche d'un festival | backend prêt |
 | `createSubtitleDraft` | POST `/subtitles/{projectId}/draft` | Audio/vidéo → brouillon FR + EN | backend prêt |
 | `getSubtitleDraft` | GET `/subtitles/{projectId}` | Brouillon de sous-titres | backend prêt |
 | `saveSubtitles` | PUT `/subtitles/{projectId}` | Enregistrer les lignes | backend prêt |
 | `getSynopsisFeedback` | POST `/synopsis/feedback` | Questions du coach | confirmé |
+| `translateSynopsis` | POST `/synopsis/translate` | Version anglaise du synopsis (brouillon IA) | **à confirmer** (ajout du front, mock seulement) |
 | `getPublicFilm` | GET `/films/{id}/public` | Page film publique | à confirmer |
 | — | POST `/shot-spec` | Coach : conseils de prise de vue | **futur** |
 | — | GET `/projects/{id}/days/{date}/public` | Feuille de service partageable sans compte | **futur** |
@@ -110,6 +113,11 @@ Réponse 200 : `Project`. Erreurs : 401, 403, 404.
   "film_page": { "stills": ["/photos/ruelle.jpg"], "trailer_url": "https://…" }
 }
 ```
+`festival_shortlist[].status` (« Où j'en suis ») · **à confirmer** : `a_preparer` (en préparation) | `pret` (prêt à
+soumettre) | `soumis` (soumis sur le site officiel) | `reponse_recue` | `prochain_appel` (appel clos, pour la prochaine
+édition). Les trois premières valeurs existaient déjà. `checklist[].done` sert aux pièces cochées à la main (affiche,
+biographie, format…) et à la déclaration IA validée.
+
 `forbidden_days` accepte des dates ISO (`"2026-11-21"`) ou des jours de semaine en français, en minuscules (`"vendredi"`).
 `film_profile`, `synopsis` et `film_page` sont facultatifs (absents tant que le Kit Festival n'a rien enregistré).
 
@@ -293,24 +301,43 @@ Erreur 404 : le front affiche « Passeport introuvable ».
 
 ### `searchFestivals` — GET `/festivals` · confirmé
 
-Paramètres (tous facultatifs) : `q`, `country`, `max_duration_min`, `fee` (`gratuit` | `payant`), `deadline_before`
-(date ISO), `subtitle_lang` (`fr`, `en`, `ar`), `ai_policy` (`acceptee` | `a_declarer` | `interdite`). Pour classer
-pour un film : `film_duration_min`, `film_language`, `film_genre`, `film_ai_departments`.
+Paramètres (tous facultatifs) : `q` (nom, pays ou ville, sans tenir compte des accents), `country`, `max_duration_min`,
+`fee` (`gratuit` | `payant`), `deadline_before` (date ISO), `subtitle_lang` (`fr`, `en`, `ar`), `ai_policy`,
+`open_only` (`true` : seulement `deadline_status = ouverte`). Pour classer pour un film : `film_duration_min`,
+`film_language`, `film_genre`, `film_ai_departments`. Même résultat en `POST /festivals/match` (film et filtres dans le corps).
 
-Réponse 200 : `FestivalMatch[]`. Avec un film, triés par score décroissant ; sinon par date limite.
+Réponse 200 : `FestivalMatch[]`. Avec un film : score décroissant, puis appels ouverts (date la plus proche), à
+confirmer, clos (les plus récents d'abord) ; sans film, le même ordre sans le score.
 ```json
 [{ "festival": {
-     "id": "fest-a", "name": "[Festival A] : courts métrages méditerranéens", "country": "Tunisie",
-     "deadline": "2026-12-22", "fee": "Gratuit", "max_duration_min": 30, "subtitle_langs": ["fr", "en"],
-     "ai_policy": "a_declarer",
-     "requirements": [{ "kind": "synopsis", "detail": "Synopsis de 300 caractères maximum", "limit_chars": 300 }],
-     "source_url": "https://festival-a.exemple.invalid/reglement", "checked_at": "2026-10-01" },
-   "score": 5,
-   "reasons": ["Durée compatible (15 min pour 30 min maximum).", "Inscription gratuite."],
-   "warnings": [] }]
+     "id": "vienna-shorts", "name": "Vienna Shorts · Fiction & Documentary", "country": "Autriche", "city": "Vienne",
+     "edition": "24e édition, 25-30 mai 2027", "deadline": "2027-01-31", "deadline_status": "ouverte",
+     "deadline_note": "Tarif normal 19 € jusqu'au 5 janvier 2027, tarif tardif 29 € du 6 au 31 janvier 2027.",
+     "fee": "19 € puis 29 €", "max_duration_min": 30, "subtitle_langs": ["en"], "ai_policy": "a_declarer",
+     "ai_policy_detail": "Déclaration obligatoire parmi 4 options : pas d'IA ; IA comme outil technique…",
+     "eligibility": "Films terminés le 1er janvier 2026 ou après ; films d'écoles acceptés",
+     "requirements": [{ "kind": "synopsis", "detail": "Synopsis court dans le formulaire", "limit_chars": null }],
+     "source_url": "https://viennashorts.filmchief.com/submit-film/fiction-documentary-2027", "checked_at": "2026-11-18" },
+   "score": 4,
+   "reasons": ["Durée compatible (15 min pour 30 min maximum).", "Le festival demande une déclaration IA : ton Passeport IA la prépare."],
+   "warnings": ["Sous-titres demandés en : en."] }]
 ```
+- `deadline` : date ISO ou `null` (prochaine édition pas encore annoncée). `deadline_status` (`ouverte` | `passee` |
+  `a_confirmer`) est calculé à la lecture, jamais stocké.
+- `ai_policy` : `acceptee` | `a_declarer` | `interdite` | `section_dediee` (films faits par IA dans une section à part)
+  | `non_precisee` (le règlement ne dit rien : ce n'est pas une autorisation).
+- Champs facultatifs, `null` si inconnus : `city`, `edition`, `deadline_note`, `ai_policy_detail`, `eligibility`,
+  `max_duration_min`, `requirements[].limit_chars`.
+
 Règles : une fiche sans `source_url` ou sans `checked_at` n'est pas affichée. Le score indique la compatibilité
-avec les critères du festival ; il ne prédit pas la sélection. Pas de soumission ni de paiement via l'API.
+avec les critères du festival ; il ne prédit pas la sélection (score 1 : un critère bloque, ex. durée, IA refusée,
+appel clos). Pas de soumission ni de paiement via l'API. Le front ne recalcule pas la compatibilité : la fiche
+reprend le score et les raisons de `searchFestivals` pour ce festival.
+
+### `getFestival` — GET `/festivals/{id}` · backend prêt
+
+Réponse 200 : `Festival` (même forme que ci-dessus, sans score). Erreur 404 :
+`{ "error": { "code": "festival_not_found", "message": "Festival introuvable." } }`.
 
 ### `createSubtitleDraft` — POST `/subtitles/{projectId}/draft` · backend prêt
 
@@ -364,6 +391,12 @@ Corps : `{ "lines": SubtitleLine[] }` (liste complète, ids uniques). Réponse 2
 Le serveur garde `source_lang` et `processing` du brouillon, ne modifie pas les horodatages et recalcule `warnings`
 (les avertissements envoyés par le front sont ignorés pour ces règles). `422` si deux lignes ont le même `id` ou si un
 horodatage n'est pas au format SRT.
+
+### `translateSynopsis` — POST `/synopsis/translate` · à confirmer (ajout du front)
+
+Corps : `{ "kind": "court", "text": "Dans la médina de Tunis…", "target_lang": "en" }`. Réponse 200 : `{ "text": "In the Tunis medina…" }`.
+Traduction du texte de l'auteur, sans rien ajouter ni réécrire ; affichée « Brouillon IA : à valider ». `422` si le
+texte est vide. Pour l'instant, seul le mock existe (il ne traduit que les textes de démonstration).
 
 ### `getSynopsisFeedback` — POST `/synopsis/feedback` · confirmé
 
