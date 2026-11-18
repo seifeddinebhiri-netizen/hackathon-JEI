@@ -5,7 +5,8 @@ Indépendant de `LLMService` pour ne pas modifier ce fichier. Choix du fournisse
 - sinon : Anthropic si `ANTHROPIC_API_KEY` est rempli, Ollama dans les autres cas.
 
 Ollama : `OLLAMA_BASE_URL` (ou `OLLAMA_URL` / `OLLAMA_HOST`, défaut http://localhost:11434),
-`OLLAMA_MODEL` (défaut : le premier modèle installé), `OLLAMA_NUM_CTX` (défaut 16384).
+`OLLAMA_MODEL` (défaut : le premier modèle installé), `OLLAMA_NUM_CTX` (défaut 8192),
+`OLLAMA_TIMEOUT` en secondes par appel (défaut 1800 : un modèle sur processeur est lent).
 La sortie est contrainte par le schéma JSON (option `format` d'Ollama), puis validée par Pydantic.
 """
 
@@ -65,10 +66,11 @@ class ScreenplayLLM:
             if not model and not settings.llm_model.startswith("claude"):
                 model = settings.llm_model
             self._model = model  # vide : premier modèle installé, cherché au premier appel
-            self._num_ctx = int(env.get("OLLAMA_NUM_CTX", "16384"))
+            self._num_ctx = int(env.get("OLLAMA_NUM_CTX", "8192"))
+            self._timeout = float(env.get("OLLAMA_TIMEOUT", "1800"))
             # Un modèle local a un contexte court et une seule carte graphique : petits lots, un
             # appel à la fois.
-            self.max_batch_chars = 12_000
+            self.max_batch_chars = 6_000
             self.max_concurrency = 1
 
     @property
@@ -100,9 +102,16 @@ class ScreenplayLLM:
     async def _ollama_parse(self, system: str, user: str, output_format: type[T]) -> T:
         schema = output_format.model_json_schema()
         try:
-            async with httpx.AsyncClient(timeout=httpx.Timeout(600, connect=5)) as client:
+            async with httpx.AsyncClient(timeout=httpx.Timeout(self._timeout, connect=5)) as client:
                 model = await self._ollama_model(client)
                 for attempt in (1, 2):
+                    log.info(
+                        "ollama_request",
+                        purpose=output_format.__name__,
+                        model=model,
+                        chars=len(user),
+                        attempt=attempt,
+                    )
                     r = await client.post(
                         f"{self._base}/api/chat",
                         json={
@@ -142,6 +151,11 @@ class ScreenplayLLM:
                         log.warning("ollama_invalid_json", purpose=output_format.__name__)
         except httpx.ConnectError as exc:
             raise LLMUnavailable(f"Ollama ne répond pas sur {self._base} (ollama serve).") from exc
+        except httpx.TimeoutException as exc:
+            raise LLMUnavailable(
+                f"le modèle local « {self._model} » n'a pas répondu en {self._timeout:g} s ; "
+                "essaie un modèle plus petit ou augmente OLLAMA_TIMEOUT"
+            ) from exc
         except httpx.HTTPError as exc:
             raise LLMUnavailable(f"Erreur Ollama : {type(exc).__name__}") from exc
         raise LLMUnavailable("Le modèle local n'a pas produit de réponse exploitable.")
