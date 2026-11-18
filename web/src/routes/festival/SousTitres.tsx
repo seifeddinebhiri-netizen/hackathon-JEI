@@ -210,7 +210,15 @@ function Review({
       },
     );
 
-  if (replacing) return <SubtitleImport project={project} replacing onCancel={() => setReplacing(false)} />;
+  if (replacing)
+    return (
+      <SubtitleImport
+        project={project}
+        replacing
+        onCancel={() => setReplacing(false)}
+        onDone={() => setReplacing(false)}
+      />
+    );
 
   return (
     <div className="flex flex-col gap-6">

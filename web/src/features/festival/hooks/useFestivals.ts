@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   api,
   isApiError,
+  mockFallback,
   type CreateSubtitleDraftInput,
   type Festival,
   type FestivalSearchParams,
@@ -105,6 +106,18 @@ export function useCreateSubtitleDraft() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: CreateSubtitleDraftInput) => api.createSubtitleDraft(input),
+    onSuccess: (d) => qc.setQueryData(subtitleKeys.draft(d.project_id), d),
+  });
+}
+
+/** Repli du mode mixte : brouillon d'exemple (mock) quand le vrai import a échoué. */
+export function useExampleSubtitleDraft() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateSubtitleDraftInput) => {
+      if (!mockFallback) throw new Error('Aucun brouillon d’exemple disponible.');
+      return mockFallback.createSubtitleDraft(input);
+    },
     onSuccess: (d) => qc.setQueryData(subtitleKeys.draft(d.project_id), d),
   });
 }

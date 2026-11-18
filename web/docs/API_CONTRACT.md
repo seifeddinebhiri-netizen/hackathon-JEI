@@ -63,7 +63,7 @@ Le message est affiché tel quel à l'utilisateur ; sans message, le front en af
 | `getSubtitleDraft` | GET `/subtitles/{projectId}` | Brouillon de sous-titres | backend prêt |
 | `saveSubtitles` | PUT `/subtitles/{projectId}` | Enregistrer les lignes | backend prêt |
 | `getSynopsisFeedback` | POST `/synopsis/feedback` | Questions du coach | confirmé |
-| `translateSynopsis` | POST `/synopsis/translate` | Version anglaise du synopsis (brouillon IA) | **à confirmer** (ajout du front, mock seulement) |
+| `translateSynopsis` | POST `/synopsis/translate` | Version anglaise du synopsis (brouillon IA) | confirmé |
 | `getPublicFilm` | GET `/films/{id}/public` | Page film publique | à confirmer |
 | — | POST `/shot-spec` | Coach : conseils de prise de vue | **futur** |
 | — | GET `/projects/{id}/days/{date}/public` | Feuille de service partageable sans compte | **futur** |
@@ -113,9 +113,10 @@ Réponse 200 : `Project`. Erreurs : 401, 403, 404.
   "film_page": { "stills": ["/photos/ruelle.jpg"], "trailer_url": "https://…" }
 }
 ```
-`festival_shortlist[].status` (« Où j'en suis ») · **à confirmer** : `a_preparer` (en préparation) | `pret` (prêt à
+`festival_shortlist[].status` (« Où j'en suis ») · **confirmé côté front** : `a_preparer` (en préparation) | `pret` (prêt à
 soumettre) | `soumis` (soumis sur le site officiel) | `reponse_recue` | `prochain_appel` (appel clos, pour la prochaine
-édition). Les trois premières valeurs existaient déjà. `checklist[].done` sert aux pièces cochées à la main (affiche,
+édition). Ces cinq valeurs sont validées par le schéma zod du front. Le backend ne gère pas encore les projets :
+la mise à jour du statut passe par `PATCH /projects/{id}`, qui reste servi par le mock. `checklist[].done` sert aux pièces cochées à la main (affiche,
 biographie, format…) et à la déclaration IA validée.
 
 `forbidden_days` accepte des dates ISO (`"2026-11-21"`) ou des jours de semaine en français, en minuscules (`"vendredi"`).
@@ -351,10 +352,13 @@ Réponse 200 : `Festival` (même forme que ci-dessus, sans score). Erreur 404 :
 Flux : transcription (ElevenLabs Scribe v2) → découpage en sous-titres → traduction FR + EN (Gemini ou Ollama,
 avec le glossaire derja) → règles de sous-titrage. Le fichier est supprimé du serveur dès la transcription finie,
 même en cas d'erreur ; l'audio n'est jamais stocké. Remplace le brouillon existant du projet. Réponse 200 : `SubtitleDraft`.
-Cette requête peut durer une à plusieurs minutes.
+Cette requête peut durer une à plusieurs minutes (3 minutes au plus côté serveur, `SUBTITLE_DRAFT_TIMEOUT_S`).
+`processing.translator` indique le modèle qui a réellement traduit (le principal, ou le modèle de secours si le
+principal était indisponible).
 
 Erreurs : `413` fichier trop volumineux · `422` fichier vide ou aucune parole détectée · `502` le service de
-transcription a échoué · `503` transcription ou traduction non configurée sur le serveur.
+transcription a échoué · `503` transcription ou traduction non configurée sur le serveur · `504` délai dépassé.
+En mode mixte, si l'appel réel échoue, l'écran propose de continuer avec le brouillon d'exemple (mock).
 
 Une ligne que le traducteur n'a pas pu traduire reste dans le brouillon avec `fr` et `en` vides, `confidence: "faible"`
 et une `note` : la requête n'échoue pas pour une ligne.
@@ -392,11 +396,16 @@ Le serveur garde `source_lang` et `processing` du brouillon, ne modifie pas les 
 (les avertissements envoyés par le front sont ignorés pour ces règles). `422` si deux lignes ont le même `id` ou si un
 horodatage n'est pas au format SRT.
 
-### `translateSynopsis` — POST `/synopsis/translate` · à confirmer (ajout du front)
+### `translateSynopsis` — POST `/synopsis/translate` · confirmé
 
 Corps : `{ "kind": "court", "text": "Dans la médina de Tunis…", "target_lang": "en" }`. Réponse 200 : `{ "text": "In the Tunis medina…" }`.
-Traduction du texte de l'auteur, sans rien ajouter ni réécrire ; affichée « Brouillon IA : à valider ». `422` si le
-texte est vide. Pour l'instant, seul le mock existe (il ne traduit que les textes de démonstration).
+`kind` : `phrase` | `court` | `long` ; `target_lang` : `en` uniquement ; `text` : 10 000 caractères au plus.
+`limit_chars` (facultatif, entier de 1 à 10 000) : limite de caractères que la traduction doit respecter ; le front
+ne l'envoie pas pour l'instant.
+Traduction du texte de l'auteur par le même LLM que les sous-titres (Gemini ou Ollama) : anglais naturel, noms propres
+gardés, rien d'ajouté ni réécrit ; affichée « Brouillon IA : à valider ». Le texte n'est jamais loggé.
+Erreurs : `422` texte vide ou corps invalide · `502` le service de traduction a échoué · `503` traduction non
+configurée sur le serveur. Le mock ne traduit que les textes de démonstration.
 
 ### `getSynopsisFeedback` — POST `/synopsis/feedback` · confirmé
 

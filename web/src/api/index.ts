@@ -50,6 +50,8 @@ export const api: Api = buildApi({
   mock: mockApi,
 });
 export const usingMocks = env.useMocks;
+/** Mode mixte : la version simulée reste un repli quand le vrai backend échoue (choix explicite à l'écran). */
+export const mockFallback: Api | null = env.useMocks ? mockApi : null;
 /** Fonctions servies par le vrai backend alors que les mocks sont actifs. */
 export const realEndpointsInMockMode: readonly string[] = env.useMocks
   ? env.realEndpoints.filter((n) => n in realApi)

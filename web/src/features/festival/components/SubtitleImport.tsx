@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import type { Project } from '@/api/types';
-import { usingMocks, realEndpointsInMockMode } from '@/api';
+import type { CreateSubtitleDraftInput, Project } from '@/api/types';
+import { mockFallback, usingMocks, realEndpointsInMockMode } from '@/api';
 import { Button, Checkbox, ErrorState, Field, FileDrop, Icon, Input, Spinner } from '@/components/ui';
-import { useCreateSubtitleDraft } from '../hooks/useFestivals';
+import { useCreateSubtitleDraft, useExampleSubtitleDraft } from '../hooks/useFestivals';
 import { AudioExtractError, extractAudioWav, wavName } from '../lib/audio';
 import { setSessionVideo } from '../lib/videoSession';
 
@@ -23,12 +23,17 @@ export function SubtitleImport({
   project,
   replacing,
   onCancel,
+  onDone,
 }: {
   project: Project;
   replacing?: boolean;
   onCancel?: () => void;
+  /** Brouillon reçu (réel ou d'exemple) : referme l'import quand il remplace un brouillon. */
+  onDone?: () => void;
 }) {
   const create = useCreateSubtitleDraft();
+  const example = useExampleSubtitleDraft();
+  const [lastInput, setLastInput] = useState<CreateSubtitleDraftInput | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [derja, setDerja] = useState(true);
   const [keyterms, setKeyterms] = useState(() => defaultKeyterms(project));
@@ -44,7 +49,7 @@ export function SubtitleImport({
       const audio = await extractAudioWav(file);
       setPhase('sending');
       const characters = [...new Set(project.people.map((p) => p.character).filter((c): c is string => !!c))];
-      await create.mutateAsync({
+      const input: CreateSubtitleDraftInput = {
         project_id: project.id,
         audio,
         file_name: wavName(file.name),
@@ -55,9 +60,12 @@ export function SubtitleImport({
           .filter(Boolean)
           .slice(0, 50),
         characters,
-      });
+      };
+      setLastInput(input);
+      await create.mutateAsync(input);
       // La vidéo reste disponible pour « Regarder et valider » pendant cette visite (jamais stockée)
       if (file.type.startsWith('video/')) setSessionVideo(file);
+      onDone?.();
     } catch (e) {
       setError(e);
     } finally {
@@ -65,7 +73,21 @@ export function SubtitleImport({
     }
   };
 
-  const busy = phase !== 'idle';
+  const openExample = async () => {
+    if (!lastInput) return;
+    setError(null);
+    try {
+      await example.mutateAsync(lastInput);
+      onDone?.();
+    } catch (e) {
+      setError(e);
+    }
+  };
+
+  const busy = phase !== 'idle' || example.isPending;
+  // Le vrai service a échoué (pas l'extraction du son) : en mode mixte, le mock reste un repli.
+  const canUseExample =
+    !!error && !(error instanceof AudioExtractError) && !simulated && !!mockFallback && !!lastInput;
   return (
     <section
       aria-labelledby="import-titre"
@@ -128,6 +150,22 @@ export function SubtitleImport({
           error={error}
           onRetry={() => void send()}
         />
+      ) : null}
+      {canUseExample ? (
+        <div className="flex flex-col items-start gap-2 border-l-4 border-gold bg-gold-soft p-3">
+          <p className="text-meta">
+            Le service réel n’a pas abouti. Pour continuer la démo, tu peux ouvrir le brouillon d’exemple : ce
+            n’est pas la transcription de ta vidéo.
+          </p>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => void openExample()}
+            loading={example.isPending}
+          >
+            Continuer avec le brouillon d’exemple
+          </Button>
+        </div>
       ) : null}
 
       <div className="flex flex-wrap items-center gap-3">
