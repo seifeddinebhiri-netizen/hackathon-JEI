@@ -4,6 +4,11 @@
 - FastAPI skeleton (routes / controllers / services / middleware), health routes, Supabase + Postgres connection code
 - 71 validated cinematography rules (`rules/rules.json`) + loader
 - `POST /shot-spec` (LLM → closed-vocabulary intent → numeric targets via `calibration.py`), 14 tests with a fake LLM
+- **Kit Festival, festivals** : `GET /festivals` (filtres + classement, contrat `searchFestivals`), `POST /festivals/match` (film et filtres dans le corps), `GET /festivals/{id}` ; 20 fiches réelles sourcées dans `data/festivals.json` ; 16 tests
+  - Supabase : appliquer `supabase/migrations/20261118120000_festivals.sql`, puis `supabase/seed_festivals.sql` (SQL Editor, ou `supabase db push`)
+  - Après une modification de `data/festivals.json` : `uv run python -m scripts.build_festival_seed`, puis relancer le seed (upsert)
+  - Sans `DATABASE_URL`, l'API lit directement `data/festivals.json` (dev local, tests)
+  - `deadline_status` (`ouverte` / `passee` / `a_confirmer`) est calculé à la lecture, jamais stocké
 
 ## Next, in order
 1. Fill `.env` (Supabase keys, `DATABASE_URL`, `ANTHROPIC_API_KEY`) and test a real scene with curl; review the plans and tune the prompt.
