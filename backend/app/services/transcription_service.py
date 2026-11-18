@@ -28,6 +28,12 @@ _KEYTERM_MAX_CHARS = 50
 _KEYTERM_MAX_WORDS = 5
 _KEYTERM_FORBIDDEN = re.compile(r"[<>{}\[\]\\]")
 
+# Scribe accepte un code ISO-639-1 ou ISO-639-3, sans code de dialecte : « aeb » (arabe
+# tunisien) est refusé (400). La derja part donc en « ara » (arabe).
+DERJA_LANGUAGE_CODE = "ara"
+_LANGUAGE_ALIASES = {"aeb": DERJA_LANGUAGE_CODE, "derja": DERJA_LANGUAGE_CODE}
+_ERROR_DETAIL_MAX_CHARS = 300
+
 
 class Transcriber(Protocol):
     name: str  # ex. "elevenlabs/scribe_v2", repris dans processing.transcriber
@@ -58,6 +64,38 @@ def clean_keyterms(keyterms: list[str]) -> list[str]:
         if len(out) == MAX_KEYTERMS:
             break
     return out
+
+
+def scribe_language(code: str | None) -> str | None:
+    """Code envoyé à Scribe : « aeb » / « derja » → « ara » ; vide → détection automatique."""
+    code = (code or "").strip().lower()
+    return _LANGUAGE_ALIASES.get(code, code) or None
+
+
+def error_detail(resp: httpx.Response) -> str | None:
+    """Champ d'erreur d'ElevenLabs (detail / message), tronqué. Ne reprend jamais le champ
+    `input` des erreurs de validation : seulement leur emplacement et leur message."""
+    try:
+        data = resp.json()
+    except ValueError:
+        return None
+    if not isinstance(data, dict):
+        return None
+    detail = data.get("detail", data.get("message"))
+    if isinstance(detail, dict):
+        text = ": ".join(str(detail[k]) for k in ("status", "message") if detail.get(k))
+    elif isinstance(detail, list):
+        text = "; ".join(
+            f"{'.'.join(map(str, d.get('loc') or []))}: {d.get('msg', '')}"
+            if isinstance(d, dict)
+            else str(d)
+            for d in detail
+        )
+    elif detail is None:
+        return None
+    else:
+        text = str(detail)
+    return text[:_ERROR_DETAIL_MAX_CHARS] or None
 
 
 def parse_words(payload: dict) -> list[Word]:
@@ -112,6 +150,7 @@ class ElevenLabsTranscriber:
             "timestamps_granularity": "word",
             "tag_audio_events": "false",
         }
+        language_code = scribe_language(language_code)
         if language_code:
             data["language_code"] = language_code
         terms = clean_keyterms(keyterms)
@@ -139,8 +178,12 @@ class ElevenLabsTranscriber:
                 await client.aclose()
 
         if resp.status_code >= 400:
-            # Pas de corps de réponse dans les logs : il peut citer le contenu envoyé.
-            log.error("transcription_http_error", status=resp.status_code)
+            # 4xx : seulement le champ d'erreur, tronqué (jamais le corps entier ni la clé).
+            log.error(
+                "transcription_http_error",
+                status=resp.status_code,
+                detail=error_detail(resp) if resp.status_code < 500 else None,
+            )
             raise AppError(
                 "La transcription a échoué. Vérifie le fichier (audio ou vidéo lisible) "
                 "et réessaie.",

@@ -1,6 +1,6 @@
 # Captures d'écran
 
-Pleine page, données de démonstration (« Marée basse »), en **1440 px** (`-1440.png`) et **390 px** (`-390.png`,
+Pleine page, données de démonstration (« Dar Hmeti »), en **1440 px** (`-1440.png`) et **390 px** (`-390.png`,
 densité ×2). Numérotées dans l'ordre de la démo. À utiliser pour les slides et la vidéo.
 
 | N° | Écran | Route |

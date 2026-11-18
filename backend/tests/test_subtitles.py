@@ -497,3 +497,69 @@ def test_ollama_translator_request_shape():
     assert tr.name == "ollama/qwen3:14b"
     assert create_translator(_settings(llm_provider="autre")) is None
     assert not create_translator(_settings(llm_provider="gemini")).available
+
+
+def test_derja_is_sent_to_scribe_as_ara(tmp_path):
+    import httpx
+
+    from app.services.transcription_service import ElevenLabsTranscriber, scribe_language
+
+    assert scribe_language("aeb") == "ara" and scribe_language("derja") == "ara"
+    assert scribe_language(" ARA ") == "ara" and scribe_language("fr") == "fr"
+    assert scribe_language(None) is None and scribe_language("") is None
+    assert subtitle_service._source_lang("ara", None) == "derja"  # libellé gardé
+
+    audio = tmp_path / "a.wav"
+    audio.write_bytes(b"audio")
+    bodies = []
+
+    def handler(request: httpx.Request):
+        bodies.append(request.content.decode("latin-1"))
+        return httpx.Response(200, json={"words": []})
+
+    tx = ElevenLabsTranscriber(
+        _settings(elevenlabs_api_key="cle-test"),
+        client=httpx.AsyncClient(transport=httpx.MockTransport(handler)),
+    )
+    asyncio.run(tx.transcribe(audio, "a.wav", "aeb", []))
+    assert 'name="language_code"\r\n\r\nara' in bodies[0]
+
+
+def test_elevenlabs_400_is_logged_without_content(tmp_path):
+    import httpx
+
+    from app.services.transcription_service import ElevenLabsTranscriber
+
+    audio = tmp_path / "a.wav"
+    audio.write_bytes(b"audio")
+    secret_line = "Ya3tik essa7a Nour"
+
+    def handler(request):
+        return httpx.Response(
+            400,
+            json={
+                "detail": [
+                    {
+                        "loc": ["body", "language_code"],
+                        "msg": "Invalid language code " + "x" * 400,
+                        "type": "value_error",
+                        "input": secret_line,
+                    }
+                ]
+            },
+        )
+
+    tx = ElevenLabsTranscriber(
+        _settings(elevenlabs_api_key="cle-tres-secrete"),
+        client=httpx.AsyncClient(transport=httpx.MockTransport(handler)),
+    )
+    with capture_logs() as logs, pytest.raises(AppError) as err:
+        asyncio.run(tx.transcribe(audio, "a.wav", "ara", ["Nour"]))
+    assert err.value.status_code == 502 and err.value.code == "transcription_failed"
+    assert "language" not in err.value.message  # message générique en français
+    event = next(e for e in logs if e["event"] == "transcription_http_error")
+    assert event["status"] == 400
+    assert event["detail"].startswith("body.language_code: Invalid language code")
+    assert len(event["detail"]) == 300
+    dumped = json.dumps(logs, default=str)
+    assert "essa7a" not in dumped and "cle-tres-secrete" not in dumped

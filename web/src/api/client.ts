@@ -68,6 +68,19 @@ export function errorFromStatus(status: number, serverMessage?: string): ApiErro
   return new ApiError(status, code, serverMessage || MESSAGES[code]);
 }
 
+/**
+ * Message français renvoyé par le serveur. Formes acceptées :
+ * `{ "error": { "code", "message" } }` (FastAPI encadré), `{ "message" }`, `{ "detail": "…" }`.
+ */
+export function serverErrorMessage(body: unknown): string | undefined {
+  if (!body || typeof body !== 'object') return undefined;
+  const b = body as { error?: { message?: unknown }; message?: unknown; detail?: unknown };
+  if (b.error && typeof b.error === 'object' && typeof b.error.message === 'string') return b.error.message;
+  if (typeof b.message === 'string') return b.message;
+  if (typeof b.detail === 'string') return b.detail;
+  return undefined;
+}
+
 export function apiError(code: ApiErrorCode, status = 0, message?: string): ApiError {
   return new ApiError(status, code, message ?? MESSAGES[code]);
 }
@@ -91,6 +104,8 @@ export function setAuthTokenGetter(fn: () => string | null): void {
 
 export const DEFAULT_TIMEOUT_MS = 15_000;
 export const UPLOAD_TIMEOUT_MS = 60_000;
+/** Transcription + traduction : une à plusieurs minutes selon la durée du film. */
+export const SUBTITLE_DRAFT_TIMEOUT_MS = 10 * 60_000;
 
 type RequestOptions<S extends z.ZodType> = {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -143,9 +158,7 @@ export async function request<S extends z.ZodType>(
   if (!res.ok) {
     let serverMessage: string | undefined;
     try {
-      const j = (await res.json()) as { message?: string; detail?: string };
-      serverMessage =
-        typeof j.message === 'string' ? j.message : typeof j.detail === 'string' ? j.detail : undefined;
+      serverMessage = serverErrorMessage(await res.json());
     } catch {
       /* corps vide ou non JSON */
     }

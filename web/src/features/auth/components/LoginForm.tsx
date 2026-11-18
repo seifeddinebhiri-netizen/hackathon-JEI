@@ -162,8 +162,8 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
               Essayer sans créer de compte
             </h2>
             <p className="mt-2 text-meta text-ink">
-              Ouvre le projet de démonstration « Marée basse », un court métrage fictif tourné à Tunis, avec
-              le compte de Yassine.
+              Ouvre le projet de démonstration « Dar Hmeti », un court métrage fictif tourné à Tunis, avec le
+              compte de Yassine.
             </p>
             {demoError ? (
               <p role="alert" className="mt-2 text-meta font-semibold text-bad-fg">

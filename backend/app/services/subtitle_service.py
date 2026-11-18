@@ -12,6 +12,7 @@ Stockage : table `subtitle_drafts` (Supabase Postgres) quand DATABASE_URL est co
 sinon un dict en mémoire (perdu au redémarrage), comme le repli des festivals.
 """
 
+import asyncio
 import json
 import shutil
 import tempfile
@@ -35,9 +36,15 @@ from app.schemas.subtitle import (
     TranslationContext,
 )
 from app.services import glossary_service, subtitle_rules
-from app.services.subtitle_segmentation import segment
-from app.services.transcription_service import Transcriber
-from app.services.translation_service import BATCH_SIZE, Translator
+from app.services.subtitle_segmentation import parse_srt_time, segment
+from app.services.transcription_service import DERJA_LANGUAGE_CODE, Transcriber
+from app.services.translation_service import (
+    BATCH_SIZE,
+    Translator,
+    set_deadline,
+    track_models,
+    used_translator_name,
+)
 
 log = structlog.get_logger()
 
@@ -49,7 +56,13 @@ _LEVELS: list[Confidence] = ["faible", "moyenne", "elevee"]
 
 # --- Confiance finale --------------------------------------------------------------
 def final_confidence(
-    llm: Confidence, asr_confidence: float, note: str | None, glossary_used: list[str]
+    llm: Confidence,
+    asr_confidence: float,
+    note: str | None,
+    glossary_used: list[str],
+    uncertain_words: list[str] | None = None,
+    mixed_words: list[str] | None = None,
+    omission: bool = False,
 ) -> Confidence:
     """Part du LLM, baisse d'un cran par signal de doute ; jamais au-dessus du LLM."""
     level = _LEVELS.index(llm)
@@ -57,7 +70,34 @@ def final_confidence(
         level -= 1
     if note and not glossary_used:  # tournure signalée par le LLM, absente du glossaire
         level -= 1
+    if uncertain_words:  # un mot au moins sous LOW_WORD_PROB
+        level -= 1
+    if mixed_words:  # mot isolé dans une autre écriture, peu sûr
+        level -= 1
+    if omission:  # avertissement omission_possible
+        level -= 1
     return _LEVELS[max(0, level)]
+
+
+def doubt_note(note: str | None, cue: Cue) -> str | None:
+    """Ajoute à la note du LLM les mots douteux de la transcription."""
+    parts = [note] if note else []
+    if cue.uncertain_words:
+        parts.append("mot incertain : " + ", ".join(cue.uncertain_words))
+    if cue.mixed_words:
+        parts.append("mot isolé dans une autre langue, à vérifier : " + ", ".join(cue.mixed_words))
+    return " · ".join(parts) or None
+
+
+def short_suggestion(full: str, short: str | None, duration_s: float) -> str | None:
+    """Garde la version courte seulement si la complète est trop rapide à lire et si la
+    courte respecte la limite. Jamais appliquée : c'est une suggestion pour le relecteur."""
+    if not short or duration_s <= 0:
+        return None
+    limit = int(duration_s * subtitle_rules.MAX_CPS)
+    if len(full) <= limit or len(short) > limit or len(short) >= len(full):
+        return None
+    return short
 
 
 # --- Stockage ----------------------------------------------------------------------
@@ -193,7 +233,7 @@ async def _translate(
 
 def _source_lang(requested: str | None, detected: str | None) -> str:
     code = (requested or detected or "").lower()
-    return DEFAULT_SOURCE_LANG if code in ("", "aeb") else code
+    return DEFAULT_SOURCE_LANG if code in ("", "aeb", "derja", DERJA_LANGUAGE_CODE) else code
 
 
 async def create_draft(
@@ -206,6 +246,52 @@ async def create_draft(
     language_code: str | None = None,
     keyterms: list[str] | None = None,
     characters: list[str] | None = None,
+    timeout_s: float | None = None,
+) -> SubtitleDraft:
+    """Brouillon complet, borné par timeout_s : au-delà (transcription trop lente : la
+    traduction, elle, s'arrête avant le budget), 504. Le fichier temporaire est
+    supprimé par le `finally` de _build_draft ; rien n'est enregistré."""
+    started = time.monotonic()
+    set_deadline(timeout_s)  # Gemini s'arrête avant : lignes « faible » plutôt qu'un 504
+    try:
+        async with asyncio.timeout(timeout_s) as deadline:
+            return await _build_draft(
+                pool,
+                transcriber,
+                translator,
+                project_id,
+                upload,
+                max_upload_mb,
+                language_code,
+                keyterms,
+                characters,
+            )
+    except TimeoutError as exc:
+        if not deadline.expired():
+            raise
+        log.error(
+            "subtitles_draft_timeout",
+            timeout_s=timeout_s,
+            total_s=round(time.monotonic() - started, 1),
+        )
+        raise AppError(
+            f"Le brouillon prend trop de temps (plus de {round(timeout_s or 0)} s) : "
+            "le service de transcription ou de traduction est lent. Réessaie dans quelques minutes.",
+            504,
+            "draft_timeout",
+        ) from exc
+
+
+async def _build_draft(
+    pool: asyncpg.Pool | None,
+    transcriber: Transcriber,
+    translator: Translator | None,
+    project_id: str,
+    upload: UploadFile,
+    max_upload_mb: int,
+    language_code: str | None,
+    keyterms: list[str] | None,
+    characters: list[str] | None,
 ) -> SubtitleDraft:
     # Vérifie les deux fournisseurs AVANT d'envoyer l'audio (une transcription est payante).
     if not getattr(transcriber, "available", True):
@@ -238,7 +324,9 @@ async def create_draft(
     cues = segment(transcript.words)
     if not cues:
         raise AppError("Aucune parole détectée dans ce fichier.", 422, "no_speech")
+    used_models = track_models()
     translations = await _translate(translator, cues, characters or [])
+    translator_name = used_translator_name(translator, used_models)
 
     lines = [
         SubtitleLine(
@@ -249,22 +337,36 @@ async def create_draft(
             fr=tr.fr,
             en=tr.en,
             confidence=final_confidence(
-                tr.confidence, cue.asr_confidence, tr.note, tr.glossary_used
+                tr.confidence,
+                cue.asr_confidence,
+                tr.note,
+                tr.glossary_used,
+                cue.uncertain_words,
+                cue.mixed_words,
             ),
-            note=tr.note,
+            note=doubt_note(tr.note, cue),
             validated=False,
             speaker=cue.speaker,
             glossary_used=tr.glossary_used,
         )
         for cue, tr in zip(cues, translations, strict=True)
     ]
+    lines = subtitle_rules.apply_rules(lines)
+    # Après les règles (durées corrigées) : omission et versions courtes.
+    for line, tr in zip(lines, translations, strict=True):
+        if any(w.rule == "omission_possible" for w in line.warnings):
+            level = _LEVELS.index(line.confidence)
+            line.confidence = _LEVELS[max(0, level - 1)]
+        duration = parse_srt_time(line.end) - parse_srt_time(line.start)
+        line.fr_court = short_suggestion(line.fr, tr.fr_court, duration)
+        line.en_court = short_suggestion(line.en or "", tr.en_court, duration)
     draft = SubtitleDraft(
         project_id=project_id,
         source_lang=_source_lang(language_code, transcript.language_code),
-        lines=subtitle_rules.apply_rules(lines),
+        lines=lines,
         processing=SubtitleProcessing(
             transcriber=transcriber.name,
-            translator=translator.name,
+            translator=translator_name,
             created_at=datetime.now(UTC),
         ),
     )
@@ -278,8 +380,13 @@ async def create_draft(
         lines=len(draft.lines),
         warnings=sum(len(line.warnings) for line in draft.lines),
         low_confidence=sum(1 for line in draft.lines if line.confidence == "faible"),
+        doubtful_words=sum(len(c.uncertain_words) + len(c.mixed_words) for c in cues),
+        omissions=sum(
+            1 for line in draft.lines for w in line.warnings if w.rule == "omission_possible"
+        ),
+        short_suggestions=sum(1 for line in draft.lines if line.fr_court or line.en_court),
         transcriber=transcriber.name,
-        translator=translator.name,
+        translator=translator_name,
         transcription_s=round(transcribed_at - started, 1),
         total_s=round(time.monotonic() - started, 1),
     )

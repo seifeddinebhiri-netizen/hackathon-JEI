@@ -105,7 +105,7 @@ export function projectTodos(project: Project, passport: Passport | null | undef
       id: 'dossiers',
       icon: 'film',
       label: `Préparer ${toPrepare} dossier(s) de festival`,
-      to: '/festival?onglet=selection',
+      to: '/festival/dossiers',
       tone: 'neutral',
     });
   return t;

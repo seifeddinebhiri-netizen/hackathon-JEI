@@ -113,12 +113,12 @@ export const festivalRequirementSchema: z.ZodType<T.FestivalRequirement> = z.obj
     'format',
   ]),
   detail: z.string(),
-  limit_chars: z.number().optional(),
+  limit_chars: z.number().nullish(),
 });
 
 export const shortlistItemSchema: z.ZodType<T.ShortlistItem> = z.object({
   festival_id: z.string(),
-  status: z.enum(['a_preparer', 'pret', 'soumis']),
+  status: z.enum(['a_preparer', 'pret', 'soumis', 'reponse_recue', 'prochain_appel']),
   checklist: z.array(z.object({ requirement: festivalRequirementSchema, done: z.boolean() })),
 });
 
@@ -238,15 +238,29 @@ export const verifyResultSchema: z.ZodType<T.VerifyResult> = z.object({
 });
 
 // --- Festival ----------------------------------------------------------------
+export const aiPolicySchema = z.enum([
+  'acceptee',
+  'a_declarer',
+  'interdite',
+  'section_dediee',
+  'non_precisee',
+]) satisfies z.ZodType<T.AiPolicy>;
+
 export const festivalSchema: z.ZodType<T.Festival> = z.object({
   id: z.string(),
   name: z.string(),
   country: z.string(),
-  deadline: z.string(),
+  city: z.string().nullish(),
+  edition: z.string().nullish(),
+  deadline: z.string().nullable(),
+  deadline_status: z.enum(['ouverte', 'passee', 'a_confirmer']),
+  deadline_note: z.string().nullish(),
   fee: z.string(),
-  max_duration_min: z.number().optional(),
+  max_duration_min: z.number().nullable(),
   subtitle_langs: z.array(z.string()),
-  ai_policy: z.enum(['acceptee', 'a_declarer', 'interdite']),
+  ai_policy: aiPolicySchema,
+  ai_policy_detail: z.string().nullish(),
+  eligibility: z.string().nullish(),
   requirements: z.array(festivalRequirementSchema),
   source_url: z.string(),
   checked_at: z.string(),
@@ -259,6 +273,19 @@ export const festivalMatchSchema: z.ZodType<T.FestivalMatch> = z.object({
   warnings: z.array(z.string()),
 });
 
+export const subtitleWarningSchema: z.ZodType<T.SubtitleWarning> = z.object({
+  rule: z.enum([
+    'lecture_rapide',
+    'trop_de_lignes',
+    'ligne_trop_longue',
+    'duree_courte',
+    'duree_longue',
+    'chevauchement',
+    'omission_possible',
+  ]),
+  detail: z.string(),
+});
+
 export const subtitleLineSchema: z.ZodType<T.SubtitleLine> = z.object({
   id: z.string(),
   start: z.string(),
@@ -269,16 +296,28 @@ export const subtitleLineSchema: z.ZodType<T.SubtitleLine> = z.object({
   confidence: z.enum(['elevee', 'moyenne', 'faible']),
   note: z.string().optional(),
   validated: z.boolean(),
+  speaker: z.string().optional(),
+  warnings: z.array(subtitleWarningSchema).optional(),
+  glossary_used: z.array(z.string()).optional(),
+  fr_court: z.string().optional(),
+  en_court: z.string().optional(),
 });
 
 export const subtitleDraftSchema: z.ZodType<T.SubtitleDraft> = z.object({
   project_id: z.string(),
   source_lang: z.string(),
   lines: z.array(subtitleLineSchema),
+  processing: z
+    .object({ transcriber: z.string(), translator: z.string(), created_at: z.string() })
+    .optional(),
 });
 
 export const synopsisFeedbackSchema: z.ZodType<T.SynopsisFeedback> = z.object({
   questions: z.array(z.string()),
+});
+
+export const synopsisTranslationSchema: z.ZodType<T.SynopsisTranslation> = z.object({
+  text: z.string(),
 });
 
 export const publicFilmSchema: z.ZodType<T.PublicFilm> = z.object({

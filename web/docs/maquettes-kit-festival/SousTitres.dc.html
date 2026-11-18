@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sous-titres · relecture</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F2F2EF}
+a{color:#121110}a:hover{color:#C8102E}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #FFC82E;outline-offset:2px}
+button:disabled{cursor:not-allowed}
+</style>
+</helmet>
+<div style="background: #F2F2EF; color: #121110; font-family: Inter, system-ui, sans-serif; font-size: 16px; min-height: 100%">
+
+  <header style="background: #121110; color: #FFFFFF">
+    <div style="max-width: 1440px; margin: 0 auto; padding: 0 64px; min-height: 64px; display: flex; flex-wrap: wrap; align-items: center; gap: 24px; justify-content: space-between">
+      <a href="#" style="display: flex; align-items: center; text-decoration: none; color: #FFFFFF; padding: 8px 10px; border-left: 2px solid #E4202E; border-top: 2px solid #E4202E">
+        <span style="font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 500; letter-spacing: -0.02em"><span style="color: #B8B4AC">en</span>cadr<span style="color: #FFC82E">é</span></span>
+      </a>
+      <nav aria-label="Étapes" style="display: flex; flex-wrap: wrap; gap: 28px; font-size: 14px; font-weight: 600">
+        <a href="#" style="color: #B8B4AC; text-decoration: none; padding: 20px 0">Projet</a>
+        <a href="#" style="color: #B8B4AC; text-decoration: none; padding: 20px 0"><span style="color: #FFC82E; font-family: 'JetBrains Mono', monospace">1</span> Planifier</a>
+        <a href="#" style="color: #B8B4AC; text-decoration: none; padding: 20px 0"><span style="color: #FFC82E; font-family: 'JetBrains Mono', monospace">2</span> Tourner</a>
+        <a href="#" style="color: #B8B4AC; text-decoration: none; padding: 20px 0"><span style="color: #FFC82E; font-family: 'JetBrains Mono', monospace">3</span> Déclarer</a>
+        <a href="#" aria-current="page" style="color: #FFFFFF; text-decoration: none; padding: 20px 0 17px; border-bottom: 3px solid #FFC82E"><span style="color: #FFC82E; font-family: 'JetBrains Mono', monospace">4</span> Diffuser</a>
+      </nav>
+      <div style="display: flex; align-items: center; gap: 10px; border: 2px solid #3A3733; padding: 6px 12px; font-size: 14px; font-weight: 600">
+        <span style="width: 24px; height: 24px; background: #FFC82E; color: #121110; display: inline-flex; align-items: center; justify-content: center; font-size: 12px">Y</span>Yassine
+      </div>
+    </div>
+  </header>
+
+  <main style="max-width: 1440px; margin: 0 auto; padding: 28px 64px 80px; box-sizing: border-box">
+
+    <nav aria-label="Fil d'Ariane" style="font-size: 14px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+      <a href="Main.dc.html" style="font-weight: 600">Kit Festival</a><span aria-hidden="true" style="color: #55524C">/</span>
+      <a href="Fiche.dc.html" style="font-weight: 600">Dossier Vienna Shorts</a><span aria-hidden="true" style="color: #55524C">/</span>
+      <span style="color: #55524C">Sous-titres anglais</span>
+    </nav>
+
+    <!-- Barre du haut : état et export -->
+    <section style="margin-top: 16px; background: #FFFFFF; border: 2px solid #121110; padding: 20px 24px; display: flex; flex-wrap: wrap; gap: 20px 32px; align-items: center">
+      <div style="flex: 1 1 420px; min-width: 0">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
+          <h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 30px; letter-spacing: -0.02em">Dar Hmeti · derja → anglais, français</h1>
+          <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; background: #FFE7A3; color: #5C4400; border: 2px dashed #5C4400; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase">Brouillon IA : à valider</span>
+        </div>
+        <p style="margin: 10px 0 8px; font-size: 14px; color: #55524C"><strong style="color: #121110">{{validatedCount}} / {{total}} lignes validées</strong> · les lignes à risque sont en premier.</p>
+        <div aria-hidden="true" style="height: 10px; background: #E2E0D9; max-width: 520px"><div style="{{progressStyle}}"></div></div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-start">
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center">
+          <a href="Regarder.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; background: #121110; color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600; box-shadow: 3px 3px 0 #FFC82E"><svg width="16" height="16" viewBox="0 0 24 24" fill="#FFFFFF" aria-hidden="true"><path d="M7 5l12 7-12 7z"></path></svg>Regarder et valider</a>
+          <div role="group" aria-label="Langue du fichier" style="display: inline-flex; border: 2px solid #121110">
+            <button type="button" aria-pressed="true" style="min-height: 44px; padding: 0 14px; border: 0; background: #121110; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 600">Anglais</button>
+            <button type="button" aria-pressed="false" style="min-height: 44px; padding: 0 14px; border: 0; background: #FFFFFF; color: #121110; font: inherit; font-size: 14px; font-weight: 600">Français</button>
+          </div>
+          <button type="button" disabled="{{exportLocked}}" style="{{exportStyle}}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path></svg>Exporter le .srt
+          </button>
+        </div>
+        <p style="margin: 0; font-size: 13px; color: #55524C">{{exportNote}}</p>
+      </div>
+    </section>
+
+    <div style="margin-top: 24px; display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start">
+
+      <!-- Colonne gauche : la vidéo et ce que l'IA a fait -->
+      <div style="flex: 1 1 440px; max-width: 560px; display: flex; flex-direction: column; gap: 20px">
+        <section aria-label="Lecteur vidéo" style="background: #121110; color: #FFFFFF; border: 2px solid #121110">
+          <div style="position: relative; aspect-ratio: 16 / 9; background: #1F1D1B; display: flex; align-items: flex-end; justify-content: center">
+            <span style="position: absolute; top: 12px; left: 14px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.1em; color: #B8B4AC">[IMAGE DU FILM]</span>
+            <span style="position: absolute; top: 12px; right: 14px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #FFC82E">{{current.start}}</span>
+            <p style="margin: 0 24px 20px; padding: 4px 10px; background: rgba(18,17,16,0.75); color: #FFFFFF; font-size: 18px; line-height: 1.35; text-align: center; white-space: pre-line">{{current.en}}</p>
+          </div>
+          <div style="padding: 12px 14px; display: flex; align-items: center; gap: 12px">
+            <button type="button" aria-label="Lire la ligne sélectionnée" style="min-width: 44px; min-height: 44px; border: 2px solid #FFFFFF; background: transparent; color: #FFFFFF; display: inline-flex; align-items: center; justify-content: center">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#FFFFFF" aria-hidden="true"><path d="M7 5l12 7-12 7z"></path></svg>
+            </button>
+            <div aria-hidden="true" style="flex: 1; height: 36px; display: flex; align-items: center; gap: 3px">
+              <sc-for list="{{bars}}" as="b" hint-placeholder-count="40">
+                <span style="{{b.style}}"></span>
+              </sc-for>
+            </div>
+          </div>
+        </section>
+
+        <section style="background: #FFFFFF; border: 2px solid #121110; padding: 20px">
+          <h2 style="margin: 0 0 12px; font-family: 'Space Grotesk', sans-serif; font-size: 20px; letter-spacing: -0.01em">Ce que l'IA a fait</h2>
+          <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 14px; line-height: 1.45">
+            <li><strong>Transcription</strong> du derja avec ElevenLabs Scribe, timecodes au mot près.</li>
+            <li><strong>Calage sur ton scénario</strong> : 6 lignes sur 9 ont repris l'orthographe et le personnage du scénario.</li>
+            <li><strong>Traduction</strong> FR et EN avec le glossaire derja : 3 expressions reconnues.</li>
+            <li><strong>Règles de sous-titrage</strong> vérifiées par le code : 1 ligne trop rapide à lire.</li>
+          </ul>
+          <p style="margin: 14px 0 0; padding-top: 12px; border-top: 2px solid #D9D7D1; font-size: 13px; color: #55524C">L'audio a été supprimé après la transcription. Il n'a servi à entraîner aucune IA. Le Passeport ajoutera : « sous-titres assistés par IA, relus par Yassine ».</p>
+        </section>
+      </div>
+
+      <!-- Colonne droite : les lignes -->
+      <section aria-label="Lignes de sous-titres" style="flex: 999 1 560px; min-width: 0">
+        <div role="group" aria-label="Filtre" style="display: inline-flex; flex-wrap: wrap; border: 2px solid #121110; margin-bottom: 16px">
+          <button type="button" aria-pressed="{{riskPressed}}" onClick="{{showRisk}}" style="{{riskTab}}">À vérifier d'abord ({{riskCount}})</button>
+          <button type="button" aria-pressed="{{allPressed}}" onClick="{{showAll}}" style="{{allTab}}">Toutes ({{total}})</button>
+        </div>
+
+        <ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 14px">
+          <sc-for list="{{lines}}" as="l" hint-placeholder-count="5">
+            <li style="{{l.cardStyle}}">
+              <div style="display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center">
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #55524C">{{l.start}} → {{l.end}}</span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500">{{l.speaker}}</span>
+                <span style="{{l.matchStyle}}">{{l.matchLabel}}</span>
+                <span style="{{l.confStyle}}">{{l.confLabel}}</span>
+                <sc-if value="{{l.validated}}" hint-placeholder-val="{{ false }}">
+                  <span style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; background: #DDEFE3; color: #14532D; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="3" aria-hidden="true"><path d="M4 12l5 5L20 6"></path></svg>Validée</span>
+                </sc-if>
+              </div>
+
+              <p style="margin: 10px 0 12px; font-size: 17px; font-weight: 600">{{l.source}}</p>
+
+              <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+                <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Français
+                  <input type="text" value="{{l.fr}}" onInput="{{l.editFr}}" style="font: inherit; font-size: 15px; font-weight: 400; min-height: 44px; padding: 0 12px; border: 2px solid #121110; background: #FFFFFF">
+                </label>
+                <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Anglais
+                  <input type="text" value="{{l.en}}" onInput="{{l.editEn}}" style="font: inherit; font-size: 15px; font-weight: 400; min-height: 44px; padding: 0 12px; border: 2px solid #121110; background: #FFFFFF">
+                </label>
+              </div>
+
+              <sc-if value="{{l.hasNote}}" hint-placeholder-val="{{ false }}">
+                <p style="margin: 12px 0 0; padding: 10px 12px; background: #FFF0C2; color: #5C4400; font-size: 13px; line-height: 1.5"><strong>Glossaire derja :</strong> {{l.note}}</p>
+              </sc-if>
+              <sc-if value="{{l.hasRule}}" hint-placeholder-val="{{ false }}">
+                <p style="margin: 12px 0 0; padding: 10px 12px; background: #FBD9DC; color: #7F1020; font-size: 13px; line-height: 1.5; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center"><span><strong>Trop rapide à lire :</strong> {{l.rule}}</span>
+                  <button type="button" style="min-height: 36px; padding: 0 10px; border: 2px solid #7F1020; background: #FFFFFF; color: #7F1020; font: inherit; font-size: 13px; font-weight: 600">Proposer une version plus courte (IA)</button>
+                </p>
+              </sc-if>
+              <sc-if value="{{l.edited}}" hint-placeholder-val="{{ false }}">
+                <p style="margin: 12px 0 0; font-size: 13px; color: #55524C; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center">Modifié par toi.
+                  <button type="button" style="min-height: 36px; padding: 0 10px; border: 2px solid #121110; background: #FFFFFF; color: #121110; font: inherit; font-size: 13px; font-weight: 600">Ajouter au glossaire du projet ?</button>
+                </p>
+              </sc-if>
+
+              <div style="margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px">
+                <button type="button" onClick="{{l.toggle}}" style="{{l.validateStyle}}">{{l.validateLabel}}</button>
+                <button type="button" onClick="{{l.select}}" style="min-height: 44px; padding: 0 14px; border: 2px solid #121110; background: #FFFFFF; color: #121110; font: inherit; font-size: 14px; font-weight: 600">Voir dans la vidéo</button>
+              </div>
+            </li>
+          </sc-for>
+        </ol>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { filter: 'risk', selected: 'l7', validated: { l1: true, l2: true, l3: true }, edits: {} };
+  }
+  renderVals() {
+    const s = this.state;
+    const base = [
+      { id: 'l1', start: '00:00:12,400', end: '00:00:14,900', speaker: 'Slim', source: 'Sbe7 el khir ya khali.', fr: 'Bonjour, mon oncle.', en: 'Morning, uncle.', match: 'calé', conf: 'elevee' },
+      { id: 'l2', start: '00:00:15,300', end: '00:00:18,200', speaker: 'Slim', source: 'El 9ahwa mabi3a, Amira.', fr: 'Le café est vendu, Amira.', en: 'The café is sold, Amira.', match: 'calé', conf: 'elevee' },
+      { id: 'l3', start: '00:00:19,000', end: '00:00:21,600', speaker: 'Amira', source: 'Chnowa? Ba3etha?', fr: 'Quoi ? Tu l’as vendu ?', en: 'What? You sold it?', match: 'calé', conf: 'elevee' },
+      { id: 'l4', start: '00:00:22,100', end: '00:00:23,900', speaker: 'Slim', source: 'Ma3andich el 9alb nkamel, Amira, walla.', fr: 'Je n’ai plus le cœur à continuer, Amira, je te jure.', en: 'I don’t have the heart to go on anymore, Amira, I swear.', match: 'calé', conf: 'moyenne', note: '« Ma3andich el 9alb » : littéralement « je n’ai pas le cœur ». Sens : plus le courage, plus l’envie.', rule: '31 car./s pour 1,8 s affichée (limite : 17).' },
+      { id: 'l5', start: '00:01:02,000', end: '00:01:04,300', speaker: 'Amira', source: 'Yezzi ya Slim!', fr: 'Ça suffit, Slim !', en: 'Enough, Slim!', match: 'calé', conf: 'elevee' },
+      { id: 'l6', start: '00:01:05,000', end: '00:01:08,700', speaker: 'Slim', source: 'Enti dima t7ebi tkouni 3la 7a9.', fr: 'Tu veux toujours avoir raison.', en: 'You always want to be right.', match: 'à vérifier', conf: 'moyenne' },
+      { id: 'l7', start: '00:02:40,500', end: '00:02:43,000', speaker: 'Nour', source: 'Rabbi yesahel.', fr: 'Que Dieu te facilite la route.', en: 'May God ease your way.', match: 'calé', conf: 'faible', note: 'Formule de politesse. Selon le ton : « Bon courage », « Bonne route ». Le mot à mot sonne solennel.' },
+      { id: 'l8', start: '00:02:44,000', end: '00:02:46,800', speaker: 'Amira', source: 'Ya3tik essa7a, Nour.', fr: 'Merci, Nour.', en: 'Thank you, Nour.', match: 'calé', conf: 'moyenne', note: '« Ya3tik essa7a » : littéralement « que Dieu te donne la santé ». Ici : merci.' },
+      { id: 'l9', start: '00:02:47,200', end: '00:02:49,500', speaker: '?', source: 'Barcha 7kayet, khalli 3la ba3d.', fr: 'Plein d’histoires, on verra plus tard.', en: 'Lots of stories, later.', match: 'improvisée', conf: 'faible' }
+    ];
+
+    const chip = 'display: inline-flex; align-items: center; padding: 3px 8px; font-family: JetBrains Mono, monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; ';
+    const matchMap = {
+      'calé': { label: 'Calé sur le scénario', style: chip + 'background: #E2E0D9; color: #121110' },
+      'à vérifier': { label: 'Scénario : à vérifier', style: chip + 'background: #FFF0C2; color: #5C4400' },
+      'improvisée': { label: 'Absente du scénario', style: chip + 'background: #FFF0C2; color: #5C4400' }
+    };
+    const confMap = {
+      elevee: { label: 'Confiance élevée', style: chip + 'background: #DDEFE3; color: #14532D', risk: 0 },
+      moyenne: { label: 'Confiance moyenne', style: chip + 'background: #FFF0C2; color: #5C4400', risk: 1 },
+      faible: { label: 'Confiance faible', style: chip + 'background: #FBD9DC; color: #7F1020', risk: 2 }
+    };
+
+    const card = 'list-style: none; background: #FFFFFF; padding: 18px 20px; ';
+    const all = base.map((l) => {
+      const e = s.edits[l.id] || {};
+      const v = !!s.validated[l.id];
+      const risk = confMap[l.conf].risk + (l.rule ? 2 : 0) + (l.match === 'calé' ? 0 : 1);
+      return {
+        ...l,
+        fr: e.fr !== undefined ? e.fr : l.fr,
+        en: e.en !== undefined ? e.en : l.en,
+        edited: e.fr !== undefined || e.en !== undefined,
+        validated: v,
+        risk,
+        matchLabel: matchMap[l.match].label,
+        matchStyle: matchMap[l.match].style,
+        confLabel: confMap[l.conf].label,
+        confStyle: confMap[l.conf].style,
+        hasNote: !!l.note,
+        note: l.note || '',
+        hasRule: !!l.rule,
+        rule: l.rule || '',
+        cardStyle: card + (s.selected === l.id ? 'border: 3px solid #121110; box-shadow: 6px 6px 0 #FFC82E' : v ? 'border: 2px solid #D9D7D1' : 'border: 2px dashed #121110'),
+        validateLabel: v ? 'Annuler la validation' : 'Valider la ligne',
+        validateStyle: 'min-height: 44px; padding: 0 16px; font: inherit; font-size: 14px; font-weight: 600; ' + (v ? 'border: 2px solid #121110; background: #FFFFFF; color: #121110' : 'border: 2px solid #C8102E; background: #C8102E; color: #FFFFFF'),
+        select: () => this.setState({ selected: l.id }),
+        toggle: () => this.setState({ validated: { ...s.validated, [l.id]: !v } }),
+        editFr: (ev) => this.setState({ edits: { ...s.edits, [l.id]: { ...e, fr: ev.target.value } } }),
+        editEn: (ev) => this.setState({ edits: { ...s.edits, [l.id]: { ...e, en: ev.target.value } } })
+      };
+    });
+
+    const riskLines = all.filter((l) => l.risk > 0).sort((a, b) => b.risk - a.risk);
+    const lines = s.filter === 'risk' ? riskLines : all;
+    const validatedCount = all.filter((l) => l.validated).length;
+    const total = all.length;
+    const current = all.find((l) => l.id === s.selected) || all[0];
+
+    const tab = 'min-height: 44px; padding: 0 16px; border: 0; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; ';
+    const locked = validatedCount < total;
+    const heights = [8, 14, 22, 30, 18, 10, 6, 12, 26, 34, 20, 9, 5, 16, 28, 24, 12, 7, 18, 30, 22, 10, 6, 14, 20, 32, 26, 12, 8, 16, 24, 18, 9, 6, 12, 22, 28, 14, 8, 5];
+    const bars = heights.map((h, i) => ({
+      style: 'flex: 1; height: ' + h + 'px; background: ' + (i >= 24 && i <= 27 ? '#FFC82E' : '#55524C')
+    }));
+
+    return {
+      lines,
+      total,
+      validatedCount,
+      riskCount: riskLines.length,
+      current,
+      bars,
+      progressStyle: 'height: 10px; background: #121110; width: ' + Math.round((validatedCount / total) * 100) + '%',
+      exportLocked: locked,
+      exportStyle: 'display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; font: inherit; font-size: 14px; font-weight: 600; border: 2px solid ' + (locked ? '#D9D7D1; background: #E2E0D9; color: #55524C' : '#C8102E; background: #C8102E; color: #FFFFFF'),
+      exportNote: locked ? 'Export possible quand les ' + total + ' lignes sont validées.' : 'Toutes les lignes sont validées : tu peux exporter.',
+      riskPressed: s.filter === 'risk' ? 'true' : 'false',
+      allPressed: s.filter === 'all' ? 'true' : 'false',
+      riskTab: tab + (s.filter === 'risk' ? 'background: #121110; color: #FFFFFF' : 'background: #FFFFFF; color: #121110'),
+      allTab: tab + (s.filter === 'all' ? 'background: #121110; color: #FFFFFF' : 'background: #FFFFFF; color: #121110'),
+      showRisk: () => this.setState({ filter: 'risk' }),
+      showAll: () => this.setState({ filter: 'all' })
+    };
+  }
+}
+</script>
+</body>
+</html>

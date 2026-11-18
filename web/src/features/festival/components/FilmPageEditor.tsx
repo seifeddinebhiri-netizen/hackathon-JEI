@@ -35,7 +35,7 @@ function Check({ ok, label, to }: { ok: boolean; label: string; to?: string }) {
   );
 }
 
-export function FilmPageTab({ project }: { project: Project }) {
+export function FilmPageEditor({ project }: { project: Project }) {
   const [page, setPage, saveState] = useProjectField(project, 'film_page', EMPTY_FILM_PAGE);
   const synopsis = projectField(project, 'synopsis', EMPTY_SYNOPSIS);
   const passport = useProjectPassport(project.id);
@@ -111,9 +111,9 @@ export function FilmPageTab({ project }: { project: Project }) {
             <Check
               ok={!!(synopsis.court || synopsis.phrase)}
               label="Synopsis court"
-              to="/festival?onglet=synopsis"
+              to="/festival/synopsis?version=court"
             />
-            <Check ok={!!synopsis.long} label="Synopsis long" to="/festival?onglet=synopsis" />
+            <Check ok={!!synopsis.long} label="Synopsis long" to="/festival/synopsis?version=long" />
             <Check ok={page.stills.length > 0} label={`Photos (${page.stills.length})`} />
             <Check ok={credits > 0} label={`Générique (${credits} personnes)`} to="/planner/projet?etape=4" />
             <Check ok={!!page.trailer_url && trailerOk} label="Bande-annonce" />

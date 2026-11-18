@@ -12,7 +12,7 @@ import {
   Skeleton,
   StatusChip,
 } from '@/components/ui';
-import { useFestivalSearch } from '@/features/festival/hooks/useFestivals';
+import { useShortlistFestivals } from '@/features/festival/hooks/useFestivals';
 import { useProjectPassport } from '@/features/passport/hooks/usePassport';
 import { DEPARTMENTS, summarize } from '@/features/passport/lib/labels';
 import { SunTimes, WeatherSummary } from '@/features/planner/components/Tags';
@@ -230,10 +230,11 @@ function PassportProgress({ project }: { project: Project }) {
 
 function Deadlines({ project }: { project: Project }) {
   const ids = project.festival_shortlist.map((f) => f.festival_id);
-  const q = useFestivalSearch({}, ids.length > 0);
-  const list = (q.data ?? [])
-    .filter((m) => ids.includes(m.festival.id))
-    .sort((a, b) => a.festival.deadline.localeCompare(b.festival.deadline))
+  const q = useShortlistFestivals(ids);
+  // Seulement les appels ouverts, la date la plus proche d'abord
+  const list = (q.data?.festivals ?? [])
+    .filter((f): f is typeof f & { deadline: string } => f.deadline_status === 'ouverte' && !!f.deadline)
+    .sort((a, b) => a.deadline.localeCompare(b.deadline))
     .slice(0, 3);
   return (
     <Panel
@@ -241,12 +242,12 @@ function Deadlines({ project }: { project: Project }) {
       icon="clock"
       action={
         <ButtonLink
-          to={ids.length ? '/festival?onglet=selection' : '/festival'}
+          to={ids.length ? '/festival/dossiers' : '/festival'}
           size="sm"
           variant="secondary"
           iconRight="arrowRight"
         >
-          {ids.length ? 'Ma sélection' : 'Trouver un festival'}
+          {ids.length ? 'Mes dossiers' : 'Trouver un festival'}
         </ButtonLink>
       }
     >
@@ -256,15 +257,17 @@ function Deadlines({ project }: { project: Project }) {
         <Skeleton className="h-16 w-full" />
       ) : q.isError ? (
         <ErrorState error={q.error} onRetry={() => void q.refetch()} />
+      ) : !list.length ? (
+        <p className="text-muted-on-light">Aucun appel ouvert dans tes dossiers.</p>
       ) : (
         <ul className="flex flex-col divide-y divide-line-light">
-          {list.map((m) => (
-            <li key={m.festival.id} className="flex items-center justify-between gap-3 py-2">
+          {list.map((f) => (
+            <li key={f.id} className="flex items-center justify-between gap-3 py-2">
               <span>
-                <span className="block font-semibold">{m.festival.name}</span>
-                <span className="text-meta text-muted-on-light">{formatDate(m.festival.deadline)}</span>
+                <span className="block font-semibold">{f.name}</span>
+                <span className="text-meta text-muted-on-light">{formatDate(f.deadline)}</span>
               </span>
-              <Countdown date={m.festival.deadline} />
+              <Countdown date={f.deadline} />
             </li>
           ))}
         </ul>

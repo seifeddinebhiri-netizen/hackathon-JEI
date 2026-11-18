@@ -1,0 +1,547 @@
+[
+  {
+    "id": "jcc-courts",
+    "name": "Journées Cinématographiques de Carthage (JCC) · Compétition courts métrages",
+    "country": "Tunisie",
+    "city": "Tunis",
+    "edition": "37e édition, 12-19 décembre 2026",
+    "deadline": "2026-09-22",
+    "deadline_note": "Date limite 2026 (prolongée au 22 septembre). Appel 2027 pas encore publié.",
+    "fee": "[non précisé]",
+    "max_duration_min": null,
+    "subtitle_langs": [],
+    "ai_policy": "non_precisee",
+    "eligibility": "Films arabes et africains. Inscription uniquement sur inscription.jcctunisie.org",
+    "requirements": [
+      {
+        "kind": "format",
+        "detail": "Inscription en ligne sur la plateforme officielle du festival"
+      }
+    ],
+    "source_url": "https://www.lapresse.tn/2026/09/19/jcc-2026-competitions-officielles-prolongation-des-delais-dinscription-des-films-jusquau-22-septembre/",
+    "checked_at": "2026-11-18"
+  },
+  {
+    "id": "jcc-cine-promesse",
+    "name": "JCC · Carthage Ciné-Promesse (films d'écoles)",
+    "country": "Tunisie",
+    "city": "Tunis",
+    "edition": "37e édition, 12-19 décembre 2026",
+    "deadline": "2026-09-22",
+    "deadline_note": "Même appel que les compétitions officielles 2026. Appel 2027 pas encore publié.",
+    "fee": "[non précisé]",
+    "max_duration_min": null,
+    "subtitle_langs": [],
+    "ai_policy": "non_precisee",
+    "eligibility": "Productions des écoles de cinéma et jeunes réalisateurs",
+    "requirements": [
+      {
+        "kind": "format",
+        "detail": "Inscription en ligne sur inscription.jcctunisie.org"
+      }
+    ],
+    "source_url": "https://www.lapresse.tn/2026/11/13/selection-officielle-des-films-tunisiens-aux-jcc-2026-entre-retrouvailles-et-nouvelles-signatures/",
+    "checked_at": "2026-11-18"
+  },
+  {
+    "id": "fifak",
+    "name": "Festival International du Film Amateur de Kélibia (FIFAK)",
+    "country": "Tunisie",
+    "city": "Kélibia",
+    "edition": "39e édition, 23-29 août 2026",
+    "deadline": null,
+    "deadline_note": "Aucune date limite publiée. Édition 2027 attendue fin août : surveiller la page FilmFreeway.",
+    "fee": "[non précisé]",
+    "max_duration_min": 30,
+    "subtitle_langs": [],
+    "ai_policy": "non_precisee",
+    "eligibility": "Compétition internationale ouverte aux films amateurs, indépendants et d'écoles, de toute origine et de tout genre ; production 2025 ou après (édition 2026)",
+    "requirements": [
+      {
+        "kind": "format",
+        "detail": "30 minutes maximum"
+      }
+    ],
+    "source_url": "https://filmfreeway.com/FIFAK2026",
+    "checked_at": "2026-11-18"
+  },
+  {
+    "id": "clermont-international",
+    "name": "Festival international du court métrage de Clermont-Ferrand · Compétition internationale",
+    "country": "France",
+    "city": "Clermont-Ferrand",
+    "edition": "49e édition, 29 janvier - 6 février 2027",
+    "deadline": "2026-09-24",
+    "deadline_note": "Pour l'édition 2027 : 9 juillet 2026 (films terminés entre le 1er oct. et le 31 déc. 2025) et 24 septembre 2026 (films terminés en 2026). Prochain appel (édition 2028) attendu à l'été 2027.",
+    "fee": "13 € + 1 timbre Shortfilmdepot (-50 % pour les écoles qui inscrivent plusieurs réalisateurs)",
+    "max_duration_min": 40,
+    "subtitle_langs": [
+      "en",
+      "fr"
+    ],
+    "ai_policy": "a_declarer",
+    "ai_policy_detail": "Tout usage d'IA générative (image, son) et tout outil d'IA (écriture, production, post-production) doit être déclaré. L'IA n'est pas un critère de sélection en soi. Un seul film entièrement généré par IA par personne.",
+    "eligibility": "Films produits après le 1er octobre 2025 ; pas de règle de première ; accord de l'école exigé pour un film d'école",
+    "requirements": [
+      {
+        "kind": "declaration_ia",
+        "detail": "Déclaration obligatoire de l'usage de l'IA sur Shortfilmdepot"
+      },
+      {
+        "kind": "sous_titres",
+        "detail": "Liste des dialogues traduite en français ou en anglais à l'inscription ; si sélectionné : sous-titres anglais non incrustés + fichier .srt"
+      },
+      {
+        "kind": "photos",
+        "detail": "1 photo du film jointe à l'inscription"
+      },
+      {
+        "kind": "format",
+        "detail": "40 minutes maximum ; inscription via Shortfilmdepot"
+      }
+    ],
+    "source_url": "https://www.lecourt-clermont.org/wp-content/uploads/2026/06/FR-Reglement-international-2027.pdf",
+    "checked_at": "2026-11-18"
+  },
+  {
+    "id": "cannes-la-cinef",
+    "name": "Festival de Cannes · La Cinef (films d'écoles)",
+    "country": "France",
+    "city": "Cannes",
+    "edition": "Festival de Cannes 2027 (mai 2027)",
+    "deadline": "2027-02-15",
+    "deadline_note": "Formulaire rempli ET film téléchargé avant le 15 février 2027.",
+    "fee": "[non précisé dans le règlement]",
+    "max_duration_min": 60,
+    "subtitle_langs": [],
+    "ai_policy": "non_precisee",
+    "eligibility": "Films d'écoles de fiction ou d'animation (pas de documentaires), réalisés dans les 18 mois précédant le festival, non montrés dans les grands festivals internationaux",
+    "requirements": [
+      {
+        "kind": "format",
+        "detail": "60 minutes maximum ; inscription sur le portail Mon Compte du Festival"
+      }
+    ],
+    "source_url": "https://www.festival-cannes.com/participer/inscrire-un-film/reglement-la-cinef/",
+    "checked_at": "2026-11-18"
+  },
+  {
+    "id": "cannes-courts",
+    "name": "Festival de Cannes · Courts métrages en Compétition",
+    "country": "France",
+    "city": "Cannes",
+    "edition": "Festival de Cannes 2027 (mai 2027)",
+    "deadline": null,
+    "deadline_note": "Règlement 2027 pas encore trouvé. En 2026 : inscription avant le 2 mars, film téléchargé avant le 9 mars.",
+    "fee": "[non précisé]",
+    "max_duration_min": 15,
+    "subtitle_langs": [],
+    "ai_policy": "non_precisee",
+    "eligibility": "Réalisé dans les 12 mois précédant le festival ; ne pas avoir été diffusé sur Internet",
+    "requirements": [
+      {
+        "kind": "format",
+        "detail": "15 minutes maximum, générique inclus ; aucune diffusion en ligne préalable"
+      }
+    ],
+    "source_url": "https://www.festival-cannes.com/participer/inscrire-un-film/reglement-courts-metrages/",
+    "checked_at": "2026-11-18"
+  },
+  {
+    "id": "fespaco",
+    "name": "FESPACO · Festival panafricain du cinéma et de la télévision de Ouagadougou",
+    "country": "Burkina Faso",
+    "city": "Ouagadougou",
+    "edition": "30e édition, 20-27 mars 2027 (dates du site officiel ; d'abord annoncées du 27 février au 6 mars)",
+    "deadline": "2026-09-20",
+    "deadline_note": "Appel à films de l'édition 2027 clos le 20 septembre 2026. Festival biennal : prochain appel pour 2029.",
+    "fee": "32 798 F CFA (environ 50 €)",
+    "max_duration_min": null,
+    "subtitle_langs": [],
+    "ai_policy": "non_precisee",
+    "eligibility": "Cinéastes africains et de la diaspora ; films produits après le FESPACO 2025 ; sections dont courts métrages et films d'écoles",
+    "requirements": [
+      {
+        "kind": "format",
+        "detail": "Inscription en ligne sur fespaco.bf, paiement via Faso Arzèka"
+      }
+    ],
+    "source_url": "https://burkina24.com/2026/02/24/fespaco-2027-le-compte-a-rebours-est-lance-pour-la-30e-edition/",
+    "checked_at": "2026-11-18"
+  },
+  {
+    "id": "cinemas-afrique-angers",
+    "name": "Festival Cinémas d'Afrique",
+    "country": "France",
+    "city": "Angers",
+    "edition": "21e édition, 18-23 mai 2027",
+    "deadline": "2026-12-31",
+    "deadline_note": "Copies de visionnage et documents à envoyer avant le 31 décembre 2026.",
+    "fee": "[non mentionné dans le règlement]",
+    "max_duration_min": 60,
+    "subtitle_langs": [
+      "fr"
+    ],
+    "ai_policy": "non_precisee",
+    "eligibility": "Films de réalisateurs africains, produits de 2024 à 2027 ; fiction, animation, documentaire",
+    "requirements": [
+      {
+        "kind": "sous_titres",
+        "detail": "Sous-titres français obligatoires pour les films non francophones (lien de visionnage sous-titré)"
+      },
+      {
+        "kind": "synopsis",
+        "detail": "Synopsis dans la fiche d'inscription"
+      },
+      {
+        "kind": "photos",
+        "detail": "Photo du film et photo du réalisateur"
+      },
+      {
+        "kind": "bio",
+        "detail": "Biographie du réalisateur"
+      }
+    ],
+    "source_url": "https://cinemasdafrique.asso.fr/wp-content/uploads/2026/04/Reglement-festival-2027.pdf",
+    "checked_at": "2026-11-18"
+  },
+  {
+    "id": "cinemamed-bruxelles",
+    "name": "Cinemamed · Festival du cinéma méditerranéen de Bruxelles",
+    "country": "Belgique",
+    "city": "Bruxelles",
+    "edition": "26e édition, 26 novembre - 4 décembre 2026",
+    "deadline": "2026-08-15",
+    "deadline_note": "Appel 2026 clos. Prochain appel attendu au printemps-été 2027.",
+    "fee": "[non précisé]",
+    "max_duration_min": 35,
+    "subtitle_langs": [
+      "fr"
+    ],
+    "ai_policy": "non_precisee",
+    "eligibility": "Courts métrages de fiction ou documentaires (section « Coup de cœur du court », non compétitive) ; réalisateur d'un pays méditerranéen ou production méditerranéenne ; terminés en 2025 ou 2026",
+    "requirements": [
+      {
+        "kind": "sous_titres",
+        "detail": "Version française ou sous-titres français uniquement"
+      },
+      {
+        "kind": "format",
+        "detail": "DCP + fichier H.264 .mp4 1920x1080 ; lien de visionnage via Festiciné"
+      },
+      {
+        "kind": "synopsis",
+        "detail": "Synopsis (si sélectionné)"
+      },
+      {
+        "kind": "photos",
+        "detail": "Photos du film 300 dpi + photo du réalisateur"
+      },
+      {
+        "kind": "bio",
+        "detail": "Courte biographie du réalisateur en français ou en anglais"
+      },
+      {
+        "kind": "bande_annonce",
+        "detail": "Lien de la bande-annonce ou extraits"
+      }
+    ],
+    "source_url": "https://up.festicine.pro/cinemamed/cinemamed26-appel-a-films-reglement.pdf",
+    "checked_at": "2026-11-18"
+  },
+  {
+    "id": "cinemed-montpellier",
+    "name": "Cinemed · Festival International du Cinéma Méditerranéen de Montpellier · Compétition courts métrages",
+    "country": "France",
+    "city": "Montpellier",
+    "edition": "48e édition, 16-24 octobre 2026",
+    "deadline": null,
+    "deadline_note": "Appel 2027 pas encore publié. En 2025, la compétition courts métrages fermait le 7 juillet.",
+    "fee": "[non précisé]",
+    "max_duration_min": null,
+    "subtitle_langs": [],
+    "ai_policy": "non_precisee",
+    "eligibility": "Réalisateurs originaires d'un pays du bassin méditerranéen (dont la Tunisie), du Portugal, de Géorgie, de Roumanie, de Bulgarie ou d'Arménie ; environ 20 courts en compétition",
+    "requirements": [],
+    "source_url": "https://www.cnc.fr/cinema/actualites/le-47e-cinemedlance-son-appel-a-films_2381961",
+    "checked_at": "2026-11-18"
+  },
+  {
+    "id": "fiff-namur",
+    "name": "FIFF · Festival International du Film Francophone de Namur",
+    "country": "Belgique",
+    "city": "Namur",
+    "edition": "41e édition (automne 2026)",
+    "deadline": null,
+    "deadline_note": "Date limite non trouvée dans une source fiable. À vérifier sur fiff.be.",
+    "fee": "[non précisé]",
+    "max_duration_min": 30,
+    "subtitle_langs": [],
+    "ai_policy": "non_precisee",
+    "eligibility": "Courts métrages francophones de fiction et d'animation ; seuls les documentaires belges sont acceptés en inscription",
+    "requirements": [
+      {
+        "kind": "format",
+        "detail": "30 minutes maximum (conditions de l'édition 2025)"
+      }
+    ],
+    "source_url": "https://www.unifrance.org/festivals-et-marches/350/festival-international-du-film-francophone-de-namur-fiff",
+    "checked_at": "2026-11-18"
+  },
+  {
+    "id": "nuits-med-bastia",
+    "name": "Les Nuits MED · Festival itinérant de courts métrages (Bastia)",
+    "country": "France",
+    "city": "Bastia (Corse)",
+    "edition": "20e édition, juin 2027",
+    "deadline": "2027-03-01",
+    "deadline_note": "Compétition méditerranéenne et compétition des premiers courts métrages (internationale) : jusqu'au 1er mars 2027.",
+    "fee": "[non précisé]",
+    "max_duration_min": null,
+    "subtitle_langs": [],
+    "ai_policy": "non_precisee",
+    "eligibility": "Courts métrages méditerranéens ; compétition dédiée aux premiers courts métrages",
+    "requirements": [
+      {
+        "kind": "format",
+        "detail": "Visa d'exploitation obligatoire pour valider l'inscription (sinon, demande de visa exceptionnel auprès du CNC)"
+      }
+    ],
+    "source_url": "https://www.helloasso.com/associations/diffusion-kva/adhesions/reglement-inscriptions-films-2027-festival-20e-nuits-med",
+    "checked_at": "2026-11-18"
+  },
+  {
+    "id": "eclats-ecran-paris",
+    "name": "Les Éclats d'Écran · Paris",
+    "country": "France",
+    "city": "Paris",
+    "edition": "Édition 2027",
+    "deadline": "2026-12-10",
+    "deadline_note": "HelloAsso indique le 20 décembre 2026, FilmFreeway le 10 décembre 2026 : on retient la date la plus prudente.",
+    "fee": "25 € (fiction ou documentaire) ; 20 € (catégories techniques / acteurs)",
+    "max_duration_min": 30,
+    "subtitle_langs": [
+      "fr"
+    ],
+    "ai_policy": "non_precisee",
+    "eligibility": "Jeunes cinéastes ; film francophone ou sous-titré en français",
+    "requirements": [
+      {
+        "kind": "sous_titres",
+        "detail": "Film en français ou sous-titré en français"
+      },
+      {
+        "kind": "format",
+        "detail": "30 minutes maximum générique inclus ; mp4 ou mov (DCP sur demande)"
+      }
+    ],
+    "source_url": "https://www.helloasso.com/associations/les-eclats-d-ecran/evenements/festival-national-les-eclats-d-ecran-paris-appel-a-films-2027",
+    "checked_at": "2026-11-18"
+  },
+  {
+    "id": "courtmed-cmca",
+    "name": "CourtMed · Concours de courts métrages du CMCA",
+    "country": "France",
+    "city": "Marseille",
+    "edition": "Édition 2026",
+    "deadline": "2026-03-31",
+    "deadline_note": "Appel 2026 clos le 31 mars 2026. Édition 2027 à surveiller (appel lancé en janvier les années précédentes).",
+    "fee": "[non précisé]",
+    "max_duration_min": null,
+    "subtitle_langs": [],
+    "ai_policy": "non_precisee",
+    "eligibility": "Étudiants d'écoles de cinéma et de journalisme, jeunes réalisateurs récemment diplômés, originaires d'un pays méditerranéen ; sujets liés aux sociétés méditerranéennes",
+    "requirements": [],
+    "source_url": "https://cmca-med.org/wp-content/uploads/2026/01/CourtMed_Reglement_Concours_2026.pdf",
+    "checked_at": "2026-11-18"
+  },
+  {
+    "id": "bsff-international",
+    "name": "Brussels Short Film Festival (BSFF) · Compétition internationale",
+    "country": "Belgique",
+    "city": "Bruxelles",
+    "edition": "30e édition, 22 avril - 1er mai 2027",
+    "deadline": "2027-01-14",
+    "deadline_note": "Tarif 16 € jusqu'au 3 décembre 2026, puis 23 € jusqu'au 14 janvier 2027. Résultats mi-mars 2027.",
+    "fee": "16 € puis 23 € (paliers)",
+    "max_duration_min": 30,
+    "subtitle_langs": [
+      "en"
+    ],
+    "ai_policy": "non_precisee",
+    "eligibility": "Tous genres ; films produits (ou montrés pour la première fois en public) après le 1er novembre 2025 ; les films d'écoles vont dans la compétition Next Generation. Festival qualificatif pour les Oscars et les BAFTA.",
+    "requirements": [
+      {
+        "kind": "sous_titres",
+        "detail": "Copie de visionnage sous-titrée en anglais, même pour un film en anglais"
+      },
+      {
+        "kind": "photos",
+        "detail": "3 photos du film + 1 photo du réalisateur (affiche facultative)"
+      },
+      {
+        "kind": "format",
+        "detail": "30 minutes maximum ; inscription en ligne via Festhome ou Shortfilmdepot ; si sélectionné : DCP non crypté ou MP4 1920x1080"
+      }
+    ],
+    "source_url": "https://filmmakers.festhome.com/festival/896",
+    "checked_at": "2026-11-18"
+  },
+  {
+    "id": "bsff-next-generation",
+    "name": "Brussels Short Film Festival (BSFF) · Compétition Next Generation (films d'écoles)",
+    "country": "Belgique",
+    "city": "Bruxelles",
+    "edition": "30e édition, 22 avril - 1er mai 2027",
+    "deadline": "2027-01-14",
+    "deadline_note": "Tarif 11 € jusqu'au 3 décembre 2026, puis 15 € jusqu'au 14 janvier 2027 (montants affichés différemment sur Festhome : à confirmer avant paiement).",
+    "fee": "11 € puis 15 € (paliers, à confirmer)",
+    "max_duration_min": 30,
+    "subtitle_langs": [
+      "en"
+    ],
+    "ai_policy": "non_precisee",
+    "eligibility": "Films réalisés dans une école de cinéma ou un cursus supérieur de réalisation ; produits après le 1er novembre 2025",
+    "requirements": [
+      {
+        "kind": "sous_titres",
+        "detail": "Copie de visionnage sous-titrée en anglais"
+      },
+      {
+        "kind": "photos",
+        "detail": "3 photos du film + 1 photo du réalisateur"
+      },
+      {
+        "kind": "format",
+        "detail": "30 minutes maximum ; inscription en ligne via Festhome ou Shortfilmdepot"
+      }
+    ],
+    "source_url": "https://filmmakers.festhome.com/festival/896",
+    "checked_at": "2026-11-18"
+  },
+  {
+    "id": "vienna-shorts",
+    "name": "Vienna Shorts · Fiction & Documentary",
+    "country": "Autriche",
+    "city": "Vienne",
+    "edition": "24e édition, 25-30 mai 2027",
+    "deadline": "2027-01-31",
+    "deadline_note": "Tarif normal 19 € jusqu'au 5 janvier 2027, tarif tardif 29 € du 6 au 31 janvier 2027.",
+    "fee": "19 € puis 29 €",
+    "max_duration_min": 30,
+    "subtitle_langs": [
+      "en"
+    ],
+    "ai_policy": "a_declarer",
+    "ai_policy_detail": "Déclaration obligatoire parmi 4 options : pas d'IA ; IA comme outil technique (sous-titrage, nettoyage audio, upscaling) ; IA pour générer des images ou du contenu artistique ; les deux. Le formulaire ne dit pas si le choix influe sur la sélection.",
+    "eligibility": "Films terminés le 1er janvier 2026 ou après ; films d'écoles acceptés",
+    "requirements": [
+      {
+        "kind": "declaration_ia",
+        "detail": "Déclaration de l'usage de l'IA dans le formulaire"
+      },
+      {
+        "kind": "sous_titres",
+        "detail": "Sous-titres anglais obligatoires pour tout film dialogué"
+      },
+      {
+        "kind": "photos",
+        "detail": "Jusqu'à 3 photos du film (JPG/PNG, moins de 5 Mo)"
+      },
+      {
+        "kind": "synopsis",
+        "detail": "Synopsis court dans le formulaire"
+      },
+      {
+        "kind": "format",
+        "detail": "30 minutes maximum ; lien de visionnage en ligne jusqu'à fin avril"
+      }
+    ],
+    "source_url": "https://viennashorts.filmchief.com/submit-film/fiction-documentary-2027",
+    "checked_at": "2026-11-18"
+  },
+  {
+    "id": "alexandria-short",
+    "name": "Alexandria Short Film Festival · Compétitions internationale et arabe",
+    "country": "Égypte",
+    "city": "Alexandrie",
+    "edition": "13e édition, 10-15 avril 2027",
+    "deadline": "2027-01-01",
+    "deadline_note": "Le règlement dit « avant le 1er janvier 2027 », mais Festhome affiche une date limite prolongée au 15 janvier 2027. On retient la date la plus prudente.",
+    "fee": "15 $ (internationale) ; 12 $ (arabe) ; 11 $ (compétition IA), tarifs de la dernière période",
+    "max_duration_min": 30,
+    "subtitle_langs": [
+      "en",
+      "ar"
+    ],
+    "ai_policy": "section_dediee",
+    "ai_policy_detail": "Les films entièrement générés par IA vont dans une compétition à part (International AI Competition). Pas d'autre règle sur l'IA.",
+    "eligibility": "Films produits après le 1er janvier 2024 ; jamais montrés en Égypte ; aucune diffusion en ligne avant la fin du festival ; compétition arabe réservée aux réalisateurs arabes ou d'origine arabe",
+    "requirements": [
+      {
+        "kind": "sous_titres",
+        "detail": "Internationale : sous-titres anglais pour les films non arabophones. Arabe : sous-titres anglais ET arabes pour les films non arabophones ; copie sous-titrée en anglais si un film arabophone est sélectionné"
+      },
+      {
+        "kind": "format",
+        "detail": "30 minutes maximum ; formulaire en ligne en arabe ou en anglais via Festhome ; aucune diffusion en ligne"
+      }
+    ],
+    "source_url": "https://filmmakers.festhome.com/festival/6819",
+    "checked_at": "2026-11-18"
+  },
+  {
+    "id": "a-films-ouverts",
+    "name": "À Films Ouverts · Concours de courts métrages contre le racisme",
+    "country": "Belgique",
+    "city": null,
+    "edition": "Concours 2027, remise des prix le 4 avril 2027",
+    "deadline": "2027-01-22",
+    "deadline_note": "Inscription avant le 22 janvier 2027 ; envoi du fichier du film avant le 22 février 2027.",
+    "fee": "Gratuit",
+    "max_duration_min": 5,
+    "subtitle_langs": [
+      "fr"
+    ],
+    "ai_policy": "a_declarer",
+    "ai_policy_detail": "Tout usage d'IA générative doit être crédité au générique, de la façon la plus transparente possible.",
+    "eligibility": "Ouvert à tous, sans condition d'âge ni de nationalité ; œuvre datée de 2026 ou après ; thème obligatoire : la lutte contre le racisme",
+    "requirements": [
+      {
+        "kind": "declaration_ia",
+        "detail": "Mention de l'IA générative dans le générique"
+      },
+      {
+        "kind": "sous_titres",
+        "detail": "Film compréhensible par un public francophone (sous-titres acceptés)"
+      },
+      {
+        "kind": "format",
+        "detail": "5 minutes maximum générique compris ; .mp4, .avi ou .mpeg via lien de transfert"
+      },
+      {
+        "kind": "droits_musique",
+        "detail": "Preuve des droits pour toute musique ou image de tiers"
+      }
+    ],
+    "source_url": "https://afilmsouverts.be/wp-content/uploads/2026/08/AFO_2027_REGLEMENT.pdf",
+    "checked_at": "2026-11-18"
+  },
+  {
+    "id": "ficam-meknes",
+    "name": "FICAM · Festival International de Cinéma d'Animation de Meknès · Compétition courts métrages",
+    "country": "Maroc",
+    "city": "Meknès",
+    "edition": "25e édition (mai 2027, dates à confirmer)",
+    "deadline": null,
+    "deadline_note": "Règlement 2027 pas encore publié. En 2026, la compétition internationale fermait le 8 février.",
+    "fee": "[non précisé]",
+    "max_duration_min": null,
+    "subtitle_langs": [],
+    "ai_policy": "non_precisee",
+    "eligibility": "Films d'animation uniquement ; compétition internationale",
+    "requirements": [],
+    "source_url": "https://ficam.ma/wp-content/uploads/2025/12/Reglement-Court-Compet-FICAM-2026.pdf",
+    "checked_at": "2026-11-18"
+  }
+]
