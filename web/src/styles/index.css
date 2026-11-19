@@ -173,7 +173,31 @@
 @media print {
   @page {
     size: A4;
-    margin: 14mm;
+    margin: 14mm 14mm 18mm;
+    /* Numéro de page en bas à droite ; le film et la date sont ajoutés par printAsPdf() */
+    @bottom-right {
+      content: 'Page ' counter(page) ' / ' counter(pages);
+      font:
+        500 9pt 'Inter',
+        sans-serif;
+      color: #55524c;
+    }
+    @bottom-left {
+      font:
+        500 9pt 'Inter',
+        sans-serif;
+      color: #55524c;
+    }
+  }
+  /* Couleurs de l'app gardées à l'impression (bandeaux, pastilles) */
+  html {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
   }
   html,
   body {

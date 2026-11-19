@@ -18,8 +18,7 @@ app = FastAPI()
 register_error_handlers(app)
 app.include_router(screenplay_router)
 
-FIXTURE = (Path(__file__).parent / "fixtures" / "le_dernier_ferry.fountain").read_text()
-
+FIXTURE = (Path(__file__).parent / "fixtures" / "le_dernier_ferry.fountain").read_text(encoding="utf-8")
 
 class FakeLLM:
     model = "fake-model"

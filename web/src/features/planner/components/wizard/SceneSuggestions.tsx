@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Project, SceneSuggestion, SceneSuggestResult } from '@/api/types';
-import { AiDraftBadge, Button, Icon, Skeleton, StatusChip } from '@/components/ui';
+import { AiDraftBadge, Button, Icon, StatusChip } from '@/components/ui';
 import {
   cachedSceneSuggestions,
   saveSuggestionDecision,
@@ -122,43 +122,34 @@ export function SceneSuggestions({
   const open = result?.suggestions.filter((s) => !decisions[s.id]).length ?? 0;
 
   return (
-    <section
-      aria-labelledby="suggestions-titre"
-      className="flex flex-col gap-4 border-2 border-ink bg-gold-soft/40 p-4 md:p-5"
-    >
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-3">
-          <h2 id="suggestions-titre" className="text-h3">
-            Suggestions pour le tournage
-          </h2>
-          {result ? <AiDraftBadge validated={!open} /> : null}
-        </div>
-        {result && !suggest.isPending ? (
-          <Button size="sm" variant="ghost" icon="sparkle" onClick={run}>
-            Relire mes scènes
-          </Button>
-        ) : null}
-      </div>
-      <p className="max-w-prose text-meta">
-        L’IA relit tes scènes et propose de préciser ou de simplifier le tournage. Elle ne réécrit jamais ton
-        histoire, tes dialogues ni tes personnages : tu acceptes ou tu refuses chaque suggestion.
-      </p>
-
-      {!result && !suggest.isPending ? (
-        <Button icon="sparkle" className="self-start" onClick={run}>
-          Demander des suggestions
+    <section aria-labelledby="suggestions-titre" className="flex flex-col gap-3">
+      <h3 id="suggestions-titre" className="sr-only">
+        Suggestions de l’IA pour le tournage
+      </h3>
+      <div className="flex flex-wrap items-center gap-3">
+        <Button
+          variant="secondary"
+          icon="sparkle"
+          onClick={run}
+          disabled={suggest.isPending}
+          aria-describedby="suggestions-aide"
+        >
+          {result ? 'Relire à nouveau' : 'Relire mes scènes'}
         </Button>
-      ) : null}
-
-      {suggest.isPending ? (
-        <div role="status" className="flex flex-col gap-3">
-          <p className="flex items-center gap-2 font-semibold">
-            <Icon name="sparkle" size={18} /> L’IA relit tes scènes…
-          </p>
-          <Skeleton className="h-24" />
-          <Skeleton className="h-24" />
-        </div>
-      ) : null}
+        {suggest.isPending ? (
+          <span role="status" className="flex items-center gap-2 text-meta text-muted-on-light">
+            <span
+              aria-hidden
+              className="inline-block size-4 animate-spin border-2 border-current border-r-transparent"
+            />
+            Relecture en cours…
+          </span>
+        ) : (
+          <span id="suggestions-aide" className="text-meta text-muted-on-light">
+            L’IA propose, tu acceptes ou refuses.
+          </span>
+        )}
+      </div>
 
       {suggest.isError ? (
         <p role="alert" className="flex flex-wrap items-center gap-2 text-meta font-semibold text-bad-fg">
@@ -172,10 +163,9 @@ export function SceneSuggestions({
       {result && !suggest.isPending ? (
         result.suggestions.length ? (
           <>
-            <p className="text-meta font-semibold">
-              {open
-                ? `${open} suggestion${open > 1 ? 's' : ''} à décider`
-                : 'Tu as décidé pour toutes les suggestions.'}
+            <p className="flex flex-wrap items-center gap-2 text-meta font-semibold">
+              {open ? `${open} suggestion${open > 1 ? 's' : ''} à décider` : 'Tout est décidé.'}
+              <AiDraftBadge validated={!open} />
             </p>
             <ul className="flex flex-col gap-3">
               {result.suggestions.map((s) => (
@@ -185,8 +175,7 @@ export function SceneSuggestions({
           </>
         ) : (
           <p className="flex items-center gap-2 text-meta font-semibold text-ok-fg">
-            <Icon name="check" size={16} /> Rien à signaler : tes scènes sont claires pour préparer le
-            tournage.
+            <Icon name="check" size={16} /> Rien à signaler.
           </p>
         )
       ) : null}

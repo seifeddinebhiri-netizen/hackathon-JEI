@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { parseScreenplay } from './endpoints';
 import { analysisToParseResult } from './scenarioImport';
 import { scenarioAnalysisSchema } from './schemas';
@@ -89,12 +89,31 @@ describe('analysisToParseResult', () => {
 });
 
 describe('parseScreenplay (backend)', () => {
-  it('refuse un PDF : le découpage par l’IA lit du texte', async () => {
-    const pdf = new File(['%PDF'], 'scenario.pdf', { type: 'application/pdf' });
-    await expect(parseScreenplay({ file: pdf })).rejects.toMatchObject({
-      code: 'invalide',
-      message:
-        'Pour le découpage par l’IA, colle le texte du scénario ou importe un fichier .txt ou .fountain.',
-    });
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('envoie le PDF tel quel en multipart à POST /planner/parse, avec use_ai', async () => {
+    const fetchMock = vi.fn(async (_url: string | URL, _init?: RequestInit) =>
+      Response.json({ scenes: [], locations: [], characters: [], warnings: ['Vide'], ai_used: true }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    const pdf = new File(['%PDF-1.7'], 'scenario.pdf', { type: 'application/pdf' });
+    const r = await parseScreenplay({ file: pdf });
+    expect(r.warnings).toEqual(['Vide']);
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(String(url)).toMatch(/\/planner\/parse$/);
+    const body = init?.body as FormData;
+    expect((body.get('file') as File).name).toBe('scenario.pdf');
+    expect(body.get('use_ai')).toBe('true');
+    expect(body.get('text')).toBeNull();
+  });
+
+  it('affiche le message du serveur pour un PDF scanné sans texte', async () => {
+    const message = 'Ce PDF ne contient pas de texte lisible (scan ?).';
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Response.json({ error: { code: 'unreadable', message } }, { status: 422 })),
+    );
+    const pdf = new File(['%PDF'], 'scan.pdf', { type: 'application/pdf' });
+    await expect(parseScreenplay({ file: pdf })).rejects.toMatchObject({ message });
   });
 });

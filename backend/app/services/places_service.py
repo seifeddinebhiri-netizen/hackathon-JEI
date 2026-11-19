@@ -48,6 +48,24 @@ class PlacesService:
             self._cache.move_to_end(key)
             return self._cache[key]
 
+        items = await self._fetch(query, city)
+        if items is None:
+            return []  # erreur réseau : pas mis en cache, on pourra réessayer
+        if not items:
+            # Nominatim cherche des noms, pas des descriptions : « café traditionnel petit
+            # quartier Tunis » ne trouve rien, « café » trouve. Un seul essai de plus.
+            simpler = simplify_query(query, city)
+            if simpler and simpler != " ".join(query.casefold().split()):
+                items = await self._fetch(simpler, city) or []
+
+        places = [p for p in (_to_candidate(i) for i in items[:MAX_RESULTS]) if p is not None]
+        self._cache[key] = places
+        if len(self._cache) > CACHE_SIZE:
+            self._cache.popitem(last=False)
+        return places
+
+    async def _fetch(self, query: str, city: str) -> list[dict] | None:
+        """Une requête Nominatim (au plus 1 par seconde). None en cas d'erreur."""
         async with self._lock:
             # Au plus 1 requête par seconde, toutes recherches confondues
             if self._last is not None:
@@ -71,18 +89,37 @@ class PlacesService:
             except (httpx.HTTPError, ValueError) as exc:
                 # Pas de requête dans les journaux : seulement le type d'erreur
                 log.warning("nominatim_error", error=type(exc).__name__)
-                return []
+                return None
             finally:
                 self._last = self._clock()
-
-        places = [p for p in (_to_candidate(i) for i in items[:MAX_RESULTS]) if p is not None]
-        self._cache[key] = places
-        if len(self._cache) > CACHE_SIZE:
-            self._cache.popitem(last=False)
-        return places
+        return items if isinstance(items, list) else None
 
     async def aclose(self) -> None:
         await self.client.aclose()
+
+
+# Mots qui décrivent un lieu sans le nommer : Nominatim ne les trouve pas sur une carte.
+_DESCRIPTIVE = {
+    "petit", "petite", "petits", "petites", "grand", "grande", "grands", "grandes",
+    "traditionnel", "traditionnelle", "traditionnels", "traditionnelles", "typique",
+    "typiques", "ancien", "ancienne", "anciens", "anciennes", "vieux", "vieille", "vieilles",
+    "moderne", "modernes", "simple", "simples", "calme", "calmes", "populaire", "populaires",
+    "local", "locale", "locaux", "locales", "authentique", "authentiques", "discret",
+    "discrète", "familial", "familiale", "quartier", "de", "du", "des", "la", "le", "les",
+    "avec", "en", "à", "au", "aux", "et", "un", "une",
+}  # fmt: skip
+
+
+def simplify_query(query: str, city: str) -> str:
+    """« café traditionnel petit quartier tunis » → « café » : sans la ville ni les adjectifs,
+    deux mots au plus."""
+    city_words = set(city.casefold().split())
+    words = [
+        w
+        for w in query.casefold().replace(",", " ").split()
+        if w not in city_words and w not in _DESCRIPTIVE
+    ]
+    return " ".join(words[:2])
 
 
 def _to_candidate(item: dict) -> PlaceCandidate | None:

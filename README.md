@@ -269,7 +269,9 @@ Documentation interactive en local : `http://localhost:8000/docs`.
 | GET | `/health/ready` | commun (test de la base) | fait |
 | POST | `/shot-spec` | 1. Cadrage | fait (testé avec un faux LLM ; appel réel à valider) |
 | GET | `/calibration` | 1. Cadrage (recalcul hors ligne côté client) | prévu |
-| POST / GET / DELETE | `/projects`, `/projects/{id}` | commun | prévu |
+| POST / GET / PATCH / DELETE | `/projects`, `/projects/{id}` | commun (projet enregistré dans Supabase, équipe comprise) | fait |
+| POST | `/callsheets/preview` | 2. Planification (brouillons des convocations, rien n'est envoyé) | fait |
+| POST | `/callsheets/send` | 2. Planification (envoi par Resend après validation ; mode essai sans clé) | fait |
 | POST | `/plan/suggest` | 2. Planification | prévu |
 | POST | `/passport` | 3. Passeport | prévu |
 | GET | `/passport/{id}/check`, `/passport/{id}/pdf`, `/verify/{id}` | 3. Passeport | prévu |

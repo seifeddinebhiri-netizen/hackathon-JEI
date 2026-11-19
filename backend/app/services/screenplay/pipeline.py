@@ -43,6 +43,7 @@ LINES_PER_PAGE = 55
 CHARS_PER_PAGE = 1_100
 HOURS_PER_PAGE = 2.0  # un court-métrage indépendant tourne ~4 à 5 pages par journée de 10 h
 MAX_HOURS_PER_SCENE = 10.0  # au-delà, ce n'est plus une scène mais plusieurs : on plafonne
+EXCERPT_CHARS = 1_200  # comme le front (Scene.excerpt)
 
 
 def _uid(prefix: str) -> str:
@@ -238,6 +239,8 @@ async def parse_screenplay(text: str, llm: ScreenplayLLM | None) -> ParseScreenp
                 page_eighths=eighths,
                 location_brief=enr.scene_briefs.get(num),
                 moment_guessed=moment_guessed[i],
+                # Début du texte de la scène : propositions de lieux, convocations (sur demande)
+                excerpt=c.body[:EXCERPT_CHARS] or None,
             )
         )
 

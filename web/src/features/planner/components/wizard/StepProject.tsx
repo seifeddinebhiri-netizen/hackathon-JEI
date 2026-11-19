@@ -124,7 +124,7 @@ export function StepProject({
       {project?.schedule ? (
         <p className="flex items-start gap-2 border-l-4 border-gold pl-3 text-meta text-muted-on-light">
           <Icon name="info" size={16} className="mt-0.5 shrink-0" />
-          Si tu changes la période ou les heures par jour, pense à régénérer le planning à la dernière étape.
+          Période ou heures changées ? Régénère le planning à la fin.
         </p>
       ) : null}
       <Button type="submit" loading={saving} iconRight="arrowRight" className="self-start">

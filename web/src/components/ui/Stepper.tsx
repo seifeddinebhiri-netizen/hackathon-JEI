@@ -8,11 +8,14 @@ export function Stepper({
   steps,
   current,
   onSelect,
+  compact,
   className,
 }: {
   steps: Step[];
   current: number;
   onSelect?: (index: number) => void;
+  /** Version basse : sur mobile, seul le nom de l'étape en cours est affiché. */
+  compact?: boolean;
   className?: string;
 }) {
   return (
@@ -25,7 +28,8 @@ export function Stepper({
             <>
               <span
                 className={cn(
-                  'grid size-7 shrink-0 place-items-center border-2 font-mono text-label',
+                  'grid shrink-0 place-items-center border-2 font-mono text-label',
+                  compact ? 'size-6' : 'size-7',
                   active
                     ? 'border-ink bg-gold text-ink'
                     : s.done
@@ -35,17 +39,31 @@ export function Stepper({
               >
                 {s.done && !active ? <Icon name="check" size={14} /> : i + 1}
               </span>
-              <span className="text-left text-meta font-semibold">{s.label}</span>
+              <span
+                className={cn(
+                  'text-left text-meta font-semibold',
+                  compact && !active && 'sr-only sm:not-sr-only',
+                )}
+              >
+                {s.label}
+              </span>
               <span className="sr-only"> ({state})</span>
             </>
           );
           const cls = cn(
-            'flex min-h-14 w-full min-w-36 items-center gap-2 px-3 py-2',
+            'flex w-full items-center gap-2',
+            compact
+              ? 'min-h-11 min-w-11 justify-center px-2 py-1 sm:justify-start'
+              : 'min-h-14 min-w-36 px-3 py-2',
             active ? 'bg-ink text-paper' : 'bg-white text-ink',
             i > 0 && 'border-l-2 border-ink',
           );
           return (
-            <li key={s.id} className="flex-1" aria-current={active ? 'step' : undefined}>
+            <li
+              key={s.id}
+              className={compact && !active ? 'flex-none sm:flex-1' : 'flex-1'}
+              aria-current={active ? 'step' : undefined}
+            >
               {onSelect ? (
                 <button
                   type="button"

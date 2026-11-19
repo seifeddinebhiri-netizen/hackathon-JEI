@@ -13,7 +13,9 @@ import {
   type CollisionDetection,
   type DragEndEvent,
 } from '@dnd-kit/core';
+import { useIsMutating } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router';
 import type { Project, Schedule, ShootingDay } from '@/api/types';
 import {
   AiDraftBadge,
@@ -26,8 +28,10 @@ import {
   PageHeader,
   SegmentedControl,
   StatusChip,
+  Stepper,
   useToast,
 } from '@/components/ui';
+import { PLANNER_STEPS, plannerStepPath, plannerStepsDone } from '@/features/planner/lib/steps';
 import { ConflictPanel } from '@/features/planner/components/calendar/ConflictPanel';
 import {
   CalendarContext,
@@ -134,7 +138,7 @@ function ScriptColumn({
   return (
     <aside
       aria-labelledby="scenario-titre"
-      className="sticky top-24 max-h-[calc(100dvh-7rem)] overflow-y-auto border-2 border-line-light bg-white p-4"
+      className="min-h-0 overflow-y-auto border-2 border-line-light bg-white p-4"
     >
       <h2 id="scenario-titre" className="text-h3">
         Votre scénario, scène par scène
@@ -176,6 +180,23 @@ function ScriptColumn({
         })}
       </ol>
     </aside>
+  );
+}
+
+/** Actions du planning, empilées : la convocation d'abord (bouton principal). */
+function PlanningActions({ className }: { className?: string }) {
+  return (
+    <div className={className ?? 'flex flex-col gap-3'}>
+      <ButtonLink to="/planner/convocations" icon="mail" className="w-full">
+        Préparer les convocations
+      </ButtonLink>
+      <ButtonLink to="/planner/projet?etape=2" variant="secondary" icon="edit" className="w-full">
+        Modifier les scènes
+      </ButtonLink>
+      <ButtonLink to="/planner/planning?pdf=1" variant="secondary" icon="download" className="w-full">
+        Télécharger en PDF
+      </ButtonLink>
+    </div>
   );
 }
 
@@ -356,6 +377,14 @@ function Calendar({ project, schedule }: { project: Project; schedule: Schedule 
           />
           <UnplacedTray schedule={schedule} extra={extra} />
 
+          <PlanningActions
+            className={
+              view === 'periode'
+                ? 'flex flex-col gap-3 sm:flex-row'
+                : 'flex flex-col gap-3 sm:flex-row lg:hidden'
+            }
+          />
+
           <div className="flex scroll-mt-24 flex-wrap items-end justify-between gap-4">
             <SegmentedControl
               legend="Affichage"
@@ -404,7 +433,8 @@ function Calendar({ project, schedule }: { project: Project; schedule: Schedule 
                   Déplacer vers… ».
                 </p>
               </div>
-              <div className="hidden lg:block">
+              {/* Colonne de droite : la carte et les actions restent collées ensemble */}
+              <div className="sticky top-24 hidden max-h-[calc(100dvh-7rem)] flex-col gap-4 lg:flex">
                 <ScriptColumn
                   schedule={schedule}
                   onPick={(sceneId, date) => {
@@ -414,6 +444,7 @@ function Calendar({ project, schedule }: { project: Project; schedule: Schedule 
                     document.getElementById(target)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                   }}
                 />
+                <PlanningActions className="flex shrink-0 flex-col gap-3" />
               </div>
             </div>
           ) : (
@@ -458,20 +489,47 @@ function Calendar({ project, schedule }: { project: Project; schedule: Schedule 
   );
 }
 
+/** Barre d'étapes de l'assistant, avec l'étape Générer en cours : on revient à une étape d'un clic. */
+function PlannerSteps({ project }: { project: Project | undefined }) {
+  const navigate = useNavigate();
+  const saving = useIsMutating() > 0;
+  const done = plannerStepsDone(project);
+  return (
+    <div className="flex flex-col gap-2">
+      <Stepper
+        compact
+        steps={PLANNER_STEPS.map((s, i) => ({ ...s, done: done[i] }))}
+        current={PLANNER_STEPS.length - 1}
+        onSelect={project ? (n) => navigate(plannerStepPath(n)) : undefined}
+      />
+      {project ? (
+        <p role="status" className="flex items-center justify-end gap-2 text-meta text-muted-on-light">
+          <Icon name={saving ? 'clock' : 'check'} size={16} />
+          {saving ? 'Enregistrement…' : 'Enregistré'}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 export default function PlannerCalendar() {
   const project = useCurrentProject();
   return (
     <div className="flex flex-col gap-8">
+      <Link
+        to={plannerStepPath(PLANNER_STEPS.length - 1)}
+        className="no-print -mb-4 inline-flex min-h-11 items-center gap-2 self-start font-semibold underline-offset-4 hover:underline"
+      >
+        <Icon name="arrowLeft" size={18} />
+        Retour
+        <span className="sr-only">aux étapes de planification</span>
+      </Link>
       <PageHeader
         eyebrow="Planifier · Calendrier"
         title="Calendrier de tournage"
-        lead="Chaque jour de tournage sur une frise resserrée autour de ses scènes, avec la lumière et la météo. Déplace les scènes : horaires et conflits sont recalculés."
-        actions={
-          <ButtonLink to="/planner/projet?etape=2" variant="secondary" icon="edit">
-            Modifier les scènes
-          </ButtonLink>
-        }
+        lead="Déplace une scène : horaires et rappels se mettent à jour."
       />
+      <PlannerSteps project={project.data} />
       {project.isPending ? (
         <LoadingBlock lines={8} label="Chargement du planning…" />
       ) : project.isError ? (

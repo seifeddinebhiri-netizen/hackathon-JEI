@@ -23,6 +23,40 @@ async def test_scenario_provider_ollama_preserves_existing_schema_without_anthro
 
 
 @pytest.mark.asyncio
+async def test_scenario_provider_groq_uses_structured_json_schema(monkeypatch):
+    real_client = httpx.AsyncClient
+    output = fixture()
+
+    def handler(request):
+        import json
+
+        payload = json.loads(request.content)
+        assert payload["response_format"]["type"] == "json_schema"
+        assert payload["response_format"]["json_schema"]["schema"] == ScenarioAnalysis.model_json_schema()
+        assert request.headers["authorization"] == "Bearer test-groq-key"
+        assert payload["model"] == "test-model"
+        return httpx.Response(
+            200,
+            json={"choices": [{"message": {"content": json.dumps(output)}}]},
+        )
+
+    monkeypatch.setattr(
+        httpx,
+        "AsyncClient",
+        lambda **kwargs: real_client(transport=httpx.MockTransport(handler), **kwargs),
+    )
+    service = LLMService(
+        Settings(
+            scenario_provider="groq",
+            groq_api_key="test-groq-key",
+            groq_scenario_model="test-model",
+        )
+    )
+    result = await service.analyze_scenario("INT. CAFÉ - JOUR\nYacine entre.")
+    assert result == ScenarioAnalysis.model_validate(output)
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "kind,status", [("valid", 200), ("malformed", 502), ("offline", 503), ("truncated", 502)]
 )

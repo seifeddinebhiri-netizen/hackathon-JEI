@@ -124,14 +124,16 @@ def test_invalid_llm_output(kind):
 
 @pytest.mark.asyncio
 async def test_missing_api_key():
-    llm = LLMService(Settings(anthropic_api_key=""))
+    llm = LLMService(Settings(_env_file=None, scenario_provider="anthropic", anthropic_api_key=""))
     with pytest.raises(LLMUnavailable):
         await llm.analyze_scenario(BODY["content"])
 
 
 @pytest.mark.asyncio
 async def test_shared_sdk_uses_structured_schema_and_rejects_truncation():
-    llm = LLMService(Settings(anthropic_api_key="test-not-a-real-key"))
+    llm = LLMService(
+        Settings(scenario_provider="anthropic", anthropic_api_key="test-not-a-real-key")
+    )
     parse = AsyncMock(
         return_value=MagicMock(
             parsed_output=ScenarioAnalysis.model_validate(fixture()), stop_reason="end_turn"

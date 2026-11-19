@@ -76,7 +76,7 @@ export default function Festival() {
       <PageHeader
         eyebrow="Étape 4 · Diffuser"
         title="Kit Festival"
-        lead="Trouver les festivals compatibles, préparer chaque dossier, présenter ton film. La soumission et le paiement se font toujours sur le site officiel du festival."
+        lead="Trouve tes festivals et prépare chaque dossier. L’envoi se fait sur leur site."
       />
       {project.isPending ? (
         <LoadingBlock lines={8} />

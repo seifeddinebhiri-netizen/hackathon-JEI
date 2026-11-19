@@ -16,6 +16,7 @@ import * as S from '../schemas';
 import type * as T from '../types';
 import aiTools from './data/ai-tools.json';
 import { buildFestivals } from './data/festivals';
+import { mockPreviewCallsheets, mockSendCallsheets } from './callsheets';
 import { getDb, persist, uid } from './db';
 import { mockSuggestLocations } from './locationSuggest';
 import { mockSuggestScenes } from './sceneSuggest';
@@ -490,6 +491,12 @@ export const mockApi: Api = {
 
   getSynopsisFeedback: (input) =>
     simulate('POST /synopsis/feedback', S.synopsisFeedbackSchema, () => synopsisQuestions(input)),
+
+  previewCallsheets: (input) =>
+    simulate('POST /callsheets/preview', S.callsheetPreviewSchema, () => mockPreviewCallsheets(input)),
+
+  sendCallsheets: (input) =>
+    simulate('POST /callsheets/send', S.callsheetSendResultSchema, () => mockSendCallsheets(input), 2),
 
   getPublicFilm: (id) =>
     simulate(`GET /films/${id}/public`, S.publicFilmSchema, () => {

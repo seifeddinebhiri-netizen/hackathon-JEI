@@ -113,7 +113,7 @@ export default function MyData() {
       <PageHeader
         eyebrow="Compte"
         title="Mes données"
-        lead="Ce qui est enregistré, ce qui ne l’est pas, et comment tout récupérer ou tout effacer."
+        lead="Ce qui est gardé, et comment tout récupérer ou effacer."
       />
 
       <section aria-labelledby="stocke">

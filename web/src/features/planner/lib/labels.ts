@@ -15,8 +15,8 @@ import { isRainy, isWeatherKnown, isWindy, lightBand, toHHMM } from './rules';
 export const MOMENT_LABELS: Record<SceneMoment, string> = {
   jour: 'Jour',
   nuit: 'Nuit',
-  aube: 'Aube',
-  heure_doree: 'Heure dorée',
+  aube: 'Lever du soleil',
+  heure_doree: 'Lumière du soir',
 };
 export const MOMENT_ICONS: Record<SceneMoment, IconName> = {
   jour: 'sun',

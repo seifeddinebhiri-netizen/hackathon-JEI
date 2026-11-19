@@ -1,11 +1,14 @@
 import asyncio
 
+import structlog
 from anthropic import APIError, APITimeoutError
 from pydantic import ValidationError
 
 from app.core.errors import AppError
 from app.schemas.scenario import ScenarioAnalysis, ScenarioRequest, ScenarioResponse
 from app.services.llm_service import LLMService, LLMUnavailable
+
+log = structlog.get_logger()
 
 
 async def analyze(llm: LLMService, body: ScenarioRequest) -> ScenarioResponse:
@@ -20,10 +23,12 @@ async def analyze(llm: LLMService, body: ScenarioRequest) -> ScenarioResponse:
         raise AppError(
             "Analyse trop longue. Réessayez avec un scénario plus court.", 504, "analysis_timeout"
         ) from None
-    except LLMUnavailable:
+    except LLMUnavailable as exc:
+        # La raison (clé manquante, quota, format…) va dans le journal serveur, pas à l'utilisateur
+        log.warning("scenario_llm_unavailable", reason=str(exc)[:300])
         raise AppError(
-            "Analyse IA indisponible. Vérifiez ANTHROPIC_API_KEY côté serveur, "
-            "ou utilisez le mode démo explicite.",
+            "Analyse IA indisponible : le fournisseur d'IA n'a pas répondu correctement. "
+            "Réessayez dans une minute ou utilisez le mode démo explicite.",
             503,
             "llm_unavailable",
         ) from None

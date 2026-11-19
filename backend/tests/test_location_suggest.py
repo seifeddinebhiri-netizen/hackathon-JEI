@@ -1,6 +1,7 @@
 import asyncio
 
 import httpx
+import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -162,7 +163,9 @@ def test_propositions_get_real_places_only():
 def test_nominatim_is_called_politely():
     calls: list[httpx.Request] = []
     _post(FakeLLM(LLM_OUTPUT), PlacesService(_nominatim(calls), sleep=_no_sleep))
-    assert len(calls) == 3
+    # 3 recherches + 1 nouvel essai simplifié pour celle qui ne trouve rien
+    assert len(calls) == 4
+    assert calls[3].url.params["q"] == "salon thé, Tunis"
     first = calls[0]
     assert first.headers["User-Agent"] == USER_AGENT
     assert first.url.params["countrycodes"] == "tn"
@@ -236,3 +239,45 @@ def test_prompt_wraps_scene_text_and_lists_exclusions():
     )
     assert "Café traditionnel" in prompt
     assert "Rue animée de Tunis" in prompt
+
+
+@pytest.mark.parametrize(
+    "query,expected",
+    [
+        ("café traditionnel petit quartier tunis", "café"),
+        ("Petite boutique café Tunis", "boutique café"),
+        ("café", "café"),
+        ("tunis", ""),
+    ],
+)
+def test_simplify_query(query, expected):
+    from app.services.places_service import simplify_query
+
+    assert simplify_query(query, "Tunis") == expected
+
+
+def test_descriptive_query_retries_with_simpler_words():
+    calls: list[httpx.Request] = []
+    hit = [{"lat": "36.8", "lon": "10.17", "name": "Café M'rabet", "display_name": "Café M'rabet, Tunis",
+            "osm_type": "node", "osm_id": 1}]  # fmt: skip
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(request)
+        return httpx.Response(200, json=hit if request.url.params["q"] == "café, Tunis" else [])
+
+    places = PlacesService(
+        httpx.AsyncClient(transport=httpx.MockTransport(handler)), sleep=_no_sleep
+    )
+    found = asyncio.run(places.search("café traditionnel petit quartier tunis", "Tunis"))
+    assert [p.name for p in found] == ["Café M'rabet"]
+    assert [c.url.params["q"] for c in calls] == [
+        "café traditionnel petit quartier tunis, Tunis",
+        "café, Tunis",
+    ]
+
+
+def test_no_retry_after_network_error():
+    calls: list[httpx.Request] = []
+    places = PlacesService(_nominatim(calls, fail=True), sleep=_no_sleep)
+    assert asyncio.run(places.search("café traditionnel", "Tunis")) == []
+    assert len(calls) == 1

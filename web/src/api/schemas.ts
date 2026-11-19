@@ -46,6 +46,17 @@ export const locationSchema: z.ZodType<T.Location> = z.object({
   notes: z.string().optional(),
 });
 
+export const memberSchema: z.ZodType<T.Member> = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+  role: z.enum(['acteur', 'technicien']),
+  characters: z.array(z.string()),
+  email_consent: z.boolean(),
+  phone: z.string().optional(),
+  job: z.string().optional(),
+});
+
 export const personSchema: z.ZodType<T.Person> = z.object({
   id: z.string(),
   kind: z.enum(['acteur', 'equipe']),
@@ -134,6 +145,7 @@ export const projectSchema: z.ZodType<T.Project> = z.object({
   scenes: z.array(sceneSchema),
   locations: z.array(locationSchema),
   people: z.array(personSchema),
+  members: z.array(memberSchema).optional(),
   schedule: scheduleSchema.optional(),
   festival_shortlist: z.array(shortlistItemSchema),
   film_profile: z
@@ -254,11 +266,18 @@ export const scenarioAnalysisSchema: z.ZodType<T.ScenarioAnalysis> = z.object({
   ),
 });
 
+/** Le backend envoie `null` pour un champ vide : le contrat du front attend un champ absent. */
+const withoutNulls = (v: unknown) =>
+  v && typeof v === 'object' && !Array.isArray(v)
+    ? Object.fromEntries(Object.entries(v).filter(([, x]) => x !== null))
+    : v;
+
 export const parseScreenplayResultSchema: z.ZodType<T.ParseScreenplayResult> = z.object({
-  scenes: z.array(sceneSchema),
-  locations: z.array(locationSchema),
+  scenes: z.array(z.preprocess(withoutNulls, sceneSchema)),
+  locations: z.array(z.preprocess(withoutNulls, locationSchema)),
   characters: z.array(z.string()),
   warnings: z.array(z.string()),
+  ai_used: z.boolean().optional(),
 });
 
 // --- Passeport IA ------------------------------------------------------------
@@ -389,3 +408,59 @@ export const publicFilmSchema: z.ZodType<T.PublicFilm> = z.object({
 });
 
 export const okSchema = z.object({ ok: z.literal(true) });
+
+// --- Convocations ------------------------------------------------------------------
+const callsheetDraftSceneSchema: z.ZodType<T.CallsheetDraftScene> = z.object({
+  number: z.string(),
+  title: z.string(),
+  date: isoDate,
+  call_time: hhmm,
+  start: hhmm.nullable(),
+  end: hhmm.nullable(),
+  location_name: z.string(),
+  address: z.string(),
+  moment_label: z.string(),
+  characters: z.array(z.string()),
+  notes: z.string(),
+  text: z.string().nullable(),
+});
+
+export const callsheetPreviewSchema: z.ZodType<T.CallsheetPreview> = z.object({
+  drafts: z.array(
+    z.object({
+      member_id: z.string(),
+      name: z.string(),
+      role: z.enum(['acteur', 'technicien']),
+      to: z.string(),
+      subject: z.string(),
+      message: z.string(),
+      schedule_text: z.string(),
+      text: z.string(),
+      html: z.string(),
+      scenes: z.array(callsheetDraftSceneSchema),
+      ics: z.string(),
+      ics_filename: z.string(),
+      include_scene_text: z.boolean(),
+      blocked_reason: z.string().nullable(),
+    }),
+  ),
+  not_concerned: z.array(z.object({ member_id: z.string(), name: z.string(), reason: z.string() })),
+  email_configured: z.boolean(),
+});
+
+export const callsheetSendResultSchema: z.ZodType<T.CallsheetSendResult> = z.object({
+  dry_run: z.boolean(),
+  results: z.array(
+    z.object({
+      member_id: z.string(),
+      name: z.string(),
+      to: z.string(),
+      status: z.enum(['envoye', 'essai', 'ignore', 'erreur']),
+      reason: z.string().nullable(),
+      subject: z.string().nullable(),
+    }),
+  ),
+  sent: z.number(),
+  skipped: z.number(),
+  failed: z.number(),
+});

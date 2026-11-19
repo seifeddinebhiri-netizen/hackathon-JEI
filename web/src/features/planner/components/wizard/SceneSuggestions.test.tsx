@@ -132,7 +132,7 @@ describe('SceneSuggestions', () => {
         <Harness onDraft={onDraft} />
       </QueryClientProvider>,
     );
-    await userEvent.click(screen.getByRole('button', { name: 'Demander des suggestions' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Relire mes scènes' }));
     expect(await screen.findByText('2 suggestions à décider')).toBeInTheDocument();
     expect(spy).toHaveBeenCalledTimes(1);
     expect(screen.getByText('Brouillon IA : à valider')).toBeInTheDocument();
@@ -147,6 +147,6 @@ describe('SceneSuggestions', () => {
     await userEvent.click(within(second).getByRole('button', { name: 'Refuser' }));
     expect(within(second).getByText('Refusée')).toBeInTheDocument();
     expect(onDraft).toHaveBeenCalledTimes(1);
-    expect(screen.getByText('Tu as décidé pour toutes les suggestions.')).toBeInTheDocument();
+    expect(screen.getByText('Tout est décidé.')).toBeInTheDocument();
   });
 });

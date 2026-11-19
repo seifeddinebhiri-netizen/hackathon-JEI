@@ -1,0 +1,38 @@
+{
+  "project": {
+    "title": "Le dernier ferry",
+    "director_name": "Seif Ben Ali",
+    "reply_to": "realisation@example.com",
+    "timezone": "Africa/Tunis"
+  },
+  "locations": [
+    {"id": "loc-port", "name": "Port de La Goulette", "address": "Quai 3, La Goulette, Tunis"},
+    {"id": "loc-maison", "name": "Maison d'Amira", "address": "12 rue des Oliviers, Sidi Bou Saïd"}
+  ],
+  "scenes": [
+    {"id": "s1", "number": "1", "title": "Le départ", "date": "2026-12-01", "call_time": "06:30",
+     "start": "07:00", "end": "09:00", "location_id": "loc-port", "moment": "aube",
+     "characters": ["Amira", "Slim"], "notes": "Prévoir des vêtements chauds",
+     "text": "Amira regarde le ferry. Slim court vers elle."},
+    {"id": "s2", "number": "2", "title": "La cuisine", "date": "2026-12-01", "call_time": "06:30",
+     "start": "10:00", "end": "12:00", "location_id": "loc-maison", "moment": "jour",
+     "characters": ["Mère", "Nour"], "notes": "",
+     "text": "La mère prépare le café. Nour mange en silence."},
+    {"id": "s3", "number": "3", "title": "Sur la corniche", "date": "2026-12-02", "call_time": "16:00",
+     "start": "17:00", "end": "18:30", "location_id": "loc-port", "moment": "heure_doree",
+     "characters": ["amira"], "notes": "",
+     "text": "Amira seule face à la mer."}
+  ],
+  "members": [
+    {"id": "m-amira", "name": "Ines Trabelsi", "email": "ines@example.com", "role": "acteur",
+     "characters": ["Amira"], "email_consent": true},
+    {"id": "m-slim", "name": "Karim Haddad", "email": "karim@example.com", "role": "acteur",
+     "characters": ["Slim"], "email_consent": false},
+    {"id": "m-nour", "name": "Lina Gharbi", "email": "pas-une-adresse", "role": "acteur",
+     "characters": ["Nour"], "email_consent": true},
+    {"id": "m-image", "name": "Youssef Mansour", "email": "youssef@example.com", "role": "technicien",
+     "characters": [], "email_consent": true},
+    {"id": "m-sans-role", "name": "Sana Jaziri", "email": "sana@example.com", "role": "acteur",
+     "characters": [], "email_consent": true}
+  ]
+}

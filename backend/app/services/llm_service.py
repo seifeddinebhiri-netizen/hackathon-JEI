@@ -1,11 +1,14 @@
 import structlog
 from anthropic import AsyncAnthropic
+from pydantic import BaseModel
 
 from app.core.config import Settings
 from app.schemas.location_suggest import LLMLocationSuggestion, LocationSuggestRequest
-from app.schemas.scenario import ScenarioAnalysis
+from app.schemas.scenario import ScenarioAnalysis, repair_analysis
 from app.schemas.scene_suggest import LLMSceneSuggestions, SceneSuggestRequest
 from app.schemas.shot_spec import LLMShotSpec
+from app.services.errors import LLMUnavailable
+from app.services.groq_client import groq_structured
 from app.services.ollama_service import OllamaService
 
 log = structlog.get_logger()
@@ -130,8 +133,7 @@ def build_scene_prompt(req: SceneSuggestRequest) -> str:
     return "\n".join(lines)
 
 
-class LLMUnavailable(Exception):
-    pass
+__all__ = ["LLMService", "LLMUnavailable"]
 
 
 class LLMService:
@@ -142,9 +144,34 @@ class LLMService:
         self._effort = settings.llm_effort
         self.scenario_timeout_seconds = settings.scenario_timeout_seconds
         self._scenario_provider = settings.scenario_provider
+        self._groq_key = settings.groq_api_key.get_secret_value()
+        self._groq_model = settings.groq_scenario_model
+        self._groq_timeout = settings.groq_timeout_seconds
+        self._groq_max_completion_tokens = settings.groq_max_completion_tokens
+        self._groq_suggest_model = settings.groq_suggest_model
         self._ollama = OllamaService(settings)
 
+    @property
+    def _suggest_with_groq(self) -> bool:
+        """Suggestions (scènes, lieux) : Anthropic si la clé est là, sinon Groq."""
+        return self._client is None and bool(self._groq_key)
+
+    async def _groq_suggest[T: BaseModel](
+        self, system: str, user: str, output_format: type[T]
+    ) -> T:
+        return await groq_structured(
+            api_key=self._groq_key,
+            model=self._groq_suggest_model,
+            timeout=self._groq_timeout,
+            max_completion_tokens=self._groq_max_completion_tokens,
+            system=system,
+            user=user,
+            output_format=output_format,
+        )
+
     async def analyze_scenario(self, content: str) -> ScenarioAnalysis:
+        if self._scenario_provider == "groq":
+            return await self._groq_structured(content)
         if self._scenario_provider == "ollama":
             return await self._ollama.structured(
                 ScenarioAnalysis,
@@ -190,9 +217,32 @@ class LLMService:
             raise ValueError("Unusable structured analysis")
         return response.parsed_output
 
+    async def _groq_structured(self, content: str) -> ScenarioAnalysis:
+        """Analyze a screenplay with Groq's OpenAI-compatible JSON-schema mode."""
+        return await groq_structured(
+            api_key=self._groq_key,
+            model=self._groq_model,
+            timeout=self._groq_timeout,
+            max_completion_tokens=self._groq_max_completion_tokens,
+            system=(
+                "Tu es l'assistant de dépouillement d'Encadré. Réponds en français. "
+                "Analyse le scénario sans le réécrire, préserve l'ordre narratif et "
+                "n'invente aucun fait. Les déductions vont dans inferences, les conseils "
+                "dans suggestions et les ambiguïtés dans missing_information."
+            ),
+            user=content,
+            output_format=ScenarioAnalysis,
+            schema_name="scenario_analysis",
+            # Schéma exigeant : en mode strict, Groq rejette ~2 réponses sur 3 pour un détail ;
+            # on corrige plutôt les écarts prévisibles, puis Pydantic valide comme d'habitude.
+            strict=False,
+            repair=repair_analysis,
+        )
+
     @property
     def model(self) -> str:
-        return self._model
+        """Modèle affiché avec les suggestions : celui qui répond vraiment."""
+        return self._groq_suggest_model if self._suggest_with_groq else self._model
 
     async def generate_shots(self, rules_text: str, description: str, setting: str) -> LLMShotSpec:
         if self._client is None:
@@ -231,6 +281,10 @@ class LLMService:
         return response.parsed_output
 
     async def suggest_locations(self, req: LocationSuggestRequest) -> LLMLocationSuggestion:
+        if self._suggest_with_groq:
+            return await self._groq_suggest(
+                LOCATION_SYSTEM, build_location_prompt(req), LLMLocationSuggestion
+            )
         if self._client is None:
             raise LLMUnavailable("ANTHROPIC_API_KEY non configurée.")
         # Le texte des scènes n'est jamais journalisé.
@@ -262,6 +316,10 @@ class LLMService:
         return response.parsed_output
 
     async def suggest_scenes(self, req: SceneSuggestRequest) -> LLMSceneSuggestions:
+        if self._suggest_with_groq:
+            return await self._groq_suggest(
+                SCENE_SUGGEST_SYSTEM, build_scene_prompt(req), LLMSceneSuggestions
+            )
         if self._client is None:
             raise LLMUnavailable("ANTHROPIC_API_KEY non configurée.")
         # Le texte des scènes n'est jamais journalisé.

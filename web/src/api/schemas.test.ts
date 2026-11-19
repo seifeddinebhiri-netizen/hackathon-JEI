@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildDemoProject } from './mocks/data/project';
-import { projectSchema } from './schemas';
+import { parseScreenplayResultSchema, projectSchema } from './schemas';
 
 describe('projectSchema', () => {
   it('accepte un projet sans les champs du Kit Festival', () => {
@@ -39,5 +39,49 @@ describe('scènes et lieux proposés', () => {
     });
     expect(locationSuggestResultSchema.safeParse(r).success).toBe(true);
     expect(locationSuggestResultSchema.safeParse({ ...r, status: 'Validé' }).success).toBe(false);
+  });
+});
+
+describe('parseScreenplayResultSchema', () => {
+  it('accepte la réponse de POST /planner/parse (null, champs en plus, ai_used)', () => {
+    const r = parseScreenplayResultSchema.parse({
+      scenes: [
+        {
+          id: 'sc-1',
+          number: '1',
+          title: 'Amira attend Slim au quai',
+          setting: 'EXT',
+          moment: 'aube',
+          location_id: 'loc-1',
+          characters: ['Amira', 'Slim'],
+          estimated_hours: 1.5,
+          summary: 'Amira attend.',
+          excerpt: 'À l’aube, Amira attend sur le quai.',
+          source: 'import_ia',
+          validated: false,
+          heading: '',
+          room: null,
+          page_eighths: 2,
+        },
+      ],
+      locations: [
+        {
+          id: 'loc-1',
+          name: 'Quai du port',
+          address: '',
+          forbidden_days: [],
+          permit: 'non_necessaire',
+          notes: null,
+          kind_fr: 'port',
+          brief_fr: null,
+        },
+      ],
+      characters: ['Amira', 'Slim'],
+      warnings: [],
+      ai_used: true,
+    });
+    expect(r.locations[0].notes).toBeUndefined();
+    expect(r.ai_used).toBe(true);
+    expect(r.scenes[0].excerpt).toContain('Amira');
   });
 });

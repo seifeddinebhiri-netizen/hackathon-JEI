@@ -40,7 +40,7 @@ export function SunDiagram({
   const up = pos.altitude > 0;
   const golden = at >= sun.goldenEvening.from && at <= sun.goldenEvening.to;
   const label = up
-    ? `Soleil au ${compassLabel(pos.azimuth)}, à ${Math.round(pos.altitude)}° au-dessus de l’horizon${golden ? ', heure dorée' : ''}.`
+    ? `Soleil au ${compassLabel(pos.azimuth)}, à ${Math.round(pos.altitude)}° au-dessus de l’horizon${golden ? ', lumière douce' : ''}.`
     : 'Soleil sous l’horizon.';
 
   return (

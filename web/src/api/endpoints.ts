@@ -3,8 +3,7 @@
  * mocks/handlers.ts expose EXACTEMENT la même signature (type `Api`).
  */
 import { z } from 'zod';
-import { ApiError, request, UPLOAD_TIMEOUT_MS } from './client';
-import { analysisToParseResult } from './scenarioImport';
+import { request, UPLOAD_TIMEOUT_MS } from './client';
 import * as S from './schemas';
 import type * as T from './types';
 
@@ -28,35 +27,25 @@ export async function deleteProject(id: string): Promise<{ ok: true }> {
   return request(`/projects/${encodeURIComponent(id)}`, { method: 'DELETE', schema: S.okSchema });
 }
 
-/** Fichiers que le navigateur sait lire en texte avant de les envoyer au dépouillement. */
-const TEXT_FILES = /\.(txt|fountain)$/i;
-/** Le dépouillement par l'IA peut être long sur un long scénario. */
-const ANALYSIS_TIMEOUT_MS = 190_000;
+/** Le découpage par l'IA peut être long sur un long scénario. */
+const PARSE_TIMEOUT_MS = 190_000;
 
 /**
- * Découpage du scénario en scènes par l'IA (POST /scenarios/analyze), converti en scènes et
- * décors de l'assistant. Le texte n'est envoyé qu'à ce moment-là.
+ * Découpage du scénario (POST /planner/parse, multipart) : fichier tel quel (PDF, DOCX, TXT,
+ * Fountain, FDX) ou texte collé. Marche aussi sur un récit sans en-têtes INT./EXT.
+ * Le texte n'est envoyé qu'à ce moment-là, et n'est pas conservé par le serveur.
  */
 export async function parseScreenplay(input: T.ParseScreenplayInput): Promise<T.ParseScreenplayResult> {
-  let content = input.text ?? '';
-  let title = 'Mon scénario';
-  if (input.file) {
-    if (!TEXT_FILES.test(input.file.name))
-      throw new ApiError(
-        0,
-        'invalide',
-        'Pour le découpage par l’IA, colle le texte du scénario ou importe un fichier .txt ou .fountain.',
-      );
-    content = await input.file.text();
-    title = input.file.name.replace(/\.[^.]+$/, '') || title;
-  }
-  const analysis = await request('/scenarios/analyze', {
+  const form = new FormData();
+  if (input.file) form.append('file', input.file, input.file.name);
+  else form.append('text', input.text ?? '');
+  form.append('use_ai', 'true');
+  return request('/planner/parse', {
     method: 'POST',
-    body: { title, content },
-    schema: S.scenarioAnalysisSchema,
-    timeoutMs: ANALYSIS_TIMEOUT_MS,
+    formData: form,
+    schema: S.parseScreenplayResultSchema,
+    timeoutMs: PARSE_TIMEOUT_MS,
   });
-  return analysisToParseResult(analysis, content);
 }
 
 /** Suggestions de tournage sur les scènes (jamais d'écriture), que l'auteur accepte ou refuse. */
@@ -160,6 +149,21 @@ export async function getPublicFilm(id: string): Promise<T.PublicFilm> {
   return request(`/films/${encodeURIComponent(id)}/public`, { schema: S.publicFilmSchema });
 }
 
+/** Brouillons des convocations : rien n'est envoyé. */
+export async function previewCallsheets(input: T.CallsheetInput): Promise<T.CallsheetPreview> {
+  return request('/callsheets/preview', { method: 'POST', body: input, schema: S.callsheetPreviewSchema });
+}
+
+/** Envoi des convocations validées par le réalisateur (mode essai sans clé côté serveur). */
+export async function sendCallsheets(input: T.CallsheetSendInput): Promise<T.CallsheetSendResult> {
+  return request('/callsheets/send', {
+    method: 'POST',
+    body: input,
+    schema: S.callsheetSendResultSchema,
+    timeoutMs: 120_000, // 50 destinataires au plus, ~0,6 s chacun
+  });
+}
+
 export type Api = {
   createProject: typeof createProject;
   getProject: typeof getProject;
@@ -184,4 +188,6 @@ export type Api = {
   saveSubtitles: typeof saveSubtitles;
   getSynopsisFeedback: typeof getSynopsisFeedback;
   getPublicFilm: typeof getPublicFilm;
+  previewCallsheets: typeof previewCallsheets;
+  sendCallsheets: typeof sendCallsheets;
 };

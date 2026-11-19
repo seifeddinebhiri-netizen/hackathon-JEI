@@ -68,7 +68,11 @@ class Proposition(BaseModel):
         description="Une ou deux phrases simples : pourquoi ce type colle aux scènes."
     )
     requete_recherche: str = Field(
-        description="Requête courte pour une recherche de lieux dans la ville (2 à 5 mots)."
+        description=(
+            "Ce qu'on taperait dans une carte pour trouver ce type de lieu : 1 ou 2 mots, "
+            "le nom courant du lieu (ex. « café », « boulangerie », « plage », « hammam »), "
+            "sans adjectif ni nom de ville."
+        )
     )
     zone: str = Field(description="Quartier ou type de zone où chercher, sans adresse.")
     facilite: Literal["facile", "moyenne", "difficile"]

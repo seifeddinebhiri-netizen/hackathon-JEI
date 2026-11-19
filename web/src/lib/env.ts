@@ -11,6 +11,8 @@ function num(v: string | undefined, fallback: number): number {
 export const env = {
   apiUrl: (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:8000',
   useMocks: bool(import.meta.env.VITE_USE_MOCKS as string | undefined, true),
+  /** Avec les mocks : le découpage du scénario passe quand même par le vrai backend. */
+  realParse: bool(import.meta.env.VITE_REAL_PARSE as string | undefined, false),
   mockLatencyMs: num(import.meta.env.VITE_MOCK_LATENCY_MS as string | undefined, 600),
   mockFailRate: num(import.meta.env.VITE_MOCK_FAIL_RATE as string | undefined, 0),
   publicAppUrl:

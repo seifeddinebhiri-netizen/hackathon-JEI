@@ -25,6 +25,7 @@ import structlog
 from pydantic import BaseModel, ValidationError
 
 from app.core.config import Settings
+from app.services.groq_client import groq_structured
 from app.services.llm_service import LLMUnavailable
 
 log = structlog.get_logger()
@@ -69,12 +70,22 @@ class ScreenplayLLM:
         env = _env() if env is None else env
         key = settings.anthropic_api_key.get_secret_value()
         forced = env.get("SCREENPLAY_LLM", "").strip().lower()
+        groq_key = env.get("GROQ_API_KEY") or settings.groq_api_key.get_secret_value()
         gemini_key = env.get("GEMINI_API_KEY") or env.get("GOOGLE_API_KEY") or ""
-        auto = "anthropic" if key else ("gemini" if gemini_key else "ollama")
+        auto = "anthropic" if key else ("groq" if groq_key else ("gemini" if gemini_key else "ollama"))
         self.provider = forced or auto
         self._effort = settings.llm_effort
 
-        if self.provider == "gemini":
+        if self.provider == "groq":
+            self._groq_key = groq_key
+            self._model = env.get("GROQ_MODEL") or settings.groq_model
+            self._timeout = float(env.get("GROQ_TIMEOUT", str(settings.groq_timeout_seconds)))
+            self._groq_max_completion_tokens = settings.groq_max_completion_tokens
+            # Offre gratuite : 8 000 jetons par minute, réponse comprise. Un lot doit tenir dedans
+            # (~2,3 caractères par jeton en français + consignes), et un appel à la fois.
+            self.max_batch_chars = settings.groq_max_batch_chars
+            self.max_concurrency = 1
+        elif self.provider == "gemini":
             self._gemini_key = gemini_key
             self._model = env.get("GEMINI_MODEL") or "gemini-3.8-flash"
             self._timeout = float(env.get("GEMINI_TIMEOUT", "180"))
@@ -114,11 +125,26 @@ class ScreenplayLLM:
         """Sortie structurée validée par Pydantic. Le texte du scénario n'est jamais journalisé."""
         if self.provider == "anthropic":
             return await self._anthropic_parse(system, user, output_format, max_tokens)
+        if self.provider == "groq":
+            return await self._groq_parse(system, user, output_format, max_tokens)
         if self.provider == "gemini":
             return await self._gemini_parse(system, user, output_format)
         return await self._ollama_parse(system, user, output_format)
 
-    # --- Gemini -------------------------------------------------------------------
+    async def _groq_parse(
+        self, system: str, user: str, output_format: type[T], max_tokens: int
+    ) -> T:
+        return await groq_structured(
+            api_key=self._groq_key,
+            model=self._model,
+            timeout=self._timeout,
+            max_completion_tokens=min(max_tokens, self._groq_max_completion_tokens),
+            system=system,
+            user=user,
+            output_format=output_format,
+        )
+
+    # --- Gemini (legacy) ----------------------------------------------------------
 
     async def _gemini_parse(self, system: str, user: str, output_format: type[T]) -> T:
         if not self._gemini_key:

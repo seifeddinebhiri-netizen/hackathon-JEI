@@ -51,6 +51,8 @@ class Scene(BaseModel):
     characters: list[str]
     estimated_hours: float
     summary: str
+    # Extrait du texte de la scène (1 200 caractères au plus), comme Scene.excerpt du front
+    excerpt: str | None = None
     source: str = "import_ia"
     validated: bool = False
     # --- extras backend ---

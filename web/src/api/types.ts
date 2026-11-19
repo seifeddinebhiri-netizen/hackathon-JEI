@@ -20,6 +20,8 @@ export type Project = {
   scenes: Scene[];
   locations: Location[];
   people: Person[];
+  /** Équipe des convocations : qui reçoit sa feuille de service par e-mail. */
+  members?: Member[];
   schedule?: Schedule;
   festival_shortlist: ShortlistItem[];
   /** Kit Festival : profil du film (le nombre de départements IA est déduit du Passeport). */
@@ -67,6 +69,23 @@ export type Person = {
   role: string;
   character?: string;
   contact?: string;
+};
+
+/** Membre de l'équipe pour les convocations par e-mail. */
+export type MemberRole = 'acteur' | 'technicien';
+export type Member = {
+  id: string;
+  name: string;
+  email: string;
+  role: MemberRole;
+  /** Acteurs : personnages joués (noms issus du découpage). */
+  characters: string[];
+  /** A accepté de recevoir des e-mails de la production. */
+  email_consent: boolean;
+  /** Téléphone, pour la liste de l'équipe (jamais envoyé par e-mail). */
+  phone?: string;
+  /** Techniciens : poste (Image, Son, Régie…). */
+  job?: string;
 };
 
 /** Au-delà de l'horizon de prévision : forecast = 'hors_horizon' et rain_pct / wind_kmh / cloud_pct = null. */
@@ -358,6 +377,7 @@ export type UpdateProjectInput = Partial<
     | 'scenes'
     | 'locations'
     | 'people'
+    | 'members'
     | 'schedule'
     | 'festival_shortlist'
     | 'film_profile'
@@ -374,6 +394,8 @@ export type ParseScreenplayResult = {
   /** Personnages détectés. */
   characters: string[];
   warnings: string[];
+  /** false : découpage simple, sans IA (IA indisponible). Absent : inconnu (mock). */
+  ai_used?: boolean;
 };
 
 export type GeocodeResult = { label: string; lat: number; lon: number };
@@ -424,3 +446,93 @@ export type SynopsisFeedbackInput = { kind: SynopsisKind; text: string; limit_ch
 
 export type User = { id: string; email: string; name: string; is_demo: boolean; project_id?: string };
 export type Session = { access_token: string; expires_at: string; user: User };
+
+// ---------------------------------------------------------------------------
+// Convocations (feuilles de service par e-mail) — POST /callsheets/preview et /send
+// ---------------------------------------------------------------------------
+export type CallsheetScene = {
+  id: string;
+  number: string;
+  title: string;
+  date: string; // ISO
+  /** Heure de rendez-vous, « 08:00 » */
+  call_time: string;
+  start?: string;
+  end?: string;
+  location_id: string;
+  moment: SceneMoment;
+  characters: string[];
+  notes: string;
+  /** Envoyé seulement si un membre doit recevoir le texte de ses scènes. */
+  text?: string;
+};
+export type CallsheetInput = {
+  project: { title: string; director_name: string; reply_to: string; timezone?: string };
+  scenes: CallsheetScene[];
+  locations: { id: string; name: string; address: string }[];
+  members: Member[];
+  include_scene_text?: boolean;
+  /** Membres qui reçoivent le texte de leurs scènes. */
+  include_scene_text_for?: string[];
+};
+export type CallsheetDraftScene = {
+  number: string;
+  title: string;
+  date: string;
+  call_time: string;
+  start: string | null;
+  end: string | null;
+  location_name: string;
+  address: string;
+  moment_label: string;
+  characters: string[];
+  notes: string;
+  text: string | null;
+};
+export type CallsheetDraft = {
+  member_id: string;
+  name: string;
+  role: MemberRole;
+  to: string;
+  subject: string;
+  /** Message personnel, modifiable. */
+  message: string;
+  /** Planning du membre, ajouté sous le message. */
+  schedule_text: string;
+  text: string;
+  html: string;
+  scenes: CallsheetDraftScene[];
+  ics: string;
+  ics_filename: string;
+  include_scene_text: boolean;
+  /** Raison pour laquelle l'envoi sera refusé, sinon null. */
+  blocked_reason: string | null;
+};
+export type CallsheetPreview = {
+  drafts: CallsheetDraft[];
+  not_concerned: { member_id: string; name: string; reason: string }[];
+  /** false : le serveur n'a pas de clé d'envoi, l'envoi sera un essai. */
+  email_configured: boolean;
+};
+export type CallsheetDraftEdit = {
+  member_id: string;
+  subject: string;
+  message: string;
+  include_scene_text: boolean;
+};
+export type CallsheetSendInput = CallsheetInput & { drafts: CallsheetDraftEdit[] };
+export type CallsheetSendStatus = 'envoye' | 'essai' | 'ignore' | 'erreur';
+export type CallsheetSendResult = {
+  dry_run: boolean;
+  results: {
+    member_id: string;
+    name: string;
+    to: string;
+    status: CallsheetSendStatus;
+    reason: string | null;
+    subject: string | null;
+  }[];
+  sent: number;
+  skipped: number;
+  failed: number;
+};

@@ -105,6 +105,8 @@ const PATHS = {
   minus: <path d="M5 12h14" />,
   trash: <path d="M4 7h16M10 11v6M14 11v6M6 7l1 14h10l1-14M9 7V4h6v3" />,
   external: <path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6" />,
+  mail: <path d="M3 6h18v12H3V6ZM3 7l9 7 9-7" />,
+  send: <path d="M21 3 3 10.5l7 3L13.5 21 21 3ZM10 13.5 21 3" />,
   user: (
     <>
       <circle cx="12" cy="8" r="4" />
