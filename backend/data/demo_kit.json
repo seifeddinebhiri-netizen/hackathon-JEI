@@ -267,7 +267,7 @@
         "department": "image",
         "used_ai": false,
         "what": "",
-        "human_decisions": ""
+        "human_decisions": "Cadre, lumière et étalonnage faits à la main par l’équipe image."
       },
       {
         "department": "montage",
@@ -281,31 +281,33 @@
         "department": "son_voix",
         "used_ai": false,
         "what": "",
-        "human_decisions": ""
+        "human_decisions": "Prise de son sur le plateau et mixage par l’ingénieur du son."
       },
       {
         "department": "musique",
         "used_ai": false,
         "what": "",
-        "human_decisions": ""
+        "human_decisions": "Musique originale enregistrée par un musicien de Tunis."
       },
       {
         "department": "vfx",
         "used_ai": false,
         "what": "",
-        "human_decisions": ""
+        "human_decisions": "Aucun effet visuel : tout est tourné en décor réel."
       },
       {
         "department": "sous_titres",
-        "used_ai": false,
-        "what": "",
-        "human_decisions": ""
+        "used_ai": true,
+        "tool_id": "tool-trad-a",
+        "what": "Transcription automatique du derja et première traduction en anglais.",
+        "level": "assistance",
+        "human_decisions": "Chaque réplique relue et corrigée à la main, découpage et timing validés."
       },
       {
         "department": "affiche_promo",
         "used_ai": false,
         "what": "",
-        "human_decisions": ""
+        "human_decisions": "Affiche dessinée à partir d’une photo de tournage, sans IA."
       }
     ],
     "c2pa_signed": false,

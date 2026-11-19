@@ -94,7 +94,11 @@ Enum `dossier_status` ↔ libellé affiché (`SHORTLIST_STATUS_LABELS`, `web/src
 
 #### `public.ai_passports` (Passeport IA : une ligne par projet)
 `project_id` (PK, réf. `projects`), `owner_id`, `film_title`, `director`, `declarations` (jsonb, liste),
-`c2pa_signed`, `badge_code` (unique, ex. `EN-DRHM-T1`, créé par le front), `created_at`, `updated_at`.
+`c2pa_signed`, `badge_code` (unique, ex. `EN-DRHM-T1`), `created_at`, `updated_at`.
+
+Depuis la migration 0007 : `badge_code` est **créé par la base** (déclencheur `ai_passports_badge_code`, sauf s'il est fourni
+par une connexion serveur comme le script de démonstration) et `c2pa_signed` n'est modifiable que par le serveur. Le
+navigateur ne peut insérer que `project_id`, `film_title`, `director`, `declarations`, puis modifier les trois derniers.
 
 Page publique `/verifier/<code>` : fonction `public.verify_badge(code text)` (`security definer`, exécutable par
 `anon`) qui renvoie **seulement** `film_title`, `director`, `declarations`, `c2pa_signed`.

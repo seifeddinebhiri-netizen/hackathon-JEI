@@ -79,11 +79,12 @@ function examplePassport(): Passport {
 
 /** Passeport du film de démo : une seule IA déclarée (montage, assistance). */
 export function demoPassport(projectId: string): Passport {
-  const none = (department: Passport['declarations'][number]['department']) => ({
+  // Passeport complet : chaque département a une réponse et dit ce qui a été décidé par des humains.
+  const human = (department: Passport['declarations'][number]['department'], human_decisions: string) => ({
     department,
     used_ai: false,
     what: '',
-    human_decisions: '',
+    human_decisions,
   });
   return {
     id: 'pass-dar-hmeti',
@@ -95,8 +96,8 @@ export function demoPassport(projectId: string): Passport {
     verify_url: `${env.publicAppUrl}/verifier/pass-dar-hmeti`,
     updated_at: '2026-11-10T18:00:00+01:00',
     declarations: [
-      { ...none('scenario'), human_decisions: 'Écrit entièrement par Yassine.' },
-      none('image'),
+      human('scenario', 'Écrit entièrement par Yassine.'),
+      human('image', 'Cadre, lumière et étalonnage faits à la main par l’équipe image.'),
       {
         department: 'montage',
         used_ai: true,
@@ -105,11 +106,18 @@ export function demoPassport(projectId: string): Passport {
         level: 'assistance',
         human_decisions: 'Choix des prises, rythme et ordre des séquences.',
       },
-      none('son_voix'),
-      none('musique'),
-      none('vfx'),
-      none('sous_titres'),
-      none('affiche_promo'),
+      human('son_voix', 'Prise de son sur le plateau et mixage par l’ingénieur du son.'),
+      human('musique', 'Musique originale enregistrée par un musicien de Tunis.'),
+      human('vfx', 'Aucun effet visuel : tout est tourné en décor réel.'),
+      {
+        department: 'sous_titres',
+        used_ai: true,
+        tool_id: 'tool-trad-a',
+        what: 'Transcription automatique du derja et première traduction en anglais.',
+        level: 'assistance',
+        human_decisions: 'Chaque réplique relue et corrigée à la main, découpage et timing validés.',
+      },
+      human('affiche_promo', 'Affiche dessinée à partir d’une photo de tournage, sans IA.'),
     ],
   };
 }

@@ -84,3 +84,26 @@ def test_reset_is_scoped_to_the_demo_owner_and_rerunnable(rows):
     assert deletes and all("owner_id = $1" in s and a == (OWNER,) for s, a in deletes)
     inserts = [s for s in statements if s.startswith("insert into public.") and "profiles" not in s]
     assert inserts and all("owner_id" in s for s in inserts)
+
+
+DEPARTMENTS = {
+    "scenario", "image", "montage", "son_voix", "musique", "vfx", "sous_titres", "affiche_promo",
+}  # fmt: skip
+
+
+def test_demo_passport_is_complete(rows):
+    """Même contrôle que checkPassportLocal (front) : le PDF et la signature sont disponibles en démo,
+    et chaque département dit ce que les humains ont décidé."""
+    [passport] = rows["ai_passports"]
+    declarations = passport["declarations"]
+    assert {d["department"] for d in declarations} == DEPARTMENTS
+    assert len(declarations) == len(DEPARTMENTS)
+    for d in declarations:
+        assert d["human_decisions"].strip(), d["department"]
+        if d["used_ai"]:
+            assert d.get("tool_id") or d.get("custom_tool"), d["department"]
+            assert d["what"].strip() and d.get("level"), d["department"]
+    # Les sous-titres de la démo sont transcrits et traduits par IA : le Passeport le déclare.
+    assert next(d for d in declarations if d["department"] == "sous_titres")["used_ai"]
+    # Aucune signature réelle n'a été posée : le Passeport de démo ne prétend pas le contraire.
+    assert passport["c2pa_signed"] is False
