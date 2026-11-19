@@ -20,7 +20,8 @@ import { usePeriodWeather } from '@/features/planner/hooks/usePlanner';
 import { CONFLICT_ICONS } from '@/features/planner/lib/labels';
 import { CONFLICT_LABELS, countConflicts } from '@/features/planner/lib/rules';
 import { useKit, withKit } from '@/features/festival/hooks/useKit';
-import { useCurrentProject } from '@/features/project/hooks/useProject';
+import { NEW_PROJECT_PATH, NoProject } from '@/features/project/components/NoProject';
+import { useCurrentProject, useCurrentProjectId } from '@/features/project/hooks/useProject';
 import { projectTodos } from '@/features/project/lib/todos';
 import { cn } from '@/lib/cn';
 import { daysUntil, formatDate, formatDayLong, isoDay } from '@/lib/format';
@@ -112,7 +113,8 @@ function NextDay({ project }: { project: Project }) {
         {next.scenes.length > 1 ? 's' : ''}
       </p>
       <div className="mt-4 flex flex-col gap-2 border-t border-line-dark pt-4 [&_.text-bad-fg]:text-gold [&_.text-warn-fg]:text-gold">
-        {weather.isPending && !w ? (
+        {/* Sans ville ni dates, la météo n'est jamais demandée : pas de squelette sans fin */}
+        {weather.isPending && !w && project.city && project.shooting_window.from ? (
           <Skeleton className="h-4 w-1/2 bg-line-dark" />
         ) : (
           <WeatherSummary weather={w} />
@@ -315,9 +317,12 @@ function Todos({ project }: { project: Project }) {
 }
 
 export default function ProjectDashboard() {
+  const projectId = useCurrentProjectId();
   const project = useCurrentProject();
   // Dossiers et champs du film : lus dans le Kit Festival (vides tant qu'il n'est pas chargé)
   const kit = useKit(project.data?.id);
+  // Compte neuf : la requête du projet est désactivée, elle ne finirait jamais de « charger »
+  if (!projectId) return <NoProject />;
   if (project.isPending)
     return (
       <div className="flex flex-col gap-8">
@@ -335,7 +340,7 @@ export default function ProjectDashboard() {
         icon="film"
         title="Aucun film ouvert"
         action={
-          <ButtonLink to="/planner/projet?nouveau=1" icon="plus">
+          <ButtonLink to={NEW_PROJECT_PATH} icon="plus">
             Créer un film
           </ButtonLink>
         }
@@ -352,7 +357,7 @@ export default function ProjectDashboard() {
         title={p.title}
         lead={`${p.city} · tournage possible du ${formatDate(p.shooting_window.from)} au ${formatDate(p.shooting_window.to)}`}
         actions={
-          <ButtonLink to="/planner/projet?nouveau=1" variant="secondary" icon="plus">
+          <ButtonLink to={NEW_PROJECT_PATH} variant="secondary" icon="plus">
             Nouveau film
           </ButtonLink>
         }

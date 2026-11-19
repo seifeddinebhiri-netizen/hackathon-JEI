@@ -12,7 +12,8 @@ import { BadgeExport, PdfAndSign, VerifyLink } from '@/features/passport/compone
 import { useAiTools, useProjectPassport, useSavePassport } from '@/features/passport/hooks/usePassport';
 import { DEPARTMENTS, LABEL_DISCLAIMER } from '@/features/passport/lib/labels';
 import { useAutosave } from '@/features/planner/hooks/useAutosave';
-import { useCurrentProject } from '@/features/project/hooks/useProject';
+import { NoProject } from '@/features/project/components/NoProject';
+import { useCurrentProject, useCurrentProjectId } from '@/features/project/hooks/useProject';
 
 function directorOf(project: Project, fallback: string): string {
   return project.people.find((p) => p.kind === 'equipe' && /réalisation/i.test(p.role))?.name || fallback;
@@ -189,6 +190,7 @@ function PassportEditor({ project, initial }: { project: Project; initial: Passp
 }
 
 export default function Passport() {
+  const projectId = useCurrentProjectId();
   const project = useCurrentProject();
   const passport = useProjectPassport(project.data?.id);
   return (
@@ -198,7 +200,9 @@ export default function Passport() {
         title="Passeport IA"
         lead="Département par département, ce que l’IA a fait et ce que tu as décidé. Les festivals le vérifient sur une page publique."
       />
-      {project.isPending || (project.data && passport.isPending) ? (
+      {!projectId ? (
+        <NoProject>Le Passeport IA se remplit pour un film : crée d’abord ton projet.</NoProject>
+      ) : project.isPending || (project.data && passport.isPending) ? (
         <LoadingBlock lines={8} label="Chargement du Passeport…" />
       ) : project.isError ? (
         <ErrorState error={project.error} onRetry={() => void project.refetch()} />

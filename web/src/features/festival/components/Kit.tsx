@@ -1,16 +1,9 @@
 import type { ReactNode } from 'react';
 import { Link, NavLink } from 'react-router';
 import type { Festival, Passport, Project } from '@/api/types';
-import {
-  ButtonLink,
-  EmptyState,
-  ErrorState,
-  Icon,
-  LoadingBlock,
-  PageHeader,
-  StatusChip,
-} from '@/components/ui';
+import { ErrorState, Icon, LoadingBlock, PageHeader, StatusChip } from '@/components/ui';
 import { useProjectPassport } from '@/features/passport/hooks/usePassport';
+import { NoProject } from '@/features/project/components/NoProject';
 import { useCurrentProject, useCurrentProjectId } from '@/features/project/hooks/useProject';
 import { cn } from '@/lib/cn';
 import { daysUntil, formatDate } from '@/lib/format';
@@ -146,19 +139,7 @@ export function WithProject({
   const kit = useKit(project.data?.id);
   const passport = useProjectPassport(project.data?.id);
   if (!projectId)
-    return (
-      <EmptyState
-        icon="film"
-        title="Pas encore de film"
-        action={
-          <ButtonLink to="/planner/projet" iconRight="arrowRight">
-            Créer mon film
-          </ButtonLink>
-        }
-      >
-        Le Kit Festival prépare les dossiers d’un film : crée d’abord ton projet.
-      </EmptyState>
-    );
+    return <NoProject>Le Kit Festival prépare les dossiers d’un film : crée d’abord ton projet.</NoProject>;
   if (project.isPending || kit.isPending)
     return (
       <LoadingBlock
