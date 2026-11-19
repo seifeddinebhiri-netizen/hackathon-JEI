@@ -4,6 +4,7 @@ import { isApiError } from '@/api';
 import { Toaster, TooltipProvider } from '@/components/ui';
 import { AuthProvider } from '@/features/auth/AuthProvider';
 import { SupabaseAuthProvider } from '@/features/auth/SupabaseAuthProvider';
+import { VideoSessionProvider } from '@/features/festival/video/VideoSessionProvider';
 import { hasRealAuth } from '@/lib/supabase';
 
 // Vrais comptes si Supabase est configuré, sinon connexion simulée (démo sans serveur).
@@ -36,7 +37,9 @@ export function Providers({ children }: { children: ReactNode }) {
     <QueryClientProvider client={client}>
       <Auth>
         <TooltipProvider>
-          <Toaster>{children}</Toaster>
+          <Toaster>
+            <VideoSessionProvider>{children}</VideoSessionProvider>
+          </Toaster>
         </TooltipProvider>
       </Auth>
     </QueryClientProvider>
