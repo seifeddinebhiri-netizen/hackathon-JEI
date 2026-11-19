@@ -22,10 +22,13 @@ begin
     return new;  -- fourni par une connexion serveur (script de démonstration)
   end if;
   loop
-    code := 'EN-'
-      || (select string_agg(substr(alphabet, 1 + floor(random() * 32)::int, 1), '') from generate_series(1, 4))
-      || '-'
-      || (select string_agg(substr(alphabet, 1 + floor(random() * 32)::int, 1), '') from generate_series(1, 2));
+    code := 'EN-';
+    for i in 1..6 loop
+      code := code || substr(alphabet, 1 + floor(random() * 32)::int, 1);
+      if i = 4 then
+        code := code || '-';
+      end if;
+    end loop;
     exit when not exists (select 1 from public.ai_passports p where p.badge_code = code);
   end loop;
   new.badge_code := code;
