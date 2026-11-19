@@ -47,20 +47,21 @@ Le message est affiché tel quel à l'utilisateur ; sans message, le front en af
 |---|---|---|---|
 | `createProject` | POST `/projects` | Nouveau projet | confirmé |
 | `getProject` | GET `/projects/{id}` | Projet complet | confirmé |
-| `updateProject` | PATCH `/projects/{id}` | Scènes, lieux, personnes, planning, sélection, Kit Festival | à confirmer |
+| `updateProject` | PATCH `/projects/{id}` | Scènes, lieux, personnes, planning | confirmé |
 | `deleteProject` | DELETE `/projects/{id}` | « Supprimer mon projet » | confirmé |
-| `getProjectPassport` | GET `/projects/{id}/passport` | Passeport du projet (`null` si aucun) | **à confirmer** (ajout du front) |
+| — | GET `/me` | Profil du compte connecté (projet courant, compte de démo) | confirmé, pas encore utilisé par le front |
+| `getProjectPassport` | ~~GET `/projects/{id}/passport`~~ → table `ai_passports` | Passeport du projet (`null` si aucun) | **remplacée par Supabase** |
 | `parseScreenplay` | POST `/planner/parse` | Scénario → scènes (brouillon) | à confirmer |
 | `geocode` | GET `/planner/geocode?q=` | Adresse ou ville → coordonnées | à confirmer |
 | `quickSlots` | POST `/planner/quick` | Scène rapide → créneaux classés | à confirmer |
 | `generateSchedule` | POST `/planner/schedule` | Projet → planning brouillon | à confirmer |
 | `getWeather` | GET `/planner/weather` | Prévisions par jour | à confirmer |
-| `getAiTools` | GET `/ai-tools` | Catalogue des outils IA | à confirmer |
-| `savePassport` | POST `/passport` | Créer ou mettre à jour la déclaration | confirmé |
-| `checkPassport` | GET `/passport/{id}/check` | Contrôle avant PDF | confirmé |
-| `getPassportPdfUrl` | GET `/passport/{id}/pdf` | URL du PDF | confirmé |
-| `signC2pa` | POST `/c2pa/sign` | Signer le fichier final | confirmé |
-| `verifyPassport` | GET `/verify/{id}` | Page publique des festivals | confirmé |
+| `getAiTools` | ~~GET `/ai-tools`~~ → fichier `mocks/data/ai-tools.json` | Catalogue des outils IA | **remplacée** (fichier de référence) |
+| `savePassport` | ~~POST `/passport`~~ → table `ai_passports` | Créer ou mettre à jour la déclaration | **remplacée par Supabase** |
+| `checkPassport` | ~~GET `/passport/{id}/check`~~ → calcul dans le navigateur | Contrôle avant PDF | **remplacée** |
+| `getPassportPdfUrl` | ~~GET `/passport/{id}/pdf`~~ → page imprimable `/verifier/<code>?imprimer=1` | URL du PDF | **remplacée** |
+| `signC2pa` | ~~POST `/c2pa/sign`~~ → simulée dans le navigateur, rien n'est écrit | Signer le fichier final | **futur** (vraie signature côté serveur) |
+| `verifyPassport` | ~~GET `/verify/{id}`~~ → fonction SQL `verify_badge(code)` | Page publique des festivals | **remplacée par Supabase** |
 | `searchFestivals` | GET `/festivals` | Recherche, filtres, classement | confirmé |
 | `getFestival` | GET `/festivals/{id}` | Fiche d'un festival | backend prêt |
 | `generateShotSpec` | POST `/shot-spec` | Coach : plan de prise de vue par l'IA (jeton Supabase exigé, 20 par heure et par utilisateur) | **confirmé, branché** |
@@ -72,7 +73,6 @@ Le message est affiché tel quel à l'utilisateur ; sans message, le front en af
 | `getSynopsisFeedback` | POST `/synopsis/feedback` | Questions du coach | confirmé |
 | `translateSynopsis` | POST `/synopsis/translate` | Version anglaise du synopsis (brouillon IA) | confirmé |
 | `getPublicFilm` | GET `/films/{id}/public` | Page film publique | à confirmer |
-| — | POST `/shot-spec` | Coach : conseils de prise de vue | **futur** |
 | — | GET `/projects/{id}/days/{date}/public` | Feuille de service partageable sans compte | **futur** |
 | — | POST `/films/{id}/stills` | Envoi des photos de la page film | **futur** |
 
@@ -135,28 +135,34 @@ par projet** (`kit_pieces`, clé `pieceKeyOf`) et remplit tous les dossiers qui 
 `forbidden_days` accepte des dates ISO (`"2026-11-21"`) ou des jours de semaine en français, en minuscules (`"vendredi"`).
 `film_profile`, `synopsis` et `film_page` sont facultatifs (absents tant que le Kit Festival n'a rien enregistré).
 
-### `updateProject` — PATCH `/projects/{id}` · à confirmer
+### `updateProject` — PATCH `/projects/{id}` · confirmé
 
 Corps : sous-ensemble de `Project` (`UpdateProjectInput`) : `title`, `format`, `city`, `shooting_window`,
-`max_hours_per_day`, `scenes`, `locations`, `people`, `schedule`, `festival_shortlist`, `film_profile`, `synopsis`,
-`film_page`. Chaque champ envoyé **remplace** la valeur entière (pas de fusion profonde des listes).
-Réponse 200 : `Project` complet. Erreurs : 400/422, 404, 409.
+`max_hours_per_day`, `scenes`, `locations`, `people`, `schedule`. Chaque champ envoyé **remplace** la valeur entière
+(pas de fusion profonde des listes). Réponse 200 : `Project` complet. Erreurs : 400/422, 401, 403, 404.
 
 Usages : enregistrement automatique de l'assistant (scènes, lieux, personnes), déplacements dans le calendrier
-(`schedule` recalculé par le front), validation du planning (`schedule.status = "valide"`), sélection de festivals,
-Kit Festival (`film_profile`, `synopsis`, `film_page`).
+(`schedule` recalculé par le front), validation du planning (`schedule.status = "valide"`).
 
-Le navigateur garde une copie de `film_profile`, `synopsis` et `film_page` (clés `pp-cache-<champ>-<projectId>`,
-même forme) qui sert seulement de cache d'affichage et de filet si l'enregistrement échoue.
+**Anciennes clés du Kit Festival** (`festival_shortlist`, `film_profile`, `synopsis`, `film_page`) : encore acceptées par
+le backend pour ne rien casser, mais **dépréciées** depuis la migration 0005. Le Kit est dans ses propres tables
+(`festival_dossiers`, `kit_pieces`, `film_kits`) : ne plus les envoyer ici.
 
 ### `deleteProject` — DELETE `/projects/{id}` · confirmé
 
 Supprime le projet, son Passeport (la page de vérification renvoie alors 404) et ses sous-titres.
 Réponse 200 `{ "ok": true }` ou 204. Erreurs : 403, 404.
 
-### `getProjectPassport` — GET `/projects/{id}/passport` · à confirmer (ajout du front)
+### `getProjectPassport` — remplacée par Supabase
 
-Réponse 200 : `Passport` ou `null` si aucune déclaration n'existe encore. Erreurs : 404 (projet).
+Lecture de la table `ai_passports` (une ligne par projet) avec la session de l'utilisateur : `Passport` ou `null` si
+aucune déclaration n'existe encore. Voir « Passeport IA » ci-dessous.
+
+### `GET /me` · confirmé (backend), pas encore utilisé par le front
+
+Jeton exigé. Réponse 200 : `{ "id", "email", "display_name", "is_demo", "current_project_id" }` (profil du compte,
+`current_project_id` peut valoir `null`). Erreurs : 401, 404 (profil absent). Le front lit aujourd'hui le projet courant
+directement dans `profiles` (Supabase).
 
 ---
 
@@ -248,7 +254,18 @@ Le front l'utilise pour recalculer les conflits même sur les jours vides du cal
 
 ## Passeport IA
 
-### `getAiTools` — GET `/ai-tools` · à confirmer
+**Routes `/passport…`, `/c2pa/sign`, `/verify/{id}` et `/ai-tools` : remplacées par Supabase. Elles n'existent pas dans le
+backend et ne sont plus appelées.** Le front (`src/api/supabase/passport.ts`) lit et écrit la table `ai_passports` avec la
+session de l'utilisateur ; la RLS limite chacun à ses passeports. Les formats ci-dessous (`Passport`, `PassportCheck`…)
+restent ceux des types du front.
+
+Ce que le navigateur peut écrire (migration 0007) : `project_id` à la création, puis `film_title`, `director`,
+`declarations`. **`badge_code` est créé par la base** (déclencheur, format `EN-XXXX-XX`, unique) et **`c2pa_signed` n'est
+posé que par le serveur**.
+
+### `getAiTools` — remplacée (fichier de référence)
+
+Catalogue lu dans `src/api/mocks/data/ai-tools.json` (données de référence versionnées, pas des données utilisateur).
 
 Réponse 200 : `AiTool[]`. Le statut décrit ce que **le fournisseur publie** (données d'entraînement, droits),
 pas le travail du réalisateur. `non_divulgue` est un statut valide.
@@ -258,7 +275,7 @@ pas le travail du réalisateur. `non_divulgue` est un statut valide.
    "source_url": "https://fournisseur-e.exemple.invalid/ia", "checked_at": "2026-10-01" }]
 ```
 
-### `savePassport` — POST `/passport` · confirmé
+### `savePassport` — remplacée par Supabase (`ai_passports`)
 
 Création (sans `id`) ou mise à jour (avec `id`). Corps (`SavePassportInput`) :
 ```json
@@ -270,12 +287,13 @@ Création (sans `id`) ou mise à jour (avec `id`). Corps (`SavePassportInput`) :
       "human_decisions": "Choix des prises et du rythme." }
   ] }
 ```
-Réponse 200 : `Passport` (le serveur fixe `badge_code`, `verify_url`, `c2pa_signed`, `updated_at`).
+Création (`insert` de `project_id`, `film_title`, `director`, `declarations`) ou mise à jour (`update` des trois derniers).
+La base fixe `badge_code`, `c2pa_signed` (faux) et `updated_at` ; le front construit `verify_url`.
 Le front enregistre automatiquement à chaque modification. Départements : `scenario`, `image`, `montage`, `son_voix`,
 `musique`, `vfx`, `sous_titres`, `affiche_promo`. Niveaux : `assistance`, `generation_partielle`, `generation_complete`.
 Un outil hors catalogue passe par `custom_tool` (affiché « Non divulgué »).
 
-### `checkPassport` — GET `/passport/{id}/check` · confirmé
+### `checkPassport` — remplacée (calcul dans le navigateur, `checkPassportLocal`)
 
 Réponse 200 (`PassportCheck`). Le bouton PDF est actif seulement si `ok = true`.
 ```json
@@ -284,23 +302,26 @@ Réponse 200 (`PassportCheck`). Le bouton PDF est actif seulement si `ok = true`
   "warnings": ["Affiche et promotion : [Générateur d'images A] est « Non divulgué » (…). Ce statut est valide et sera affiché tel quel."] }
 ```
 
-### `getPassportPdfUrl` — GET `/passport/{id}/pdf` · confirmé
+### `getPassportPdfUrl` — remplacée (page imprimable)
 
-Réponse 200 : `{ "url": "https://…/passeport.pdf" }`, ouverte dans un nouvel onglet. En mode mock, l'URL pointe vers
-`/verifier/{id}?imprimer=1` (aperçu imprimable). Erreurs : 404, 409 (déclaration incomplète).
+Renvoie `{ "url": "<site>/verifier/<code>?imprimer=1" }` (aperçu imprimable de la page de vérification), ouvert dans un
+nouvel onglet. Pas encore de PDF généré côté serveur. Erreur : 404 (pas de Passeport).
 
-### `signC2pa` — POST `/c2pa/sign` · confirmé
+### `signC2pa` — simulée · vraie signature : futur (serveur)
 
 Corps : `{ "passport_id": "pass-4ff7045785", "file_name": "dar-hmeti-v-finale.mp4" }`.
 Réponse 200 :
 ```json
 { "signed": true, "manifest_id": "c2pa-…", "signed_at": "2026-11-14T16:10:00+01:00", "simulated": true }
 ```
-`simulated = true` : le front l'annonce (« aucune signature réelle n'a été posée »). Erreurs : 404, 409.
+`simulated = true` : le front l'annonce (« aucune signature réelle n'a été posée »). **Rien n'est écrit** :
+`c2pa_signed` reste faux tant qu'une vraie signature n'est pas posée par le serveur. Erreur : 404.
 
-### `verifyPassport` — GET `/verify/{id}` · confirmé · **public, sans authentification**
+### `verifyPassport` — fonction SQL `verify_badge(code)` · **public, sans authentification**
 
-Réponse 200 (`VerifyResult`) : la déclaration, les outils utilisés (catalogue), l'état de la signature.
+`supabase.rpc('verify_badge', { code })` avec la clé publique : la fonction (`security definer`, migration 0005) ne renvoie
+que `film_title`, `director`, `declarations`, `c2pa_signed`. Le front y ajoute les outils du catalogue et forme le
+`VerifyResult` : la déclaration, les outils utilisés, l'état de la signature. Le code `exemple` affiche un Passeport fictif.
 ```json
 { "passport": { "id": "exemple", "film_title": "[Film d'exemple]", "badge_code": "EN-EXEM-PL", "c2pa_signed": true, "…": "…" },
   "tools": [{ "id": "tool-son-a", "status": "documente", "…": "…" }],

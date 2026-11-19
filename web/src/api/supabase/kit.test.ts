@@ -151,7 +151,7 @@ describe('Passeport IA dans Supabase', () => {
     expect(isApiError(e) && e.code).toBe('introuvable');
   });
 
-  it('un nouveau Passeport reçoit un code de badge ; une mise à jour le garde', async () => {
+  it('nouveau Passeport : seuls titre, réalisation et déclarations sont envoyés ; le code vient de la base', async () => {
     const row = {
       project_id: 'p1',
       film_title: 'Dar Hmeti',
@@ -168,8 +168,47 @@ describe('Passeport IA dans Supabase', () => {
       director: 'Yassine',
       declarations: [],
     });
-    const [inserted] = f.argsOf('ai_passports', 'insert')! as [{ badge_code: string }];
-    expect(inserted.badge_code).toMatch(/^[A-Z0-9]{2,6}-[A-Z0-9]{4}-[A-Z0-9]{2}$/);
+    const [inserted] = f.argsOf('ai_passports', 'insert')! as [Record<string, unknown>];
+    // Migration 0007 : le navigateur n'a pas le droit d'écrire badge_code ni c2pa_signed.
+    expect(Object.keys(inserted).sort()).toEqual(['declarations', 'director', 'film_title', 'project_id']);
+    expect(p.badge_code).toBe('EN-ABCD-23');
     expect(p.verify_url).toMatch(/\/verifier\/EN-ABCD-23$/);
+  });
+
+  it('mise à jour : jamais badge_code ni c2pa_signed', async () => {
+    const row = {
+      project_id: 'p1',
+      film_title: 'Dar Hmeti',
+      director: 'Yassine',
+      declarations: [],
+      c2pa_signed: false,
+      badge_code: 'EN-ABCD-23',
+      updated_at: '2026-11-19T10:00:00Z',
+    };
+    const f = use(() => ({ data: row, error: null }));
+    await supabasePassportApi.savePassport({
+      project_id: 'p1',
+      film_title: 'Dar Hmeti 2',
+      director: 'Yassine',
+      declarations: [],
+    });
+    const [updated] = f.argsOf('ai_passports', 'update')! as [Record<string, unknown>];
+    expect(Object.keys(updated).sort()).toEqual(['declarations', 'director', 'film_title']);
+  });
+
+  it('signature C2PA de démonstration : annoncée simulée, rien n’est écrit', async () => {
+    const row = {
+      project_id: 'p1',
+      film_title: 'Dar Hmeti',
+      director: 'Yassine',
+      declarations: [],
+      c2pa_signed: false,
+      badge_code: 'EN-ABCD-23',
+      updated_at: '2026-11-19T10:00:00Z',
+    };
+    const f = use(() => ({ data: row, error: null }));
+    const r = await supabasePassportApi.signC2pa({ passport_id: 'p1', file_name: 'film.mp4' });
+    expect(r).toMatchObject({ signed: true, simulated: true, manifest_id: 'c2pa-EN-ABCD-23' });
+    expect(f.calls.some((c) => has(c, 'update') || has(c, 'insert') || has(c, 'upsert'))).toBe(false);
   });
 });

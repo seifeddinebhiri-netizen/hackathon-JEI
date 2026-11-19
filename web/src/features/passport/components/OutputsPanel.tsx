@@ -182,7 +182,7 @@ export function PdfAndSign({ passport }: { passport: Passport }) {
       <Dialog open={signOpen} onOpenChange={setSignOpen}>
         <DialogContent
           title="Signer le fichier final (C2PA)"
-          description="Ajoute au fichier final une marque Content Credentials qui renvoie vers ce Passeport. Dans cette version de démonstration, la signature est simulée par le serveur."
+          description="Ajoute au fichier final une marque Content Credentials qui renvoie vers ce Passeport. Dans cette version de démonstration, la signature est simulée : aucune marque n’est posée et le Passeport reste « pas encore signé »."
         >
           <form
             className="flex flex-col gap-4"

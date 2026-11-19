@@ -1,5 +1,7 @@
 /**
  * Passeport IA dans Supabase (table ai_passports, une ligne par projet ; Passport.id = project_id).
+ * Le navigateur n'écrit que film_title, director, declarations (migration 0007) : le code du badge
+ * est créé par la base, et `c2pa_signed` n'est posé que par le serveur (vraie signature, à venir).
  * Vérification publique (/verifier/<code>) : fonction verify_badge, exécutable sans compte, qui ne
  * renvoie que les champs publics (titre, réalisation, déclarations, signature).
  */
@@ -10,7 +12,7 @@ import { supabase } from '@/lib/supabase';
 import { apiError, validate } from '../client';
 import type { Api } from '../endpoints';
 import aiTools from '../mocks/data/ai-tools.json';
-import { badgeCode, checkPassportLocal, mockApi } from '../mocks/handlers';
+import { checkPassportLocal, mockApi } from '../mocks/handlers';
 import * as S from '../schemas';
 import type * as T from '../types';
 import { fromSupabase, unwrap } from './errors';
@@ -94,7 +96,7 @@ export const supabasePassportApi: Pick<
           .single()
       : await sb
           .from('ai_passports')
-          .insert({ project_id: input.project_id, ...fields, badge_code: badgeCode() })
+          .insert({ project_id: input.project_id, ...fields }) // badge_code : créé par la base
           .select(COLUMNS)
           .single();
     return toPassport(validate(rowSchema, unwrap(res), 'ai_passports'));
@@ -109,10 +111,9 @@ export const supabasePassportApi: Pick<
   },
 
   async signC2pa({ passport_id }) {
-    const sb = await signedInClient();
     const p = await requirePassport(passport_id);
-    unwrap(await sb.from('ai_passports').update({ c2pa_signed: true }).eq('project_id', passport_id));
-    // Pas encore de vraie signature C2PA : le résultat le dit (simulated).
+    // Pas encore de vraie signature C2PA : rien n'est écrit (le Passeport reste « pas encore
+    // signé », c'est le vrai état) et le résultat le dit (simulated).
     return {
       signed: true,
       manifest_id: `c2pa-${p.badge_code}`,
