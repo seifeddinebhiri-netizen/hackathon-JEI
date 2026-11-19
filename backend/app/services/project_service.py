@@ -1,3 +1,5 @@
+from uuid import UUID
+
 import asyncpg
 
 from app.core.auth import CurrentUser
@@ -32,6 +34,16 @@ async def _owned(pool: asyncpg.Pool | None, project_id: str, user: CurrentUser) 
     if row["owner_id"] != user.id:
         raise AppError("Ce projet ne t'appartient pas.", status_code=403, code="interdit")
     return row
+
+
+async def ensure_owned(pool: asyncpg.Pool | None, project_id: str, user: CurrentUser) -> None:
+    """404 si le projet n'existe pas (ou si l'identifiant n'est pas un uuid), 403 s'il appartient
+    à quelqu'un d'autre. Utilisé par les routes rattachées à un projet (sous-titres)."""
+    try:
+        UUID(project_id)
+    except ValueError:
+        raise AppError("Projet introuvable.", status_code=404, code="introuvable") from None
+    await _owned(pool, project_id, user)
 
 
 async def create_project(

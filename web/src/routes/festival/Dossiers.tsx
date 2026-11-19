@@ -1,4 +1,11 @@
-import type { Festival, Passport, Project, ShortlistItem, ShortlistStatus } from '@/api/types';
+import type {
+  Festival,
+  FestivalRequirement,
+  Passport,
+  Project,
+  ShortlistItem,
+  ShortlistStatus,
+} from '@/api/types';
 import {
   Button,
   ButtonLink,
@@ -19,7 +26,6 @@ import {
   countReady,
   dossierPieces,
   PIECE_STATE_LABELS,
-  setRequirementDone,
   sharedPieces,
   type Piece,
   type PieceState,
@@ -57,6 +63,7 @@ function DossierCard({
   pieces,
   busy,
   onChange,
+  onTogglePiece,
   onRemove,
 }: {
   festival: Festival;
@@ -64,6 +71,8 @@ function DossierCard({
   pieces: Piece[];
   busy: boolean;
   onChange: (item: ShortlistItem) => void;
+  /** Une pièce cochée ici l'est pour tous les dossiers qui la demandent. */
+  onTogglePiece: (r: FestivalRequirement, done: boolean) => void;
   onRemove: () => void;
 }) {
   const dl = deadlineLabel(festival);
@@ -100,12 +109,7 @@ function DossierCard({
         <PiecesProgress ready={countReady(pieces)} total={pieces.length} className="w-full sm:w-44" />
       </div>
       {pieces.length ? (
-        <PiecesList
-          pieces={pieces}
-          compact
-          busy={busy}
-          onToggle={(r, done) => onChange(setRequirementDone(item, r, done))}
-        />
+        <PiecesList pieces={pieces} compact busy={busy} onToggle={onTogglePiece} />
       ) : (
         <p className="text-meta text-muted-on-light">
           Le règlement ne liste pas de pièces précises : vérifie le formulaire sur le site officiel.
@@ -257,6 +261,7 @@ function DossiersBody({ project, passport }: { project: Project; passport: Passp
                         pieces={d.pieces}
                         busy={shortlist.pending}
                         onChange={(item) => void save(shortlist.replace(item))}
+                        onTogglePiece={(r, done) => void save(shortlist.setPiece(d.festival, r, done))}
                         onRemove={() => void save(shortlist.remove(d.festival.id))}
                       />
                     ))}

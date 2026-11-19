@@ -116,10 +116,32 @@ export const festivalRequirementSchema: z.ZodType<T.FestivalRequirement> = z.obj
   limit_chars: z.number().nullish(),
 });
 
+export const aiChoiceSchema = z.enum([
+  'aucune',
+  'outil_technique',
+  'generation',
+  'les_deux',
+]) satisfies z.ZodType<T.AiChoice>;
+
 export const shortlistItemSchema: z.ZodType<T.ShortlistItem> = z.object({
   festival_id: z.string(),
   status: z.enum(['a_preparer', 'pret', 'soumis', 'reponse_recue', 'prochain_appel']),
-  checklist: z.array(z.object({ requirement: festivalRequirementSchema, done: z.boolean() })),
+  ai_choice: aiChoiceSchema.nullish(),
+});
+
+const filmProfileSchema: z.ZodType<T.ProjectFilmProfile> = z.object({
+  duration_min: z.number().nonnegative(),
+  language: z.string(),
+  genre: z.string(),
+});
+const synopsisTextsSchema: z.ZodType<T.SynopsisTexts> = z.object({
+  phrase: z.string(),
+  court: z.string(),
+  long: z.string(),
+});
+const filmPageSchema: z.ZodType<T.FilmPageContent> = z.object({
+  stills: z.array(z.string()),
+  trailer_url: z.string().optional(),
 });
 
 export const projectSchema: z.ZodType<T.Project> = z.object({
@@ -134,12 +156,38 @@ export const projectSchema: z.ZodType<T.Project> = z.object({
   people: z.array(personSchema),
   schedule: scheduleSchema.optional(),
   festival_shortlist: z.array(shortlistItemSchema),
-  film_profile: z
-    .object({ duration_min: z.number().nonnegative(), language: z.string(), genre: z.string() })
-    .optional(),
-  synopsis: z.object({ phrase: z.string(), court: z.string(), long: z.string() }).optional(),
-  film_page: z.object({ stills: z.array(z.string()), trailer_url: z.string().optional() }).optional(),
+  film_profile: filmProfileSchema.optional(),
+  synopsis: synopsisTextsSchema.optional(),
+  film_page: filmPageSchema.optional(),
 });
+
+// --- Kit Festival (Supabase) ---------------------------------------------------------------
+const synopsisEnDraftSchema: z.ZodType<T.SynopsisEnDraft> = z.object({
+  text: z.string(),
+  source: z.string(),
+  validated: z.boolean(),
+});
+export const kitFilmFieldsSchema: z.ZodType<T.KitFilmFields> = z.object({
+  film_profile: filmProfileSchema.optional(),
+  synopsis: synopsisTextsSchema.optional(),
+  film_page: filmPageSchema.optional(),
+  synopsis_en: z
+    .object({
+      phrase: synopsisEnDraftSchema.optional(),
+      court: synopsisEnDraftSchema.optional(),
+      long: synopsisEnDraftSchema.optional(),
+    })
+    .optional(),
+});
+export const kitPieceStateSchema = z.enum(['a_faire', 'pret']) satisfies z.ZodType<T.KitPieceState>;
+export const kitDataSchema: z.ZodType<T.KitData> = z.intersection(
+  kitFilmFieldsSchema,
+  z.object({
+    project_id: z.string(),
+    dossiers: z.array(shortlistItemSchema),
+    pieces: z.record(z.string(), kitPieceStateSchema),
+  }),
+);
 
 export const quickSlotSchema: z.ZodType<T.QuickSlot> = z.object({
   start: z.string(),

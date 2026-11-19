@@ -16,12 +16,7 @@ import { PiecesList, PiecesProgress } from '@/features/festival/components/Piece
 import { useDossierContext } from '@/features/festival/hooks/useDossierContext';
 import { useFestival, useFestivalSearch, useShortlist } from '@/features/festival/hooks/useFestivals';
 import { deptLabel } from '@/features/festival/lib/aiDeclaration';
-import {
-  countReady,
-  dossierPieces,
-  newShortlistItem,
-  setRequirementDone,
-} from '@/features/festival/lib/dossier';
+import { countReady, dossierPieces, newShortlistItem } from '@/features/festival/lib/dossier';
 import { langList, RANKING_DISCLAIMER } from '@/features/festival/lib/labels';
 import { defaultProfile, projectField } from '@/features/festival/lib/localStore';
 import { cn } from '@/lib/cn';
@@ -221,9 +216,7 @@ function FicheBody({
               <PiecesList
                 pieces={pieces}
                 busy={shortlist.pending}
-                onToggle={
-                  item ? (r, done) => void shortlist.replace(setRequirementDone(item, r, done)) : undefined
-                }
+                onToggle={item ? (r, done) => void shortlist.setPiece(festival, r, done) : undefined}
               />
               {!item ? (
                 <Button

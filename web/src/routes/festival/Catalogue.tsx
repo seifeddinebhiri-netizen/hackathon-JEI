@@ -33,7 +33,7 @@ import {
   regionOf,
   type Region,
 } from '@/features/festival/lib/labels';
-import { defaultProfile, useProjectField } from '@/features/festival/lib/localStore';
+import { defaultProfile, projectField, useProjectField } from '@/features/festival/lib/localStore';
 import type { Passport } from '@/api/types';
 import { cn } from '@/lib/cn';
 import { toDate } from '@/lib/format';
@@ -277,7 +277,7 @@ function CatalogueBody({
   const navigate = useNavigate();
   const { toast } = useToast();
   const shortlist = useShortlist(project);
-  const [stored] = useProjectField(project, 'film_profile', defaultProfile(project.format));
+  const stored = projectField(project, 'film_profile', defaultProfile(project.format));
   const [query, setQuery] = useState('');
   const [openOnly, setOpenOnly] = useState(true);
   const [compatOnly, setCompatOnly] = useState(false);

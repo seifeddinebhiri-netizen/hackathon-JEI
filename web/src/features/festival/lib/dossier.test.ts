@@ -4,7 +4,7 @@ import {
   countReady,
   dossierPieces,
   newShortlistItem,
-  setRequirementDone,
+  pieceKeyOf,
   sharedPieces,
   synopsisLimit,
   type DossierContext,
@@ -65,6 +65,7 @@ const ctx = (p: Partial<DossierContext> = {}): DossierContext => ({
   subtitles: [sub(true), sub(false)],
   passport,
   filmPage: { stills: ['/photos/a.jpg', '/photos/b.jpg', '/photos/c.jpg'] },
+  pieces: {},
   ...p,
 });
 
@@ -88,11 +89,27 @@ describe('pièces d’un dossier', () => {
   });
 
   it('suit l’état réel : sous-titres validés, déclaration validée, pièce cochée à la main', () => {
-    let item: ShortlistItem = newShortlistItem(vienna);
-    item = setRequirementDone(item, vienna.requirements[0], true);
-    item = setRequirementDone(item, vienna.requirements[4], true);
-    const pieces = dossierPieces(vienna, item, ctx({ subtitles: [sub(true), sub(true)] }));
+    const item: ShortlistItem = { ...newShortlistItem(vienna), ai_choice: 'outil_technique' };
+    const pieces = dossierPieces(
+      vienna,
+      item,
+      ctx({ subtitles: [sub(true), sub(true)], pieces: { 'format:vienna-shorts': 'pret' } }),
+    );
     expect(pieces.every((p) => p.state === 'pret')).toBe(true);
+  });
+
+  it('une pièce cochée une fois remplit tous les dossiers qui la demandent (aucune copie)', () => {
+    const bsff = fest({ id: 'bsff', requirements: [{ kind: 'affiche', detail: 'Affiche A4' }] });
+    const clermont = fest({ id: 'clermont', requirements: [{ kind: 'affiche', detail: 'Affiche du film' }] });
+    // Même clé pour les deux festivals, même si le règlement est écrit autrement
+    expect(pieceKeyOf(bsff, bsff.requirements[0])).toBe('affiche');
+    expect(pieceKeyOf(clermont, clermont.requirements[0])).toBe('affiche');
+    const c = ctx({ pieces: { affiche: 'pret' } });
+    expect(dossierPieces(bsff, undefined, c)[0].state).toBe('pret');
+    expect(dossierPieces(clermont, undefined, c)[0].state).toBe('pret');
+    // « Film et inscription » reste propre à chaque festival ; les pièces calculées n'ont pas de clé
+    expect(pieceKeyOf(vienna, vienna.requirements[4])).toBe('format:vienna-shorts');
+    expect(pieceKeyOf(vienna, vienna.requirements[1])).toBeNull();
   });
 
   it('bloque un film trop long et une IA refusée', () => {
@@ -189,6 +206,6 @@ describe('limites de synopsis', () => {
 describe('dossier', () => {
   it('un appel clos part « pour le prochain appel »', () => {
     expect(newShortlistItem(fest({ deadline_status: 'passee' })).status).toBe('prochain_appel');
-    expect(newShortlistItem(vienna).checklist).toHaveLength(5);
+    expect(newShortlistItem(vienna)).toEqual({ festival_id: 'vienna-shorts', status: 'a_preparer' });
   });
 });

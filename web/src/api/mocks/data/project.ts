@@ -6,8 +6,7 @@
  * (une partie de la période dépasse l'horizon météo de 14 jours, volontairement).
  * Noms d'acteurs, adresses précises : [placeholders].
  */
-import type { FestivalRequirement, Project, ShortlistItem } from '@/api/types';
-import festivals from './festivals.json';
+import type { KitPieceState, Project } from '@/api/types';
 import { demoDate } from '../weather';
 
 export const DEMO_PROJECT_ID = 'demo-maree-basse';
@@ -158,9 +157,9 @@ export function buildDemoProject(): Project {
       { id: 'p-8', kind: 'equipe', name: '[Nom]', role: 'Régie' },
     ],
     festival_shortlist: [
-      dossier('bsff-next-generation', 'a_preparer', ['photos']),
-      dossier('vienna-shorts', 'a_preparer', ['photos', 'format']),
-      dossier('clermont-international', 'prochain_appel', []),
+      { festival_id: 'bsff-next-generation', status: 'a_preparer' },
+      { festival_id: 'vienna-shorts', status: 'a_preparer' },
+      { festival_id: 'clermont-international', status: 'prochain_appel' },
     ],
     film_profile: { duration_min: 15, language: 'Derja (arabe tunisien)', genre: 'Fiction' },
     synopsis: {
@@ -173,21 +172,8 @@ export function buildDemoProject(): Project {
   };
 }
 
-/** Dossier de la sélection de démo, à partir des exigences réelles du festival (mêmes fiches que le backend). */
-function dossier(
-  festivalId: string,
-  status: ShortlistItem['status'],
-  done: FestivalRequirement['kind'][],
-): ShortlistItem {
-  const f = (festivals as { id: string; requirements: FestivalRequirement[] }[]).find(
-    (x) => x.id === festivalId,
-  );
-  return {
-    festival_id: festivalId,
-    status,
-    checklist: (f?.requirements ?? []).map((requirement) => ({
-      requirement,
-      done: done.includes(requirement.kind),
-    })),
-  };
-}
+/**
+ * Pièces cochées à la main dans la démo (clés de pieceKeyOf) : « Film et inscription » prêt pour
+ * Vienna Shorts. Les photos, synopsis, sous-titres et déclaration IA sont calculés.
+ */
+export const DEMO_PIECES: Record<string, KitPieceState> = { 'format:vienna-shorts': 'pret' };

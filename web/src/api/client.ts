@@ -117,21 +117,30 @@ type RequestOptions<S extends z.ZodType> = {
   signal?: AbortSignal;
 };
 
-export async function request<S extends z.ZodType>(
-  path: string,
-  opts: RequestOptions<S>,
-): Promise<z.output<S>> {
+function apiUrl(path: string, query?: RequestOptions<z.ZodType>['query']): URL {
   // `VITE_API_URL` peut être relative (ex. « /api », relayée par le serveur de dev) : on la résout
   // par rapport à la page.
   const base = new URL(env.apiUrl.endsWith('/') ? env.apiUrl : `${env.apiUrl}/`, window.location.origin);
   const url = new URL(path.replace(/^\//, ''), base);
-  for (const [k, v] of Object.entries(opts.query ?? {})) {
+  for (const [k, v] of Object.entries(query ?? {})) {
     if (v !== undefined && v !== '') url.searchParams.set(k, String(v));
   }
+  return url;
+}
 
+function authHeaders(): Record<string, string> {
   const headers: Record<string, string> = { Accept: 'application/json' };
   const token = tokenGetter();
   if (token) headers.Authorization = `Bearer ${token}`;
+  return headers;
+}
+
+export async function request<S extends z.ZodType>(
+  path: string,
+  opts: RequestOptions<S>,
+): Promise<z.output<S>> {
+  const url = apiUrl(path, opts.query);
+  const headers = authHeaders();
   let body: BodyInit | undefined;
   if (opts.formData) {
     body = opts.formData; // le navigateur pose le Content-Type multipart
@@ -167,4 +176,48 @@ export async function request<S extends z.ZodType>(
 
   const data: unknown = res.status === 204 ? { ok: true } : await res.json().catch(() => undefined);
   return validate(opts.schema, data, `${opts.method ?? 'GET'} ${path}`);
+}
+
+/** Avancement d'un envoi : octets envoyés sur le total. */
+export type UploadProgress = (sent: number, total: number) => void;
+
+/**
+ * Envoi multipart avec avancement (XMLHttpRequest : `fetch` ne donne pas la progression de
+ * l'envoi). Mêmes erreurs typées en français que `request`.
+ */
+export function uploadForm<S extends z.ZodType>(
+  path: string,
+  opts: { formData: FormData; schema: S; timeoutMs: number; onProgress?: UploadProgress },
+): Promise<z.output<S>> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', apiUrl(path).toString());
+    for (const [k, v] of Object.entries(authHeaders())) xhr.setRequestHeader(k, v);
+    xhr.timeout = opts.timeoutMs;
+    if (opts.onProgress) {
+      const cb = opts.onProgress;
+      xhr.upload.onprogress = (e) => cb(e.loaded, e.lengthComputable ? e.total : 0);
+    }
+    xhr.onerror = () => reject(apiError('reseau'));
+    xhr.ontimeout = () => reject(apiError('delai_depasse'));
+    xhr.onabort = () => reject(new DOMException('Envoi annulé', 'AbortError'));
+    xhr.onload = () => {
+      let body: unknown;
+      try {
+        body = xhr.responseText ? JSON.parse(xhr.responseText) : undefined;
+      } catch {
+        body = undefined;
+      }
+      if (xhr.status < 200 || xhr.status >= 300) {
+        reject(errorFromStatus(xhr.status, serverErrorMessage(body)));
+        return;
+      }
+      try {
+        resolve(validate(opts.schema, body, `POST ${path}`));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    xhr.send(opts.formData);
+  });
 }

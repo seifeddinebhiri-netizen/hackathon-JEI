@@ -6,12 +6,13 @@ import math
 import pytest
 from fastapi.testclient import TestClient
 
+from app.core.auth import get_current_user
 from app.main import app
 from app.schemas.subtitle import SubtitleLine
 from app.services import subtitle_rules, subtitle_service
 from app.services.subtitle_segmentation import segment
 from tests.test_gemini_translator import gemini
-from tests.test_subtitles import FakeTranscriber, post_draft, w
+from tests.test_subtitles import TEST_USER, FakeTranscriber, post_draft, w
 
 P = math.log  # probabilité → logprob
 
@@ -34,12 +35,14 @@ def reply(**line):
 
 @pytest.fixture
 def client():
+    app.dependency_overrides[get_current_user] = lambda: TEST_USER
     with TestClient(app) as c:
         app.state.db_pool = None
         app.state.transcriber = FakeTranscriber(words=words_one_line())
         subtitle_service._memory.clear()
         yield c
     subtitle_service._memory.clear()
+    app.dependency_overrides.pop(get_current_user, None)
 
 
 def line_of(r):

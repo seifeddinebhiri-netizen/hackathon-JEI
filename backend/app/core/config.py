@@ -16,6 +16,10 @@ class Settings(BaseSettings):
     supabase_service_role_key: SecretStr = SecretStr("")
     supabase_jwt_secret: SecretStr = SecretStr("")
     database_url: SecretStr = SecretStr("")
+    # Compte de démonstration (scripts/seed_kit_demo.py) : mêmes valeurs que VITE_DEMO_EMAIL /
+    # VITE_DEMO_PASSWORD du front.
+    demo_email: str = ""
+    demo_password: SecretStr = SecretStr("")
 
     gemini_api_key: SecretStr = SecretStr("")
     shot_spec_rate_limit: int = 20  # requêtes par fenêtre et par utilisateur

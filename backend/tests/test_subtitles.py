@@ -7,6 +7,7 @@ import pytest
 from fastapi.testclient import TestClient
 from structlog.testing import capture_logs
 
+from app.core.auth import CurrentUser, get_current_user
 from app.core.config import get_settings
 from app.core.errors import AppError
 from app.main import app
@@ -22,6 +23,8 @@ from app.services import glossary_service, subtitle_rules, subtitle_service
 from app.services.subtitle_segmentation import parse_srt_time, segment, srt_time
 from app.services.transcription_service import MAX_KEYTERMS, clean_keyterms, parse_words
 from app.services.translation_service import FALLBACK_NOTE, PromptTranslator
+
+TEST_USER = CurrentUser(id="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", email=None)
 
 
 # --- Faux fournisseurs (aucun appel réseau) ------------------------------------------
@@ -118,6 +121,7 @@ def cue(i, source="Labes"):
 
 @pytest.fixture
 def client():
+    app.dependency_overrides[get_current_user] = lambda: TEST_USER
     with TestClient(app) as c:
         app.state.db_pool = None
         app.state.transcriber = FakeTranscriber()
@@ -125,6 +129,7 @@ def client():
         subtitle_service._memory.clear()
         yield c
     subtitle_service._memory.clear()
+    app.dependency_overrides.pop(get_current_user, None)
 
 
 def post_draft(client, project="demo", content=b"RIFF....", **form):
@@ -563,3 +568,87 @@ def test_elevenlabs_400_is_logged_without_content(tmp_path):
     assert len(event["detail"]) == 300
     dumped = json.dumps(logs, default=str)
     assert "essa7a" not in dumped and "cle-tres-secrete" not in dumped
+
+
+# --- Propriétaire : authentification, projet, owner_id explicite ------------------------------
+OTHER_USER = CurrentUser(id="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb", email=None)
+
+
+def test_subtitle_routes_require_auth():
+    with TestClient(app) as c:
+        app.state.db_pool = None
+        assert c.get("/subtitles/demo").status_code == 401
+        assert c.put("/subtitles/demo", json={"lines": []}).status_code == 401
+        assert post_draft(c).status_code == 401
+
+
+def test_drafts_are_separated_by_owner(client):
+    assert post_draft(client).status_code == 200
+    assert client.get("/subtitles/demo").json()["lines"]
+    app.dependency_overrides[get_current_user] = lambda: OTHER_USER
+    assert client.get("/subtitles/demo").json()["lines"] == []
+
+
+class RecordingPool:
+    """Faux pool asyncpg : garde chaque requête et ses paramètres."""
+
+    def __init__(self, status="INSERT 0 1"):
+        self.status = status
+        self.executed: list[tuple[str, tuple]] = []
+
+    async def execute(self, sql, *args):
+        self.executed.append((sql, args))
+        return self.status
+
+    async def fetchrow(self, sql, *args):
+        self.executed.append((sql, args))
+
+    async def close(self):
+        pass
+
+
+def test_save_draft_always_sends_owner_id_explicitly():
+    pool = RecordingPool()
+    draft = subtitle_service.SubtitleDraft(project_id="p1", source_lang="derja", lines=[])
+    asyncio.run(subtitle_service.save_draft(pool, TEST_USER.id, draft))
+    sql, args = pool.executed[0]
+    columns = sql.split("(", 1)[1].split(")", 1)[0].replace(" ", "").split(",")
+    # owner_id est une colonne envoyée, avec la valeur de l'utilisateur (jamais le défaut auth.uid()).
+    assert columns[args.index(TEST_USER.id)] == "owner_id"
+    with pytest.raises(ValueError):
+        asyncio.run(subtitle_service.save_draft(pool, "", draft))
+
+
+def test_load_draft_filters_on_owner():
+    pool = RecordingPool()
+    asyncio.run(subtitle_service.load_draft(pool, TEST_USER.id, "p1"))
+    sql, args = pool.executed[0]
+    assert "owner_id = $2" in sql and args == ("p1", TEST_USER.id)
+
+
+def test_save_draft_refuses_other_owners_row():
+    pool = RecordingPool(status="INSERT 0 0")
+    draft = subtitle_service.SubtitleDraft(project_id="p1", source_lang="derja", lines=[])
+    with pytest.raises(AppError) as e:
+        asyncio.run(subtitle_service.save_draft(pool, TEST_USER.id, draft))
+    assert e.value.status_code == 403
+
+
+def test_project_must_belong_to_user(client, monkeypatch):
+    from app.repositories import project_repository
+
+    project = "11111111-1111-1111-1111-111111111111"
+    rows = {project: {"id": project, "owner_id": OTHER_USER.id}}
+
+    async def get(pool, project_id):
+        return rows.get(project_id)
+
+    monkeypatch.setattr(project_repository, "get", get)
+    app.state.db_pool = RecordingPool()
+    assert client.get(f"/subtitles/{project}").status_code == 403
+    assert client.get("/subtitles/pas-un-uuid").status_code == 404
+    assert client.get("/subtitles/22222222-2222-2222-2222-222222222222").status_code == 404
+    assert app.state.transcriber.calls == []
+    app.dependency_overrides[get_current_user] = lambda: OTHER_USER
+    assert client.get(f"/subtitles/{project}").status_code == 200
+    app.state.db_pool = None

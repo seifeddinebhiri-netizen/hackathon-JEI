@@ -19,6 +19,7 @@ import {
   useTranslateSynopsis,
 } from '@/features/festival/hooks/useFestivals';
 import { synopsisLimit } from '@/features/festival/lib/dossier';
+import { useSynopsisEnglish } from '@/features/festival/hooks/useKit';
 import { EMPTY_SYNOPSIS, useProjectField } from '@/features/festival/lib/localStore';
 import { cn } from '@/lib/cn';
 
@@ -32,26 +33,6 @@ const VERSIONS: { value: SynopsisKind; label: string; hint: string }[] = [
   { value: 'long', label: 'Synopsis long', hint: 'Une page, pour les dossiers de presse.' },
 ];
 
-/** Version anglaise : brouillon IA gardé dans ce navigateur, avec le texte qu'il traduit. */
-type EnDraft = { text: string; source: string; validated: boolean };
-const enKey = (projectId: string, kind: SynopsisKind) => `pp-synopsis-en-${projectId}-${kind}`;
-function readEn(projectId: string, kind: SynopsisKind): EnDraft | null {
-  try {
-    const raw = localStorage.getItem(enKey(projectId, kind));
-    return raw ? (JSON.parse(raw) as EnDraft) : null;
-  } catch {
-    return null;
-  }
-}
-function writeEn(projectId: string, kind: SynopsisKind, d: EnDraft | null): void {
-  try {
-    if (d) localStorage.setItem(enKey(projectId, kind), JSON.stringify(d));
-    else localStorage.removeItem(enKey(projectId, kind));
-  } catch {
-    /* stockage indisponible */
-  }
-}
-
 function EnglishVersion({
   project,
   kind,
@@ -64,12 +45,9 @@ function EnglishVersion({
   festivals: Festival[];
 }) {
   const translate = useTranslateSynopsis();
-  const [draft, setDraft] = useState<EnDraft | null>(() => readEn(project.id, kind));
+  // Enregistrée dans la base (film_kits.synopsis_en), pas dans le navigateur.
+  const [draft, set, saveState] = useSynopsisEnglish(project.id, kind);
   const [editing, setEditing] = useState(false);
-  const set = (d: EnDraft | null) => {
-    setDraft(d);
-    writeEn(project.id, kind, d);
-  };
   const stale = !!draft && draft.source !== text.trim();
   const forWho = festivals.filter((f) => f.subtitle_langs.includes('en')).map(shortName);
   const run = () =>
@@ -153,6 +131,12 @@ function EnglishVersion({
           {draft ? 'Retraduire après mes changements' : 'Traduire en anglais'}
         </Button>
       </div>
+      {saveState === 'error' ? (
+        <p role="alert" className="flex items-center gap-2 text-meta font-semibold text-bad-fg">
+          <Icon name="alert" size={14} /> La version anglaise n’a pas été enregistrée. Modifie-la pour
+          réessayer.
+        </p>
+      ) : null}
     </section>
   );
 }
@@ -338,7 +322,7 @@ function Page({ project }: { project: Project }) {
                 {saveState === 'saving' || saveState === 'pending'
                   ? 'Enregistrement…'
                   : saveState === 'error'
-                    ? 'Échec de l’enregistrement : une copie reste dans ce navigateur.'
+                    ? 'Échec de l’enregistrement : vérifie ta connexion, le texte sera renvoyé à la prochaine modification.'
                     : 'Enregistré dans ton projet.'}
               </p>
             </div>

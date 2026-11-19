@@ -15,6 +15,10 @@ Statuts : **confirmé** (validé avec l'équipe backend), **à confirmer** (prop
 - **Météo hors horizon** : si `forecast = "hors_horizon"`, `rain_pct`, `wind_kmh` et `cloud_pct` valent `null`.
   Le front affiche « Météo à revérifier » ; aucune valeur ne doit être inventée.
 - Authentification : en-tête `Authorization: Bearer <jeton>` (jeton Supabase, voir INTEGRATION.md).
+- **Kit Festival et Passeport IA** (avec `VITE_USE_MOCKS=false`) : lus et écrits directement dans Supabase avec la clé
+  publique et la session de l'utilisateur (`src/api/kit.ts`, `src/api/supabase/`) ; la sécurité par ligne limite chacun
+  à ses lignes. Les routes `/projects/{id}/passport`, `/passport…` et `/verify/{id}` ci-dessous ne sont donc plus
+  appelées ; `/verifier/<code>` utilise la fonction SQL `verify_badge(code)` (champs publics seulement).
 - Champs facultatifs : absents ou `undefined` ; ne pas envoyer `null` sauf là où le type l'indique.
 - Toute réponse est validée par zod côté front : une réponse non conforme s'affiche comme une erreur
   (« La réponse du serveur n'a pas le format attendu »), jamais comme un écran blanc.
@@ -62,9 +66,9 @@ Le message est affiché tel quel à l'utilisateur ; sans message, le front en af
 | `generateShotSpec` | POST `/shot-spec` | Coach : plan de prise de vue par l'IA (jeton Supabase exigé, 20 par heure et par utilisateur) | **confirmé, branché** |
 | `listWorkspaces` / `putWorkspace` / `deleteWorkspace` | GET `/workspaces`, PUT / DELETE `/workspaces/{id}` | Coach : espaces de travail enregistrés sur le compte (jeton exigé) | **confirmé, branché** |
 | `getCalibration` | GET `/calibration` | Coach : tables « mots → nombres » et libellés (public) | **confirmé, branché** |
-| `createSubtitleDraft` | POST `/subtitles/{projectId}/draft` | Audio/vidéo → brouillon FR + EN | backend prêt |
-| `getSubtitleDraft` | GET `/subtitles/{projectId}` | Brouillon de sous-titres | backend prêt |
-| `saveSubtitles` | PUT `/subtitles/{projectId}` | Enregistrer les lignes | backend prêt |
+| `createSubtitleDraft` | POST `/subtitles/{projectId}/draft` | Audio/vidéo → brouillon FR + EN | backend prêt, jeton exigé |
+| `getSubtitleDraft` | GET `/subtitles/{projectId}` | Brouillon de sous-titres | backend prêt, jeton exigé |
+| `saveSubtitles` | PUT `/subtitles/{projectId}` | Enregistrer les lignes | backend prêt, jeton exigé |
 | `getSynopsisFeedback` | POST `/synopsis/feedback` | Questions du coach | confirmé |
 | `translateSynopsis` | POST `/synopsis/translate` | Version anglaise du synopsis (brouillon IA) | confirmé |
 | `getPublicFilm` | GET `/films/{id}/public` | Page film publique | à confirmer |
@@ -116,12 +120,17 @@ Réponse 200 : `Project`. Erreurs : 401, 403, 404.
   "film_page": { "stills": ["/photos/ruelle.jpg"], "trailer_url": "https://…" }
 }
 ```
-`festival_shortlist[].status` (« Où j'en suis ») · **confirmé côté front** : `a_preparer` (en préparation) | `pret` (prêt à
-soumettre) | `soumis` (soumis sur le site officiel) | `reponse_recue` | `prochain_appel` (appel clos, pour la prochaine
-édition). Ces cinq valeurs sont validées par le schéma zod du front. Le backend enregistre `festival_shortlist`
-tel quel (liste JSON, `PATCH /projects/{id}`), sans valider ces valeurs ; en mode mixte, `updateProject` reste simulé
-tant qu'il n'est pas listé dans `VITE_REAL_ENDPOINTS`. `checklist[].done` sert aux pièces cochées à la main (affiche,
-biographie, format…) et à la déclaration IA validée.
+**Kit Festival : n'est plus lu ni écrit par `/projects`.** Avec `VITE_USE_MOCKS=false`, les dossiers (`festival_shortlist`),
+les pièces cochées et `film_profile` / `synopsis` / `film_page` sont lus et écrits directement dans Supabase
+(`src/api/kit.ts`, tables `festival_dossiers`, `kit_pieces`, `film_kits` : voir `backend/migrations/schema.md`). Les
+clés de `data` ci-dessus restent acceptées par le backend mais le front ne les envoie plus ; à la lecture, il ne garde de
+chaque dossier que `festival_id`, `status` et `ai_choice` (`checklist` est ignorée).
+
+« Où j'en suis » (`status`, enum `dossier_status`) : `a_preparer` (En préparation) | `pret` (Prêt à soumettre) | `soumis`
+(Soumis sur le site officiel) | `reponse_recue` (Réponse reçue) | `prochain_appel` (Pour le prochain appel).
+`ai_choice` (enum `ai_choice`, `null` tant que non validée) : `aucune` | `outil_technique` | `generation` | `les_deux`.
+**Une pièce cochée à la main (affiche, biographie, droits musicaux, « Film et inscription ») est enregistrée une seule fois
+par projet** (`kit_pieces`, clé `pieceKeyOf`) et remplit tous les dossiers qui la demandent.
 
 `forbidden_days` accepte des dates ISO (`"2026-11-21"`) ou des jours de semaine en français, en minuscules (`"vendredi"`).
 `film_profile`, `synopsis` et `film_page` sont facultatifs (absents tant que le Kit Festival n'a rien enregistré).
@@ -362,9 +371,14 @@ Cette requête peut durer une à plusieurs minutes (3 minutes au plus côté ser
 `processing.translator` indique le modèle qui a réellement traduit (le principal, ou le modèle de secours si le
 principal était indisponible).
 
-Erreurs : `413` fichier trop volumineux · `422` fichier vide ou aucune parole détectée · `502` le service de
-transcription a échoué · `503` transcription ou traduction non configurée sur le serveur · `504` délai dépassé.
-En mode mixte, si l'appel réel échoue, l'écran propose de continuer avec le brouillon d'exemple (mock).
+Erreurs : `401` sans jeton · `403` projet d'un autre compte · `404` projet inconnu · `413` fichier trop volumineux ·
+`422` fichier vide ou aucune parole détectée · `502` le service de transcription a échoué · `503` transcription (clé
+ElevenLabs) ou traduction (clé Gemini) non configurée sur le serveur · `504` délai dépassé.
+Les trois routes `/subtitles` exigent le jeton Supabase et un projet qui appartient à l'utilisateur ; le brouillon est
+enregistré avec son `owner_id`. Si l'appel échoue, l'écran affiche l'erreur en français : **aucun repli** vers le
+brouillon d'exemple, qui ne sert qu'en mode démo (`VITE_USE_MOCKS=true` sans `createSubtitleDraft` dans
+`VITE_REAL_ENDPOINTS`). Le front envoie le son avec une barre d'avancement (XMLHttpRequest), puis affiche le temps
+écoulé pendant la transcription et la traduction.
 
 Une ligne que le traducteur n'a pas pu traduire reste dans le brouillon avec `fr` et `en` vides, `confidence: "faible"`
 et une `note` : la requête n'échoue pas pour une ligne.

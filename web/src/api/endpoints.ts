@@ -3,7 +3,13 @@
  * mocks/handlers.ts expose EXACTEMENT la même signature (type `Api`).
  */
 import { z } from 'zod';
-import { request, SUBTITLE_DRAFT_TIMEOUT_MS, UPLOAD_TIMEOUT_MS } from './client';
+import {
+  request,
+  SUBTITLE_DRAFT_TIMEOUT_MS,
+  UPLOAD_TIMEOUT_MS,
+  uploadForm,
+  type UploadProgress,
+} from './client';
 import * as S from './schemas';
 import type * as T from './types';
 
@@ -137,17 +143,20 @@ export async function getFestival(id: string): Promise<T.Festival> {
   return request(`/festivals/${encodeURIComponent(id)}`, { schema: S.festivalSchema });
 }
 
-export async function createSubtitleDraft(input: T.CreateSubtitleDraftInput): Promise<T.SubtitleDraft> {
+export async function createSubtitleDraft(
+  input: T.CreateSubtitleDraftInput,
+  opts?: { onUploadProgress?: UploadProgress },
+): Promise<T.SubtitleDraft> {
   const fd = new FormData();
   fd.append('file', input.audio, input.file_name);
   if (input.language_code) fd.append('language_code', input.language_code);
   if (input.keyterms?.length) fd.append('keyterms', input.keyterms.join(', '));
   if (input.characters?.length) fd.append('characters', input.characters.join(', '));
-  return request(`/subtitles/${encodeURIComponent(input.project_id)}/draft`, {
-    method: 'POST',
+  return uploadForm(`/subtitles/${encodeURIComponent(input.project_id)}/draft`, {
     formData: fd,
     schema: S.subtitleDraftSchema,
     timeoutMs: SUBTITLE_DRAFT_TIMEOUT_MS,
+    onProgress: opts?.onUploadProgress,
   });
 }
 

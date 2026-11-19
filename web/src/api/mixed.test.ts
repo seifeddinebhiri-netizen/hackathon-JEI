@@ -9,7 +9,14 @@ function fakeApi(origin: 'reel' | 'mock'): Api {
   return new Proxy({} as Api, {
     get: (_t, name) => vi.fn(async () => `${origin}:${String(name)}`),
     has: () => true,
-    ownKeys: () => ['searchFestivals', 'getFestival', 'getProject', 'getSubtitleDraft'],
+    ownKeys: () => [
+      'searchFestivals',
+      'getFestival',
+      'getProject',
+      'createSubtitleDraft',
+      'getSubtitleDraft',
+      'saveSubtitles',
+    ],
     getOwnPropertyDescriptor: () => ({ enumerable: true, configurable: true }),
   });
 }
@@ -24,6 +31,13 @@ describe('mode mixte (VITE_REAL_ENDPOINTS)', () => {
     await expect(api.getFestival('x')).resolves.toBe('reel:getFestival');
     await expect(api.getProject('p')).resolves.toBe('mock:getProject');
     await expect(api.getSubtitleDraft('p')).resolves.toBe('mock:getSubtitleDraft');
+  });
+
+  it('sous-titres : nommer une fonction rend les trois réelles (création, relecture, enregistrement)', async () => {
+    const api = buildApi({ useMocks: true, realEndpoints: ['createSubtitleDraft'], real, mock });
+    await expect(api.getSubtitleDraft('p')).resolves.toBe('reel:getSubtitleDraft');
+    await expect(api.saveSubtitles('p', [])).resolves.toBe('reel:saveSubtitles');
+    await expect(api.getProject('p')).resolves.toBe('mock:getProject');
   });
 
   it('sans mocks, tout passe par le vrai backend', async () => {

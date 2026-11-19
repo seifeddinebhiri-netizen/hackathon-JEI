@@ -2,9 +2,9 @@
  * Déclaration IA d'un dossier : la case proposée est calculée par le code à partir du Passeport
  * (niveaux d'usage), puis présentée comme une proposition à valider par l'auteur.
  */
-import type { Passport } from '@/api/types';
+import type { AiChoice, Passport } from '@/api/types';
 
-export type AiChoice = 'aucune' | 'outil_technique' | 'generation' | 'les_deux';
+export type { AiChoice };
 
 export const AI_CHOICE_LABELS: Record<AiChoice, string> = {
   aucune: 'Pas d’IA dans le film',
@@ -76,22 +76,4 @@ export function whyChoice(p: Passport): string {
   return generative.length
     ? `Ton Passeport déclare : ${what.join(', ')}. Une partie du contenu a été générée.`
     : `Ton Passeport déclare : ${what.join(', ')}. Ce sont des usages techniques : aucune image ni aucun son n’a été généré.`;
-}
-
-// Réponse validée par festival : gardée dans ce navigateur (la pièce du dossier est cochée dans le projet).
-const key = (projectId: string, festivalId: string) => `pp-declaration-${projectId}-${festivalId}`;
-export function readChoice(projectId: string, festivalId: string): AiChoice | null {
-  try {
-    return (localStorage.getItem(key(projectId, festivalId)) as AiChoice | null) ?? null;
-  } catch {
-    return null;
-  }
-}
-export function writeChoice(projectId: string, festivalId: string, choice: AiChoice | null): void {
-  try {
-    if (choice) localStorage.setItem(key(projectId, festivalId), choice);
-    else localStorage.removeItem(key(projectId, festivalId));
-  } catch {
-    /* stockage indisponible */
-  }
 }

@@ -2,19 +2,23 @@
  * « Base de données » des mocks : en mémoire + localStorage (la démo survit au rechargement).
  * Réinitialisable depuis /mes-donnees ou avec resetMockDb().
  */
-import type { Passport, Project, SubtitleDraft } from '@/api/types';
+import type { KitPieceState, Passport, Project, SubtitleDraft, SynopsisEnglish } from '@/api/types';
 import { brand } from '@/app/brand';
-import { buildDemoProject } from './data/project';
+import { buildDemoProject, DEMO_PIECES } from './data/project';
 import subtitles from './data/subtitles.json';
 import { env } from '@/lib/env';
 
 // v2 : Kit Festival (Dar Hmeti, vrais festivals, statuts de dossier) ; l'ancienne forme est ignorée.
-const KEY = 'pp-mock-db-v2';
+const KEY = 'pp-mock-db-v3';
 
 export type MockDb = {
   projects: Record<string, Project>;
   passports: Record<string, Passport>;
   subtitles: Record<string, SubtitleDraft>;
+  /** Kit Festival : pièces cochées à la main, par projet puis par clé (une fois pour tous les dossiers). */
+  pieces: Record<string, Record<string, KitPieceState>>;
+  /** Kit Festival : versions anglaises des synopsis, par projet. */
+  synopsisEn: Record<string, SynopsisEnglish>;
 };
 
 function examplePassport(): Passport {
@@ -74,7 +78,7 @@ function examplePassport(): Passport {
 }
 
 /** Passeport du film de démo : une seule IA déclarée (montage, assistance). */
-function demoPassport(projectId: string): Passport {
+export function demoPassport(projectId: string): Passport {
   const none = (department: Passport['declarations'][number]['department']) => ({
     department,
     used_ai: false,
@@ -117,6 +121,8 @@ function seed(): MockDb {
     projects: { [p.id]: p },
     passports: { exemple: examplePassport(), [pass.id]: pass },
     subtitles: { [p.id]: structuredClone(subtitles) as SubtitleDraft },
+    pieces: { [p.id]: { ...DEMO_PIECES } },
+    synopsisEn: {},
   };
 }
 
