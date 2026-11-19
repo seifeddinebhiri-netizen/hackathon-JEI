@@ -52,7 +52,7 @@ export default function FilmPublic() {
           <div className="lg:col-span-6">
             <p className="eyebrow text-gold">Dossier de presse</p>
             <h1 className="mt-4 text-[52px] leading-[0.92] md:text-[88px]">{f.title}</h1>
-            <p className="mt-4 text-lead text-muted-on-dark">Un film de {f.director}</p>
+            {f.director ? <p className="mt-4 text-lead text-muted-on-dark">Un film de {f.director}</p> : null}
             {f.synopsis_short ? <p className="mt-6 max-w-xl text-lead">{f.synopsis_short}</p> : null}
             <div className="mt-8 flex flex-wrap gap-3">
               {f.trailer_url ? (

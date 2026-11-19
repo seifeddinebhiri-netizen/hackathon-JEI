@@ -70,9 +70,9 @@ Le message est affiché tel quel à l'utilisateur ; sans message, le front en af
 | `createSubtitleDraft` | POST `/subtitles/{projectId}/draft` | Audio/vidéo → brouillon FR + EN | backend prêt, jeton exigé |
 | `getSubtitleDraft` | GET `/subtitles/{projectId}` | Brouillon de sous-titres | backend prêt, jeton exigé |
 | `saveSubtitles` | PUT `/subtitles/{projectId}` | Enregistrer les lignes | backend prêt, jeton exigé |
-| `getSynopsisFeedback` | POST `/synopsis/feedback` | Questions du coach | confirmé |
+| `getSynopsisFeedback` | POST `/synopsis/feedback` | Questions du coach | **pas encore dans le backend** : bloc masqué en mode réel |
 | `translateSynopsis` | POST `/synopsis/translate` | Version anglaise du synopsis (brouillon IA) | confirmé |
-| `getPublicFilm` | GET `/films/{id}/public` | Page film publique | à confirmer |
+| `getPublicFilm` | ~~GET `/films/{id}/public`~~ → fonction SQL `public_film(id)` | Page film publique | **remplacée par Supabase** (0008) |
 | — | GET `/projects/{id}/days/{date}/public` | Feuille de service partageable sans compte | **futur** |
 | — | POST `/films/{id}/stills` | Envoi des photos de la page film | **futur** |
 
@@ -454,7 +454,11 @@ gardés, rien d'ajouté ni réécrit ; affichée « Brouillon IA : à valider »
 Erreurs : `422` texte vide ou corps invalide · `502` le service de traduction a échoué · `503` traduction non
 configurée sur le serveur. Le mock ne traduit que les textes de démonstration.
 
-### `getSynopsisFeedback` — POST `/synopsis/feedback` · confirmé
+### `getSynopsisFeedback` — POST `/synopsis/feedback` · pas encore dans le backend
+
+Tant que la route n'existe pas, le bloc « Les questions du coach » n'est affiché qu'en mode démo (mocks) :
+`synopsisFeedbackAvailable` dans `src/api/index.ts`.
+
 
 Corps : `{ "kind": "court", "text": "Amira, 24 ans, apprend…", "limit_chars": 300 }`
 (`kind` : `phrase` | `court` | `long`). Réponse 200 :
@@ -464,19 +468,25 @@ Corps : `{ "kind": "court", "text": "Amira, 24 ans, apprend…", "limit_chars": 
 ```
 **Uniquement des questions** : la réponse ne contient jamais de texte réécrit.
 
-### `getPublicFilm` — GET `/films/{id}/public` · à confirmer · **public**
+### `getPublicFilm` — fonction SQL `public_film(id)` · **public, sans authentification**
 
-`{id}` = identifiant du projet. Construit à partir du projet (`synopsis`, `film_page`, `people`) et du Passeport.
+Remplace GET `/films/{id}/public` (jamais écrite côté backend). `src/api/supabase/film.ts` appelle
+`supabase.rpc('public_film', { film_id })` avec la clé publique. La fonction (`security definer`, migration 0008)
+ne renvoie que : `title`, `director` (Passeport, sinon la personne « Réalisation »), `synopsis_short`, `synopsis_long`,
+`stills`, `credits` (nom + rôle ou personnage, **jamais le contact**), `trailer_url`, `passport_badge_code`. Le front
+ajoute `id` et `verify_url`. Seuls les projets qui ont une page film préparée (`film_kits`) sont visibles ; sinon, ou
+si l'identifiant n'est pas un uuid : 404 « Film introuvable ». Format de la réponse inchangé (`PublicFilm`) :
+
 ```json
 { "id": "demo-maree-basse", "title": "Dar Hmeti", "director": "Yassine",
   "synopsis_short": "…", "synopsis_long": "…",
   "stills": ["/photos/ruelle.jpg", "/photos/porte.jpg"],
   "credits": [{ "role": "Amira", "name": "[Actrice 1]" }, { "role": "Réalisation", "name": "Yassine" }],
   "trailer_url": "https://…", "passport_badge_code": "EN-WWVQ-M2",
-  "verify_url": "https://…/verifier/pass-4ff7045785" }
+  "verify_url": "https://…/verifier/EN-WWVQ-M2" }
 ```
 Erreur 404 : « Film introuvable ». L'envoi de vraies photos (`POST /films/{id}/stills`) est **futur** : pour
-l'instant, `film_page.stills` contient des chemins d'images déjà publiées.
+l'instant, `film_kits.stills` contient des chemins d'images déjà publiées.
 
 ---
 

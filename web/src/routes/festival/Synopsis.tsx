@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
+import { synopsisFeedbackAvailable } from '@/api';
 import type { Festival, Project, SynopsisKind } from '@/api/types';
 import {
   AiDraftBadge,
@@ -337,7 +338,7 @@ function Page({ project }: { project: Project }) {
           >
             {(d) => <Limits kind={kind} count={text.length} festivals={d.festivals} />}
           </QueryState>
-          <Coach key={kind} kind={kind} text={text} limit={minLimit} />
+          {synopsisFeedbackAvailable ? <Coach key={kind} kind={kind} text={text} limit={minLimit} /> : null}
         </aside>
       </div>
     </div>
