@@ -15,13 +15,18 @@ Statuts : **confirmé** (validé avec l'équipe backend), **à confirmer** (prop
 - **Météo hors horizon** : si `forecast = "hors_horizon"`, `rain_pct`, `wind_kmh` et `cloud_pct` valent `null`.
   Le front affiche « Météo à revérifier » ; aucune valeur ne doit être inventée.
 - Authentification : en-tête `Authorization: Bearer <jeton>` (jeton Supabase, voir INTEGRATION.md).
+- **Kit Festival et Passeport IA** (avec `VITE_USE_MOCKS=false`) : lus et écrits directement dans Supabase avec la clé
+  publique et la session de l'utilisateur (`src/api/kit.ts`, `src/api/supabase/`) ; la sécurité par ligne limite chacun
+  à ses lignes. Les routes `/projects/{id}/passport`, `/passport…` et `/verify/{id}` ci-dessous ne sont donc plus
+  appelées ; `/verifier/<code>` utilise la fonction SQL `verify_badge(code)` (champs publics seulement).
 - Champs facultatifs : absents ou `undefined` ; ne pas envoyer `null` sauf là où le type l'indique.
 - Toute réponse est validée par zod côté front : une réponse non conforme s'affiche comme une erreur
   (« La réponse du serveur n'a pas le format attendu »), jamais comme un écran blanc.
 
 ### Erreurs
 
-Corps : `{ "message": "…en français…" }` (ou `{ "detail": "…" }`, format FastAPI : les deux sont lus).
+Corps du backend encadré : `{ "error": { "code": "festival_not_found", "message": "…en français…" } }`. Le front lit
+`error.message`, puis `message`, puis `detail` (format FastAPI par défaut).
 Le message est affiché tel quel à l'utilisateur ; sans message, le front en affiche un par défaut.
 
 | Statut | Code front | Message par défaut |
@@ -42,26 +47,32 @@ Le message est affiché tel quel à l'utilisateur ; sans message, le front en af
 |---|---|---|---|
 | `createProject` | POST `/projects` | Nouveau projet | confirmé |
 | `getProject` | GET `/projects/{id}` | Projet complet | confirmé |
-| `updateProject` | PATCH `/projects/{id}` | Scènes, lieux, personnes, planning, sélection, Kit Festival | à confirmer |
+| `updateProject` | PATCH `/projects/{id}` | Scènes, lieux, personnes, planning | confirmé |
 | `deleteProject` | DELETE `/projects/{id}` | « Supprimer mon projet » | confirmé |
-| `getProjectPassport` | GET `/projects/{id}/passport` | Passeport du projet (`null` si aucun) | **à confirmer** (ajout du front) |
+| — | GET `/me` | Profil du compte connecté (projet courant, compte de démo) | confirmé, pas encore utilisé par le front |
+| `getProjectPassport` | ~~GET `/projects/{id}/passport`~~ → table `ai_passports` | Passeport du projet (`null` si aucun) | **remplacée par Supabase** |
 | `parseScreenplay` | POST `/planner/parse` | Scénario → scènes (brouillon) | à confirmer |
 | `geocode` | GET `/planner/geocode?q=` | Adresse ou ville → coordonnées | à confirmer |
 | `quickSlots` | POST `/planner/quick` | Scène rapide → créneaux classés | à confirmer |
 | `generateSchedule` | POST `/planner/schedule` | Projet → planning brouillon | à confirmer |
 | `getWeather` | GET `/planner/weather` | Prévisions par jour | à confirmer |
-| `getAiTools` | GET `/ai-tools` | Catalogue des outils IA | à confirmer |
-| `savePassport` | POST `/passport` | Créer ou mettre à jour la déclaration | confirmé |
-| `checkPassport` | GET `/passport/{id}/check` | Contrôle avant PDF | confirmé |
-| `getPassportPdfUrl` | GET `/passport/{id}/pdf` | URL du PDF | confirmé |
-| `signC2pa` | POST `/c2pa/sign` | Signer le fichier final | confirmé |
-| `verifyPassport` | GET `/verify/{id}` | Page publique des festivals | confirmé |
+| `getAiTools` | ~~GET `/ai-tools`~~ → fichier `mocks/data/ai-tools.json` | Catalogue des outils IA | **remplacée** (fichier de référence) |
+| `savePassport` | ~~POST `/passport`~~ → table `ai_passports` | Créer ou mettre à jour la déclaration | **remplacée par Supabase** |
+| `checkPassport` | ~~GET `/passport/{id}/check`~~ → calcul dans le navigateur | Contrôle avant PDF | **remplacée** |
+| `getPassportPdfUrl` | ~~GET `/passport/{id}/pdf`~~ → page imprimable `/verifier/<code>?imprimer=1` | URL du PDF | **remplacée** |
+| `signC2pa` | ~~POST `/c2pa/sign`~~ → simulée dans le navigateur, rien n'est écrit | Signer le fichier final | **futur** (vraie signature côté serveur) |
+| `verifyPassport` | ~~GET `/verify/{id}`~~ → fonction SQL `verify_badge(code)` | Page publique des festivals | **remplacée par Supabase** |
 | `searchFestivals` | GET `/festivals` | Recherche, filtres, classement | confirmé |
-| `getSubtitleDraft` | GET `/subtitles/{projectId}` | Brouillon de sous-titres | à confirmer |
-| `saveSubtitles` | PUT `/subtitles/{projectId}` | Enregistrer les lignes | à confirmer |
-| `getSynopsisFeedback` | POST `/synopsis/feedback` | Questions du coach | confirmé |
-| `getPublicFilm` | GET `/films/{id}/public` | Page film publique | à confirmer |
-| — | POST `/shot-spec` | Coach : conseils de prise de vue | **futur** |
+| `getFestival` | GET `/festivals/{id}` | Fiche d'un festival | backend prêt |
+| `generateShotSpec` | POST `/shot-spec` | Coach : plan de prise de vue par l'IA (jeton Supabase exigé, 20 par heure et par utilisateur) | **confirmé, branché** |
+| `listWorkspaces` / `putWorkspace` / `deleteWorkspace` | GET `/workspaces`, PUT / DELETE `/workspaces/{id}` | Coach : espaces de travail enregistrés sur le compte (jeton exigé) | **confirmé, branché** |
+| `getCalibration` | GET `/calibration` | Coach : tables « mots → nombres » et libellés (public) | **confirmé, branché** |
+| `createSubtitleDraft` | POST `/subtitles/{projectId}/draft` | Audio/vidéo → brouillon FR + EN | backend prêt, jeton exigé |
+| `getSubtitleDraft` | GET `/subtitles/{projectId}` | Brouillon de sous-titres | backend prêt, jeton exigé |
+| `saveSubtitles` | PUT `/subtitles/{projectId}` | Enregistrer les lignes | backend prêt, jeton exigé |
+| `getSynopsisFeedback` | POST `/synopsis/feedback` | Questions du coach | **pas encore dans le backend** : bloc masqué en mode réel |
+| `translateSynopsis` | POST `/synopsis/translate` | Version anglaise du synopsis (brouillon IA) | confirmé |
+| `getPublicFilm` | ~~GET `/films/{id}/public`~~ → fonction SQL `public_film(id)` | Page film publique | **remplacée par Supabase** (0008) |
 | — | GET `/projects/{id}/days/{date}/public` | Feuille de service partageable sans compte | **futur** |
 | — | POST `/films/{id}/stills` | Envoi des photos de la page film | **futur** |
 
@@ -73,7 +84,7 @@ Le message est affiché tel quel à l'utilisateur ; sans message, le front en af
 
 Corps (`CreateProjectInput`) :
 ```json
-{ "title": "Marée basse", "format": "court", "city": "Tunis",
+{ "title": "Dar Hmeti", "format": "court", "city": "Tunis",
   "shooting_window": { "from": "2026-11-19", "to": "2026-12-08" }, "max_hours_per_day": 8 }
 ```
 Réponse 201 : `Project` (listes vides). Erreurs : 400/422.
@@ -83,7 +94,7 @@ Réponse 201 : `Project` (listes vides). Erreurs : 400/422.
 Réponse 200 : `Project`. Erreurs : 401, 403, 404.
 ```json
 {
-  "id": "demo-maree-basse", "title": "Marée basse", "format": "court", "city": "Tunis",
+  "id": "demo-maree-basse", "title": "Dar Hmeti", "format": "court", "city": "Tunis",
   "shooting_window": { "from": "2026-11-19", "to": "2026-12-08" }, "max_hours_per_day": 8,
   "locations": [{
     "id": "loc-medina", "name": "Médina : ruelle et café", "address": "Médina de Tunis, [adresse exacte à compléter]",
@@ -109,31 +120,49 @@ Réponse 200 : `Project`. Erreurs : 401, 403, 404.
   "film_page": { "stills": ["/photos/ruelle.jpg"], "trailer_url": "https://…" }
 }
 ```
+**Kit Festival : n'est plus lu ni écrit par `/projects`.** Avec `VITE_USE_MOCKS=false`, les dossiers (`festival_shortlist`),
+les pièces cochées et `film_profile` / `synopsis` / `film_page` sont lus et écrits directement dans Supabase
+(`src/api/kit.ts`, tables `festival_dossiers`, `kit_pieces`, `film_kits` : voir `backend/migrations/schema.md`). Les
+clés de `data` ci-dessus restent acceptées par le backend mais le front ne les envoie plus ; à la lecture, il ne garde de
+chaque dossier que `festival_id`, `status` et `ai_choice` (`checklist` est ignorée).
+
+« Où j'en suis » (`status`, enum `dossier_status`) : `a_preparer` (En préparation) | `pret` (Prêt à soumettre) | `soumis`
+(Soumis sur le site officiel) | `reponse_recue` (Réponse reçue) | `prochain_appel` (Pour le prochain appel).
+`ai_choice` (enum `ai_choice`, `null` tant que non validée) : `aucune` | `outil_technique` | `generation` | `les_deux`.
+**Une pièce cochée à la main (affiche, biographie, droits musicaux, « Film et inscription ») est enregistrée une seule fois
+par projet** (`kit_pieces`, clé `pieceKeyOf`) et remplit tous les dossiers qui la demandent.
+
 `forbidden_days` accepte des dates ISO (`"2026-11-21"`) ou des jours de semaine en français, en minuscules (`"vendredi"`).
 `film_profile`, `synopsis` et `film_page` sont facultatifs (absents tant que le Kit Festival n'a rien enregistré).
 
-### `updateProject` — PATCH `/projects/{id}` · à confirmer
+### `updateProject` — PATCH `/projects/{id}` · confirmé
 
 Corps : sous-ensemble de `Project` (`UpdateProjectInput`) : `title`, `format`, `city`, `shooting_window`,
-`max_hours_per_day`, `scenes`, `locations`, `people`, `schedule`, `festival_shortlist`, `film_profile`, `synopsis`,
-`film_page`. Chaque champ envoyé **remplace** la valeur entière (pas de fusion profonde des listes).
-Réponse 200 : `Project` complet. Erreurs : 400/422, 404, 409.
+`max_hours_per_day`, `scenes`, `locations`, `people`, `schedule`. Chaque champ envoyé **remplace** la valeur entière
+(pas de fusion profonde des listes). Réponse 200 : `Project` complet. Erreurs : 400/422, 401, 403, 404.
 
 Usages : enregistrement automatique de l'assistant (scènes, lieux, personnes), déplacements dans le calendrier
-(`schedule` recalculé par le front), validation du planning (`schedule.status = "valide"`), sélection de festivals,
-Kit Festival (`film_profile`, `synopsis`, `film_page`).
+(`schedule` recalculé par le front), validation du planning (`schedule.status = "valide"`).
 
-Le navigateur garde une copie de `film_profile`, `synopsis` et `film_page` (clés `pp-cache-<champ>-<projectId>`,
-même forme) qui sert seulement de cache d'affichage et de filet si l'enregistrement échoue.
+**Anciennes clés du Kit Festival** (`festival_shortlist`, `film_profile`, `synopsis`, `film_page`) : encore acceptées par
+le backend pour ne rien casser, mais **dépréciées** depuis la migration 0005. Le Kit est dans ses propres tables
+(`festival_dossiers`, `kit_pieces`, `film_kits`) : ne plus les envoyer ici.
 
 ### `deleteProject` — DELETE `/projects/{id}` · confirmé
 
 Supprime le projet, son Passeport (la page de vérification renvoie alors 404) et ses sous-titres.
 Réponse 200 `{ "ok": true }` ou 204. Erreurs : 403, 404.
 
-### `getProjectPassport` — GET `/projects/{id}/passport` · à confirmer (ajout du front)
+### `getProjectPassport` — remplacée par Supabase
 
-Réponse 200 : `Passport` ou `null` si aucune déclaration n'existe encore. Erreurs : 404 (projet).
+Lecture de la table `ai_passports` (une ligne par projet) avec la session de l'utilisateur : `Passport` ou `null` si
+aucune déclaration n'existe encore. Voir « Passeport IA » ci-dessous.
+
+### `GET /me` · confirmé (backend), pas encore utilisé par le front
+
+Jeton exigé. Réponse 200 : `{ "id", "email", "display_name", "is_demo", "current_project_id" }` (profil du compte,
+`current_project_id` peut valoir `null`). Erreurs : 401, 404 (profil absent). Le front lit aujourd'hui le projet courant
+directement dans `profiles` (Supabase).
 
 ---
 
@@ -225,7 +254,18 @@ Le front l'utilise pour recalculer les conflits même sur les jours vides du cal
 
 ## Passeport IA
 
-### `getAiTools` — GET `/ai-tools` · à confirmer
+**Routes `/passport…`, `/c2pa/sign`, `/verify/{id}` et `/ai-tools` : remplacées par Supabase. Elles n'existent pas dans le
+backend et ne sont plus appelées.** Le front (`src/api/supabase/passport.ts`) lit et écrit la table `ai_passports` avec la
+session de l'utilisateur ; la RLS limite chacun à ses passeports. Les formats ci-dessous (`Passport`, `PassportCheck`…)
+restent ceux des types du front.
+
+Ce que le navigateur peut écrire (migration 0007) : `project_id` à la création, puis `film_title`, `director`,
+`declarations`. **`badge_code` est créé par la base** (déclencheur, format `EN-XXXX-XX`, unique) et **`c2pa_signed` n'est
+posé que par le serveur**.
+
+### `getAiTools` — remplacée (fichier de référence)
+
+Catalogue lu dans `src/api/mocks/data/ai-tools.json` (données de référence versionnées, pas des données utilisateur).
 
 Réponse 200 : `AiTool[]`. Le statut décrit ce que **le fournisseur publie** (données d'entraînement, droits),
 pas le travail du réalisateur. `non_divulgue` est un statut valide.
@@ -235,11 +275,11 @@ pas le travail du réalisateur. `non_divulgue` est un statut valide.
    "source_url": "https://fournisseur-e.exemple.invalid/ia", "checked_at": "2026-10-01" }]
 ```
 
-### `savePassport` — POST `/passport` · confirmé
+### `savePassport` — remplacée par Supabase (`ai_passports`)
 
 Création (sans `id`) ou mise à jour (avec `id`). Corps (`SavePassportInput`) :
 ```json
-{ "id": "pass-4ff7045785", "project_id": "demo-maree-basse", "film_title": "Marée basse", "director": "Yassine",
+{ "id": "pass-4ff7045785", "project_id": "demo-maree-basse", "film_title": "Dar Hmeti", "director": "Yassine",
   "declarations": [
     { "department": "scenario", "used_ai": false, "what": "", "human_decisions": "Écrit par le réalisateur." },
     { "department": "montage", "used_ai": true, "tool_id": "tool-montage-a",
@@ -247,12 +287,13 @@ Création (sans `id`) ou mise à jour (avec `id`). Corps (`SavePassportInput`) :
       "human_decisions": "Choix des prises et du rythme." }
   ] }
 ```
-Réponse 200 : `Passport` (le serveur fixe `badge_code`, `verify_url`, `c2pa_signed`, `updated_at`).
+Création (`insert` de `project_id`, `film_title`, `director`, `declarations`) ou mise à jour (`update` des trois derniers).
+La base fixe `badge_code`, `c2pa_signed` (faux) et `updated_at` ; le front construit `verify_url`.
 Le front enregistre automatiquement à chaque modification. Départements : `scenario`, `image`, `montage`, `son_voix`,
 `musique`, `vfx`, `sous_titres`, `affiche_promo`. Niveaux : `assistance`, `generation_partielle`, `generation_complete`.
 Un outil hors catalogue passe par `custom_tool` (affiché « Non divulgué »).
 
-### `checkPassport` — GET `/passport/{id}/check` · confirmé
+### `checkPassport` — remplacée (calcul dans le navigateur, `checkPassportLocal`)
 
 Réponse 200 (`PassportCheck`). Le bouton PDF est actif seulement si `ok = true`.
 ```json
@@ -261,23 +302,26 @@ Réponse 200 (`PassportCheck`). Le bouton PDF est actif seulement si `ok = true`
   "warnings": ["Affiche et promotion : [Générateur d'images A] est « Non divulgué » (…). Ce statut est valide et sera affiché tel quel."] }
 ```
 
-### `getPassportPdfUrl` — GET `/passport/{id}/pdf` · confirmé
+### `getPassportPdfUrl` — remplacée (page imprimable)
 
-Réponse 200 : `{ "url": "https://…/passeport.pdf" }`, ouverte dans un nouvel onglet. En mode mock, l'URL pointe vers
-`/verifier/{id}?imprimer=1` (aperçu imprimable). Erreurs : 404, 409 (déclaration incomplète).
+Renvoie `{ "url": "<site>/verifier/<code>?imprimer=1" }` (aperçu imprimable de la page de vérification), ouvert dans un
+nouvel onglet. Pas encore de PDF généré côté serveur. Erreur : 404 (pas de Passeport).
 
-### `signC2pa` — POST `/c2pa/sign` · confirmé
+### `signC2pa` — simulée · vraie signature : futur (serveur)
 
-Corps : `{ "passport_id": "pass-4ff7045785", "file_name": "maree-basse-v-finale.mp4" }`.
+Corps : `{ "passport_id": "pass-4ff7045785", "file_name": "dar-hmeti-v-finale.mp4" }`.
 Réponse 200 :
 ```json
 { "signed": true, "manifest_id": "c2pa-…", "signed_at": "2026-11-14T16:10:00+01:00", "simulated": true }
 ```
-`simulated = true` : le front l'annonce (« aucune signature réelle n'a été posée »). Erreurs : 404, 409.
+`simulated = true` : le front l'annonce (« aucune signature réelle n'a été posée »). **Rien n'est écrit** :
+`c2pa_signed` reste faux tant qu'une vraie signature n'est pas posée par le serveur. Erreur : 404.
 
-### `verifyPassport` — GET `/verify/{id}` · confirmé · **public, sans authentification**
+### `verifyPassport` — fonction SQL `verify_badge(code)` · **public, sans authentification**
 
-Réponse 200 (`VerifyResult`) : la déclaration, les outils utilisés (catalogue), l'état de la signature.
+`supabase.rpc('verify_badge', { code })` avec la clé publique : la fonction (`security definer`, migration 0005) ne renvoie
+que `film_title`, `director`, `declarations`, `c2pa_signed`. Le front y ajoute les outils du catalogue et forme le
+`VerifyResult` : la déclaration, les outils utilisés, l'état de la signature. Le code `exemple` affiche un Passeport fictif.
 ```json
 { "passport": { "id": "exemple", "film_title": "[Film d'exemple]", "badge_code": "EN-EXEM-PL", "c2pa_signed": true, "…": "…" },
   "tools": [{ "id": "tool-son-a", "status": "documente", "…": "…" }],
@@ -292,42 +336,129 @@ Erreur 404 : le front affiche « Passeport introuvable ».
 
 ### `searchFestivals` — GET `/festivals` · confirmé
 
-Paramètres (tous facultatifs) : `q`, `country`, `max_duration_min`, `fee` (`gratuit` | `payant`), `deadline_before`
-(date ISO), `subtitle_lang` (`fr`, `en`, `ar`), `ai_policy` (`acceptee` | `a_declarer` | `interdite`). Pour classer
-pour un film : `film_duration_min`, `film_language`, `film_genre`, `film_ai_departments`.
+Paramètres (tous facultatifs) : `q` (nom, pays ou ville, sans tenir compte des accents), `country`, `max_duration_min`,
+`fee` (`gratuit` | `payant`), `deadline_before` (date ISO), `subtitle_lang` (`fr`, `en`, `ar`), `ai_policy`,
+`open_only` (`true` : seulement `deadline_status = ouverte`). Pour classer pour un film : `film_duration_min`,
+`film_language`, `film_genre`, `film_ai_departments`. Même résultat en `POST /festivals/match` (film et filtres dans le corps).
 
-Réponse 200 : `FestivalMatch[]`. Avec un film, triés par score décroissant ; sinon par date limite.
+Réponse 200 : `FestivalMatch[]`. Avec un film : score décroissant, puis appels ouverts (date la plus proche), à
+confirmer, clos (les plus récents d'abord) ; sans film, le même ordre sans le score.
 ```json
 [{ "festival": {
-     "id": "fest-a", "name": "[Festival A] : courts métrages méditerranéens", "country": "Tunisie",
-     "deadline": "2026-12-22", "fee": "Gratuit", "max_duration_min": 30, "subtitle_langs": ["fr", "en"],
-     "ai_policy": "a_declarer",
-     "requirements": [{ "kind": "synopsis", "detail": "Synopsis de 300 caractères maximum", "limit_chars": 300 }],
-     "source_url": "https://festival-a.exemple.invalid/reglement", "checked_at": "2026-10-01" },
-   "score": 5,
-   "reasons": ["Durée compatible (15 min pour 30 min maximum).", "Inscription gratuite."],
-   "warnings": [] }]
+     "id": "vienna-shorts", "name": "Vienna Shorts · Fiction & Documentary", "country": "Autriche", "city": "Vienne",
+     "edition": "24e édition, 25-30 mai 2027", "deadline": "2027-01-31", "deadline_status": "ouverte",
+     "deadline_note": "Tarif normal 19 € jusqu'au 5 janvier 2027, tarif tardif 29 € du 6 au 31 janvier 2027.",
+     "fee": "19 € puis 29 €", "max_duration_min": 30, "subtitle_langs": ["en"], "ai_policy": "a_declarer",
+     "ai_policy_detail": "Déclaration obligatoire parmi 4 options : pas d'IA ; IA comme outil technique…",
+     "eligibility": "Films terminés le 1er janvier 2026 ou après ; films d'écoles acceptés",
+     "requirements": [{ "kind": "synopsis", "detail": "Synopsis court dans le formulaire", "limit_chars": null }],
+     "source_url": "https://viennashorts.filmchief.com/submit-film/fiction-documentary-2027", "checked_at": "2026-11-18" },
+   "score": 4,
+   "reasons": ["Durée compatible (15 min pour 30 min maximum).", "Le festival demande une déclaration IA : ton Passeport IA la prépare."],
+   "warnings": ["Sous-titres demandés en : en."] }]
 ```
+- `deadline` : date ISO ou `null` (prochaine édition pas encore annoncée). `deadline_status` (`ouverte` | `passee` |
+  `a_confirmer`) est calculé à la lecture, jamais stocké.
+- `ai_policy` : `acceptee` | `a_declarer` | `interdite` | `section_dediee` (films faits par IA dans une section à part)
+  | `non_precisee` (le règlement ne dit rien : ce n'est pas une autorisation).
+- Champs facultatifs, `null` si inconnus : `city`, `edition`, `deadline_note`, `ai_policy_detail`, `eligibility`,
+  `max_duration_min`, `requirements[].limit_chars`.
+
 Règles : une fiche sans `source_url` ou sans `checked_at` n'est pas affichée. Le score indique la compatibilité
-avec les critères du festival ; il ne prédit pas la sélection. Pas de soumission ni de paiement via l'API.
+avec les critères du festival ; il ne prédit pas la sélection (score 1 : un critère bloque, ex. durée, IA refusée,
+appel clos). Pas de soumission ni de paiement via l'API. Le front ne recalcule pas la compatibilité : la fiche
+reprend le score et les raisons de `searchFestivals` pour ce festival.
 
-### `getSubtitleDraft` — GET `/subtitles/{projectId}` · à confirmer
+### `getFestival` — GET `/festivals/{id}` · backend prêt
 
-Réponse 200 (`SubtitleDraft`) ; `lines` vide s'il n'y a pas encore de brouillon.
+Réponse 200 : `Festival` (même forme que ci-dessus, sans score). Erreur 404 :
+`{ "error": { "code": "festival_not_found", "message": "Festival introuvable." } }`.
+
+### `createSubtitleDraft` — POST `/subtitles/{projectId}/draft` · backend prêt
+
+`multipart/form-data` :
+- `file` (obligatoire) : audio ou vidéo du film, `SUBTITLE_MAX_UPLOAD_MB` maximum (200 Mo par défaut) ;
+- `language_code` (facultatif) : code ISO-639-1 ou ISO-639-3 accepté par ElevenLabs Scribe. Pour la derja, `ara`
+  (Scribe n'a pas de code de dialecte ; `aeb` est converti en `ara` par le serveur). `source_lang` vaut alors `derja`.
+  Absent = langue détectée automatiquement ;
+- `keyterms` (facultatif) : noms des personnages et des lieux séparés par des virgules (`"Nour, Amira, Kerkennah"`),
+  50 au maximum, 5 mots et 50 caractères au plus chacun ; aide la transcription à les reconnaître ;
+- `characters` (facultatif) : personnages séparés par des virgules, donnés au traducteur comme contexte.
+
+Flux : transcription (ElevenLabs Scribe v2) → découpage en sous-titres → traduction FR + EN (Gemini ou Ollama,
+avec le glossaire derja) → règles de sous-titrage. Le fichier est supprimé du serveur dès la transcription finie,
+même en cas d'erreur ; l'audio n'est jamais stocké. Remplace le brouillon existant du projet. Réponse 200 : `SubtitleDraft`.
+Cette requête peut durer une à plusieurs minutes (3 minutes au plus côté serveur, `SUBTITLE_DRAFT_TIMEOUT_S`).
+`processing.translator` indique le modèle qui a réellement traduit (le principal, ou le modèle de secours si le
+principal était indisponible).
+
+Erreurs : `401` sans jeton · `403` projet d'un autre compte · `404` projet inconnu · `413` fichier trop volumineux ·
+`422` fichier vide ou aucune parole détectée · `502` le service de transcription a échoué · `503` transcription (clé
+ElevenLabs) ou traduction (clé Gemini) non configurée sur le serveur · `504` délai dépassé.
+Les trois routes `/subtitles` exigent le jeton Supabase et un projet qui appartient à l'utilisateur ; le brouillon est
+enregistré avec son `owner_id`. Si l'appel échoue, l'écran affiche l'erreur en français : **aucun repli** vers le
+brouillon d'exemple, qui ne sert qu'en mode démo (`VITE_USE_MOCKS=true` sans `createSubtitleDraft` dans
+`VITE_REAL_ENDPOINTS`). Le front envoie le son avec une barre d'avancement (XMLHttpRequest), puis affiche le temps
+écoulé pendant la transcription et la traduction.
+
+Une ligne que le traducteur n'a pas pu traduire reste dans le brouillon avec `fr` et `en` vides, `confidence: "faible"`
+et une `note` : la requête n'échoue pas pour une ligne.
+
+### `getSubtitleDraft` — GET `/subtitles/{projectId}` · backend prêt
+
+Réponse 200 (`SubtitleDraft`) ; `lines` vide (et `processing` absent) s'il n'y a pas encore de brouillon.
 ```json
 { "project_id": "demo-maree-basse", "source_lang": "derja",
-  "lines": [{ "id": "st-8", "start": "00:02:44,000", "end": "00:02:46,800", "source": "Ya3tik essa7a, Nour.",
-              "fr": "Merci, Nour.", "en": "Thank you, Nour.", "confidence": "faible",
+  "lines": [{ "id": "l8", "start": "00:02:44,000", "end": "00:02:46,800", "source": "Ya3tik essa7a, Nour.",
+              "fr": "Merci, Nour.", "en": "Thank you, Nour.", "confidence": "elevee",
               "note": "« Ya3tik essa7a » : littéralement « que Dieu te donne la santé ». Remerciement courant…",
-              "validated": false }] }
+              "validated": false,
+              "speaker": "S1", "glossary_used": ["ya3tik-essa7a"],
+              "warnings": [{ "rule": "lecture_rapide", "detail": "FR : 19 car./s pour 2,8 s (limite 17)" }] }],
+  "processing": { "transcriber": "elevenlabs/scribe_v2", "translator": "gemini/gemini-3.8-flash",
+                  "created_at": "2026-11-18T15:02:11.204Z" } }
 ```
-Horodatage au format SRT (`HH:MM:SS,mmm`). Le front exporte le `.srt` lui-même, seulement si toutes les lignes sont validées.
+- Horodatage au format SRT (`HH:MM:SS,mmm`). Le front exporte le `.srt` lui-même, seulement si toutes les lignes sont validées.
+- `confidence` : `elevee` | `moyenne` | `faible`. Calculée par le serveur à partir de celle du traducteur, abaissée
+  d'un cran pour chaque signal de doute : transcription incertaine en moyenne ; tournure signalée (`note`) sans entrée
+  du glossaire ; un mot transcrit avec une probabilité < 0,5 ; un mot isolé dans une autre écriture (arabe / latin)
+  et peu sûr (< 0,8) ; avertissement `omission_possible`. Jamais au-dessus de ce qu'indique le traducteur.
+  Les mots douteux sont cités dans `note` (« mot incertain : خراج », « mot isolé dans une autre langue, à vérifier : … »).
+- Champs facultatifs (absents si vides, jamais `null`) : `en`, `note`, `speaker` (`S1`, `S2`… dans l'ordre
+  d'apparition), `processing`, `fr_court` / `en_court` (version condensée proposée quand la ligne dépasse 17 car./s
+  et que la version courte respecte la limite). Ce sont des **suggestions** : le serveur ne remplace jamais `fr` ou
+  `en`. Le front les propose ; s'il les accepte, il envoie `fr` = ancienne `fr_court` sans `fr_court`. Toujours présents dans les réponses du serveur : `warnings` (liste, éventuellement vide)
+  et `glossary_used` (ids du glossaire derja utilisés).
+- `warnings[].rule` : `lecture_rapide` (plus de 17 car./s), `trop_de_lignes` (plus de 2 lignes de 42 car.),
+  `ligne_trop_longue` (un mot dépasse 42 car.), `duree_courte` (moins de 1 s), `duree_longue` (plus de 7 s),
+  `chevauchement` (moins de 80 ms après la ligne précédente), `omission_possible` (traduction de moins de 50 % de la
+  longueur de la source, hésitations retirées, ou avec moins de phrases que la source : fin de ligne non traduite ?).
+  `detail` est un texte en français à afficher tel quel.
+- `processing` : outils utilisés, repris par le Passeport IA.
 
-### `saveSubtitles` — PUT `/subtitles/{projectId}` · à confirmer
+### `saveSubtitles` — PUT `/subtitles/{projectId}` · backend prêt
 
-Corps : `{ "lines": SubtitleLine[] }` (liste complète). Réponse 200 : `SubtitleDraft`.
+Corps : `{ "lines": SubtitleLine[] }` (liste complète, ids uniques). Réponse 200 : `SubtitleDraft`.
+Le serveur garde `source_lang` et `processing` du brouillon, ne modifie pas les horodatages et recalcule `warnings`
+(les avertissements envoyés par le front sont ignorés pour ces règles). `422` si deux lignes ont le même `id` ou si un
+horodatage n'est pas au format SRT.
 
-### `getSynopsisFeedback` — POST `/synopsis/feedback` · confirmé
+### `translateSynopsis` — POST `/synopsis/translate` · confirmé
+
+Corps : `{ "kind": "court", "text": "Dans la médina de Tunis…", "target_lang": "en" }`. Réponse 200 : `{ "text": "In the Tunis medina…" }`.
+`kind` : `phrase` | `court` | `long` ; `target_lang` : `en` uniquement ; `text` : 10 000 caractères au plus.
+`limit_chars` (facultatif, entier de 1 à 10 000) : limite de caractères que la traduction doit respecter ; le front
+ne l'envoie pas pour l'instant.
+Traduction du texte de l'auteur par le même LLM que les sous-titres (Gemini ou Ollama) : anglais naturel, noms propres
+gardés, rien d'ajouté ni réécrit ; affichée « Brouillon IA : à valider ». Le texte n'est jamais loggé.
+Erreurs : `422` texte vide ou corps invalide · `502` le service de traduction a échoué · `503` traduction non
+configurée sur le serveur. Le mock ne traduit que les textes de démonstration.
+
+### `getSynopsisFeedback` — POST `/synopsis/feedback` · pas encore dans le backend
+
+Tant que la route n'existe pas, le bloc « Les questions du coach » n'est affiché qu'en mode démo (mocks) :
+`synopsisFeedbackAvailable` dans `src/api/index.ts`.
+
 
 Corps : `{ "kind": "court", "text": "Amira, 24 ans, apprend…", "limit_chars": 300 }`
 (`kind` : `phrase` | `court` | `long`). Réponse 200 :
@@ -337,19 +468,25 @@ Corps : `{ "kind": "court", "text": "Amira, 24 ans, apprend…", "limit_chars": 
 ```
 **Uniquement des questions** : la réponse ne contient jamais de texte réécrit.
 
-### `getPublicFilm` — GET `/films/{id}/public` · à confirmer · **public**
+### `getPublicFilm` — fonction SQL `public_film(id)` · **public, sans authentification**
 
-`{id}` = identifiant du projet. Construit à partir du projet (`synopsis`, `film_page`, `people`) et du Passeport.
+Remplace GET `/films/{id}/public` (jamais écrite côté backend). `src/api/supabase/film.ts` appelle
+`supabase.rpc('public_film', { film_id })` avec la clé publique. La fonction (`security definer`, migration 0008)
+ne renvoie que : `title`, `director` (Passeport, sinon la personne « Réalisation »), `synopsis_short`, `synopsis_long`,
+`stills`, `credits` (nom + rôle ou personnage, **jamais le contact**), `trailer_url`, `passport_badge_code`. Le front
+ajoute `id` et `verify_url`. Seuls les projets qui ont une page film préparée (`film_kits`) sont visibles ; sinon, ou
+si l'identifiant n'est pas un uuid : 404 « Film introuvable ». Format de la réponse inchangé (`PublicFilm`) :
+
 ```json
-{ "id": "demo-maree-basse", "title": "Marée basse", "director": "Yassine",
+{ "id": "demo-maree-basse", "title": "Dar Hmeti", "director": "Yassine",
   "synopsis_short": "…", "synopsis_long": "…",
   "stills": ["/photos/ruelle.jpg", "/photos/porte.jpg"],
   "credits": [{ "role": "Amira", "name": "[Actrice 1]" }, { "role": "Réalisation", "name": "Yassine" }],
   "trailer_url": "https://…", "passport_badge_code": "EN-WWVQ-M2",
-  "verify_url": "https://…/verifier/pass-4ff7045785" }
+  "verify_url": "https://…/verifier/EN-WWVQ-M2" }
 ```
 Erreur 404 : « Film introuvable ». L'envoi de vraies photos (`POST /films/{id}/stills`) est **futur** : pour
-l'instant, `film_page.stills` contient des chemins d'images déjà publiées.
+l'instant, `film_kits.stills` contient des chemins d'images déjà publiées.
 
 ---
 
@@ -383,3 +520,64 @@ date prend le premier créneau libre (ou son horaire solaire) ; déposée sur la
 (`finalizeDay`, `src/features/planner/lib/rules.ts`) et enregistre le planning avec `PATCH /projects/{id}` (`schedule`).
 Les actions sur les conflits (« Marquer comme obtenue », « Déplacer au … ? ») passent aussi par ce `PATCH`. Si le backend applique d'autres règles, il doit
 renvoyer un `Schedule` de même forme. La disponibilité des acteurs n'est pas prise en compte dans cette version.
+
+
+---
+
+## Coach : plan de prise de vue
+
+Types : `ShotSpecRequest`, `ShotSpec`, `Calibration` (`src/api/types.ts`). Ces deux routes sont réelles même quand le reste est simulé
+(`VITE_REAL_COACH=true`, par défaut dès que Supabase est configuré).
+
+### `generateShotSpec` — POST `/shot-spec`
+
+Corps (`ShotSpecRequest`) : seule `description` (10 à 2000 caractères) est obligatoire. Les étiquettes améliorent le plan :
+`setting` (`INT`/`EXT`/`interior`/`exterior`/`unknown`), `moment` (`jour`/`nuit`/`aube`/`heure_doree`), `location`, `characters[]` (8 max),
+`mood[]` (5 max), `visual_style`, `intention`, `light`, `support` (`handheld`/`tripod`/`unknown`),
+`motion` (`fixed`/`moving`/`unknown` : plan fixe ou en mouvement), `duration_s` (2 à 120 s, **obligatoire si `motion` = `moving`**), `scene_id`.
+
+Réponse 200 (`ShotSpec`) : `shots[]` avec, pour chacun, `intent` (choix en vocabulaire fermé + `label_fr`, `why_fr`, `advice_fr`, `rule_ids`),
+`targets` (cibles chiffrées) et `rules[]` (titre, confiance, sources). `status` vaut « Brouillon IA : à valider ».
+
+**Un seul plan par scène** : `shots` contient exactement un élément. Deux prompts côté serveur : `motion` = `moving` donne un plan en mouvement,
+tout le reste un plan fixe (`movement` = `static`).
+
+**Plan en mouvement** : `shots[0].timeline` = `{ duration_s, how_fr, segments[] }`. `how_fr` explique en français comment la scène sera filmée,
+avec les secondes. Chaque passage : `{ id, start_s, end_s, description_fr, at_start, at_end, targets_start, targets_end }` ; les passages se suivent
+sans trou de 0 à `duration_s`. `at_end` (et `targets_end`) n'existent que si le cadrage évolue pendant le passage (ex. angle de contre-plongée à plongée,
+sujet de la droite vers la gauche) : le téléphone fait alors glisser les cibles du début vers la fin. Un passage sans personne a `subject_kind` = `none`
+(`center_x`, `headroom`, `subject_h` valent `null`). `shake_max` vaut `null` pendant un mouvement voulu (`pan`, `tilt`, `tracking`). `intent` et `targets`
+du plan décrivent le premier passage. Les secondes se comptent depuis le début de l'enregistrement.
+
+Erreurs : 401 (jeton), 422 (corps invalide), 429 (limite : `trop_de_requetes`), 502 (réponse de l'IA invalide), 503 (clé ou modèle d'IA indisponible).
+Durée : jusqu'à ~30 s ; le front attend 60 s.
+
+### `getCalibration` — GET `/calibration` · public
+
+Tables du backend (`subject_h`, `headroom`, `center_x`, `pitch`, `roll_abs`, `luma`, `contrast`, `backlight_ratio_max`, `sun_offset_abs`, `shake_max`),
+règles (`no_subject`, `has_head`) et `vocabulary` : pour chaque champ du plan, son libellé français et ses options.
+Le front garde ce JSON dans le téléphone et recalcule les cibles quand l'utilisateur modifie un mot (`computeTargets`), sans réseau.
+Un jeu d'essai commun (`backend/tests/fixtures/targets_cases.json`, copié dans `web/src/features/coach/plan/fixtures/`) garantit que Python et TypeScript donnent les mêmes nombres.
+Si `calibration.py` change : `cd backend && uv run python -m scripts.export_targets_fixture`.
+
+### Format des erreurs du backend
+
+`{ "code": "non_autorise", "message": "…" }` : le front lit `message` à la racine.
+
+
+### Espaces de travail — GET `/workspaces`, PUT / DELETE `/workspaces/{id}`
+
+Un espace = une scène : `{ id, name, data, version, created_at, updated_at }`. `data` = `{ request, spec, overrides, notes }`
+(la scène saisie, le plan de l'IA, les mots modifiés par l'utilisateur, les étiquettes de mouvement). `id` est un **UUID créé par
+l'appareil** (un espace peut être créé hors ligne puis envoyé).
+
+- `GET /workspaces` : les espaces de l'utilisateur, du plus ancien au plus récent.
+- `PUT /workspaces/{id}` avec `{ name, data, base_version }` : crée (`base_version: null`) ou met à jour (`base_version` = version connue).
+  Réponse 200 : l'espace enregistré, `version` augmentée. **409 `conflit`** si `base_version` n'est plus la version du serveur
+  (un autre appareil a modifié l'espace, ou l'espace a été supprimé) : le front récupère la liste et la fusion tranche (le plus récent gagne).
+  Autres erreurs : 403 (espace d'un autre utilisateur), 413 (`data` > 256 Ko), 422 (nom vide ou de plus de 40 caractères, UUID invalide,
+  ou `limite_atteinte` : 12 espaces au maximum).
+- `DELETE /workspaces/{id}` : idempotent (200 même si déjà supprimé).
+
+Le front garde les espaces dans le téléphone (clé `pp-coach-workspaces-v1:<utilisateur>`), n'envoie que ceux qui ont un plan, et
+ne synchronise qu'avec un vrai compte et un vrai backend.

@@ -3,7 +3,13 @@
  * mocks/handlers.ts expose EXACTEMENT la même signature (type `Api`).
  */
 import { z } from 'zod';
-import { request, UPLOAD_TIMEOUT_MS } from './client';
+import {
+  request,
+  SUBTITLE_DRAFT_TIMEOUT_MS,
+  UPLOAD_TIMEOUT_MS,
+  uploadForm,
+  type UploadProgress,
+} from './client';
 import * as S from './schemas';
 import type * as T from './types';
 
@@ -48,6 +54,16 @@ export async function parseScreenplay(input: T.ParseScreenplayInput): Promise<T.
   });
 }
 
+/** Fiche de tournage d'une scène, écrite par l'IA à partir de son texte (rien d'inventé). */
+export async function detailScene(input: T.SceneDetailInput): Promise<T.SceneDetail> {
+  return request('/planner/scenes/detail', {
+    method: 'POST',
+    body: input,
+    schema: S.sceneDetailSchema,
+    timeoutMs: UPLOAD_TIMEOUT_MS,
+  });
+}
+
 /** Suggestions de tournage sur les scènes (jamais d'écriture), que l'auteur accepte ou refuse. */
 export async function suggestScenes(input: T.SceneSuggestInput): Promise<T.SceneSuggestResult> {
   return request('/planner/scenes/suggest', {
@@ -84,6 +100,38 @@ export async function getWeather(q: T.WeatherQuery): Promise<T.WeatherDay[]> {
   return request('/planner/weather', { query: q, schema: z.array(S.weatherDaySchema) });
 }
 
+/** Plan de prise de vue proposé par l'IA (Gemini) pour une scène. Peut durer plusieurs secondes. */
+export async function generateShotSpec(input: T.ShotSpecRequest): Promise<T.ShotSpec> {
+  return request('/shot-spec', {
+    method: 'POST',
+    body: input,
+    schema: S.shotSpecSchema,
+    timeoutMs: UPLOAD_TIMEOUT_MS,
+  });
+}
+
+/** Tables mots → nombres, pour recalculer les cibles quand l'utilisateur modifie le plan. */
+export async function getCalibration(): Promise<T.Calibration> {
+  return request('/calibration', { schema: S.calibrationSchema });
+}
+
+/** Les espaces de travail du Coach de l'utilisateur connecté. */
+export async function listWorkspaces(): Promise<T.WorkspaceRecord[]> {
+  return request('/workspaces', { schema: z.array(S.workspaceRecordSchema) });
+}
+
+export async function putWorkspace(id: string, input: T.WorkspaceInput): Promise<T.WorkspaceRecord> {
+  return request(`/workspaces/${encodeURIComponent(id)}`, {
+    method: 'PUT',
+    body: input,
+    schema: S.workspaceRecordSchema,
+  });
+}
+
+export async function deleteWorkspace(id: string): Promise<{ ok: true }> {
+  return request(`/workspaces/${encodeURIComponent(id)}`, { method: 'DELETE', schema: S.okSchema });
+}
+
 export async function getAiTools(): Promise<T.AiTool[]> {
   return request('/ai-tools', { schema: z.array(S.aiToolSchema) });
 }
@@ -116,16 +164,38 @@ export async function verifyPassport(id: string): Promise<T.VerifyResult> {
 }
 
 export async function searchFestivals(params: T.FestivalSearchParams): Promise<T.FestivalMatch[]> {
-  const { film, ...rest } = params;
+  const { film, open_only, ...rest } = params;
   return request('/festivals', {
     query: {
       ...rest,
+      open_only: open_only ? 'true' : undefined,
       film_duration_min: film?.duration_min,
       film_language: film?.language,
       film_genre: film?.genre,
       film_ai_departments: film?.declared_ai_departments,
     },
     schema: z.array(S.festivalMatchSchema),
+  });
+}
+
+export async function getFestival(id: string): Promise<T.Festival> {
+  return request(`/festivals/${encodeURIComponent(id)}`, { schema: S.festivalSchema });
+}
+
+export async function createSubtitleDraft(
+  input: T.CreateSubtitleDraftInput,
+  opts?: { onUploadProgress?: UploadProgress },
+): Promise<T.SubtitleDraft> {
+  const fd = new FormData();
+  fd.append('file', input.audio, input.file_name);
+  if (input.language_code) fd.append('language_code', input.language_code);
+  if (input.keyterms?.length) fd.append('keyterms', input.keyterms.join(', '));
+  if (input.characters?.length) fd.append('characters', input.characters.join(', '));
+  return uploadForm(`/subtitles/${encodeURIComponent(input.project_id)}/draft`, {
+    formData: fd,
+    schema: S.subtitleDraftSchema,
+    timeoutMs: SUBTITLE_DRAFT_TIMEOUT_MS,
+    onProgress: opts?.onUploadProgress,
   });
 }
 
@@ -143,6 +213,10 @@ export async function saveSubtitles(projectId: string, lines: T.SubtitleLine[]):
 
 export async function getSynopsisFeedback(input: T.SynopsisFeedbackInput): Promise<T.SynopsisFeedback> {
   return request('/synopsis/feedback', { method: 'POST', body: input, schema: S.synopsisFeedbackSchema });
+}
+
+export async function translateSynopsis(input: T.SynopsisTranslateInput): Promise<T.SynopsisTranslation> {
+  return request('/synopsis/translate', { method: 'POST', body: input, schema: S.synopsisTranslationSchema });
 }
 
 export async function getPublicFilm(id: string): Promise<T.PublicFilm> {
@@ -173,10 +247,16 @@ export type Api = {
   geocode: typeof geocode;
   suggestLocations: typeof suggestLocations;
   suggestScenes: typeof suggestScenes;
+  detailScene: typeof detailScene;
   quickSlots: typeof quickSlots;
   generateSchedule: typeof generateSchedule;
   getWeather: typeof getWeather;
   getAiTools: typeof getAiTools;
+  generateShotSpec: typeof generateShotSpec;
+  getCalibration: typeof getCalibration;
+  listWorkspaces: typeof listWorkspaces;
+  putWorkspace: typeof putWorkspace;
+  deleteWorkspace: typeof deleteWorkspace;
   getProjectPassport: typeof getProjectPassport;
   savePassport: typeof savePassport;
   checkPassport: typeof checkPassport;
@@ -184,9 +264,12 @@ export type Api = {
   signC2pa: typeof signC2pa;
   verifyPassport: typeof verifyPassport;
   searchFestivals: typeof searchFestivals;
+  getFestival: typeof getFestival;
+  createSubtitleDraft: typeof createSubtitleDraft;
   getSubtitleDraft: typeof getSubtitleDraft;
   saveSubtitles: typeof saveSubtitles;
   getSynopsisFeedback: typeof getSynopsisFeedback;
+  translateSynopsis: typeof translateSynopsis;
   getPublicFilm: typeof getPublicFilm;
   previewCallsheets: typeof previewCallsheets;
   sendCallsheets: typeof sendCallsheets;

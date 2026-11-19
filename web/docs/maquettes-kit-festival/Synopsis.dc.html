@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Kit Festival · Synopsis</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F2F2EF}
+a{color:#121110}a:hover{color:#C8102E}
+a:focus-visible,button:focus-visible,textarea:focus-visible{outline:3px solid #FFC82E;outline-offset:2px}
+</style>
+</helmet>
+<div style="background: #F2F2EF; color: #121110; font-family: Inter, system-ui, sans-serif; font-size: 16px; min-height: 100%">
+
+  <header style="background: #121110; color: #FFFFFF">
+    <div style="max-width: 1440px; margin: 0 auto; padding: 0 64px; min-height: 64px; display: flex; flex-wrap: wrap; align-items: center; gap: 24px; justify-content: space-between">
+      <a href="#" style="display: flex; align-items: center; text-decoration: none; color: #FFFFFF; padding: 8px 10px; border-left: 2px solid #E4202E; border-top: 2px solid #E4202E">
+        <span style="font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 500; letter-spacing: -0.02em"><span style="color: #B8B4AC">en</span>cadr<span style="color: #FFC82E">é</span></span>
+      </a>
+      <nav aria-label="Étapes" style="display: flex; flex-wrap: wrap; gap: 28px; font-size: 14px; font-weight: 600">
+        <a href="#" style="color: #B8B4AC; text-decoration: none; padding: 20px 0">Projet</a>
+        <a href="#" style="color: #B8B4AC; text-decoration: none; padding: 20px 0"><span style="color: #FFC82E; font-family: 'JetBrains Mono', monospace">1</span> Planifier</a>
+        <a href="#" style="color: #B8B4AC; text-decoration: none; padding: 20px 0"><span style="color: #FFC82E; font-family: 'JetBrains Mono', monospace">2</span> Tourner</a>
+        <a href="#" style="color: #B8B4AC; text-decoration: none; padding: 20px 0"><span style="color: #FFC82E; font-family: 'JetBrains Mono', monospace">3</span> Déclarer</a>
+        <a href="#" aria-current="page" style="color: #FFFFFF; text-decoration: none; padding: 20px 0 17px; border-bottom: 3px solid #FFC82E"><span style="color: #FFC82E; font-family: 'JetBrains Mono', monospace">4</span> Diffuser</a>
+      </nav>
+      <div style="display: flex; align-items: center; gap: 10px; border: 2px solid #3A3733; padding: 6px 12px; font-size: 14px; font-weight: 600">
+        <span style="width: 24px; height: 24px; background: #FFC82E; color: #121110; display: inline-flex; align-items: center; justify-content: center; font-size: 12px">Y</span>Yassine
+      </div>
+    </div>
+  </header>
+
+  <main style="max-width: 1440px; margin: 0 auto; padding: 28px 64px 80px; box-sizing: border-box">
+    <nav aria-label="Fil d'Ariane" style="font-size: 14px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+      <a href="Dossiers.dc.html" style="font-weight: 600">Mes dossiers</a><span aria-hidden="true" style="color: #55524C">/</span><span style="color: #55524C">Synopsis</span>
+    </nav>
+    <h1 style="margin: 16px 0 0; font-family: 'Space Grotesk', sans-serif; font-size: 44px; letter-spacing: -0.02em">Synopsis de Dar Hmeti</h1>
+
+    <p style="margin: 18px 0 0; padding: 14px 18px; background: #FFFFFF; border: 2px solid #121110; display: flex; gap: 12px; align-items: flex-start; line-height: 1.5">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#121110" stroke-width="2.2" aria-hidden="true" style="flex: none; margin-top: 2px"><path d="M4 20h4L20 8l-4-4L4 16z"></path></svg>
+      <span><strong>Ton texte reste le tien.</strong> L'IA pose des questions et vérifie les limites. Elle n'écrit jamais ton synopsis à ta place.</span>
+    </p>
+
+    <div role="group" aria-label="Version" style="margin-top: 24px; display: inline-flex; flex-wrap: wrap; border: 2px solid #121110">
+      <sc-for list="{{versions}}" as="v" hint-placeholder-count="3">
+        <button type="button" aria-pressed="{{v.pressed}}" onClick="{{v.pick}}" style="{{v.style}}">{{v.label}}</button>
+      </sc-for>
+    </div>
+
+    <div style="margin-top: 20px; display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start">
+
+      <!-- Écriture -->
+      <section style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 20px">
+        <div style="background: #FFFFFF; border: 2px solid #121110; padding: 22px">
+          <label for="syn" style="display: block; font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700">{{current.label}}</label>
+          <p style="margin: 4px 0 12px; font-size: 14px; color: #55524C">{{current.hint}}</p>
+          <textarea id="syn" rows="7" onInput="{{onText}}" style="width: 100%; box-sizing: border-box; font: inherit; font-size: 16px; line-height: 1.6; padding: 14px; border: 2px solid #121110; resize: vertical" value="{{current.text}}"></textarea>
+          <p style="margin: 8px 0 0; font-family: 'JetBrains Mono', monospace; font-size: 13px">{{count}} caractères</p>
+        </div>
+
+        <div style="background: #FFFFFF; border: 2px dashed #121110; padding: 22px">
+          <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center">
+            <h2 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 20px">Version anglaise</h2>
+            <span style="padding: 3px 8px; background: #FFE7A3; color: #5C4400; border: 2px dashed #5C4400; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase">Brouillon IA : à valider</span>
+          </div>
+          <p style="margin: 6px 0 12px; font-size: 14px; color: #55524C">Traduction de <strong>ton</strong> texte, pour BSFF et Vienna. Rien n'est ajouté ni réécrit.</p>
+          <p style="margin: 0; padding: 14px; background: #F2F2EF; line-height: 1.6">{{current.en}}</p>
+          <div style="margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px">
+            <button type="button" style="min-height: 44px; padding: 0 16px; border: 2px solid #C8102E; background: #C8102E; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 600">Valider la traduction</button>
+            <button type="button" style="min-height: 44px; padding: 0 16px; border: 2px solid #121110; background: #FFFFFF; color: #121110; font: inherit; font-size: 14px; font-weight: 600">Modifier</button>
+            <button type="button" style="min-height: 44px; padding: 0 16px; border: 2px solid #121110; background: #FFFFFF; color: #121110; font: inherit; font-size: 14px; font-weight: 600">Retraduire après mes changements</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Limites + coach -->
+      <aside style="flex: 1 1 380px; max-width: 460px; display: flex; flex-direction: column; gap: 20px">
+        <section style="background: #FFFFFF; border: 2px solid #121110; padding: 20px">
+          <h2 style="margin: 0 0 4px; font-family: 'Space Grotesk', sans-serif; font-size: 20px">Limites de tes festivals</h2>
+          <p style="margin: 0 0 12px; font-size: 13px; color: #55524C">Vérifiées par le code à chaque frappe. Limites d'exemple pour la maquette.</p>
+          <ul style="margin: 0; padding: 0; list-style: none">
+            <sc-for list="{{limits}}" as="l" hint-placeholder-count="3">
+              <li style="display: flex; gap: 10px; align-items: center; padding: 10px 0; border-top: 2px solid #E2E0D9">
+                <sc-if value="{{l.ok}}" hint-placeholder-val="{{ true }}">
+                  <span style="flex: none; width: 22px; height: 22px; background: #DDEFE3; display: inline-flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="3" aria-hidden="true"><path d="M4 12l5 5L20 6"></path></svg></span>
+                </sc-if>
+                <sc-if value="{{l.over}}" hint-placeholder-val="{{ false }}">
+                  <span style="flex: none; width: 22px; height: 22px; background: #FBD9DC; display: inline-flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7F1020" stroke-width="3" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></span>
+                </sc-if>
+                <span style="flex: 1; min-width: 0"><strong>{{l.name}}</strong><span style="display: block; font-size: 13px; color: #55524C">{{l.text}}</span></span>
+              </li>
+            </sc-for>
+          </ul>
+        </section>
+
+        <section style="background: #121110; color: #FFFFFF; padding: 20px; box-shadow: 6px 6px 0 #FFC82E">
+          <p style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #FFC82E">Les questions du coach</p>
+          <p style="margin: 6px 0 14px; font-size: 13px; color: #B8B4AC">Pour t'aider à relire. Tu peux les ignorer.</p>
+          <ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px">
+            <sc-for list="{{questions}}" as="q" hint-placeholder-count="3">
+              <li style="padding: 14px; border: 2px solid #3A3733">
+                <p style="margin: 0; font-weight: 600; line-height: 1.45">{{q.q}}</p>
+                <p style="margin: 6px 0 0; font-size: 13px; color: #B8B4AC">{{q.why}}</p>
+                <button type="button" onClick="{{q.dismiss}}" style="margin-top: 10px; min-height: 40px; padding: 0 12px; border: 2px solid #FFFFFF; background: transparent; color: #FFFFFF; font: inherit; font-size: 13px; font-weight: 600">C'est voulu, j'ignore</button>
+              </li>
+            </sc-for>
+          </ol>
+          <sc-if value="{{noQuestions}}" hint-placeholder-val="{{ false }}">
+            <p style="margin: 0; font-size: 14px">Plus de questions. Ton texte est prêt à relire une dernière fois.</p>
+          </sc-if>
+          <button type="button" style="margin-top: 14px; min-height: 44px; padding: 0 16px; border: 2px solid #FFC82E; background: #FFC82E; color: #121110; font: inherit; font-size: 14px; font-weight: 600">Me reposer des questions</button>
+        </section>
+      </aside>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      version: 'court',
+      texts: {
+        phrase: 'Slim veut vendre le café de son père à Tunis, mais sa sœur Amira refuse de le laisser partir.',
+        court: 'Dans la médina de Tunis, Slim a vendu en secret le café que leur père a tenu pendant quarante ans. Quand sa sœur Amira l’apprend, une dispute éclate entre les murs blancs du café. Pendant une nuit, ils vident les étagères, retrouvent les photos, les dettes et les promesses. Au matin, Amira comprend pourquoi Slim est parti, et Slim comprend ce qu’il a vendu.',
+        long: ''
+      },
+      dismissed: {}
+    };
+  }
+  renderVals() {
+    const s = this.state;
+    const defs = {
+      phrase: { label: 'En une phrase', hint: 'Qui, ce qu’il veut, ce qui l’en empêche.', en: 'Slim wants to sell his father’s café in Tunis, but his sister Amira refuses to let it go.' },
+      court: { label: 'Synopsis court', hint: 'Quelques lignes, pour les catalogues et les formulaires.', en: 'In the Tunis medina, Slim has secretly sold the café their father ran for forty years. When his sister Amira finds out, a fight breaks out within the café’s white walls. Over one night, they empty the shelves and find the photos, the debts and the promises. By morning, Amira understands why Slim left, and Slim understands what he sold.' },
+      long: { label: 'Synopsis long', hint: 'Une page, pour les dossiers de presse.', en: 'Pas encore de texte à traduire.' }
+    };
+    const text = s.texts[s.version];
+    const count = text.length;
+
+    const limitDefs = {
+      phrase: [['BSFF', 150], ['Vienna Shorts', null], ['Clermont-Ferrand', null]],
+      court: [['BSFF', 300], ['Vienna Shorts', 500], ['Clermont-Ferrand', null]],
+      long: [['BSFF', null], ['Vienna Shorts', null], ['Clermont-Ferrand', 1500]]
+    };
+    const limits = limitDefs[s.version].map(([name, max]) => {
+      if (max === null) return { name, ok: true, over: false, text: 'Pas demandé ou pas de limite.' };
+      const over = count > max;
+      return { name, ok: !over, over, text: over ? count + ' / ' + max + ' : retire ' + (count - max) + ' caractères.' : count + ' / ' + max + ' : ça passe.' };
+    });
+
+    const qDefs = s.version === 'court' ? [
+      { id: 'fin', q: 'Ta dernière phrase dit ce que comprennent Slim et Amira. Veux-tu révéler la fin aux programmateurs ?', why: 'Certains festivals préfèrent un synopsis qui garde le suspense.' },
+      { id: 'enjeu', q: 'Pourquoi Slim a-t-il vendu en secret ? Le lecteur peut-il le deviner ?', why: 'L’enjeu de ton personnage principal est la première chose qu’on cherche.' },
+      { id: 'ton', q: 'Le film est-il plutôt drame, comédie, chronique ? Le ton ne transparaît pas encore.', why: 'Le ton aide le comité à imaginer la séance.' }
+    ] : s.version === 'phrase' ? [
+      { id: 'ph', q: 'Que risque Amira si le café est vendu ?', why: 'Une phrase forte contient un enjeu.' }
+    ] : [];
+    const questions = qDefs.filter((q) => !s.dismissed[q.id]).map((q) => ({ ...q, dismiss: () => this.setState({ dismissed: { ...s.dismissed, [q.id]: true } }) }));
+
+    const tab = 'min-height: 44px; padding: 0 16px; border: 0; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; ';
+    const versions = ['phrase', 'court', 'long'].map((id) => ({
+      label: defs[id].label,
+      pressed: s.version === id ? 'true' : 'false',
+      style: tab + (s.version === id ? 'background: #121110; color: #FFFFFF' : 'background: #FFFFFF; color: #121110'),
+      pick: () => this.setState({ version: id })
+    }));
+
+    return {
+      versions,
+      current: { label: defs[s.version].label, hint: defs[s.version].hint, en: defs[s.version].en, text },
+      count,
+      limits,
+      questions,
+      noQuestions: questions.length === 0,
+      onText: (e) => this.setState({ texts: { ...s.texts, [s.version]: e.target.value } })
+    };
+  }
+}
+</script>
+</body>
+</html>

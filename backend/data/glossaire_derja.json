@@ -1,0 +1,82 @@
+[
+  {
+    "id": "ya3tik-essa7a",
+    "variants": ["ya3tik essa7a", "y3atik essa7a", "ya3tik saha", "يعطيك الصحة"],
+    "literal": "que (Dieu) te donne la santé",
+    "meaning": "Remerciement courant, aussi pour saluer un effort ou un travail fini.",
+    "fr": ["Merci", "Merci beaucoup", "Beau travail"],
+    "en": ["Thank you", "Thanks a lot", "Good job"],
+    "note": "Ne jamais traduire mot à mot par « que Dieu te donne la santé ».",
+    "a_relire": true
+  },
+  {
+    "id": "y3aychek",
+    "variants": ["y3aychek", "ya3aychek", "3aychek", "يعيشك"],
+    "literal": "que (Dieu) te fasse vivre",
+    "meaning": "Merci ; aussi « s'il te plaît » avant une demande.",
+    "fr": ["Merci", "S'il te plaît"],
+    "en": ["Thanks", "Please"],
+    "note": "Le sens dépend de la place : après un service = merci, avant une demande = s'il te plaît.",
+    "a_relire": true
+  },
+  {
+    "id": "bessa7a",
+    "variants": ["bessa7a", "b essa7a", "bsa7a", "بالصحة"],
+    "literal": "avec la santé",
+    "meaning": "Souhait de profiter : un repas, un vêtement neuf, une coupe de cheveux.",
+    "fr": ["Bon appétit", "Profites-en bien", "Ça te va bien"],
+    "en": ["Enjoy", "Enjoy your meal", "Looks good on you"],
+    "note": "Choisir selon la situation (repas, achat, nouveauté).",
+    "a_relire": true
+  },
+  {
+    "id": "inchallah",
+    "variants": ["inchallah", "nchallah", "inshallah", "إن شاء الله", "ان شاء الله"],
+    "literal": "si Dieu le veut",
+    "meaning": "Espoir pour l'avenir ; parfois une façon polie de ne pas s'engager.",
+    "fr": ["J'espère", "Si tout va bien", "On verra"],
+    "en": ["Hopefully", "God willing", "We'll see"],
+    "note": "Le ton décide : sincère (« j'espère ») ou évasif (« on verra »).",
+    "a_relire": true
+  },
+  {
+    "id": "sbe7-el-khir",
+    "variants": ["sbe7 el khir", "sba7 el khir", "sbah el khir", "صباح الخير"],
+    "literal": "matin de bien",
+    "meaning": "Salutation du matin.",
+    "fr": ["Bonjour"],
+    "en": ["Good morning", "Morning"],
+    "note": "",
+    "a_relire": true
+  },
+  {
+    "id": "labes",
+    "variants": ["labes", "lebes", "labess", "لاباس", "لا باس"],
+    "literal": "pas de mal",
+    "meaning": "« Ça va ? » en question, « ça va » en réponse.",
+    "fr": ["Ça va ?", "Ça va"],
+    "en": ["How are you?", "I'm fine"],
+    "note": "Question ou réponse selon l'intonation et la ponctuation.",
+    "a_relire": true
+  },
+  {
+    "id": "ma3lich",
+    "variants": ["ma3lich", "m3lich", "ma3lech", "معليش"],
+    "literal": "il n'y a rien sur toi",
+    "meaning": "« Pas grave », « tant pis » ; aussi une demande polie (« ça te dérange de… »).",
+    "fr": ["Pas grave", "Tant pis", "Tu veux bien…"],
+    "en": ["Never mind", "It's okay", "Would you mind…"],
+    "note": "Suivi d'une demande, c'est une formule de politesse, pas « pas grave ».",
+    "a_relire": true
+  },
+  {
+    "id": "rabbi-m3ak",
+    "variants": ["rabbi m3ak", "rabi m3ak", "rabbi m3akom", "ربي معاك"],
+    "literal": "Dieu est avec toi",
+    "meaning": "Encouragement ou souhait au moment d'un départ ou d'une épreuve.",
+    "fr": ["Bon courage", "Bonne chance"],
+    "en": ["Good luck", "Take care"],
+    "note": "",
+    "a_relire": true
+  }
+]

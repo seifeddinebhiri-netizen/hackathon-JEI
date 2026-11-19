@@ -3,6 +3,12 @@ import { useState, type ReactNode } from 'react';
 import { isApiError } from '@/api';
 import { Toaster, TooltipProvider } from '@/components/ui';
 import { AuthProvider } from '@/features/auth/AuthProvider';
+import { SupabaseAuthProvider } from '@/features/auth/SupabaseAuthProvider';
+import { VideoSessionProvider } from '@/features/festival/video/VideoSessionProvider';
+import { hasRealAuth } from '@/lib/supabase';
+
+// Vrais comptes si Supabase est configuré, sinon connexion simulée (démo sans serveur).
+const Auth = hasRealAuth ? SupabaseAuthProvider : AuthProvider;
 
 function makeClient() {
   return new QueryClient({
@@ -29,11 +35,13 @@ export function Providers({ children }: { children: ReactNode }) {
   const [client] = useState(makeClient);
   return (
     <QueryClientProvider client={client}>
-      <AuthProvider>
+      <Auth>
         <TooltipProvider>
-          <Toaster>{children}</Toaster>
+          <Toaster>
+            <VideoSessionProvider>{children}</VideoSessionProvider>
+          </Toaster>
         </TooltipProvider>
-      </AuthProvider>
+      </Auth>
     </QueryClientProvider>
   );
 }

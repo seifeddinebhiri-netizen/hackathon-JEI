@@ -202,7 +202,7 @@ export default function UiKit() {
       <Section title="Formulaires : Field, Input, TextArea, Select, Checkbox">
         <div className="grid gap-6 md:grid-cols-2">
           <Field label="Titre du film" hint="Tu pourras le changer plus tard." required>
-            <Input placeholder="Marée basse" />
+            <Input placeholder="Dar Hmeti" />
           </Field>
           <Field label="Ville" error="Indique une ville ou une adresse.">
             <Input defaultValue="" placeholder="Tunis" />

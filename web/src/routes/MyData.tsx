@@ -17,7 +17,8 @@ import {
   type IconName,
 } from '@/components/ui';
 import { useDeleteProjectData, useExportData } from '@/features/account/hooks/useAccount';
-import { useCurrentProject } from '@/features/project/hooks/useProject';
+import { NoProject } from '@/features/project/components/NoProject';
+import { useCurrentProject, useCurrentProjectId } from '@/features/project/hooks/useProject';
 import { downloadBlob } from '@/lib/print';
 
 const STORED: { icon: IconName; what: string; where: string; visible: string }[] = [
@@ -73,6 +74,7 @@ const NOT_STORED: { icon: IconName; text: string }[] = [
 ];
 
 export default function MyData() {
+  const projectId = useCurrentProjectId();
   const project = useCurrentProject();
   const exp = useExportData();
   const del = useDeleteProjectData();
@@ -182,7 +184,9 @@ export default function MyData() {
         <h2 id="actions" className="text-h2">
           Récupérer ou effacer
         </h2>
-        {project.isPending ? (
+        {!projectId ? (
+          <NoProject>Aucune donnée de film à exporter ou effacer pour l’instant.</NoProject>
+        ) : project.isPending ? (
           <LoadingBlock lines={2} />
         ) : project.isError ? (
           <ErrorState
@@ -221,7 +225,7 @@ export default function MyData() {
           <div className="flex flex-col items-start gap-2 border-2 border-dashed border-ink/40 p-4">
             <p className="font-semibold">Démonstration</p>
             <p className="text-meta text-muted-on-light">
-              Remet le projet « Marée basse » et l’exemple de Passeport dans leur état de départ.
+              Remet le projet « Dar Hmeti » et l’exemple de Passeport dans leur état de départ.
             </p>
             <Button
               variant="ghost"

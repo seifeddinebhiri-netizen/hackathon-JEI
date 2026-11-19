@@ -8,6 +8,7 @@ export type ApiErrorCode =
   | 'interdit'
   | 'introuvable'
   | 'conflit'
+  | 'trop_de_requetes'
   | 'trop_volumineux'
   | 'invalide'
   | 'serveur'
@@ -37,6 +38,7 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   interdit: "Tu n'as pas accès à cette ressource.",
   introuvable: 'Élément introuvable.',
   conflit: 'Ces données ont été modifiées ailleurs. Recharge la page.',
+  trop_de_requetes: 'Trop de demandes en peu de temps. Réessaie dans un instant.',
   trop_volumineux: 'Fichier trop volumineux.',
   invalide: 'Certaines informations envoyées ne sont pas valides.',
   serveur: 'Le serveur a rencontré un problème. Réessaie dans un instant.',
@@ -54,14 +56,29 @@ export function errorFromStatus(status: number, serverMessage?: string): ApiErro
           ? 'introuvable'
           : status === 409
             ? 'conflit'
-            : status === 413
-              ? 'trop_volumineux'
-              : status === 400 || status === 422
-                ? 'invalide'
-                : status >= 500
-                  ? 'serveur'
-                  : 'inconnu';
+            : status === 429
+              ? 'trop_de_requetes'
+              : status === 413
+                ? 'trop_volumineux'
+                : status === 400 || status === 422
+                  ? 'invalide'
+                  : status >= 500
+                    ? 'serveur'
+                    : 'inconnu';
   return new ApiError(status, code, serverMessage || MESSAGES[code]);
+}
+
+/**
+ * Message français renvoyé par le serveur. Formes acceptées :
+ * `{ "error": { "code", "message" } }` (FastAPI encadré), `{ "message" }`, `{ "detail": "…" }`.
+ */
+export function serverErrorMessage(body: unknown): string | undefined {
+  if (!body || typeof body !== 'object') return undefined;
+  const b = body as { error?: { message?: unknown }; message?: unknown; detail?: unknown };
+  if (b.error && typeof b.error === 'object' && typeof b.error.message === 'string') return b.error.message;
+  if (typeof b.message === 'string') return b.message;
+  if (typeof b.detail === 'string') return b.detail;
+  return undefined;
 }
 
 export function apiError(code: ApiErrorCode, status = 0, message?: string): ApiError {
@@ -72,7 +89,7 @@ export function apiError(code: ApiErrorCode, status = 0, message?: string): ApiE
 export function validate<S extends z.ZodType>(schema: S, data: unknown, where: string): z.output<S> {
   const r = schema.safeParse(data);
   if (!r.success) {
-    // Do not log validation inputs: responses may contain private screenplay text.
+    if (import.meta.env.DEV) console.error(`[api] Réponse invalide pour ${where}`, r.error.issues);
     throw new ApiError(0, 'reponse_invalide', `${MESSAGES.reponse_invalide} (${where})`);
   }
   return r.data;
@@ -85,8 +102,23 @@ export function setAuthTokenGetter(fn: () => string | null): void {
   tokenGetter = fn;
 }
 
+// --- Session refusée par le backend (401) ----------------------------------------
+let onUnauthorized: () => void = () => {};
+/**
+ * Appelé par le fournisseur d'authentification : que faire quand le backend répond 401 à une
+ * requête qui portait un jeton (session expirée ou révoquée). Voir SupabaseAuthProvider.
+ */
+export function setUnauthorizedHandler(fn: () => void): void {
+  onUnauthorized = fn;
+}
+function notifyIf401(status: number, hadToken: boolean): void {
+  if (status === 401 && hadToken) onUnauthorized();
+}
+
 export const DEFAULT_TIMEOUT_MS = 15_000;
 export const UPLOAD_TIMEOUT_MS = 60_000;
+/** Transcription + traduction : une à plusieurs minutes selon la durée du film. */
+export const SUBTITLE_DRAFT_TIMEOUT_MS = 10 * 60_000;
 
 type RequestOptions<S extends z.ZodType> = {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -98,18 +130,30 @@ type RequestOptions<S extends z.ZodType> = {
   signal?: AbortSignal;
 };
 
+function apiUrl(path: string, query?: RequestOptions<z.ZodType>['query']): URL {
+  // `VITE_API_URL` peut être relative (ex. « /api », relayée par le serveur de dev) : on la résout
+  // par rapport à la page.
+  const base = new URL(env.apiUrl.endsWith('/') ? env.apiUrl : `${env.apiUrl}/`, window.location.origin);
+  const url = new URL(path.replace(/^\//, ''), base);
+  for (const [k, v] of Object.entries(query ?? {})) {
+    if (v !== undefined && v !== '') url.searchParams.set(k, String(v));
+  }
+  return url;
+}
+
+function authHeaders(): Record<string, string> {
+  const headers: Record<string, string> = { Accept: 'application/json' };
+  const token = tokenGetter();
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return headers;
+}
+
 export async function request<S extends z.ZodType>(
   path: string,
   opts: RequestOptions<S>,
 ): Promise<z.output<S>> {
-  const url = new URL(path.replace(/^\//, ''), env.apiUrl.endsWith('/') ? env.apiUrl : `${env.apiUrl}/`);
-  for (const [k, v] of Object.entries(opts.query ?? {})) {
-    if (v !== undefined && v !== '') url.searchParams.set(k, String(v));
-  }
-
-  const headers: Record<string, string> = { Accept: 'application/json' };
-  const token = tokenGetter();
-  if (token) headers.Authorization = `Bearer ${token}`;
+  const url = apiUrl(path, opts.query);
+  const headers = authHeaders();
   let body: BodyInit | undefined;
   if (opts.formData) {
     body = opts.formData; // le navigateur pose le Content-Type multipart
@@ -134,17 +178,10 @@ export async function request<S extends z.ZodType>(
   }
 
   if (!res.ok) {
+    notifyIf401(res.status, !!headers.Authorization);
     let serverMessage: string | undefined;
     try {
-      const j = (await res.json()) as { message?: string; detail?: string; error?: { message?: string } };
-      serverMessage =
-        typeof j.error?.message === 'string'
-          ? j.error.message
-          : typeof j.message === 'string'
-            ? j.message
-            : typeof j.detail === 'string'
-              ? j.detail
-              : undefined;
+      serverMessage = serverErrorMessage(await res.json());
     } catch {
       /* corps vide ou non JSON */
     }
@@ -153,4 +190,50 @@ export async function request<S extends z.ZodType>(
 
   const data: unknown = res.status === 204 ? { ok: true } : await res.json().catch(() => undefined);
   return validate(opts.schema, data, `${opts.method ?? 'GET'} ${path}`);
+}
+
+/** Avancement d'un envoi : octets envoyés sur le total. */
+export type UploadProgress = (sent: number, total: number) => void;
+
+/**
+ * Envoi multipart avec avancement (XMLHttpRequest : `fetch` ne donne pas la progression de
+ * l'envoi). Mêmes erreurs typées en français que `request`.
+ */
+export function uploadForm<S extends z.ZodType>(
+  path: string,
+  opts: { formData: FormData; schema: S; timeoutMs: number; onProgress?: UploadProgress },
+): Promise<z.output<S>> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', apiUrl(path).toString());
+    const headers = authHeaders();
+    for (const [k, v] of Object.entries(headers)) xhr.setRequestHeader(k, v);
+    xhr.timeout = opts.timeoutMs;
+    if (opts.onProgress) {
+      const cb = opts.onProgress;
+      xhr.upload.onprogress = (e) => cb(e.loaded, e.lengthComputable ? e.total : 0);
+    }
+    xhr.onerror = () => reject(apiError('reseau'));
+    xhr.ontimeout = () => reject(apiError('delai_depasse'));
+    xhr.onabort = () => reject(new DOMException('Envoi annulé', 'AbortError'));
+    xhr.onload = () => {
+      let body: unknown;
+      try {
+        body = xhr.responseText ? JSON.parse(xhr.responseText) : undefined;
+      } catch {
+        body = undefined;
+      }
+      if (xhr.status < 200 || xhr.status >= 300) {
+        notifyIf401(xhr.status, !!headers.Authorization);
+        reject(errorFromStatus(xhr.status, serverErrorMessage(body)));
+        return;
+      }
+      try {
+        resolve(validate(opts.schema, body, `POST ${path}`));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    xhr.send(opts.formData);
+  });
 }

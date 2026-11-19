@@ -71,8 +71,14 @@ class ScreenplayLLM:
         key = settings.anthropic_api_key.get_secret_value()
         forced = env.get("SCREENPLAY_LLM", "").strip().lower()
         groq_key = env.get("GROQ_API_KEY") or settings.groq_api_key.get_secret_value()
-        gemini_key = env.get("GEMINI_API_KEY") or env.get("GOOGLE_API_KEY") or ""
-        auto = "anthropic" if key else ("groq" if groq_key else ("gemini" if gemini_key else "ollama"))
+        gemini_key = (
+            env.get("GEMINI_API_KEY")
+            or env.get("GOOGLE_API_KEY")
+            or settings.gemini_api_key.get_secret_value()
+        )
+        auto = (
+            "anthropic" if key else ("groq" if groq_key else ("gemini" if gemini_key else "ollama"))
+        )
         self.provider = forced or auto
         self._effort = settings.llm_effort
 
@@ -95,7 +101,7 @@ class ScreenplayLLM:
             from anthropic import AsyncAnthropic
 
             self._anthropic = AsyncAnthropic(api_key=key) if key else None
-            self._model = settings.llm_model
+            self._model = settings.anthropic_model
             self.max_batch_chars = 60_000
             self.max_concurrency = 4
         else:
@@ -105,8 +111,6 @@ class ScreenplayLLM:
                 base = "http://" + base
             self._base = base
             model = env.get("OLLAMA_MODEL", "")
-            if not model and not settings.llm_model.startswith("claude"):
-                model = settings.llm_model
             self._model = model  # vide : premier modèle installé, cherché au premier appel
             self._num_ctx = int(env.get("OLLAMA_NUM_CTX", "8192"))
             self._timeout = float(env.get("OLLAMA_TIMEOUT", "1800"))

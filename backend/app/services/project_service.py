@@ -1,109 +1,87 @@
-"""Lecture et écriture des projets dans Postgres (table `projects`).
-
-Chaque requête filtre sur `owner_id` : le rôle Postgres du serveur ignore les règles RLS, la
-séparation entre utilisateurs repose donc sur ces filtres. Un projet d'un autre utilisateur
-répond « introuvable », exactement comme un projet qui n'existe pas.
-"""
-
-import json
-from typing import Any
 from uuid import UUID
 
 import asyncpg
 
+from app.core.auth import CurrentUser
 from app.core.errors import AppError
-from app.schemas.project import (
-    LIST_FIELDS,
-    OPTIONAL_FIELDS,
-    CreateProjectInput,
-    UpdateProjectInput,
-)
+from app.repositories import project_repository as repo
+from app.schemas.project import CreateProjectInput, Me, Project, UpdateProjectInput
 
-_COLUMNS = ("title", "format", "city")
-_RETURNING = "id, title, format, city, data"
+DATA_FIELDS = (
+    "shooting_window", "max_hours_per_day", "scenes", "locations", "people", "schedule",
+    "festival_shortlist", "film_profile", "synopsis", "film_page", "members",
+)  # fmt: skip
 
 
-def _not_found() -> AppError:
-    return AppError("Projet introuvable.", 404, "introuvable")
+def _to_project(row: repo.Row) -> Project:
+    # `scene_extras` (géré par le backend) reste dans `data` et n'est pas renvoyé au front.
+    visible = {k: row["data"][k] for k in DATA_FIELDS if k in row["data"]}
+    return Project.model_validate(
+        {
+            "id": row["id"],
+            "title": row["title"],
+            "format": row["format"],
+            "city": row["city"],
+            **visible,
+        }
+    )
 
 
-def _project_id(raw: str) -> UUID:
+async def _owned(pool: asyncpg.Pool | None, project_id: str, user: CurrentUser) -> repo.Row:
+    row = await repo.get(pool, project_id)
+    if row is None:
+        raise AppError("Projet introuvable.", status_code=404, code="introuvable")
+    if row["owner_id"] != user.id:
+        raise AppError("Ce projet ne t'appartient pas.", status_code=403, code="interdit")
+    return row
+
+
+async def ensure_owned(pool: asyncpg.Pool | None, project_id: str, user: CurrentUser) -> None:
+    """404 si le projet n'existe pas (ou si l'identifiant n'est pas un uuid), 403 s'il appartient
+    à quelqu'un d'autre. Utilisé par les routes rattachées à un projet (sous-titres)."""
     try:
-        return UUID(raw)
+        UUID(project_id)
     except ValueError:
-        raise _not_found() from None
+        raise AppError("Projet introuvable.", status_code=404, code="introuvable") from None
+    await _owned(pool, project_id, user)
 
 
-def to_project(row: asyncpg.Record) -> dict[str, Any]:
-    """Ligne SQL → objet `Project` du contrat (listes vides par défaut, jamais de null)."""
-    data = row["data"]
-    if isinstance(data, str):
-        data = json.loads(data)
-    project: dict[str, Any] = {field: [] for field in LIST_FIELDS}
-    project.update({k: v for k, v in data.items() if v is not None and k not in _COLUMNS})
-    project.update(id=str(row["id"]), title=row["title"], format=row["format"], city=row["city"])
-    return project
+async def create_project(
+    pool: asyncpg.Pool | None, user: CurrentUser, body: CreateProjectInput
+) -> Project:
+    data = {
+        "shooting_window": body.shooting_window.model_dump(by_alias=True),
+        "max_hours_per_day": body.max_hours_per_day,
+        "scenes": [], "locations": [], "people": [], "festival_shortlist": [],
+        "scene_extras": {},
+    }  # fmt: skip
+    row = await repo.create(pool, user.id, body.title, body.format, body.city, data)
+    return _to_project(row)
 
 
-async def create(pool: asyncpg.Pool, owner_id: UUID, body: CreateProjectInput) -> dict[str, Any]:
-    data = body.model_dump(mode="json", by_alias=True, exclude=set(_COLUMNS))
-    row = await pool.fetchrow(
-        f"insert into projects (owner_id, title, format, city, data) "
-        f"values ($1, $2, $3, $4, $5::jsonb) returning {_RETURNING}",
-        owner_id,
-        body.title,
-        body.format,
-        body.city,
-        json.dumps(data),
-    )
-    return to_project(row)
+async def get_project(pool: asyncpg.Pool | None, user: CurrentUser, project_id: str) -> Project:
+    return _to_project(await _owned(pool, project_id, user))
 
 
-async def get(pool: asyncpg.Pool, owner_id: UUID, project_id: str) -> dict[str, Any]:
-    row = await pool.fetchrow(
-        f"select {_RETURNING} from projects where id = $1 and owner_id = $2",
-        _project_id(project_id),
-        owner_id,
-    )
-    if row is None:
-        raise _not_found()
-    return to_project(row)
+async def update_project(
+    pool: asyncpg.Pool | None, user: CurrentUser, project_id: str, body: UpdateProjectInput
+) -> Project:
+    await _owned(pool, project_id, user)
+    sent = body.model_dump(exclude_unset=True, by_alias=True)
+    columns = {k: sent.pop(k) for k in repo.COLUMN_FIELDS if sent.get(k) is not None}
+    sent = {k: v for k, v in sent.items() if k in DATA_FIELDS}
+    row = await repo.update(pool, project_id, columns, sent)
+    return _to_project(row)
 
 
-async def update(
-    pool: asyncpg.Pool, owner_id: UUID, project_id: str, patch: UpdateProjectInput
-) -> dict[str, Any]:
-    changes = patch.model_dump(mode="json", by_alias=True, exclude_unset=True)
-    columns = {k: changes.pop(k) for k in _COLUMNS if k in changes}
-    removed = [k for k in OPTIONAL_FIELDS if k in changes and changes[k] is None]
-    data_patch = {k: v for k, v in changes.items() if k not in removed}
-    row = await pool.fetchrow(
-        f"""update projects set
-              title = coalesce($3, title),
-              format = coalesce($4, format),
-              city = coalesce($5, city),
-              data = (data || $6::jsonb) - $7::text[],
-              version = version + 1
-            where id = $1 and owner_id = $2
-            returning {_RETURNING}""",
-        _project_id(project_id),
-        owner_id,
-        columns.get("title"),
-        columns.get("format"),
-        columns.get("city"),
-        json.dumps(data_patch),
-        removed,
-    )
-    if row is None:
-        raise _not_found()
-    return to_project(row)
+async def delete_project(pool: asyncpg.Pool | None, user: CurrentUser, project_id: str) -> None:
+    await _owned(pool, project_id, user)
+    # TODO (avec l'envoi du scénario) : supprimer aussi les fichiers du bucket `scripts`.
+    await repo.delete(pool, project_id)
 
 
-async def delete(pool: asyncpg.Pool, owner_id: UUID, project_id: str) -> None:
-    deleted = await pool.fetchval(
-        "delete from projects where id = $1 and owner_id = $2 returning id",
-        _project_id(project_id),
-        owner_id,
-    )
-    if deleted is None:
-        raise _not_found()
+async def get_me(pool: asyncpg.Pool | None, user: CurrentUser) -> Me:
+    profile = await repo.get_profile(pool, user.id)
+    if profile is None:
+        raise AppError("Profil introuvable.", status_code=404, code="introuvable")
+    return Me(email=user.email, **profile)

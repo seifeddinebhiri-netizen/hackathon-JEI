@@ -12,6 +12,8 @@ from app.schemas.scouting import Explanation, Interpretation
 from app.services import scouting_service as module
 from app.services.scouting_service import Cache, ScoutingService
 
+pytestmark = pytest.mark.usefixtures("signed_in")
+
 NOW = datetime(2026, 11, 15, tzinfo=UTC)
 DAY = "2026-11-16"
 BASE = datetime(2026, 11, 15, 23, tzinfo=UTC)
@@ -210,7 +212,7 @@ def test_no_geoapify_key_and_request_rate_limit(setup):
     service.settings.geoapify_api_key = Settings(geoapify_api_key="").geoapify_api_key
     response = client.get("/locations/search", params={"region": "Tunis"})
     assert response.status_code == 503
-    assert "GEOAPIFY_API_KEY" in response.json()["error"]["message"]
+    assert "GEOAPIFY_API_KEY" in response.json()["message"]
     assert not calls
     for _ in range(19):
         client.get("/locations/search", params={"region": "Tunis"})

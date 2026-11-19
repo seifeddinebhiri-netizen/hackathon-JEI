@@ -60,5 +60,5 @@ async def suggest_locations(
         besoins=suggestion.besoins,
         propositions=propositions,
         mutualisation=suggestion.mutualisation or None,
-        model=llm.model,
+        model=llm.suggest_model,
     )

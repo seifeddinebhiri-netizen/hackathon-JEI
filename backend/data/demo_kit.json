@@ -1,0 +1,451 @@
+{
+  "project": {
+    "title": "Dar Hmeti",
+    "format": "court",
+    "city": "Tunis",
+    "shooting_window_offsets": {
+      "from": 5,
+      "to": 24
+    },
+    "max_hours_per_day": 8,
+    "locations": [
+      {
+        "id": "loc-medina",
+        "name": "Médina : ruelle et café",
+        "address": "Médina de Tunis, [adresse exacte à compléter]",
+        "lat": 36.7986,
+        "lon": 10.1706,
+        "access_hours": {
+          "from": "07:00",
+          "to": "23:00"
+        },
+        "forbidden_days": [
+          "vendredi"
+        ],
+        "permit": "a_demander",
+        "notes": "Café ouvert aux clients le matin : tourner après 10 h si possible. [contact du gérant]"
+      },
+      {
+        "id": "loc-appart",
+        "name": "Appartement d’Amira",
+        "address": "La Marsa, [adresse à compléter]",
+        "lat": 36.8782,
+        "lon": 10.3247,
+        "forbidden_days": [],
+        "permit": "non_necessaire",
+        "notes": "Prévenir les voisins. Pas de bruit après 22 h."
+      },
+      {
+        "id": "loc-plage",
+        "name": "Plage et route côtière",
+        "address": "Gammarth, [accès plage à préciser]",
+        "lat": 36.9197,
+        "lon": 10.2894,
+        "access_hours": {
+          "from": "05:00",
+          "to": "22:00"
+        },
+        "forbidden_days": [],
+        "permit": "obtenue",
+        "notes": "Parking limité : covoiturage."
+      }
+    ],
+    "scenes": [
+      {
+        "id": "sc-1",
+        "number": "1",
+        "title": "Amira ouvre le café",
+        "setting": "INT",
+        "moment": "jour",
+        "location_id": "loc-medina",
+        "characters": [
+          "Amira",
+          "Mounir"
+        ],
+        "estimated_hours": 2,
+        "summary": "Amira lève le rideau du café de son oncle, qui lui annonce la vente.",
+        "source": "import_ia",
+        "validated": true
+      },
+      {
+        "id": "sc-2",
+        "number": "2",
+        "title": "Course dans les ruelles",
+        "setting": "EXT",
+        "moment": "jour",
+        "location_id": "loc-medina",
+        "characters": [
+          "Amira",
+          "Slim"
+        ],
+        "estimated_hours": 1.5,
+        "summary": "Amira poursuit Slim dans la médina pour récupérer les clés.",
+        "source": "import_ia",
+        "validated": true
+      },
+      {
+        "id": "sc-3",
+        "number": "3",
+        "title": "Dispute avec Slim",
+        "setting": "INT",
+        "moment": "nuit",
+        "location_id": "loc-appart",
+        "characters": [
+          "Amira",
+          "Slim"
+        ],
+        "estimated_hours": 2.5,
+        "summary": "Le frère et la sœur s’affrontent sur l’avenir du café.",
+        "source": "import_ia",
+        "validated": true
+      },
+      {
+        "id": "sc-4",
+        "number": "4",
+        "title": "Amira face à la mer",
+        "setting": "EXT",
+        "moment": "heure_doree",
+        "location_id": "loc-plage",
+        "characters": [
+          "Amira"
+        ],
+        "estimated_hours": 1,
+        "summary": "Seule sur la plage, Amira relit la lettre de son père.",
+        "source": "import_ia",
+        "validated": true
+      },
+      {
+        "id": "sc-5",
+        "number": "5",
+        "title": "Départ sur la route côtière",
+        "setting": "EXT",
+        "moment": "aube",
+        "location_id": "loc-plage",
+        "characters": [
+          "Amira",
+          "Nour"
+        ],
+        "estimated_hours": 1.5,
+        "summary": "Nour conduit Amira vers la gare au lever du jour.",
+        "source": "import_ia",
+        "validated": true
+      },
+      {
+        "id": "sc-6",
+        "number": "6",
+        "title": "Le colis",
+        "setting": "INT",
+        "moment": "jour",
+        "location_id": "loc-appart",
+        "characters": [
+          "Amira",
+          "Nour"
+        ],
+        "estimated_hours": 1.5,
+        "summary": "Nour apporte un colis oublié au café des années plus tôt.",
+        "source": "manuel",
+        "validated": true
+      },
+      {
+        "id": "sc-7",
+        "number": "7",
+        "title": "Mounir ferme le café",
+        "setting": "EXT",
+        "moment": "nuit",
+        "location_id": "loc-medina",
+        "characters": [
+          "Mounir",
+          "Amira"
+        ],
+        "estimated_hours": 2,
+        "summary": "Dernière fermeture du rideau, sous les lampes de la ruelle.",
+        "source": "import_ia",
+        "validated": true
+      }
+    ],
+    "people": [
+      {
+        "id": "p-1",
+        "kind": "acteur",
+        "name": "[Actrice 1]",
+        "role": "Actrice",
+        "character": "Amira"
+      },
+      {
+        "id": "p-2",
+        "kind": "acteur",
+        "name": "[Acteur 2]",
+        "role": "Acteur",
+        "character": "Slim"
+      },
+      {
+        "id": "p-3",
+        "kind": "acteur",
+        "name": "[Acteur 3]",
+        "role": "Acteur",
+        "character": "Mounir"
+      },
+      {
+        "id": "p-4",
+        "kind": "acteur",
+        "name": "[Actrice 4]",
+        "role": "Actrice",
+        "character": "Nour"
+      },
+      {
+        "id": "p-5",
+        "kind": "equipe",
+        "name": "Yassine",
+        "role": "Réalisation"
+      },
+      {
+        "id": "p-6",
+        "kind": "equipe",
+        "name": "[Nom]",
+        "role": "Image"
+      },
+      {
+        "id": "p-7",
+        "kind": "equipe",
+        "name": "[Nom]",
+        "role": "Son"
+      },
+      {
+        "id": "p-8",
+        "kind": "equipe",
+        "name": "[Nom]",
+        "role": "Régie"
+      }
+    ]
+  },
+  "film_kit": {
+    "duration_min": 15,
+    "language": "Derja (arabe tunisien)",
+    "genre": "Fiction",
+    "synopsis": {
+      "phrase": "Slim veut vendre le café de son père à Tunis, mais sa sœur Amira refuse de le laisser partir.",
+      "court": "Dans la médina de Tunis, Slim a vendu en secret le café que leur père a tenu pendant quarante ans. Quand sa sœur Amira l’apprend, une dispute éclate entre les murs blancs du café. Pendant une nuit, ils vident les étagères, retrouvent les photos, les dettes et les promesses. Au matin, Amira comprend pourquoi Slim est parti, et Slim comprend ce qu’il a vendu.",
+      "long": ""
+    },
+    "stills": [
+      "/photos/ruelle.jpg",
+      "/photos/porte.jpg",
+      "/photos/cote.jpg"
+    ]
+  },
+  "dossiers": [
+    {
+      "festival_id": "bsff-next-generation",
+      "status": "a_preparer"
+    },
+    {
+      "festival_id": "vienna-shorts",
+      "status": "a_preparer"
+    },
+    {
+      "festival_id": "clermont-international",
+      "status": "prochain_appel"
+    }
+  ],
+  "pieces": [
+    {
+      "key": "format:vienna-shorts",
+      "state": "pret"
+    }
+  ],
+  "passport": {
+    "film_title": "Dar Hmeti",
+    "director": "Yassine",
+    "declarations": [
+      {
+        "department": "scenario",
+        "used_ai": false,
+        "what": "",
+        "human_decisions": "Écrit entièrement par Yassine."
+      },
+      {
+        "department": "image",
+        "used_ai": false,
+        "what": "",
+        "human_decisions": "Cadre, lumière et étalonnage faits à la main par l’équipe image."
+      },
+      {
+        "department": "montage",
+        "used_ai": true,
+        "tool_id": "tool-montage-a",
+        "what": "Nettoyage du son des dialogues pendant le montage.",
+        "level": "assistance",
+        "human_decisions": "Choix des prises, rythme et ordre des séquences."
+      },
+      {
+        "department": "son_voix",
+        "used_ai": false,
+        "what": "",
+        "human_decisions": "Prise de son sur le plateau et mixage par l’ingénieur du son."
+      },
+      {
+        "department": "musique",
+        "used_ai": false,
+        "what": "",
+        "human_decisions": "Musique originale enregistrée par un musicien de Tunis."
+      },
+      {
+        "department": "vfx",
+        "used_ai": false,
+        "what": "",
+        "human_decisions": "Aucun effet visuel : tout est tourné en décor réel."
+      },
+      {
+        "department": "sous_titres",
+        "used_ai": true,
+        "tool_id": "tool-trad-a",
+        "what": "Transcription automatique du derja et première traduction en anglais.",
+        "level": "assistance",
+        "human_decisions": "Chaque réplique relue et corrigée à la main, découpage et timing validés."
+      },
+      {
+        "department": "affiche_promo",
+        "used_ai": false,
+        "what": "",
+        "human_decisions": "Affiche dessinée à partir d’une photo de tournage, sans IA."
+      }
+    ],
+    "c2pa_signed": false,
+    "badge_code": "EN-DRHM-T1"
+  },
+  "subtitles": {
+    "source_lang": "derja",
+    "lines": [
+      {
+        "id": "l1",
+        "start": "00:00:12,400",
+        "end": "00:00:14,900",
+        "source": "Sbe7 el khir ya khali.",
+        "fr": "Bonjour, mon oncle.",
+        "en": "Morning, uncle.",
+        "confidence": "elevee",
+        "validated": true,
+        "speaker": "S1",
+        "warnings": [],
+        "glossary_used": [
+          "sbe7-el-khir"
+        ]
+      },
+      {
+        "id": "l2",
+        "start": "00:00:15,300",
+        "end": "00:00:18,200",
+        "source": "El 9ahwa mabi3a, Amira.",
+        "fr": "Le café est vendu, Amira.",
+        "en": "The café is sold, Amira.",
+        "confidence": "elevee",
+        "validated": true,
+        "speaker": "S1",
+        "warnings": [],
+        "glossary_used": []
+      },
+      {
+        "id": "l3",
+        "start": "00:00:19,000",
+        "end": "00:00:21,600",
+        "source": "Chnowa? Ba3etha?",
+        "fr": "Quoi ? Tu l’as vendu ?",
+        "en": "What? You sold it?",
+        "confidence": "elevee",
+        "validated": true,
+        "speaker": "S2",
+        "warnings": [],
+        "glossary_used": []
+      },
+      {
+        "id": "l4",
+        "start": "00:00:22,100",
+        "end": "00:00:23,900",
+        "source": "Ma3andich el 9alb nkamel, Amira, walla.",
+        "fr": "Je n’ai plus le cœur à continuer, Amira, je te jure.",
+        "en": "I don’t have the heart to go on anymore, Amira, I swear.",
+        "fr_court": "Je n’ai plus le cœur, Amira.",
+        "en_court": "I can’t go on, Amira.",
+        "confidence": "moyenne",
+        "note": "« Ma3andich el 9alb » : littéralement « je n’ai pas le cœur ». Sens : plus le courage, plus l’envie.",
+        "validated": false,
+        "speaker": "S1",
+        "warnings": [],
+        "glossary_used": []
+      },
+      {
+        "id": "l5",
+        "start": "00:01:02,000",
+        "end": "00:01:04,300",
+        "source": "Yezzi ya Slim!",
+        "fr": "Ça suffit, Slim !",
+        "en": "Enough, Slim!",
+        "confidence": "elevee",
+        "validated": false,
+        "speaker": "S2",
+        "warnings": [],
+        "glossary_used": []
+      },
+      {
+        "id": "l6",
+        "start": "00:01:05,000",
+        "end": "00:01:08,700",
+        "source": "Enti dima t7ebi tkouni 3la 7a9.",
+        "fr": "Tu veux toujours avoir raison.",
+        "en": "You always want to be right.",
+        "confidence": "moyenne",
+        "validated": false,
+        "speaker": "S1",
+        "warnings": [],
+        "glossary_used": []
+      },
+      {
+        "id": "l7",
+        "start": "00:02:40,500",
+        "end": "00:02:43,000",
+        "source": "Rabbi yesahel.",
+        "fr": "Que Dieu te facilite la route.",
+        "en": "May God ease your way.",
+        "confidence": "faible",
+        "note": "Formule de politesse. Selon le ton : « Bon courage », « Bonne route ». Le mot à mot sonne solennel.",
+        "validated": false,
+        "speaker": "S3",
+        "warnings": [],
+        "glossary_used": []
+      },
+      {
+        "id": "l8",
+        "start": "00:02:44,000",
+        "end": "00:02:46,800",
+        "source": "Ya3tik essa7a, Nour.",
+        "fr": "Merci, Nour.",
+        "en": "Thank you, Nour.",
+        "confidence": "moyenne",
+        "note": "« Ya3tik essa7a » : littéralement « que Dieu te donne la santé ». Ici : merci.",
+        "validated": false,
+        "speaker": "S2",
+        "warnings": [],
+        "glossary_used": [
+          "ya3tik-essa7a"
+        ]
+      },
+      {
+        "id": "l9",
+        "start": "00:02:47,200",
+        "end": "00:02:49,500",
+        "source": "Barcha 7kayet, khalli 3la ba3d.",
+        "fr": "Plein d’histoires, on verra plus tard.",
+        "en": "Lots of stories, later.",
+        "confidence": "faible",
+        "validated": false,
+        "warnings": [],
+        "glossary_used": []
+      }
+    ],
+    "processing": {
+      "transcriber": "elevenlabs/scribe_v2",
+      "translator": "gemini/gemini-3.1-flash-lite",
+      "created_at": "2026-11-18T15:02:11.204Z"
+    }
+  }
+}

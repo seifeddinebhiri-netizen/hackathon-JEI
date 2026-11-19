@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Dossier · Déclaration IA</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F2F2EF}
+a{color:#121110}a:hover{color:#C8102E}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #FFC82E;outline-offset:2px}
+</style>
+</helmet>
+<div style="background: #F2F2EF; color: #121110; font-family: Inter, system-ui, sans-serif; font-size: 16px; min-height: 100%">
+
+  <header style="background: #121110; color: #FFFFFF">
+    <div style="max-width: 1440px; margin: 0 auto; padding: 0 64px; min-height: 64px; display: flex; flex-wrap: wrap; align-items: center; gap: 24px; justify-content: space-between">
+      <a href="#" style="display: flex; align-items: center; text-decoration: none; color: #FFFFFF; padding: 8px 10px; border-left: 2px solid #E4202E; border-top: 2px solid #E4202E">
+        <span style="font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 500; letter-spacing: -0.02em"><span style="color: #B8B4AC">en</span>cadr<span style="color: #FFC82E">é</span></span>
+      </a>
+      <nav aria-label="Étapes" style="display: flex; flex-wrap: wrap; gap: 28px; font-size: 14px; font-weight: 600">
+        <a href="#" style="color: #B8B4AC; text-decoration: none; padding: 20px 0">Projet</a>
+        <a href="#" style="color: #B8B4AC; text-decoration: none; padding: 20px 0"><span style="color: #FFC82E; font-family: 'JetBrains Mono', monospace">1</span> Planifier</a>
+        <a href="#" style="color: #B8B4AC; text-decoration: none; padding: 20px 0"><span style="color: #FFC82E; font-family: 'JetBrains Mono', monospace">2</span> Tourner</a>
+        <a href="#" style="color: #B8B4AC; text-decoration: none; padding: 20px 0"><span style="color: #FFC82E; font-family: 'JetBrains Mono', monospace">3</span> Déclarer</a>
+        <a href="#" aria-current="page" style="color: #FFFFFF; text-decoration: none; padding: 20px 0 17px; border-bottom: 3px solid #FFC82E"><span style="color: #FFC82E; font-family: 'JetBrains Mono', monospace">4</span> Diffuser</a>
+      </nav>
+      <div style="display: flex; align-items: center; gap: 10px; border: 2px solid #3A3733; padding: 6px 12px; font-size: 14px; font-weight: 600">
+        <span style="width: 24px; height: 24px; background: #FFC82E; color: #121110; display: inline-flex; align-items: center; justify-content: center; font-size: 12px">Y</span>Yassine
+      </div>
+    </div>
+  </header>
+
+  <main style="max-width: 1440px; margin: 0 auto; padding: 28px 64px 80px; box-sizing: border-box">
+    <nav aria-label="Fil d'Ariane" style="font-size: 14px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+      <a href="Dossiers.dc.html" style="font-weight: 600">Mes dossiers</a><span aria-hidden="true" style="color: #55524C">/</span>
+      <a href="Fiche.dc.html" style="font-weight: 600">Vienna Shorts</a><span aria-hidden="true" style="color: #55524C">/</span>
+      <span style="color: #55524C">Déclaration IA</span>
+    </nav>
+    <h1 style="margin: 16px 0 0; font-family: 'Space Grotesk', sans-serif; font-size: 44px; letter-spacing: -0.02em">Déclaration IA pour Vienna Shorts</h1>
+    <p style="margin: 8px 0 0; font-size: 16px; color: #55524C; max-width: 760px">Le festival demande de cocher une case sur l'usage de l'IA. encadré part de ton Passeport IA pour te proposer la bonne réponse.</p>
+
+    <!-- Levier de maquette : les 3 situations -->
+    <div style="margin-top: 22px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center">
+      <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #55524C">Maquette · situation</span>
+      <div role="group" aria-label="Situation" style="display: inline-flex; flex-wrap: wrap; border: 2px solid #121110">
+        <sc-for list="{{cases}}" as="c" hint-placeholder-count="3">
+          <button type="button" aria-pressed="{{c.pressed}}" onClick="{{c.pick}}" style="{{c.style}}">{{c.label}}</button>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- Cas 1 : Passeport déjà fait -->
+    <sc-if value="{{isDone}}" hint-placeholder-val="{{ true }}">
+      <div style="margin-top: 22px; display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start">
+        <section style="flex: 1 1 380px; max-width: 460px; background: #FFFFFF; border: 2px solid #121110; padding: 22px">
+          <p style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #55524C">Ton Passeport IA</p>
+          <p style="margin: 6px 0 14px; font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700">Dar Hmeti · 1 département sur 8</p>
+          <ul style="margin: 0; padding: 0; list-style: none">
+            <sc-for list="{{departments}}" as="d" hint-placeholder-count="8">
+              <li style="display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-top: 2px solid #E2E0D9; font-size: 14px">
+                <span style="font-weight: 600">{{d.name}}</span>
+                <span style="{{d.style}}">{{d.value}}</span>
+              </li>
+            </sc-for>
+          </ul>
+          <a href="#" style="display: inline-flex; margin-top: 14px; font-size: 14px; font-weight: 600">Modifier dans l'étape 3 · Déclarer</a>
+        </section>
+
+        <section style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 20px">
+          <div style="background: #FFFFFF; border: 2px dashed #121110; padding: 22px">
+            <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center">
+              <h2 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 22px">La question de Vienna Shorts</h2>
+              <span style="padding: 3px 8px; background: #FFE7A3; color: #5C4400; border: 2px dashed #5C4400; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase">Proposition : à valider</span>
+            </div>
+            <fieldset style="border: 0; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px">
+              <legend style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Usage de l'IA</legend>
+              <sc-for list="{{viennaOptions}}" as="o" hint-placeholder-count="4">
+                <label style="{{o.style}}">
+                  <input type="radio" name="vienna" checked="{{o.checked}}" onChange="{{o.pick}}" style="width: 20px; height: 20px; accent-color: #121110; flex: none">
+                  <span><span style="display: block; font-weight: 600">{{o.label}}</span><span style="display: block; font-size: 13px; color: #55524C">{{o.hint}}</span></span>
+                </label>
+              </sc-for>
+            </fieldset>
+            <p style="margin: 14px 0 0; padding: 12px 14px; background: #FFF0C2; color: #5C4400; font-size: 14px; line-height: 1.5"><strong>Pourquoi cette case :</strong> ton Passeport déclare un outil d'IA pour le montage (nettoyage du son) et des sous-titres assistés par IA. Ce sont des usages techniques. Aucune image ni aucun son n'a été généré.</p>
+            <div style="margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px">
+              <button type="button" onClick="{{validate}}" style="{{validateStyle}}">{{validateLabel}}</button>
+            </div>
+          </div>
+
+          <div style="background: #FFFFFF; border: 2px solid #121110; padding: 22px">
+            <h2 style="margin: 0 0 6px; font-family: 'Space Grotesk', sans-serif; font-size: 20px">Et pour tes autres dossiers</h2>
+            <p style="margin: 0 0 12px; font-size: 14px; color: #55524C">La même déclaration, traduite dans la forme que chaque festival demande.</p>
+            <ul style="margin: 0; padding: 0; list-style: none">
+              <li style="padding: 10px 0; border-top: 2px solid #E2E0D9; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center"><strong style="flex: 1 1 200px">Clermont-Ferrand</strong><span style="font-size: 13px; color: #55524C">Texte à coller sur Shortfilmdepot</span><a href="#" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; border: 2px solid #121110; text-decoration: none; font-size: 13px; font-weight: 600">Voir le brouillon</a></li>
+              <li style="padding: 10px 0; border-top: 2px solid #E2E0D9; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center"><strong style="flex: 1 1 200px">BSFF</strong><span style="font-size: 13px; color: #55524C">Le règlement ne demande rien sur l'IA</span><span style="padding: 3px 8px; background: #E2E0D9; font-family: 'JetBrains Mono', monospace; font-size: 12px; text-transform: uppercase">Rien à faire</span></li>
+            </ul>
+          </div>
+        </section>
+      </div>
+    </sc-if>
+
+    <!-- Cas 2 : pas encore déclaré -->
+    <sc-if value="{{isTodo}}" hint-placeholder-val="{{ false }}">
+      <section style="margin-top: 22px; max-width: 760px; background: #FFFFFF; border: 2px dashed #121110; padding: 28px">
+        <h2 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 26px">Tu n'as pas encore rempli ton Passeport IA</h2>
+        <p style="margin: 10px 0 0; line-height: 1.6">Vienna Shorts demande une déclaration. Le Passeport prend environ 5 minutes : 8 départements (scénario, image, son, montage…), et pour chacun, l'outil d'IA utilisé ou « aucun ».</p>
+        <div style="margin-top: 18px; display: flex; flex-wrap: wrap; gap: 12px">
+          <a href="#" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 20px; background: #C8102E; color: #FFFFFF; text-decoration: none; font-weight: 600; box-shadow: 3px 3px 0 #121110">Déclarer maintenant</a>
+          <button type="button" onClick="{{goImport}}" style="min-height: 48px; padding: 0 18px; border: 2px solid #121110; background: #FFFFFF; color: #121110; font: inherit; font-weight: 600">J'ai déjà une déclaration ailleurs</button>
+        </div>
+        <p style="margin: 14px 0 0; font-size: 14px; color: #55524C">Quand tu as fini, encadré te ramène ici, avec la case de Vienna déjà proposée.</p>
+      </section>
+    </sc-if>
+
+    <!-- Cas 3 : importer -->
+    <sc-if value="{{isImport}}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top: 22px; display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start">
+        <section style="flex: 1 1 460px; min-width: 0; background: #FFFFFF; border: 2px solid #121110; padding: 24px">
+          <h2 style="margin: 0 0 6px; font-family: 'Space Grotesk', sans-serif; font-size: 24px">Importer une déclaration existante</h2>
+          <p style="margin: 0 0 16px; font-size: 14px; color: #55524C">Deux façons, au choix. Tu confirmes tout avant que ça compte.</p>
+          <div style="border: 2px dashed #121110; padding: 24px; text-align: center; background: #F2F2EF">
+            <p style="margin: 0; font-weight: 600">Dépose ton fichier final</p>
+            <p style="margin: 6px 0 12px; font-size: 13px; color: #55524C">Si ton logiciel a ajouté des Content Credentials (C2PA), encadré lit la liste des outils utilisés.</p>
+            <button type="button" style="min-height: 44px; padding: 0 16px; border: 2px solid #121110; background: #FFFFFF; font: inherit; font-size: 14px; font-weight: 600">Choisir un fichier</button>
+          </div>
+          <label for="lien" style="display: block; margin-top: 18px; font-size: 14px; font-weight: 600">Ou colle un lien de Passeport encadré</label>
+          <input id="lien" type="url" placeholder="https://encadre.app/verifier/…" style="margin-top: 6px; width: 100%; box-sizing: border-box; font: inherit; min-height: 44px; padding: 0 12px; border: 2px solid #121110">
+        </section>
+        <section style="flex: 1 1 380px; max-width: 480px; background: #FFFFFF; border: 2px dashed #121110; padding: 24px">
+          <p style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #55524C">Exemple de résultat</p>
+          <p style="margin: 6px 0 12px; font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700">2 outils trouvés dans le fichier</p>
+          <ul style="margin: 0; padding: 0; list-style: none; font-size: 14px">
+            <li style="padding: 9px 0; border-top: 2px solid #E2E0D9">Montage · nettoyage du son par IA <span style="color: #55524C">→ département Son</span></li>
+            <li style="padding: 9px 0; border-top: 2px solid #E2E0D9">Étalonnage · aucune IA déclarée <span style="color: #55524C">→ département Image</span></li>
+          </ul>
+          <p style="margin: 12px 0 0; font-size: 13px; color: #55524C">Un fichier sans Content Credentials ne prouve rien : dans ce cas, tu remplis le Passeport toi-même.</p>
+          <button type="button" style="margin-top: 14px; min-height: 44px; padding: 0 16px; border: 2px solid #C8102E; background: #C8102E; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 600">Confirmer et compléter mon Passeport</button>
+        </section>
+      </div>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { mode: 'done', vienna: 'tech', validated: false };
+  }
+  renderVals() {
+    const s = this.state;
+    const tab = 'min-height: 44px; padding: 0 16px; border: 0; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; ';
+    const cases = [
+      ['done', 'Passeport déjà fait'],
+      ['todo', 'Pas encore déclaré'],
+      ['import', 'Fait ailleurs : importer']
+    ].map(([id, label]) => ({
+      label,
+      pressed: s.mode === id ? 'true' : 'false',
+      style: tab + (s.mode === id ? 'background: #121110; color: #FFFFFF' : 'background: #FFFFFF; color: #121110'),
+      pick: () => this.setState({ mode: id })
+    }));
+
+    const tag = 'padding: 2px 6px; font-family: JetBrains Mono, monospace; font-size: 12px; text-transform: uppercase; ';
+    const departments = [
+      ['Scénario', 'Aucune IA'], ['Image', 'Aucune IA'], ['Son', 'IA : nettoyage'], ['Montage', 'Aucune IA'],
+      ['Musique', 'Aucune IA'], ['Effets visuels', 'Aucune IA'], ['Sous-titres', 'IA, relus'], ['Affiche', 'Aucune IA']
+    ].map(([name, value]) => ({ name, value, style: tag + (value === 'Aucune IA' ? 'background: #E2E0D9; color: #121110' : 'background: #FFE7A3; color: #5C4400') }));
+
+    const opt = 'display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; cursor: pointer; ';
+    const viennaOptions = [
+      ['none', 'Pas d’IA dans le film', 'Faux pour toi : ton Passeport déclare 2 usages.'],
+      ['tech', 'IA comme outil technique', 'Sous-titrage, nettoyage du son, upscaling.'],
+      ['gen', 'IA pour générer des images ou du contenu artistique', 'Rien de généré dans ton Passeport.'],
+      ['both', 'Les deux', 'Pas ton cas.']
+    ].map(([id, label, hint]) => ({
+      label, hint,
+      checked: s.vienna === id,
+      style: opt + (s.vienna === id ? 'border: 3px solid #121110; background: #FFFFFF' : 'border: 2px solid #D9D7D1; background: #FFFFFF'),
+      pick: () => this.setState({ vienna: id, validated: false })
+    }));
+
+    return {
+      cases,
+      isDone: s.mode === 'done',
+      isTodo: s.mode === 'todo',
+      isImport: s.mode === 'import',
+      departments,
+      viennaOptions,
+      validate: () => this.setState({ validated: !s.validated }),
+      validateLabel: s.validated ? 'Validé par toi · annuler' : 'Valider ma réponse pour Vienna',
+      validateStyle: 'min-height: 44px; padding: 0 16px; font: inherit; font-size: 14px; font-weight: 600; ' + (s.validated ? 'border: 2px solid #14532D; background: #DDEFE3; color: #14532D' : 'border: 2px solid #C8102E; background: #C8102E; color: #FFFFFF'),
+      goImport: () => this.setState({ mode: 'import' })
+    };
+  }
+}
+</script>
+</body>
+</html>

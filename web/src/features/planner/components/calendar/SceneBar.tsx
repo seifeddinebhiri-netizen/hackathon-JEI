@@ -9,6 +9,7 @@ import { ConflictSentences } from './ConflictSentences';
 import { useCalendar } from './context';
 import { endHourOf, hourOf, pct, type HourRange } from './geometry';
 import { sceneHeading, sceneLine } from './sceneText';
+import { SceneDetailView } from '../SceneDetailView';
 import { useSceneSentences } from './hooks';
 
 function position(start: string, end: string, range: HourRange) {
@@ -76,6 +77,7 @@ export function SceneBar({ sceneId, label, range }: { sceneId: string; label: st
             {loc ? ` · ${loc.name}` : ''}
           </p>
           {scene.summary ? <p className="mt-2 text-meta">{scene.summary}</p> : null}
+          <SceneDetailView detail={scene.detail} compact className="mt-3 border-t-2 border-line-light pt-2" />
           <ConflictSentences sceneId={sceneId} className="mt-3" />
           <div className="mt-4 flex flex-wrap gap-2">
             <Popover.Close asChild>

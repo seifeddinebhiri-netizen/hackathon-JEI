@@ -45,6 +45,7 @@ import { anchoredSlot } from '@/features/planner/lib/rules';
 import { useCurrentProject } from '@/features/project/hooks/useProject';
 import { cn } from '@/lib/cn';
 import { formatDayLong, formatTime } from '@/lib/format';
+import { SceneDetailView } from '@/features/planner/components/SceneDetailView';
 import { copyToClipboard, fileSlug, printAsPdf } from '@/lib/print';
 
 /** Heures de rendez-vous au quart d'heure, de 04:00 à 22:00 (format 24 h quel que soit le navigateur). */
@@ -131,6 +132,7 @@ function SceneRow({
           <span className="font-semibold">{scene.title}</span>
         </p>
         {scene.summary ? <p className="mt-1 text-meta text-muted-on-light">{scene.summary}</p> : null}
+        <SceneDetailView detail={scene.detail} className="mt-2 border-l-4 border-gold pl-3" />
         <p className="mt-1 text-meta">
           {loc ? <>{loc.name} · </> : null}
           {scene.characters.length ? scene.characters.join(', ') : 'Sans personnage'}

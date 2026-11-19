@@ -78,5 +78,5 @@ async def suggest_scenes(llm: LLMService, body: SceneSuggestRequest) -> SceneSug
         suggestions=[
             SceneSuggestion(**s.model_dump(), id=f"sug-{i + 1}") for i, s in enumerate(kept)
         ],
-        model=llm.model,
+        model=llm.suggest_model,
     )

@@ -10,3 +10,19 @@ os.environ["GROQ_API_KEY"] = ""
 os.environ["ANTHROPIC_API_KEY"] = ""
 # Jamais de vrai e-mail envoyé par un test (mode essai)
 os.environ["RESEND_API_KEY"] = ""
+os.environ["GEMINI_API_KEY"] = ""
+
+import pytest
+
+
+@pytest.fixture
+def signed_in():
+    """Routes privées (Planner, repérage, météo) appelées par un utilisateur connecté."""
+    from app.core.auth import CurrentUser, get_current_user
+    from app.main import app
+
+    app.dependency_overrides[get_current_user] = lambda: CurrentUser(
+        id="00000000-0000-0000-0000-000000000001", email=None
+    )
+    yield
+    app.dependency_overrides.pop(get_current_user, None)

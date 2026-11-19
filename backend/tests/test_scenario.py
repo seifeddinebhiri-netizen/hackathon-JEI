@@ -9,6 +9,8 @@ from app.main import app
 from app.schemas.scenario import ScenarioAnalysis
 from app.services.llm_service import LLMService, LLMUnavailable
 
+pytestmark = pytest.mark.usefixtures("signed_in")
+
 
 def fixture():
     scenes = [
@@ -100,7 +102,7 @@ def test_invalid_requests_do_not_call_provider(body):
 def test_provider_failures_are_safe(failure, status, code):
     response, _ = post(failure)
     assert response.status_code == status
-    assert response.json()["error"]["code"] == code
+    assert response.json()["code"] == code
     assert "private details" not in response.text
 
 
@@ -139,8 +141,8 @@ async def test_shared_sdk_uses_structured_schema_and_rejects_truncation():
             parsed_output=ScenarioAnalysis.model_validate(fixture()), stop_reason="end_turn"
         )
     )
-    llm._client = MagicMock()
-    llm._client.with_options.return_value.beta.messages.parse = parse
+    llm._anthropic = MagicMock()
+    llm._anthropic.with_options.return_value.beta.messages.parse = parse
     assert len((await llm.analyze_scenario(BODY["content"])).scenes) == 2
     assert parse.call_args.kwargs["output_format"] is ScenarioAnalysis
     assert parse.call_args.kwargs["messages"][0]["content"] == BODY["content"]

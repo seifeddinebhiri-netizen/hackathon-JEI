@@ -4,6 +4,7 @@
  */
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
+import { Link } from 'react-router';
 import { api } from '@/api';
 import type {
   CallsheetDraft,
@@ -368,9 +369,26 @@ function Review({ project }: { project: Project }) {
           </ul>
 
           <div className="sticky bottom-0 flex flex-wrap items-center gap-4 border-2 border-ink bg-paper p-4">
-            <p className="font-semibold">
-              {toSend.length ? `${people(toSend.length)} recevront leur convocation` : 'Personne à convoquer'}
-            </p>
+            <div className="flex flex-col gap-1">
+              <p className="font-semibold">
+                {toSend.length
+                  ? `${people(toSend.length)} recevront leur convocation`
+                  : 'Personne à convoquer'}
+              </p>
+              {/* Pourquoi rien ne part : dit tout de suite quoi corriger, et où */}
+              {!toSend.length ? (
+                <p className="text-meta">
+                  {blocked.length
+                    ? blocked.map((d) => `${d.name} : ${d.blocked_reason}`).join(' · ')
+                    : drafts.length
+                      ? 'Tous les membres sont retirés de l’envoi.'
+                      : 'Aucun membre n’a de scène planifiée (voir la liste ci-dessus).'}{' '}
+                  <Link to="/equipe" className="font-semibold underline underline-offset-4">
+                    Corriger dans Équipe
+                  </Link>
+                </p>
+              ) : null}
+            </div>
             <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
               <Button
                 icon="send"
@@ -429,6 +447,14 @@ export default function PlannerCallsheets() {
   const project = useCurrentProject();
   return (
     <div className="flex flex-col gap-8">
+      {/* Retour à l'écran final de la génération (calendrier du planning) */}
+      <Link
+        to="/planner/calendrier"
+        className="no-print -mb-4 inline-flex min-h-11 items-center gap-2 self-start font-semibold underline-offset-4 hover:underline"
+      >
+        <Icon name="arrowLeft" size={18} />
+        Retour au planning
+      </Link>
       <PageHeader
         eyebrow="Planifier · Convocations"
         title="Convocations"

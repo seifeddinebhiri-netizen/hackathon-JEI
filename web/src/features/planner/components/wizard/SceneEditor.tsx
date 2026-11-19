@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import type { Location, Scene } from '@/api/types';
+import type { Location, LocationSuggestInput, Scene } from '@/api/types';
 import { AiDraftBadge, Button, Checkbox, Field, Icon, Input, Select } from '@/components/ui';
 import { cn } from '@/lib/cn';
 import { MOMENT_LABELS } from '../../lib/labels';
+import { SceneDetailSheet } from './SceneDetailSheet';
 
 /** Saisie « Amira, Slim » → ['Amira', 'Slim'], appliquée à la sortie du champ. */
 function CharactersInput({ value, onCommit }: { value: string[]; onCommit: (v: string[]) => void }) {
@@ -29,11 +30,14 @@ export function SceneEditor({
   locations,
   onChange,
   onDelete,
+  film,
 }: {
   scene: Scene;
   locations: Location[];
   onChange: (s: Scene) => void;
   onDelete: () => void;
+  /** Contexte du film pour la fiche de tournage ; sans lui, pas de bouton « Détailler ». */
+  film?: LocationSuggestInput['film'];
 }) {
   const set = <K extends keyof Scene>(k: K, v: Scene[K]) => onChange({ ...scene, [k]: v });
   const draft = scene.source === 'import_ia' && !scene.validated;
@@ -108,6 +112,19 @@ export function SceneEditor({
           <Input value={scene.summary} onChange={(e) => set('summary', e.target.value)} />
         </Field>
       </div>
+      {film ? (
+        <div className="mt-4 border-t-2 border-line-light pt-4">
+          <SceneDetailSheet
+            scene={scene}
+            film={film}
+            decor={locations.find((l) => l.id === scene.location_id)?.name ?? ''}
+            onChange={(detail) => {
+              const { detail: _old, ...rest } = scene;
+              onChange(detail ? { ...rest, detail } : rest);
+            }}
+          />
+        </div>
+      ) : null}
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t-2 border-line-light pt-3">
         <Checkbox
           checked={scene.validated}

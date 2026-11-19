@@ -25,7 +25,7 @@ npm install
 npm run dev             # http://localhost:5173
 ```
 
-Pour la démo, cliquer sur « Continuer en démo » sur la page de connexion : le projet fictif « Marée basse »
+Pour la démo, cliquer sur « Continuer en démo » sur la page de connexion : le projet fictif « Dar Hmeti »
 (court métrage tourné à Tunis) est prêt. La page **Mes données** permet de le remettre dans son état de départ.
 
 ## Scripts
@@ -47,11 +47,13 @@ La page interne `/_ui` (tous les composants et leurs états) n'existe qu'en dév
 | Variable | Défaut | Rôle |
 |---|---|---|
 | `VITE_API_URL` | `http://localhost:8000` | URL du backend FastAPI |
-| `VITE_USE_MOCKS` | `true` | `true` : API simulée dans le navigateur ; `false` : vrai backend |
+| `VITE_USE_MOCKS` | `true` | `true` : mode démo, API simulée dans le navigateur ; `false` : vrai backend, Kit Festival et Passeport IA dans Supabase |
+| `VITE_REAL_ENDPOINTS` | vide | Mode mixte (avec les mocks) : fonctions servies par le vrai backend. Les trois fonctions des sous-titres vont ensemble |
 | `VITE_MOCK_LATENCY_MS` | `600` | Latence simulée des mocks |
 | `VITE_MOCK_FAIL_RATE` | `0` | Taux d'échec aléatoire des mocks (0 à 1), pour tester les états d'erreur |
 | `VITE_PUBLIC_APP_URL` | `http://localhost:5173` | URL publique de l'app (liens de vérification, QR code du Coach) |
-| `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | vide | Plus tard : authentification Supabase |
+| `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | vide | Comptes Supabase, Kit Festival et Passeport IA (clé publique uniquement, jamais la clé `service_role`) |
+| `VITE_DEMO_EMAIL`, `VITE_DEMO_PASSWORD` | vide | Compte de démo du bouton « Continuer en démo » (créé par `backend/scripts/seed_kit_demo.py`) |
 
 ## Identité visuelle
 
@@ -97,7 +99,10 @@ react-hook-form + zod, @dnd-kit, date-fns, suncalc, qrcode.react, vite-plugin-pw
 2. Relancer `npm run dev` (les variables Vite sont lues au démarrage).
 
 `src/api/index.ts` choisit alors `endpoints.ts` au lieu de `mocks/handlers.ts`. Les deux respectent le même type
-`Api` : aucun écran ne change. Le contrat complet est dans [`docs/API_CONTRACT.md`](docs/API_CONTRACT.md),
+`Api` : aucun écran ne change. Le Kit Festival (`src/api/kit.ts`) et le Passeport IA (`src/api/supabase/`) lisent et
+écrivent alors directement dans Supabase, avec la clé publique : un compte est obligatoire, la sécurité par ligne
+limite chacun à ses données. Les sous-titres passent par le backend (`/subtitles`, jeton exigé) ; si l'appel échoue,
+l'erreur est affichée, sans repli vers le brouillon d'exemple. Le contrat complet est dans [`docs/API_CONTRACT.md`](docs/API_CONTRACT.md),
 la checklist côté backend dans [`docs/INTEGRATION.md`](docs/INTEGRATION.md).
 
 ## Éthique dans le front

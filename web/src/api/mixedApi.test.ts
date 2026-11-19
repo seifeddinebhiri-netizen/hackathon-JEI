@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { demoApi, mixedApi, NOT_IN_BACKEND_YET } from './index';
-import { parseScreenplay } from './endpoints';
+import { demoRealEndpoints, mixedApi, NOT_IN_BACKEND_YET } from './index';
 import { getDb } from './mocks/db';
 import { mockApi } from './mocks/handlers';
 import type { Api } from './endpoints';
@@ -17,7 +16,8 @@ describe('mixedApi', () => {
     const api = mixedApi(fakeApi('backend'), fakeApi('mock'));
     expect(await api.createProject({} as never)).toBe('backend:createProject');
     expect(await api.parseScreenplay({})).toBe('backend:parseScreenplay');
-    expect(await api.searchFestivals({} as never)).toBe('mock:searchFestivals');
+    expect(await api.searchFestivals({} as never)).toBe('backend:searchFestivals');
+    expect(NOT_IN_BACKEND_YET).toContain('generateSchedule');
     expect(NOT_IN_BACKEND_YET).not.toContain('createProject');
   });
 
@@ -37,17 +37,13 @@ describe('mixedApi', () => {
   });
 });
 
-describe('demoApi (VITE_REAL_PARSE)', () => {
-  it('only sends the screenplay parsing to the backend', () => {
-    const mocks = fakeApi('mock');
-    const api = demoApi(mocks, true);
-    expect(api.parseScreenplay).toBe(parseScreenplay);
-    expect(api.createProject).toBe(mocks.createProject);
-    expect(api.suggestLocations).toBe(mocks.suggestLocations);
+describe('demoRealEndpoints (VITE_REAL_PARSE)', () => {
+  it('adds the screenplay parsing to the real endpoints', () => {
+    expect(demoRealEndpoints(['getFestival'], true)).toEqual(['getFestival', 'parseScreenplay']);
+    expect(demoRealEndpoints(['parseScreenplay'], true)).toEqual(['parseScreenplay']);
   });
 
-  it('stays fully on mocks when the setting is off', () => {
-    const mocks = fakeApi('mock');
-    expect(demoApi(mocks, false)).toBe(mocks);
+  it('leaves the list unchanged when the setting is off', () => {
+    expect(demoRealEndpoints(['getFestival'], false)).toEqual(['getFestival']);
   });
 });

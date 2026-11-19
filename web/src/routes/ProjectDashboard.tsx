@@ -13,14 +13,16 @@ import {
   StatusChip,
 } from '@/components/ui';
 import { charactersWithoutActor, isValidEmail, projectCharacters } from '@/features/callsheets/lib';
-import { useFestivalSearch } from '@/features/festival/hooks/useFestivals';
+import { useShortlistFestivals } from '@/features/festival/hooks/useFestivals';
 import { useProjectPassport } from '@/features/passport/hooks/usePassport';
 import { DEPARTMENTS, summarize } from '@/features/passport/lib/labels';
 import { SunTimes, WeatherSummary } from '@/features/planner/components/Tags';
 import { usePeriodWeather } from '@/features/planner/hooks/usePlanner';
 import { CONFLICT_ICONS } from '@/features/planner/lib/labels';
 import { CONFLICT_LABELS, countConflicts } from '@/features/planner/lib/rules';
-import { useCurrentProject } from '@/features/project/hooks/useProject';
+import { useKit, withKit } from '@/features/festival/hooks/useKit';
+import { NEW_PROJECT_PATH, NoProject } from '@/features/project/components/NoProject';
+import { useCurrentProject, useCurrentProjectId } from '@/features/project/hooks/useProject';
 import { projectTodos } from '@/features/project/lib/todos';
 import { cn } from '@/lib/cn';
 import { daysUntil, formatDate, formatDayLong, isoDay } from '@/lib/format';
@@ -112,7 +114,8 @@ function NextDay({ project }: { project: Project }) {
         {next.scenes.length > 1 ? 's' : ''}
       </p>
       <div className="mt-4 flex flex-col gap-2 border-t border-line-dark pt-4 [&_.text-bad-fg]:text-gold [&_.text-warn-fg]:text-gold">
-        {weather.isPending && !w ? (
+        {/* Sans ville ni dates, la météo n'est jamais demandée : pas de squelette sans fin */}
+        {weather.isPending && !w && project.city && project.shooting_window.from ? (
           <Skeleton className="h-4 w-1/2 bg-line-dark" />
         ) : (
           <WeatherSummary weather={w} />
@@ -278,10 +281,11 @@ function PassportProgress({ project }: { project: Project }) {
 
 function Deadlines({ project }: { project: Project }) {
   const ids = project.festival_shortlist.map((f) => f.festival_id);
-  const q = useFestivalSearch({}, ids.length > 0);
-  const list = (q.data ?? [])
-    .filter((m) => ids.includes(m.festival.id))
-    .sort((a, b) => a.festival.deadline.localeCompare(b.festival.deadline))
+  const q = useShortlistFestivals(ids);
+  // Seulement les appels ouverts, la date la plus proche d'abord
+  const list = (q.data?.festivals ?? [])
+    .filter((f): f is typeof f & { deadline: string } => f.deadline_status === 'ouverte' && !!f.deadline)
+    .sort((a, b) => a.deadline.localeCompare(b.deadline))
     .slice(0, 3);
   return (
     <Panel
@@ -289,12 +293,12 @@ function Deadlines({ project }: { project: Project }) {
       icon="clock"
       action={
         <ButtonLink
-          to={ids.length ? '/festival?onglet=selection' : '/festival'}
+          to={ids.length ? '/festival/dossiers' : '/festival'}
           size="sm"
           variant="secondary"
           iconRight="arrowRight"
         >
-          {ids.length ? 'Ma sélection' : 'Trouver un festival'}
+          {ids.length ? 'Mes dossiers' : 'Trouver un festival'}
         </ButtonLink>
       }
     >
@@ -304,15 +308,17 @@ function Deadlines({ project }: { project: Project }) {
         <Skeleton className="h-16 w-full" />
       ) : q.isError ? (
         <ErrorState error={q.error} onRetry={() => void q.refetch()} />
+      ) : !list.length ? (
+        <p className="text-muted-on-light">Aucun appel ouvert dans tes dossiers.</p>
       ) : (
         <ul className="flex flex-col divide-y divide-line-light">
-          {list.map((m) => (
-            <li key={m.festival.id} className="flex items-center justify-between gap-3 py-2">
+          {list.map((f) => (
+            <li key={f.id} className="flex items-center justify-between gap-3 py-2">
               <span>
-                <span className="block font-semibold">{m.festival.name}</span>
-                <span className="text-meta text-muted-on-light">{formatDate(m.festival.deadline)}</span>
+                <span className="block font-semibold">{f.name}</span>
+                <span className="text-meta text-muted-on-light">{formatDate(f.deadline)}</span>
               </span>
-              <Countdown date={m.festival.deadline} />
+              <Countdown date={f.deadline} />
             </li>
           ))}
         </ul>
@@ -359,7 +365,12 @@ function Todos({ project }: { project: Project }) {
 }
 
 export default function ProjectDashboard() {
+  const projectId = useCurrentProjectId();
   const project = useCurrentProject();
+  // Dossiers et champs du film : lus dans le Kit Festival (vides tant qu'il n'est pas chargé)
+  const kit = useKit(project.data?.id);
+  // Compte neuf : la requête du projet est désactivée, elle ne finirait jamais de « charger »
+  if (!projectId) return <NoProject />;
   if (project.isPending)
     return (
       <div className="flex flex-col gap-8">
@@ -377,7 +388,7 @@ export default function ProjectDashboard() {
         icon="film"
         title="Aucun film ouvert"
         action={
-          <ButtonLink to="/planner/projet?nouveau=1" icon="plus">
+          <ButtonLink to={NEW_PROJECT_PATH} icon="plus">
             Créer un film
           </ButtonLink>
         }
@@ -386,7 +397,7 @@ export default function ProjectDashboard() {
       </EmptyState>
     );
   }
-  const p = project.data;
+  const p = withKit(project.data, kit.data ?? { project_id: project.data.id, dossiers: [], pieces: {} });
   return (
     <div className="flex flex-col gap-8">
       <PageHeader
@@ -394,7 +405,7 @@ export default function ProjectDashboard() {
         title={p.title}
         lead={`${p.city} · tournage possible du ${formatDate(p.shooting_window.from)} au ${formatDate(p.shooting_window.to)}`}
         actions={
-          <ButtonLink to="/planner/projet?nouveau=1" variant="secondary" icon="plus">
+          <ButtonLink to={NEW_PROJECT_PATH} variant="secondary" icon="plus">
             Nouveau film
           </ButtonLink>
         }

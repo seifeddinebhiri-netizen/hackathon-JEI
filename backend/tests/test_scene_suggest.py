@@ -1,8 +1,11 @@
+import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
 from app.schemas.scene_suggest import LLMSceneSuggestions, SceneSuggestRequest
 from app.services.llm_service import LLMUnavailable, build_scene_prompt
+
+pytestmark = pytest.mark.usefixtures("signed_in")
 
 BODY = {
     "film": {"title": "Marée basse", "format": "court", "city": "Tunis"},
@@ -47,7 +50,7 @@ def _s(**over):
 
 
 class FakeLLM:
-    model = "fake-model"
+    suggest_model = "fake-model"
 
     def __init__(self, suggestions=None, error=None):
         self.suggestions = suggestions or []
@@ -125,7 +128,7 @@ def test_at_most_twelve():
 def test_llm_unavailable_gives_503_in_french():
     r = _post(FakeLLM(error=LLMUnavailable("ANTHROPIC_API_KEY non configurée.")))
     assert r.status_code == 503
-    assert "Ton scénario reste tel quel" in r.json()["error"]["message"]
+    assert "Ton scénario reste tel quel" in r.json()["message"]
 
 
 def test_prompt_wraps_scene_text():

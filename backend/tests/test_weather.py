@@ -1,11 +1,14 @@
 from datetime import date, timedelta
 
 import httpx
+import pytest
 from fastapi.testclient import TestClient
 
 from app.core.config import get_settings
 from app.main import app
 from app.services.weather_service import WeatherService, sun_times_utc
+
+pytestmark = pytest.mark.usefixtures("signed_in")
 
 TUNIS = (36.8065, 10.1815)
 

@@ -30,6 +30,9 @@
   --color-bad-bg: #fbd9dc;
   --color-bad-fg: #7f1020;
 
+  /* Coach (voyants sur l'image de la caméra) : vert vif, le rouge reste brand-red */
+  --color-live-ok: #34c759;
+
   /* Calendrier */
   --color-ext: #ffe7a3;
   --color-int: #e2e0d9;
@@ -225,4 +228,22 @@
 }
 .print-only {
   display: none;
+}
+
+/* Coach : une consigne apparaît en fondu (la disparition est gérée par la classe opacity-0). */
+@keyframes coach-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.coach-fade-in {
+  animation: coach-fade-in 300ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .coach-fade-in {
+    animation: none;
+  }
 }

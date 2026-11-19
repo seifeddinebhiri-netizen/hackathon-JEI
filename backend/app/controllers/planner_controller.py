@@ -6,9 +6,10 @@ from fastapi import Query, Request
 from app.core.config import get_settings
 from app.core.errors import AppError
 from app.schemas.location_suggest import LocationSuggestRequest, LocationSuggestResponse
+from app.schemas.scene_detail import SceneDetail, SceneDetailRequest
 from app.schemas.scene_suggest import SceneSuggestRequest, SceneSuggestResponse
 from app.schemas.weather import WeatherDay
-from app.services import location_suggest_service, scene_suggest_service
+from app.services import location_suggest_service, scene_detail_service, scene_suggest_service
 from app.services.places_service import PlacesService
 from app.services.weather_service import WeatherService
 
@@ -43,6 +44,10 @@ async def suggest_locations(
 
 async def suggest_scenes(body: SceneSuggestRequest, request: Request) -> SceneSuggestResponse:
     return await scene_suggest_service.suggest_scenes(request.app.state.llm, body)
+
+
+async def detail_scene(body: SceneDetailRequest, request: Request) -> SceneDetail:
+    return await scene_detail_service.detail_scene(request.app.state.llm, body)
 
 
 async def get_weather(

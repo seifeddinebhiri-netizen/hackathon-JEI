@@ -47,6 +47,8 @@ export type Scene = {
   summary: string;
   /** Extrait du texte de la scène (1 200 caractères au plus), gardé au découpage du scénario. */
   excerpt?: string;
+  /** Fiche de tournage écrite par l'IA à partir du texte de la scène (modifiable). */
+  detail?: SceneDetail;
   source: 'import_ia' | 'manuel';
   validated: boolean;
 };
@@ -191,6 +193,22 @@ export type SceneSuggestInput = {
   }[];
   decors: string[];
 };
+/** Fiche de tournage d'une scène (POST /planner/scenes/detail). Vide = non précisé dans le texte. */
+export type SceneDetail = {
+  what_happens: string;
+  on_screen: string;
+  props: string[];
+  costumes: string[];
+  extras: string;
+  sound: string[];
+  special: string[];
+  watch_out: string[];
+  model: string;
+};
+export type SceneDetailInput = {
+  film: LocationSuggestInput['film'];
+  scene: Omit<SceneSuggestInput['scenes'][number], 'estimated_hours'>;
+};
 export type SceneSuggestion = {
   id: string;
   scene_numbers: string[];
@@ -289,16 +307,30 @@ export type Passport = {
 // ---------------------------------------------------------------------------
 // Festival
 // ---------------------------------------------------------------------------
-export type AiPolicy = 'acceptee' | 'a_declarer' | 'interdite';
+/**
+ * Politique IA telle qu'écrite dans le règlement. `non_precisee` : le règlement ne dit rien
+ * (statut honnête, pas une autorisation). `section_dediee` : films faits par IA dans une section à part.
+ */
+export type AiPolicy = 'acceptee' | 'a_declarer' | 'interdite' | 'section_dediee' | 'non_precisee';
+/** Calculé par le serveur à la lecture (jamais stocké). */
+export type DeadlineStatus = 'ouverte' | 'passee' | 'a_confirmer';
 export type Festival = {
   id: string;
   name: string;
   country: string;
-  deadline: string;
+  city?: string | null;
+  edition?: string | null;
+  /** Date ISO ; null si la date de la prochaine édition n'est pas connue. */
+  deadline: string | null;
+  deadline_status: DeadlineStatus;
+  /** Ex. « Appel 2027 pas encore publié. » */
+  deadline_note?: string | null;
   fee: string;
-  max_duration_min?: number;
+  max_duration_min: number | null;
   subtitle_langs: string[];
   ai_policy: AiPolicy;
+  ai_policy_detail?: string | null;
+  eligibility?: string | null;
   requirements: FestivalRequirement[];
   source_url: string;
   checked_at: string;
@@ -315,7 +347,7 @@ export type FestivalRequirement = {
     | 'droits_musique'
     | 'format';
   detail: string;
-  limit_chars?: number;
+  limit_chars?: number | null;
 };
 export type FestivalMatch = {
   festival: Festival;
@@ -329,10 +361,42 @@ export type FilmProfile = {
   genre: string;
   declared_ai_departments: number;
 };
+/** « Où j'en suis » pour un dossier. La soumission se fait toujours sur le site officiel. */
+export type ShortlistStatus = 'a_preparer' | 'pret' | 'soumis' | 'reponse_recue' | 'prochain_appel';
+/**
+ * Un dossier (un festival suivi). Les pièces cochées à la main ne sont PAS dans le dossier :
+ * elles sont rangées une fois par projet (`KitData.pieces`) et servent à tous les dossiers.
+ */
 export type ShortlistItem = {
   festival_id: string;
-  status: 'a_preparer' | 'pret' | 'soumis';
-  checklist: { requirement: FestivalRequirement; done: boolean }[];
+  status: ShortlistStatus;
+  /** Réponse validée à la question IA de ce festival (null ou absent : pas encore validée). */
+  ai_choice?: AiChoice | null;
+};
+/** Case cochée pour la question IA d'un festival. */
+export type AiChoice = 'aucune' | 'outil_technique' | 'generation' | 'les_deux';
+
+// ---------------------------------------------------------------------------
+// Kit Festival (Supabase : festival_dossiers, kit_pieces, film_kits)
+// ---------------------------------------------------------------------------
+/** Pièce cochée à la main. « Bloquant » n'est jamais stocké : il est calculé. */
+export type KitPieceState = 'a_faire' | 'pret';
+/** Version anglaise d'un synopsis : brouillon IA, avec le texte français qu'il traduit. */
+export type SynopsisEnDraft = { text: string; source: string; validated: boolean };
+export type SynopsisEnglish = Partial<Record<SynopsisKind, SynopsisEnDraft>>;
+/** Champs du film enregistrés par le Kit (table film_kits). */
+export type KitFilmFields = {
+  film_profile?: ProjectFilmProfile;
+  synopsis?: SynopsisTexts;
+  film_page?: FilmPageContent;
+  synopsis_en?: SynopsisEnglish;
+};
+export type KitData = KitFilmFields & {
+  project_id: string;
+  /** Dans l'ordre d'ajout. */
+  dossiers: ShortlistItem[];
+  /** Pièces cochées à la main, par clé (`pieceKeyOf`) : une seule ligne pour tous les dossiers. */
+  pieces: Record<string, KitPieceState>;
 };
 export type SubtitleLine = {
   id: string;
@@ -344,7 +408,26 @@ export type SubtitleLine = {
   confidence: 'elevee' | 'moyenne' | 'faible';
   note?: string;
   validated: boolean;
+  /** S1, S2… dans l'ordre d'apparition (absent si inconnu). */
+  speaker?: string;
+  /** Règles de sous-titrage non respectées (recalculées par le serveur). */
+  warnings?: SubtitleWarning[];
+  /** Ids du glossaire derja utilisés pour cette ligne. */
+  glossary_used?: string[];
+  /** Version condensée proposée quand la ligne est trop rapide à lire : suggestion, jamais appliquée seule. */
+  fr_court?: string;
+  en_court?: string;
 };
+export type SubtitleRule =
+  | 'lecture_rapide'
+  | 'trop_de_lignes'
+  | 'ligne_trop_longue'
+  | 'duree_courte'
+  | 'duree_longue'
+  | 'chevauchement'
+  | 'omission_possible';
+export type SubtitleWarning = { rule: SubtitleRule; detail: string };
+export type SubtitleProcessing = { transcriber: string; translator: string; created_at: string };
 export type SynopsisFeedback = { questions: string[] }; // jamais de texte réécrit
 export type PublicFilm = {
   id: string;
@@ -435,14 +518,35 @@ export type FestivalSearchParams = {
   deadline_before?: string;
   subtitle_lang?: string;
   ai_policy?: AiPolicy;
+  /** Seulement les appels ouverts (deadline_status = ouverte). */
+  open_only?: boolean;
   /** Si fourni, le serveur classe les festivals pour ce film. */
   film?: FilmProfile;
 };
 
-export type SubtitleDraft = { project_id: string; source_lang: string; lines: SubtitleLine[] };
+export type SubtitleDraft = {
+  project_id: string;
+  source_lang: string;
+  lines: SubtitleLine[];
+  /** Outils utilisés (absent tant qu'il n'y a pas de brouillon). */
+  processing?: SubtitleProcessing;
+};
+/** POST /subtitles/{projectId}/draft : seul le son (WAV extrait dans le navigateur) est envoyé. */
+export type CreateSubtitleDraftInput = {
+  project_id: string;
+  audio: Blob;
+  file_name: string;
+  /** `ara` pour la derja (Scribe n'a pas de code de dialecte) ; absent = détection automatique. */
+  language_code?: string;
+  keyterms?: string[];
+  characters?: string[];
+};
 
 export type SynopsisKind = 'phrase' | 'court' | 'long';
 export type SynopsisFeedbackInput = { kind: SynopsisKind; text: string; limit_chars?: number };
+/** POST /synopsis/translate (à confirmer) : traduction du texte de l'auteur, rien d'ajouté ni réécrit. */
+export type SynopsisTranslateInput = { kind: SynopsisKind; text: string; target_lang: 'en' };
+export type SynopsisTranslation = { text: string };
 
 export type User = { id: string; email: string; name: string; is_demo: boolean; project_id?: string };
 export type Session = { access_token: string; expires_at: string; user: User };
@@ -535,4 +639,166 @@ export type CallsheetSendResult = {
   sent: number;
   skipped: number;
   failed: number;
+};
+
+// ---------------------------------------------------------------------------
+// Coach : plan de prise de vue (POST /shot-spec) et calibration (GET /calibration)
+// ---------------------------------------------------------------------------
+export type ShotSize = 'ECU' | 'CU' | 'MCU' | 'MS' | 'MWS' | 'WS';
+export type SubjectKind = 'person' | 'face' | 'hands' | 'object' | 'none';
+export type SubjectView = 'front' | 'side' | 'back' | 'not_applicable';
+export type SubjectPosition = 'left_third' | 'center' | 'right_third';
+export type CameraAngle = 'eye_level' | 'low' | 'high';
+export type Tilt = 'level' | 'dutch';
+export type LightContrast = 'low' | 'medium_low' | 'medium' | 'high';
+export type Exposure = 'dark' | 'balanced' | 'bright';
+export type BacklightPolicy = 'avoid' | 'accept' | 'intentional';
+export type SunRelative = 'front' | 'side' | 'behind' | 'not_applicable';
+export type Stability = 'tripod' | 'handheld';
+export type Movement = 'static' | 'pan' | 'tilt' | 'tracking';
+
+/** Les champs à choix fermé d'un plan : ce que l'utilisateur lit et modifie en mots. */
+export type ShotChoices = {
+  size: ShotSize;
+  subject_kind: SubjectKind;
+  subject_view: SubjectView;
+  subject_position: SubjectPosition;
+  camera_angle: CameraAngle;
+  tilt: Tilt;
+  light_contrast: LightContrast;
+  exposure: Exposure;
+  backlight: BacklightPolicy;
+  sun_relative: SunRelative;
+  stability: Stability;
+  movement: Movement;
+};
+export type ShotIntent = ShotChoices & {
+  label_fr: string;
+  why_fr: string;
+  rule_ids: string[];
+  advice_fr: string[];
+};
+
+export type NumRange = { min: number; max: number };
+/** Cibles chiffrées d'un plan, calculées par la calibration (mêmes noms que le backend). */
+export type ShotTargets = {
+  roll_abs_deg: NumRange;
+  /** null : plan en mouvement, pas d'angle fixe à viser. */
+  pitch_deg: NumRange | null;
+  subject_h: NumRange | null;
+  center_x: NumRange | null;
+  center_y: NumRange | null;
+  headroom: NumRange | null;
+  luma: NumRange;
+  contrast: NumRange;
+  backlight_ratio_max: number | null;
+  sun_offset_abs_deg: NumRange | null;
+  /** null : plan en mouvement (la caméra bouge exprès). */
+  shake_max: number | null;
+};
+
+export type RuleSource = { title: string; author: string | null; url: string; type: string };
+export type RuleRef = { id: string; title_fr: string; confidence: string; sources: RuleSource[] };
+/** Un passage d'un plan en mouvement. Les secondes se comptent depuis le début de la prise. */
+export type TimelineSegment = {
+  id: string;
+  start_s: number;
+  end_s: number;
+  /** Ce qui se passe à l'image et comment la caméra bouge pendant ce passage. */
+  description_fr: string;
+  at_start: ShotChoices;
+  /** Cadrage à la fin du passage s'il évolue en douceur (sinon null). */
+  at_end: ShotChoices | null;
+  targets_start: ShotTargets;
+  targets_end: ShotTargets | null;
+};
+export type Timeline = {
+  duration_s: number;
+  /** Comment la scène sera filmée, en phrases (écrit par l'IA). */
+  how_fr: string;
+  segments: TimelineSegment[];
+};
+export type PlanShot = {
+  id: string;
+  intent: ShotIntent;
+  targets: ShotTargets;
+  rules: RuleRef[];
+  /** Seulement pour un plan en mouvement ; `intent` et `targets` décrivent alors le premier passage. */
+  timeline?: Timeline | null;
+};
+export type ShotSpec = {
+  scene_id: string;
+  /** « Brouillon IA : à valider » */
+  status: string;
+  calibration: string;
+  model: string;
+  generated_at: string;
+  shots: PlanShot[];
+};
+
+export type SceneSettingInput = 'interior' | 'exterior' | 'unknown' | 'INT' | 'EXT';
+export type SupportInput = 'handheld' | 'tripod' | 'unknown';
+/** Une scène et ses étiquettes. Seule `description` est obligatoire. */
+export type ShotSpecRequest = {
+  description: string;
+  scene_id?: string;
+  setting?: SceneSettingInput;
+  moment?: SceneMoment;
+  location?: string;
+  characters?: string[];
+  mood?: string[];
+  visual_style?: string;
+  intention?: string;
+  light?: string;
+  support?: SupportInput;
+  /** Plan fixe ou en mouvement (panoramique, tilt, travelling). */
+  motion?: 'fixed' | 'moving' | 'unknown';
+  /** Durée estimée de la scène en secondes (2 à 120) : obligatoire pour un plan en mouvement. */
+  duration_s?: number;
+};
+
+type Pair = [number, number];
+export type CalibrationField = {
+  key: keyof ShotChoices;
+  label_fr: string;
+  options: { value: string; label_fr: string }[];
+};
+/** Tables de conversion « mots → nombres » : le téléphone recalcule les cibles hors ligne. */
+export type Calibration = {
+  version: string;
+  third_tol: number;
+  rules: { no_subject: string[]; has_head: string[]; moving: string[] };
+  tables: {
+    subject_h: Record<string, Pair>;
+    headroom: Record<string, Pair>;
+    center_x: Record<string, number>;
+    pitch: Record<string, Pair>;
+    roll_abs: Record<string, Pair>;
+    luma: Record<string, Pair>;
+    contrast: Record<string, Pair>;
+    backlight_ratio_max: Record<string, number | null>;
+    sun_offset_abs: Record<string, Pair>;
+    shake_max: Record<string, number>;
+  };
+  vocabulary: CalibrationField[];
+};
+
+// ---------------------------------------------------------------------------
+// Coach : espaces de travail synchronisés avec le compte (GET/PUT/DELETE /workspaces)
+// ---------------------------------------------------------------------------
+/** Un espace de travail tel que le serveur le garde. `data` = { request, spec, overrides, notes }. */
+export type WorkspaceRecord = {
+  id: string;
+  name: string;
+  data: Record<string, unknown>;
+  /** Augmente à chaque enregistrement : sert à détecter deux appareils qui modifient le même espace. */
+  version: number;
+  created_at: string;
+  updated_at: string;
+};
+export type WorkspaceInput = {
+  name: string;
+  data: Record<string, unknown>;
+  /** Version sur laquelle la modification est fondée ; null pour créer l'espace. */
+  base_version: number | null;
 };

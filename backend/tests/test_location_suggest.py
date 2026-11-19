@@ -9,6 +9,8 @@ from app.schemas.location_suggest import LLMLocationSuggestion, LocationSuggestR
 from app.services.llm_service import LLMUnavailable, build_location_prompt
 from app.services.places_service import USER_AGENT, PlacesService
 
+pytestmark = pytest.mark.usefixtures("signed_in")
+
 BODY = {
     "film": {"title": "Marée basse", "format": "court", "city": "Tunis", "genre": "Drame"},
     "decor": {"name": "Petit café de Tunis"},
@@ -100,7 +102,7 @@ NOMINATIM = {
 
 
 class FakeLLM:
-    model = "fake-model"
+    suggest_model = "fake-model"
 
     def __init__(self, output=None, error: Exception | None = None):
         self.output = output
@@ -209,8 +211,8 @@ def test_llm_unavailable_gives_503_in_french():
         PlacesService(_nominatim(calls), sleep=_no_sleep),
     )
     assert r.status_code == 503
-    assert r.json()["error"]["code"] == "llm_unavailable"
-    assert "remplir le lieu à la main" in r.json()["error"]["message"]
+    assert r.json()["code"] == "llm_unavailable"
+    assert "remplir le lieu à la main" in r.json()["message"]
     assert calls == []
 
 

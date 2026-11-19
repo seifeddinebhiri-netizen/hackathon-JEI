@@ -17,6 +17,18 @@ export const sceneMomentSchema = z.enum([
 ]) satisfies z.ZodType<T.SceneMoment>;
 export const settingSchema = z.enum(['INT', 'EXT']);
 
+export const sceneDetailSchema: z.ZodType<T.SceneDetail> = z.object({
+  what_happens: z.string(),
+  on_screen: z.string(),
+  props: z.array(z.string()),
+  costumes: z.array(z.string()),
+  extras: z.string(),
+  sound: z.array(z.string()),
+  special: z.array(z.string()),
+  watch_out: z.array(z.string()),
+  model: z.string(),
+});
+
 export const sceneSchema: z.ZodType<T.Scene> = z.object({
   id: z.string(),
   number: z.string(),
@@ -28,6 +40,7 @@ export const sceneSchema: z.ZodType<T.Scene> = z.object({
   estimated_hours: z.number().nonnegative(),
   summary: z.string(),
   excerpt: z.string().max(1200).optional(),
+  detail: sceneDetailSchema.optional(),
   source: z.enum(['import_ia', 'manuel']),
   validated: z.boolean(),
 });
@@ -126,13 +139,35 @@ export const festivalRequirementSchema: z.ZodType<T.FestivalRequirement> = z.obj
     'format',
   ]),
   detail: z.string(),
-  limit_chars: z.number().optional(),
+  limit_chars: z.number().nullish(),
 });
+
+export const aiChoiceSchema = z.enum([
+  'aucune',
+  'outil_technique',
+  'generation',
+  'les_deux',
+]) satisfies z.ZodType<T.AiChoice>;
 
 export const shortlistItemSchema: z.ZodType<T.ShortlistItem> = z.object({
   festival_id: z.string(),
-  status: z.enum(['a_preparer', 'pret', 'soumis']),
-  checklist: z.array(z.object({ requirement: festivalRequirementSchema, done: z.boolean() })),
+  status: z.enum(['a_preparer', 'pret', 'soumis', 'reponse_recue', 'prochain_appel']),
+  ai_choice: aiChoiceSchema.nullish(),
+});
+
+const filmProfileSchema: z.ZodType<T.ProjectFilmProfile> = z.object({
+  duration_min: z.number().nonnegative(),
+  language: z.string(),
+  genre: z.string(),
+});
+const synopsisTextsSchema: z.ZodType<T.SynopsisTexts> = z.object({
+  phrase: z.string(),
+  court: z.string(),
+  long: z.string(),
+});
+const filmPageSchema: z.ZodType<T.FilmPageContent> = z.object({
+  stills: z.array(z.string()),
+  trailer_url: z.string().optional(),
 });
 
 export const projectSchema: z.ZodType<T.Project> = z.object({
@@ -148,12 +183,38 @@ export const projectSchema: z.ZodType<T.Project> = z.object({
   members: z.array(memberSchema).optional(),
   schedule: scheduleSchema.optional(),
   festival_shortlist: z.array(shortlistItemSchema),
-  film_profile: z
-    .object({ duration_min: z.number().nonnegative(), language: z.string(), genre: z.string() })
-    .optional(),
-  synopsis: z.object({ phrase: z.string(), court: z.string(), long: z.string() }).optional(),
-  film_page: z.object({ stills: z.array(z.string()), trailer_url: z.string().optional() }).optional(),
+  film_profile: filmProfileSchema.optional(),
+  synopsis: synopsisTextsSchema.optional(),
+  film_page: filmPageSchema.optional(),
 });
+
+// --- Kit Festival (Supabase) ---------------------------------------------------------------
+const synopsisEnDraftSchema: z.ZodType<T.SynopsisEnDraft> = z.object({
+  text: z.string(),
+  source: z.string(),
+  validated: z.boolean(),
+});
+export const kitFilmFieldsSchema: z.ZodType<T.KitFilmFields> = z.object({
+  film_profile: filmProfileSchema.optional(),
+  synopsis: synopsisTextsSchema.optional(),
+  film_page: filmPageSchema.optional(),
+  synopsis_en: z
+    .object({
+      phrase: synopsisEnDraftSchema.optional(),
+      court: synopsisEnDraftSchema.optional(),
+      long: synopsisEnDraftSchema.optional(),
+    })
+    .optional(),
+});
+export const kitPieceStateSchema = z.enum(['a_faire', 'pret']) satisfies z.ZodType<T.KitPieceState>;
+export const kitDataSchema: z.ZodType<T.KitData> = z.intersection(
+  kitFilmFieldsSchema,
+  z.object({
+    project_id: z.string(),
+    dossiers: z.array(shortlistItemSchema),
+    pieces: z.record(z.string(), kitPieceStateSchema),
+  }),
+);
 
 export const quickSlotSchema: z.ZodType<T.QuickSlot> = z.object({
   start: z.string(),
@@ -351,15 +412,29 @@ export const verifyResultSchema: z.ZodType<T.VerifyResult> = z.object({
 });
 
 // --- Festival ----------------------------------------------------------------
+export const aiPolicySchema = z.enum([
+  'acceptee',
+  'a_declarer',
+  'interdite',
+  'section_dediee',
+  'non_precisee',
+]) satisfies z.ZodType<T.AiPolicy>;
+
 export const festivalSchema: z.ZodType<T.Festival> = z.object({
   id: z.string(),
   name: z.string(),
   country: z.string(),
-  deadline: z.string(),
+  city: z.string().nullish(),
+  edition: z.string().nullish(),
+  deadline: z.string().nullable(),
+  deadline_status: z.enum(['ouverte', 'passee', 'a_confirmer']),
+  deadline_note: z.string().nullish(),
   fee: z.string(),
-  max_duration_min: z.number().optional(),
+  max_duration_min: z.number().nullable(),
   subtitle_langs: z.array(z.string()),
-  ai_policy: z.enum(['acceptee', 'a_declarer', 'interdite']),
+  ai_policy: aiPolicySchema,
+  ai_policy_detail: z.string().nullish(),
+  eligibility: z.string().nullish(),
   requirements: z.array(festivalRequirementSchema),
   source_url: z.string(),
   checked_at: z.string(),
@@ -372,6 +447,19 @@ export const festivalMatchSchema: z.ZodType<T.FestivalMatch> = z.object({
   warnings: z.array(z.string()),
 });
 
+export const subtitleWarningSchema: z.ZodType<T.SubtitleWarning> = z.object({
+  rule: z.enum([
+    'lecture_rapide',
+    'trop_de_lignes',
+    'ligne_trop_longue',
+    'duree_courte',
+    'duree_longue',
+    'chevauchement',
+    'omission_possible',
+  ]),
+  detail: z.string(),
+});
+
 export const subtitleLineSchema: z.ZodType<T.SubtitleLine> = z.object({
   id: z.string(),
   start: z.string(),
@@ -382,16 +470,28 @@ export const subtitleLineSchema: z.ZodType<T.SubtitleLine> = z.object({
   confidence: z.enum(['elevee', 'moyenne', 'faible']),
   note: z.string().optional(),
   validated: z.boolean(),
+  speaker: z.string().optional(),
+  warnings: z.array(subtitleWarningSchema).optional(),
+  glossary_used: z.array(z.string()).optional(),
+  fr_court: z.string().optional(),
+  en_court: z.string().optional(),
 });
 
 export const subtitleDraftSchema: z.ZodType<T.SubtitleDraft> = z.object({
   project_id: z.string(),
   source_lang: z.string(),
   lines: z.array(subtitleLineSchema),
+  processing: z
+    .object({ transcriber: z.string(), translator: z.string(), created_at: z.string() })
+    .optional(),
 });
 
 export const synopsisFeedbackSchema: z.ZodType<T.SynopsisFeedback> = z.object({
   questions: z.array(z.string()),
+});
+
+export const synopsisTranslationSchema: z.ZodType<T.SynopsisTranslation> = z.object({
+  text: z.string(),
 });
 
 export const publicFilmSchema: z.ZodType<T.PublicFilm> = z.object({
@@ -463,4 +563,132 @@ export const callsheetSendResultSchema: z.ZodType<T.CallsheetSendResult> = z.obj
   sent: z.number(),
   skipped: z.number(),
   failed: z.number(),
+});
+
+// --- Coach : plan de prise de vue et calibration ------------------------------------
+const numRange = z.object({ min: z.number(), max: z.number() });
+
+export const shotChoicesShape = {
+  size: z.enum(['ECU', 'CU', 'MCU', 'MS', 'MWS', 'WS']),
+  subject_kind: z.enum(['person', 'face', 'hands', 'object', 'none']),
+  subject_view: z.enum(['front', 'side', 'back', 'not_applicable']),
+  subject_position: z.enum(['left_third', 'center', 'right_third']),
+  camera_angle: z.enum(['eye_level', 'low', 'high']),
+  tilt: z.enum(['level', 'dutch']),
+  light_contrast: z.enum(['low', 'medium_low', 'medium', 'high']),
+  exposure: z.enum(['dark', 'balanced', 'bright']),
+  backlight: z.enum(['avoid', 'accept', 'intentional']),
+  sun_relative: z.enum(['front', 'side', 'behind', 'not_applicable']),
+  stability: z.enum(['tripod', 'handheld']),
+  movement: z.enum(['static', 'pan', 'tilt', 'tracking']),
+};
+
+export const shotIntentSchema: z.ZodType<T.ShotIntent> = z.object({
+  ...shotChoicesShape,
+  label_fr: z.string(),
+  why_fr: z.string(),
+  rule_ids: z.array(z.string()),
+  advice_fr: z.array(z.string()),
+});
+
+export const shotTargetsSchema: z.ZodType<T.ShotTargets> = z.object({
+  roll_abs_deg: numRange,
+  pitch_deg: numRange.nullable(),
+  subject_h: numRange.nullable(),
+  center_x: numRange.nullable(),
+  center_y: numRange.nullable(),
+  headroom: numRange.nullable(),
+  luma: numRange,
+  contrast: numRange,
+  backlight_ratio_max: z.number().nullable(),
+  sun_offset_abs_deg: numRange.nullable(),
+  shake_max: z.number().nullable(),
+});
+
+const ruleSourceSchema = z.object({
+  title: z.string(),
+  author: z.string().nullable(),
+  url: z.string(),
+  type: z.string(),
+});
+const shotChoicesObject = z.object(shotChoicesShape);
+
+export const timelineSegmentSchema: z.ZodType<T.TimelineSegment> = z.object({
+  id: z.string(),
+  start_s: z.number(),
+  end_s: z.number(),
+  description_fr: z.string(),
+  at_start: shotChoicesObject,
+  at_end: shotChoicesObject.nullable(),
+  targets_start: shotTargetsSchema,
+  targets_end: shotTargetsSchema.nullable(),
+});
+
+export const timelineSchema: z.ZodType<T.Timeline> = z.object({
+  duration_s: z.number().positive(),
+  how_fr: z.string(),
+  segments: z.array(timelineSegmentSchema).min(1),
+});
+
+export const planShotSchema: z.ZodType<T.PlanShot> = z.object({
+  id: z.string(),
+  intent: shotIntentSchema,
+  targets: shotTargetsSchema,
+  rules: z.array(
+    z.object({
+      id: z.string(),
+      title_fr: z.string(),
+      confidence: z.string(),
+      sources: z.array(ruleSourceSchema),
+    }),
+  ),
+  timeline: timelineSchema.nullable().optional(),
+});
+export const shotSpecSchema: z.ZodType<T.ShotSpec> = z.object({
+  scene_id: z.string(),
+  status: z.string(),
+  calibration: z.string(),
+  model: z.string(),
+  generated_at: z.string(),
+  shots: z.array(planShotSchema),
+});
+
+const pair = z.tuple([z.number(), z.number()]);
+export const calibrationSchema: z.ZodType<T.Calibration> = z.object({
+  version: z.string(),
+  third_tol: z.number(),
+  rules: z.object({
+    no_subject: z.array(z.string()),
+    has_head: z.array(z.string()),
+    moving: z.array(z.string()),
+  }),
+  tables: z.object({
+    subject_h: z.record(z.string(), pair),
+    headroom: z.record(z.string(), pair),
+    center_x: z.record(z.string(), z.number()),
+    pitch: z.record(z.string(), pair),
+    roll_abs: z.record(z.string(), pair),
+    luma: z.record(z.string(), pair),
+    contrast: z.record(z.string(), pair),
+    backlight_ratio_max: z.record(z.string(), z.number().nullable()),
+    sun_offset_abs: z.record(z.string(), pair),
+    shake_max: z.record(z.string(), z.number()),
+  }),
+  vocabulary: z.array(
+    z.object({
+      key: z.enum(Object.keys(shotChoicesShape) as [keyof T.ShotChoices, ...(keyof T.ShotChoices)[]]),
+      label_fr: z.string(),
+      options: z.array(z.object({ value: z.string(), label_fr: z.string() })),
+    }),
+  ),
+});
+
+// --- Coach : espaces de travail -------------------------------------------------------
+export const workspaceRecordSchema: z.ZodType<T.WorkspaceRecord> = z.object({
+  id: z.string(),
+  name: z.string(),
+  data: z.record(z.string(), z.unknown()),
+  version: z.number().int().positive(),
+  created_at: z.string(),
+  updated_at: z.string(),
 });

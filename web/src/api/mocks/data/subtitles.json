@@ -1,89 +1,132 @@
 {
   "project_id": "demo-maree-basse",
   "source_lang": "derja",
+  "processing": {
+    "transcriber": "elevenlabs/scribe_v2",
+    "translator": "gemini/gemini-3.1-flash-lite",
+    "created_at": "2026-11-18T15:02:11.204Z"
+  },
   "lines": [
     {
-      "id": "st-1",
+      "id": "l1",
       "start": "00:00:12,400",
       "end": "00:00:14,900",
       "source": "Sbe7 el khir ya khali.",
       "fr": "Bonjour, mon oncle.",
       "en": "Morning, uncle.",
       "confidence": "elevee",
-      "validated": false
+      "validated": true,
+      "speaker": "S1",
+      "warnings": [],
+      "glossary_used": ["sbe7-el-khir"]
     },
     {
-      "id": "st-2",
+      "id": "l2",
       "start": "00:00:15,300",
       "end": "00:00:18,200",
       "source": "El 9ahwa mabi3a, Amira.",
       "fr": "Le café est vendu, Amira.",
       "en": "The café is sold, Amira.",
       "confidence": "elevee",
-      "validated": false
+      "validated": true,
+      "speaker": "S1",
+      "warnings": [],
+      "glossary_used": []
     },
     {
-      "id": "st-3",
+      "id": "l3",
       "start": "00:00:19,000",
       "end": "00:00:21,600",
       "source": "Chnowa? Ba3etha?",
-      "fr": "Quoi ? Tu l'as vendu ?",
+      "fr": "Quoi ? Tu l’as vendu ?",
       "en": "What? You sold it?",
       "confidence": "elevee",
-      "validated": false
+      "validated": true,
+      "speaker": "S2",
+      "warnings": [],
+      "glossary_used": []
     },
     {
-      "id": "st-4",
+      "id": "l4",
       "start": "00:00:22,100",
-      "end": "00:00:25,400",
-      "source": "Ma3andich el 9alb nkamel.",
-      "fr": "Je n'ai plus le cœur à continuer.",
-      "en": "I don't have the heart to go on.",
+      "end": "00:00:23,900",
+      "source": "Ma3andich el 9alb nkamel, Amira, walla.",
+      "fr": "Je n’ai plus le cœur à continuer, Amira, je te jure.",
+      "en": "I don’t have the heart to go on anymore, Amira, I swear.",
+      "fr_court": "Je n’ai plus le cœur, Amira.",
+      "en_court": "I can’t go on, Amira.",
       "confidence": "moyenne",
-      "note": "« Ma3andich el 9alb » : littéralement « je n'ai pas le cœur ». Sens : courage, envie.",
-      "validated": false
+      "note": "« Ma3andich el 9alb » : littéralement « je n’ai pas le cœur ». Sens : plus le courage, plus l’envie.",
+      "validated": false,
+      "speaker": "S1",
+      "warnings": [],
+      "glossary_used": []
     },
     {
-      "id": "st-5",
+      "id": "l5",
       "start": "00:01:02,000",
       "end": "00:01:04,300",
       "source": "Yezzi ya Slim!",
       "fr": "Ça suffit, Slim !",
       "en": "Enough, Slim!",
       "confidence": "elevee",
-      "validated": false
+      "validated": false,
+      "speaker": "S2",
+      "warnings": [],
+      "glossary_used": []
     },
     {
-      "id": "st-6",
+      "id": "l6",
       "start": "00:01:05,000",
       "end": "00:01:08,700",
       "source": "Enti dima t7ebi tkouni 3la 7a9.",
       "fr": "Tu veux toujours avoir raison.",
       "en": "You always want to be right.",
       "confidence": "moyenne",
-      "validated": false
+      "validated": false,
+      "speaker": "S1",
+      "warnings": [],
+      "glossary_used": []
     },
     {
-      "id": "st-7",
+      "id": "l7",
       "start": "00:02:40,500",
       "end": "00:02:43,000",
       "source": "Rabbi yesahel.",
       "fr": "Que Dieu te facilite la route.",
       "en": "May God ease your way.",
       "confidence": "faible",
-      "note": "Formule de politesse idiomatique. Selon le ton, « Bon courage » ou « Bonne route » peut être plus naturel.",
-      "validated": false
+      "note": "Formule de politesse. Selon le ton : « Bon courage », « Bonne route ». Le mot à mot sonne solennel.",
+      "validated": false,
+      "speaker": "S3",
+      "warnings": [],
+      "glossary_used": []
     },
     {
-      "id": "st-8",
+      "id": "l8",
       "start": "00:02:44,000",
       "end": "00:02:46,800",
       "source": "Ya3tik essa7a, Nour.",
       "fr": "Merci, Nour.",
       "en": "Thank you, Nour.",
+      "confidence": "moyenne",
+      "note": "« Ya3tik essa7a » : littéralement « que Dieu te donne la santé ». Ici : merci.",
+      "validated": false,
+      "speaker": "S2",
+      "warnings": [],
+      "glossary_used": ["ya3tik-essa7a"]
+    },
+    {
+      "id": "l9",
+      "start": "00:02:47,200",
+      "end": "00:02:49,500",
+      "source": "Barcha 7kayet, khalli 3la ba3d.",
+      "fr": "Plein d’histoires, on verra plus tard.",
+      "en": "Lots of stories, later.",
       "confidence": "faible",
-      "note": "« Ya3tik essa7a » : littéralement « que Dieu te donne la santé ». Remerciement courant, nuance de reconnaissance pour un effort.",
-      "validated": false
+      "validated": false,
+      "warnings": [],
+      "glossary_used": []
     }
   ]
 }

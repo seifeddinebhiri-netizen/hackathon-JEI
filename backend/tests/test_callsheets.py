@@ -322,7 +322,9 @@ def test_routes_require_login():
 
 @pytest.fixture
 def logged_in():
-    app.dependency_overrides[auth.get_caller] = lambda: auth.Caller(OWNER, is_demo=True)
+    app.dependency_overrides[auth.get_current_user] = lambda: auth.CurrentUser(
+        id=str(OWNER), email=None, is_demo=True
+    )
     yield
     app.dependency_overrides.clear()
 

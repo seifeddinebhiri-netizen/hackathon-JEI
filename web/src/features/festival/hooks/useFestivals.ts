@@ -1,14 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   api,
+  isApiError,
+  type CreateSubtitleDraftInput,
+  type Festival,
   type FestivalSearchParams,
   type SubtitleDraft,
   type SubtitleLine,
   type SynopsisFeedbackInput,
+  type SynopsisTranslateInput,
 } from '@/api';
+import type { UploadProgress } from '@/api/client';
+
+export { useShortlist } from './useKit';
 
 export const festivalKeys = {
-  search: (p: FestivalSearchParams) => ['festivals', p] as const,
+  search: (p: FestivalSearchParams) => ['festivals', 'search', p] as const,
+  one: (id: string) => ['festivals', 'one', id] as const,
 };
 
 export function useFestivalSearch(params: FestivalSearchParams, enabled = true) {
@@ -16,6 +24,48 @@ export function useFestivalSearch(params: FestivalSearchParams, enabled = true) 
     queryKey: festivalKeys.search(params),
     queryFn: () => api.searchFestivals(params),
     enabled,
+    staleTime: 5 * 60_000,
+    placeholderData: (prev) => prev,
+  });
+}
+
+export function useFestival(id: string | undefined) {
+  return useQuery({
+    queryKey: festivalKeys.one(id ?? 'aucun'),
+    queryFn: () => api.getFestival(id!),
+    enabled: !!id,
+    staleTime: 5 * 60_000,
+  });
+}
+
+/**
+ * Festivals de la sélection du projet, chargés un par un (même cache que la fiche).
+ * Un festival retiré du catalogue (404) est listé dans `missing` au lieu de tout faire échouer.
+ */
+export function useShortlistFestivals(ids: string[]) {
+  const qc = useQueryClient();
+  return useQuery({
+    queryKey: ['festivals', 'shortlist', ids],
+    queryFn: async () => {
+      const results = await Promise.all(
+        ids.map((id) =>
+          qc
+            .fetchQuery({
+              queryKey: festivalKeys.one(id),
+              queryFn: () => api.getFestival(id),
+              staleTime: 5 * 60_000,
+            })
+            .catch((e: unknown) => {
+              if (isApiError(e) && e.status === 404) return id;
+              throw e;
+            }),
+        ),
+      );
+      return {
+        festivals: results.filter((r): r is Festival => typeof r !== 'string'),
+        missing: results.filter((r): r is string => typeof r === 'string'),
+      };
+    },
     staleTime: 5 * 60_000,
   });
 }
@@ -27,6 +77,21 @@ export function useSubtitleDraft(projectId: string | undefined) {
     queryKey: subtitleKeys.draft(projectId ?? 'aucun'),
     queryFn: () => api.getSubtitleDraft(projectId!),
     enabled: !!projectId,
+  });
+}
+
+/** Import réel (ou simulé si VITE_USE_MOCKS=true) : aucun repli silencieux vers le brouillon d'exemple. */
+export function useCreateSubtitleDraft() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      input,
+      onUploadProgress,
+    }: {
+      input: CreateSubtitleDraftInput;
+      onUploadProgress?: UploadProgress;
+    }) => api.createSubtitleDraft(input, { onUploadProgress }),
+    onSuccess: (d) => qc.setQueryData(subtitleKeys.draft(d.project_id), d),
   });
 }
 
@@ -47,6 +112,10 @@ export function useSaveSubtitles(projectId: string | undefined) {
 
 export function useSynopsisFeedback() {
   return useMutation({ mutationFn: (input: SynopsisFeedbackInput) => api.getSynopsisFeedback(input) });
+}
+
+export function useTranslateSynopsis() {
+  return useMutation({ mutationFn: (input: SynopsisTranslateInput) => api.translateSynopsis(input) });
 }
 
 export function usePublicFilm(id: string | undefined) {

@@ -14,11 +14,16 @@ from app.services.screenplay.extractor import prose_names, speaking_characters
 from app.services.screenplay.pipeline import parse_screenplay
 from app.services.screenplay.reader import clean, read_screenplay
 
+pytestmark = pytest.mark.usefixtures("signed_in")
+
 app = FastAPI()
 register_error_handlers(app)
 app.include_router(screenplay_router)
 
-FIXTURE = (Path(__file__).parent / "fixtures" / "le_dernier_ferry.fountain").read_text(encoding="utf-8")
+FIXTURE = (Path(__file__).parent / "fixtures" / "le_dernier_ferry.fountain").read_text(
+    encoding="utf-8"
+)
+
 
 class FakeLLM:
     model = "fake-model"
@@ -301,7 +306,7 @@ def test_route_empty_input():
     with TestClient(app) as client:
         r = client.post("/planner/parse", data={"text": "   "})
     assert r.status_code == 400
-    assert r.json()["error"]["code"] == "empty_input"
+    assert r.json()["code"] == "empty_input"
 
 
 # --- Récit (le cas principal : on écrit une histoire, l'outil découpe) ----------------
@@ -406,3 +411,88 @@ async def test_prose_with_ai_is_cut_on_sentences():
     cinema = next(loc for loc in r.locations if loc.name == "Cinéma Le Rivage")
     assert cinema.rooms == ["Salle", "Hall"] and cinema.scene_numbers == ["1", "2"]
     assert r.scenes[0].summary.startswith("Yacine enregistre")
+
+
+# --- PDF de scénario « pro » : marges, numéros, en-têtes de page ---------------------------
+
+
+def test_tidy_pdf_text_cleans_layout():
+    from app.services.screenplay.reader import tidy_pdf_text
+
+    raw = (
+        "12     INT. CAFÉ DE LA MÉDINA - JOUR                              12\n"
+        "      Amira lève le rideau. La salle est vi-\n"
+        "      de, les chaises retournées.\n"
+        "                                       AMIRA\n"
+        "                       Encore  une  journée.\n"
+        "EXT. PORT - NUIT                                       13A"
+    )
+    assert tidy_pdf_text(raw).splitlines() == [
+        "12 INT. CAFÉ DE LA MÉDINA - JOUR",
+        "Amira lève le rideau. La salle est vide, les chaises retournées.",
+        "AMIRA",
+        "Encore une journée.",
+        "EXT. PORT - NUIT",
+    ]
+
+
+def test_tidy_pdf_text_keeps_real_dashes():
+    from app.services.screenplay.reader import tidy_pdf_text
+
+    # Tiret de dialogue ou mot composé en fin de ligne suivi d'une majuscule : pas recollé
+    assert tidy_pdf_text("Il crie à Slim-\nAmira se retourne.").splitlines() == [
+        "Il crie à Slim-",
+        "Amira se retourne.",
+    ]
+
+
+def _pro_pdf() -> bytes:
+    from fpdf import FPDF
+
+    pdf = FPDF(format="A4")
+    pdf.set_font("Courier", size=12)
+    scenes = [
+        ("1", "INT. CAFÉ DE LA MÉDINA - JOUR", "AMIRA", "Encore une journée sans clients."),
+        ("2", "EXT. RUELLE DE LA MÉDINA - JOUR", "LIVREUR", "Attention, la demoiselle !"),
+        ("3", "INT. APPARTEMENT D'AMIRA - NUIT", "SLIM", "Tu ne peux pas le sauver seule."),
+    ]
+    for page, chunk in enumerate((scenes[:2], scenes[2:]), start=1):
+        pdf.add_page()
+        pdf.set_xy(20, 10)
+        pdf.cell(120, 5, "Marée basse - version du 12/11")
+        pdf.cell(0, 5, f"{page}.")
+        pdf.set_y(30)
+        for num, heading, who, line in chunk:
+            y = pdf.get_y() + 6
+            pdf.set_xy(12, y)
+            pdf.cell(10, 6, num)
+            pdf.set_xy(25, y)
+            pdf.cell(150, 6, heading)
+            pdf.set_xy(185, y)
+            pdf.cell(10, 6, num)
+            pdf.ln(10)
+            pdf.set_x(25)
+            pdf.multi_cell(160, 6, "Amira traverse la pièce sans un mot.")
+            pdf.set_x(95)
+            pdf.cell(0, 6, who)
+            pdf.ln(6)
+            pdf.set_x(60)
+            pdf.multi_cell(90, 6, line)
+    return bytes(pdf.output())
+
+
+def test_professional_pdf_gives_clean_scenes():
+    from app.services.screenplay.chunker import split_scenes
+    from app.services.screenplay.extractor import speaking_characters
+    from app.services.screenplay.reader import read_screenplay
+
+    text = read_screenplay(filename="scenario.pdf", data=_pro_pdf())
+    assert "Marée basse - version" not in text  # en-tête de page retiré
+    chunks = split_scenes(text)
+    assert [(c.number, c.setting, c.moment) for c in chunks] == [
+        ("1", "INT", "jour"),
+        ("2", "EXT", "jour"),
+        ("3", "INT", "nuit"),
+    ]
+    assert chunks[0].place == "CAFÉ DE LA MÉDINA"
+    assert [speaking_characters(c) for c in chunks] == [["Amira"], ["Livreur"], ["Slim"]]

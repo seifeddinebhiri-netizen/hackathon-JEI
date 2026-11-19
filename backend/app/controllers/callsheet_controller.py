@@ -2,13 +2,13 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from app.core.auth import Caller, get_caller
+from app.core.auth import CurrentUser, get_current_user
 from app.core.config import get_settings
 from app.schemas.callsheet import CallsheetRequest, PreviewResponse, SendRequest, SendResponse
 from app.services import callsheet
 
 # Connexion obligatoire : sans elle, la route servirait à envoyer des e-mails à n'importe qui.
-CallerDep = Annotated[Caller, Depends(get_caller)]
+CallerDep = Annotated[CurrentUser, Depends(get_current_user)]
 
 
 async def preview_callsheets(body: CallsheetRequest, caller: CallerDep) -> PreviewResponse:

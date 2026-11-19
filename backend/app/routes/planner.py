@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from app.controllers import planner_controller
 from app.schemas.location_suggest import LocationSuggestResponse
+from app.schemas.scene_detail import SceneDetail
 from app.schemas.scene_suggest import SceneSuggestResponse
 from app.schemas.weather import WeatherDay
 
@@ -18,6 +19,12 @@ router.add_api_route(
     planner_controller.suggest_scenes,
     methods=["POST"],
     response_model=SceneSuggestResponse,
+)
+router.add_api_route(
+    "/scenes/detail",
+    planner_controller.detail_scene,
+    methods=["POST"],
+    response_model=SceneDetail,
 )
 router.add_api_route(
     "/weather",

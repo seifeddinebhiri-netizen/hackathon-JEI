@@ -7,6 +7,7 @@ import { useSearchParams } from 'react-router';
 import type { Project } from '@/api/types';
 import { Button, ButtonLink, EmptyState, ErrorState, LoadingBlock } from '@/components/ui';
 import { PrintLayout } from '@/app/layouts/PrintLayout';
+import { SceneDetailView } from '@/features/planner/components/SceneDetailView';
 import { MOMENT_LABELS } from '@/features/planner/lib/labels';
 import { useCurrentProject } from '@/features/project/hooks/useProject';
 import { formatDate, formatDayLong, formatHourFr } from '@/lib/format';
@@ -74,6 +75,7 @@ function Schedule({ project }: { project: Project }) {
                             Avec : {scene.characters.join(', ')}
                           </p>
                         ) : null}
+                        <SceneDetailView detail={scene.detail} className="mt-2 border-l-4 border-gold pl-3" />
                       </div>
                     </li>
                   );

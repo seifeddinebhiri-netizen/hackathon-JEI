@@ -360,4 +360,35 @@ async def test_suggestions_use_groq_without_anthropic_key(groq):
     res = await svc.suggest_scenes(req)
     assert res.suggestions == []
     assert groq["requests"][0]["model"] == "openai/gpt-oss-120b"
-    assert svc.model == "openai/gpt-oss-120b"
+    assert svc.suggest_model == "openai/gpt-oss-120b"
+
+
+@pytest.mark.asyncio
+async def test_shot_spec_falls_back_to_groq_without_gemini_key(monkeypatch):
+    from app.core.config import Settings
+    from app.schemas.shot_spec import LLMStaticPlan
+    from app.services import llm_service
+    from app.services.llm_service import LLMService
+
+    calls = []
+
+    async def fake_structured(**kw):
+        calls.append(kw)
+        return "plan"
+
+    monkeypatch.setattr(llm_service, "groq_structured", fake_structured)
+    svc = LLMService(Settings(_env_file=None, gemini_api_key="", groq_api_key="k"))
+    assert await svc._generate("consigne", "scène", LLMStaticPlan) == "plan"
+    assert calls[0]["output_format"] is LLMStaticPlan and calls[0]["strict"] is False
+    assert svc.model == calls[0]["model"]
+
+
+@pytest.mark.asyncio
+async def test_shot_spec_without_any_key_is_unavailable():
+    from app.core.config import Settings
+    from app.schemas.shot_spec import LLMStaticPlan
+    from app.services.llm_service import LLMService, LLMUnavailable
+
+    svc = LLMService(Settings(_env_file=None, gemini_api_key="", groq_api_key=""))
+    with pytest.raises(LLMUnavailable):
+        await svc._generate("consigne", "scène", LLMStaticPlan)

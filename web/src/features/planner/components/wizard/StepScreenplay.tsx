@@ -23,6 +23,7 @@ import { plural } from '@/lib/format';
 import { useParseScreenplay } from '../../hooks/usePlanner';
 import { localId, nextSceneNumber } from '../../lib/ids';
 import { pruneSchedule, removeScene, restoreScene, scheduleHasScene } from '../../lib/removeScene';
+import { filmContext } from './locationSuggestInput';
 import { SceneEditor, SceneSummaryBar } from './SceneEditor';
 import { SceneSuggestions } from './SceneSuggestions';
 import type { Detected, DraftSetter, PlannerDraft } from './types';
@@ -89,6 +90,7 @@ export function StepScreenplay({
   const parse = useParseScreenplay();
   const fallback = useMutation({ mutationFn: (i: ParseScreenplayInput) => demoParseFallback!(i) });
   const update = useUpdateProject(project.id);
+  const film = filmContext(project);
   const { toast } = useToast();
   const [file, setFile] = useState<File | null>(null);
   const [text, setText] = useState('');
@@ -300,6 +302,7 @@ export function StepScreenplay({
               locations={draft.locations}
               onChange={updateScene}
               onDelete={() => deleteScene(s.id)}
+              film={film}
             />
           ))
         )}

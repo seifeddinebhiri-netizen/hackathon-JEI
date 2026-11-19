@@ -32,9 +32,10 @@ describe('données envoyées au repérage', () => {
   it('reprend le film, les scènes du décor et les autres décors', () => {
     const input = buildSuggestInput(project, cafe, scenes, ['Rue animée de Tunis', ''], []);
     expect(input.film).toEqual({
-      title: 'Marée basse',
+      title: project.title,
       format: 'court',
       city: 'Tunis',
+      genre: project.film_profile?.genre,
       synopsis: 'Amira veut sauver le café.',
     });
     expect(input.decor).toEqual({ name: 'Petit café de Tunis' });

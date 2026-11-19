@@ -1,10 +1,12 @@
 /**
- * Projet de démonstration : un court métrage FICTIF tourné à Tunis.
+ * Projet de démonstration : « Dar Hmeti », un court métrage FICTIF tourné à Tunis
+ * (15 min, derja, fiction, 1 usage d'IA déclaré dans le Passeport : le montage).
+ * L'identifiant reste `demo-maree-basse` (ancien titre) pour ne pas casser les sessions enregistrées.
  * Les dates sont relatives à aujourd'hui pour que la démo reste crédible
  * (une partie de la période dépasse l'horizon météo de 14 jours, volontairement).
  * Noms d'acteurs, adresses précises : [placeholders].
  */
-import type { Project } from '@/api/types';
+import type { KitPieceState, Project } from '@/api/types';
 import { demoDate } from '../weather';
 
 export const DEMO_PROJECT_ID = 'demo-maree-basse';
@@ -12,7 +14,7 @@ export const DEMO_PROJECT_ID = 'demo-maree-basse';
 export function buildDemoProject(): Project {
   return {
     id: DEMO_PROJECT_ID,
-    title: 'Marée basse',
+    title: 'Dar Hmeti',
     format: 'court',
     city: 'Tunis',
     shooting_window: { from: demoDate(5), to: demoDate(24) },
@@ -154,7 +156,24 @@ export function buildDemoProject(): Project {
       { id: 'p-7', kind: 'equipe', name: '[Nom]', role: 'Son' },
       { id: 'p-8', kind: 'equipe', name: '[Nom]', role: 'Régie' },
     ],
-    festival_shortlist: [],
+    festival_shortlist: [
+      { festival_id: 'bsff-next-generation', status: 'a_preparer' },
+      { festival_id: 'vienna-shorts', status: 'a_preparer' },
+      { festival_id: 'clermont-international', status: 'prochain_appel' },
+    ],
+    film_profile: { duration_min: 15, language: 'Derja (arabe tunisien)', genre: 'Fiction' },
+    synopsis: {
+      phrase: 'Slim veut vendre le café de son père à Tunis, mais sa sœur Amira refuse de le laisser partir.',
+      court:
+        'Dans la médina de Tunis, Slim a vendu en secret le café que leur père a tenu pendant quarante ans. Quand sa sœur Amira l’apprend, une dispute éclate entre les murs blancs du café. Pendant une nuit, ils vident les étagères, retrouvent les photos, les dettes et les promesses. Au matin, Amira comprend pourquoi Slim est parti, et Slim comprend ce qu’il a vendu.',
+      long: '',
+    },
     film_page: { stills: ['/photos/ruelle.jpg', '/photos/porte.jpg', '/photos/cote.jpg'] },
   };
 }
+
+/**
+ * Pièces cochées à la main dans la démo (clés de pieceKeyOf) : « Film et inscription » prêt pour
+ * Vienna Shorts. Les photos, synopsis, sous-titres et déclaration IA sont calculés.
+ */
+export const DEMO_PIECES: Record<string, KitPieceState> = { 'format:vienna-shorts': 'pret' };
