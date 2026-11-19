@@ -27,7 +27,7 @@ import { anchoredSlot, atTime, isRainy, isWeatherKnown, isWindy } from '@/featur
 import { TUNIS } from '@/lib/sun';
 
 // --- Simulation réseau -----------------------------------------------------------
-async function simulate<Sch extends z.ZodType>(
+export async function simulate<Sch extends z.ZodType>(
   where: string,
   schema: Sch,
   fn: () => unknown | Promise<unknown>,
@@ -40,7 +40,7 @@ async function simulate<Sch extends z.ZodType>(
   return validate(schema, structuredClone(data), `[mock] ${where}`);
 }
 
-function requireProject(id: string): T.Project {
+export function requireProject(id: string): T.Project {
   const p = getDb().projects[id];
   if (!p) throw apiError('introuvable', 404, 'Projet introuvable.');
   return p;
@@ -212,14 +212,14 @@ const DEPT_LABEL: Record<T.Department, string> = {
   affiche_promo: 'Affiche et promotion',
 };
 
-function badgeCode(): string {
+export function badgeCode(): string {
   const a = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   const pick = (n: number) =>
     Array.from({ length: n }, () => a[Math.floor(Math.random() * a.length)]).join('');
   return `${brand.badgePrefix}-${pick(4)}-${pick(2)}`;
 }
 
-function checkPassportLocal(p: T.Passport): T.PassportCheck {
+export function checkPassportLocal(p: T.Passport): T.PassportCheck {
   const missing: T.PassportCheck['missing'] = [];
   const warnings: string[] = [];
   const tools = aiTools as T.AiTool[];
@@ -340,6 +340,8 @@ export const mockApi: Api = {
       const db = getDb();
       delete db.projects[id];
       delete db.subtitles[id];
+      delete db.pieces[id];
+      delete db.synopsisEn[id];
       for (const [k, v] of Object.entries(db.passports)) if (v.project_id === id) delete db.passports[k];
       persist();
       return { ok: true };

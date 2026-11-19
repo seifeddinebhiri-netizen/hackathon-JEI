@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 from google.genai import errors
 from structlog.testing import capture_logs
 
+from app.core.auth import get_current_user
 from app.core.config import Settings, get_settings
 from app.main import app
 from app.schemas.subtitle import Cue, TranslationContext
@@ -23,7 +24,7 @@ from app.services.translation_service import (
     track_models,
     used_translator_name,
 )
-from tests.test_subtitles import FakeTranscriber, post_draft
+from tests.test_subtitles import TEST_USER, FakeTranscriber, post_draft
 
 HANG = "hang"
 OK = json.dumps(
@@ -131,12 +132,14 @@ def test_everything_fails_gives_low_confidence_lines():
 # --- Endpoint ------------------------------------------------------------------------
 @pytest.fixture
 def client():
+    app.dependency_overrides[get_current_user] = lambda: TEST_USER
     with TestClient(app) as c:
         app.state.db_pool = None
         app.state.transcriber = FakeTranscriber()
         subtitle_service._memory.clear()
         yield c
     subtitle_service._memory.clear()
+    app.dependency_overrides.pop(get_current_user, None)
 
 
 def test_draft_returns_200_when_gemini_fails_everywhere(client):

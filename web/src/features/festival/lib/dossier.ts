@@ -7,6 +7,7 @@ import type {
   FestivalRequirement,
   Festival,
   FilmPageContent,
+  KitPieceState,
   Passport,
   ShortlistItem,
   SubtitleLine,
@@ -39,6 +40,8 @@ export type DossierContext = {
   /** undefined : pas encore chargé ; null : pas de Passeport. */
   passport?: Passport | null;
   filmPage: FilmPageContent;
+  /** Pièces cochées à la main, par clé (`pieceKeyOf`) : les mêmes pour tous les dossiers. */
+  pieces: Record<string, KitPieceState>;
 };
 
 export const PIECE_STATE_LABELS: Record<PieceState, string> = {
@@ -98,31 +101,29 @@ export function subtitleLangOf(f: Festival, r: FestivalRequirement): 'fr' | 'en'
   return null;
 }
 
-function isDone(item: ShortlistItem | undefined, r: FestivalRequirement): boolean {
-  return !!item?.checklist.find((c) => c.requirement.kind === r.kind && c.requirement.detail === r.detail)
-    ?.done;
+const MANUAL_KINDS = new Set<FestivalRequirement['kind']>(['affiche', 'bio', 'droits_musique', 'format']);
+
+/**
+ * Clé d'enregistrement d'une pièce cochée à la main (table kit_pieces), null pour les pièces
+ * calculées (synopsis, sous-titres, déclaration IA, photos, page film). Une même clé est partagée
+ * par tous les dossiers qui demandent la pièce : la cocher une fois remplit tous ces dossiers.
+ * « Film et inscription » est propre à chaque festival.
+ */
+export function pieceKeyOf(f: Festival, r: FestivalRequirement): string | null {
+  if (!MANUAL_KINDS.has(r.kind)) return null;
+  return r.kind === 'format' ? `format:${f.id}` : r.kind;
 }
 
-/** Coche ou décoche une exigence dans le dossier (ajoutée si elle manque). */
-export function setRequirementDone(
-  item: ShortlistItem,
-  r: FestivalRequirement,
-  done: boolean,
-): ShortlistItem {
-  const same = (c: { requirement: FestivalRequirement }) =>
-    c.requirement.kind === r.kind && c.requirement.detail === r.detail;
-  const checklist = item.checklist.some(same)
-    ? item.checklist.map((c) => (same(c) ? { ...c, done } : c))
-    : [...item.checklist, { requirement: r, done }];
-  return { ...item, checklist };
+function isDone(f: Festival, r: FestivalRequirement, ctx: DossierContext): boolean {
+  const key = pieceKeyOf(f, r);
+  return !!key && ctx.pieces[key] === 'pret';
 }
 
-/** Dossier vide pour un festival (une ligne par exigence). */
+/** Nouveau dossier pour un festival. Ses pièces viennent du projet (rien n'est copié). */
 export function newShortlistItem(f: Festival): ShortlistItem {
   return {
     festival_id: f.id,
     status: f.deadline_status === 'passee' ? 'prochain_appel' : 'a_preparer',
-    checklist: f.requirements.map((requirement) => ({ requirement, done: false })),
   };
 }
 
@@ -228,7 +229,7 @@ function declarationPiece(
       detail: 'Le festival refuse l’IA générative et ton Passeport en déclare.',
       action: { label: 'Voir', to },
     };
-  if (isDone(item, r))
+  if (item?.ai_choice)
     return {
       ...base,
       state: 'pret',
@@ -269,13 +270,8 @@ function filmPagePiece(r: FestivalRequirement, ctx: DossierContext): Piece {
   };
 }
 
-function manualPiece(
-  f: Festival,
-  r: FestivalRequirement,
-  item: ShortlistItem | undefined,
-  ctx: DossierContext,
-): Piece {
-  const done = isDone(item, r);
+function manualPiece(f: Festival, r: FestivalRequirement, ctx: DossierContext): Piece {
+  const done = isDone(f, r, ctx);
   if (r.kind === 'format') {
     const base = { key: `format:${f.id}`, kind: r.kind, title: 'Film et inscription', requirement: r.detail };
     if (ctx.filmDurationMin && f.max_duration_min !== null && ctx.filmDurationMin > f.max_duration_min)
@@ -325,7 +321,7 @@ export function dossierPieces(f: Festival, item: ShortlistItem | undefined, ctx:
             ? declarationPiece(f, r, item, ctx)
             : r.kind === 'photos' || r.kind === 'bande_annonce'
               ? filmPagePiece(r, ctx)
-              : manualPiece(f, r, item, ctx);
+              : manualPiece(f, r, ctx);
     const prev = out.get(p.key);
     if (!prev || ORDER[p.state] < ORDER[prev.state]) out.set(p.key, p);
   }

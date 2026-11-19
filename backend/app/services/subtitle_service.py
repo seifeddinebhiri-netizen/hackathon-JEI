@@ -9,7 +9,9 @@ contiennent ni le texte des répliques ni les clés : seulement durée, nombre d
 fournisseurs et temps de traitement.
 
 Stockage : table `subtitle_drafts` (Supabase Postgres) quand DATABASE_URL est configurée,
-sinon un dict en mémoire (perdu au redémarrage), comme le repli des festivals.
+sinon un dict en mémoire (perdu au redémarrage), comme le repli des festivals. Chaque
+brouillon a un propriétaire (`owner_id`, toujours rempli explicitement : la connexion directe
+ignore la RLS et `auth.uid()` y est vide) ; lecture et écriture filtrent dessus.
 """
 
 import asyncio
@@ -101,7 +103,7 @@ def short_suggestion(full: str, short: str | None, duration_s: float) -> str | N
 
 
 # --- Stockage ----------------------------------------------------------------------
-_memory: dict[str, SubtitleDraft] = {}
+_memory: dict[tuple[str, str], SubtitleDraft] = {}  # (owner_id, project_id)
 _memory_logged = False
 
 
@@ -124,15 +126,18 @@ def _from_row(row: Any) -> SubtitleDraft:
     return SubtitleDraft.model_validate(data)
 
 
-async def load_draft(pool: asyncpg.Pool | None, project_id: str) -> SubtitleDraft | None:
+async def load_draft(
+    pool: asyncpg.Pool | None, owner_id: str, project_id: str
+) -> SubtitleDraft | None:
     if _use_memory(pool):
-        draft = _memory.get(project_id)
+        draft = _memory.get((owner_id, project_id))
         return draft.model_copy(deep=True) if draft else None
     try:
         row = await pool.fetchrow(
             "select project_id, source_lang, lines, processing "
-            "from public.subtitle_drafts where project_id = $1",
+            "from public.subtitle_drafts where project_id = $1 and owner_id = $2::uuid",
             project_id,
+            owner_id,
         )
     except Exception as exc:
         log.error("subtitles_query_failed", error=type(exc).__name__)
@@ -142,23 +147,31 @@ async def load_draft(pool: asyncpg.Pool | None, project_id: str) -> SubtitleDraf
     return _from_row(row) if row else None
 
 
-async def save_draft(pool: asyncpg.Pool | None, draft: SubtitleDraft) -> SubtitleDraft:
+# owner_id est TOUJOURS envoyé explicitement (jamais le défaut de la base).
+SAVE_DRAFT_SQL = (
+    "insert into public.subtitle_drafts "
+    "(project_id, owner_id, source_lang, lines, processing, updated_at) "
+    "values ($1, $2::uuid, $3, $4::jsonb, $5::jsonb, now()) "
+    "on conflict (project_id) do update set source_lang = excluded.source_lang, lines = excluded.lines, "
+    "processing = excluded.processing, updated_at = now() "
+    # Ne remplace jamais le brouillon d'un autre compte (ni une ancienne ligne sans propriétaire).
+    "where public.subtitle_drafts.owner_id = excluded.owner_id"
+)
+
+
+async def save_draft(
+    pool: asyncpg.Pool | None, owner_id: str, draft: SubtitleDraft
+) -> SubtitleDraft:
+    if not owner_id:
+        raise ValueError("owner_id est obligatoire pour enregistrer un brouillon.")
     if _use_memory(pool):
-        _memory[draft.project_id] = draft.model_copy(deep=True)
+        _memory[(owner_id, draft.project_id)] = draft.model_copy(deep=True)
         return draft
     lines = json.dumps([line.model_dump(mode="json") for line in draft.lines], ensure_ascii=False)
     processing = draft.processing.model_dump_json() if draft.processing else None
     try:
-        await pool.execute(
-            "insert into public.subtitle_drafts "
-            "(project_id, source_lang, lines, processing, updated_at) "
-            "values ($1, $2, $3::jsonb, $4::jsonb, now()) "
-            "on conflict (project_id) do update set source_lang = excluded.source_lang, "
-            "lines = excluded.lines, processing = excluded.processing, updated_at = now()",
-            draft.project_id,
-            draft.source_lang,
-            lines,
-            processing,
+        status = await pool.execute(
+            SAVE_DRAFT_SQL, draft.project_id, owner_id, draft.source_lang, lines, processing
         )
     except Exception as exc:
         log.error("subtitles_save_failed", error=type(exc).__name__)
@@ -167,30 +180,32 @@ async def save_draft(pool: asyncpg.Pool | None, draft: SubtitleDraft) -> Subtitl
             503,
             "subtitles_unavailable",
         ) from exc
+    if status.endswith(" 0"):  # « INSERT 0 0 » : la ligne appartient à un autre compte
+        raise AppError("Ce brouillon ne t'appartient pas.", 403, "interdit")
     return draft
 
 
 # --- Lecture / enregistrement ------------------------------------------------------
-async def get_draft(pool: asyncpg.Pool | None, project_id: str) -> SubtitleDraft:
-    draft = await load_draft(pool, project_id)
+async def get_draft(pool: asyncpg.Pool | None, owner_id: str, project_id: str) -> SubtitleDraft:
+    draft = await load_draft(pool, owner_id, project_id)
     return draft or SubtitleDraft(project_id=project_id, source_lang=DEFAULT_SOURCE_LANG, lines=[])
 
 
 async def save_lines(
-    pool: asyncpg.Pool | None, project_id: str, lines: list[SubtitleLine]
+    pool: asyncpg.Pool | None, owner_id: str, project_id: str, lines: list[SubtitleLine]
 ) -> SubtitleDraft:
     """PUT : remplace la liste complète. Avertissements recalculés, temps non modifiés."""
     ids = [line.id for line in lines]
     if len(ids) != len(set(ids)):
         raise AppError("Deux lignes ont le même identifiant.", 422, "duplicate_line_id")
-    existing = await load_draft(pool, project_id)
+    existing = await load_draft(pool, owner_id, project_id)
     draft = SubtitleDraft(
         project_id=project_id,
         source_lang=existing.source_lang if existing else DEFAULT_SOURCE_LANG,
         lines=subtitle_rules.apply_rules(lines, autofix=False),
         processing=existing.processing if existing else None,
     )
-    return await save_draft(pool, draft)
+    return await save_draft(pool, owner_id, draft)
 
 
 # --- Brouillon automatique ---------------------------------------------------------
@@ -240,6 +255,7 @@ async def create_draft(
     pool: asyncpg.Pool | None,
     transcriber: Transcriber,
     translator: Translator | None,
+    owner_id: str,
     project_id: str,
     upload: UploadFile,
     max_upload_mb: int,
@@ -259,6 +275,7 @@ async def create_draft(
                 pool,
                 transcriber,
                 translator,
+                owner_id,
                 project_id,
                 upload,
                 max_upload_mb,
@@ -286,6 +303,7 @@ async def _build_draft(
     pool: asyncpg.Pool | None,
     transcriber: Transcriber,
     translator: Translator | None,
+    owner_id: str,
     project_id: str,
     upload: UploadFile,
     max_upload_mb: int,
@@ -296,13 +314,15 @@ async def _build_draft(
     # Vérifie les deux fournisseurs AVANT d'envoyer l'audio (une transcription est payante).
     if not getattr(transcriber, "available", True):
         raise AppError(
-            "La transcription n'est pas configurée sur ce serveur.",
+            "La transcription n'est pas configurée sur ce serveur (clé ElevenLabs absente).",
             503,
             "transcription_unavailable",
         )
     if translator is None or not translator.available:
         raise AppError(
-            "La traduction n'est pas configurée sur ce serveur.", 503, "translation_unavailable"
+            "La traduction n'est pas configurée sur ce serveur (clé Gemini absente).",
+            503,
+            "translation_unavailable",
         )
     max_bytes = max_upload_mb * 1024 * 1024
     if upload.size is not None and upload.size > max_bytes:
@@ -370,7 +390,7 @@ async def _build_draft(
             created_at=datetime.now(UTC),
         ),
     )
-    await save_draft(pool, draft)
+    await save_draft(pool, owner_id, draft)
 
     words = [w for w in transcript.words if w.type == "word"]
     log.info(

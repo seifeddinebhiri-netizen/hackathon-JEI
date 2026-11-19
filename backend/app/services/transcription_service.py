@@ -140,7 +140,7 @@ class ElevenLabsTranscriber:
     ) -> Transcript:
         if not self._key:
             raise AppError(
-                "La transcription n'est pas configurée sur ce serveur.",
+                "La transcription n'est pas configurée sur ce serveur (clé ElevenLabs absente).",
                 503,
                 "transcription_unavailable",
             )

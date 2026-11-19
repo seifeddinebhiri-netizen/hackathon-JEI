@@ -12,14 +12,27 @@ import { supabase } from '@/lib/supabase';
 import { authErrorMessage } from './authErrors';
 import { AuthContext, type AuthContextValue } from './context';
 
-const PROJECT_KEY = 'pp-current-project';
+// Projet courant, par compte : un autre compte ouvert dans ce navigateur garde le sien.
+const projectKey = (userId: string) => `pp-current-project:${userId}`;
 
-function readProject(): string | undefined {
+function readProject(userId: string): string | undefined {
   try {
-    return localStorage.getItem(PROJECT_KEY) ?? undefined;
+    return localStorage.getItem(projectKey(userId)) ?? undefined;
   } catch {
     return undefined;
   }
+}
+
+/** Projet ouvert par défaut, enregistré dans le profil (création du projet, compte de démo). */
+async function profileProject(userId: string): Promise<string | undefined> {
+  if (!supabase) return undefined;
+  const { data } = await supabase
+    .from('profiles')
+    .select('current_project_id')
+    .eq('id', userId)
+    .maybeSingle();
+  const id = (data as { current_project_id?: string | null } | null)?.current_project_id;
+  return id ?? undefined;
 }
 
 function displayName(u: SbUser): string {
@@ -33,7 +46,9 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   const [sb, setSb] = useState<SbSession | null>(null);
   const [initializing, setInitializing] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [projectId, setProjectId] = useState<string | undefined>(readProject);
+  // Projet courant du compte connecté (`userId` : pour quel compte il a été lu)
+  const [current, setCurrent] = useState<{ userId: string; projectId?: string } | null>(null);
+  const userId = sb?.user.id;
 
   useEffect(() => {
     if (!supabase) return;
@@ -53,6 +68,23 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       sub.subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    if (!userId || env.useMocks) return;
+    let alive = true;
+    const local = readProject(userId);
+    void (local ? Promise.resolve(local) : profileProject(userId).catch(() => undefined)).then(
+      (projectId) => {
+        if (alive) setCurrent({ userId, projectId });
+      },
+    );
+    return () => {
+      alive = false;
+    };
+  }, [userId]);
+  const projectId = current?.userId === userId ? current?.projectId : undefined;
+  // Le projet du compte est en cours de lecture : pas encore d'écran « Pas encore de film »
+  const resolvingProject = !!userId && !env.useMocks && current?.userId !== userId;
 
   const session = useMemo<Session | null>(() => {
     if (!sb) return null;
@@ -103,21 +135,25 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     await supabase?.auth.signOut();
   }, []);
 
-  const setCurrentProject = useCallback((id: string) => {
-    setProjectId(id);
-    try {
-      localStorage.setItem(PROJECT_KEY, id);
-    } catch {
-      /* stockage indisponible : valable pour cette session seulement */
-    }
-  }, []);
+  const setCurrentProject = useCallback(
+    (id: string) => {
+      if (!userId) return;
+      setCurrent({ userId, projectId: id });
+      try {
+        localStorage.setItem(projectKey(userId), id);
+      } catch {
+        /* stockage indisponible : valable pour cette session seulement */
+      }
+    },
+    [userId],
+  );
 
   const value = useMemo<AuthContextValue>(
     () => ({
       user: session?.user ?? null,
       session,
       loading,
-      initializing,
+      initializing: initializing || resolvingProject,
       authMode: 'supabase',
       canSignUp: true,
       demoAvailable: !!env.demoEmail && !!env.demoPassword,
@@ -127,7 +163,17 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       signOut,
       setCurrentProject,
     }),
-    [session, loading, initializing, signIn, signUp, signInDemo, signOut, setCurrentProject],
+    [
+      session,
+      loading,
+      initializing,
+      resolvingProject,
+      signIn,
+      signUp,
+      signInDemo,
+      signOut,
+      setCurrentProject,
+    ],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

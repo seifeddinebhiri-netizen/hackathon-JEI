@@ -1,7 +1,8 @@
 # Schéma de la base de données
 
-Les comptes sont gérés par **Supabase Auth** (`auth.users`). Nous ajoutons deux tables et un bucket.
-Les migrations sont à exécuter dans l'ordre dans *Supabase > SQL Editor* : `0001`, `0002`, `0003`.
+Les comptes sont gérés par **Supabase Auth** (`auth.users`). Nous ajoutons nos tables et un bucket.
+Les migrations sont à exécuter dans l'ordre dans *Supabase > SQL Editor* : `0001` à `0004`, puis les deux fichiers
+de `backend/supabase/migrations/` (`festivals`, `subtitle_drafts`), puis `0005` (Kit Festival).
 
 ## Tables
 
@@ -42,6 +43,62 @@ Créé automatiquement à l'inscription (déclencheur sur `auth.users`). Supprim
 
 12 espaces au maximum par utilisateur, 256 Ko au maximum par espace. Seuls les espaces qui ont un plan sont enregistrés.
 
+### Kit Festival (migration 0005)
+
+Le front lit et écrit ces tables **directement** avec la clé publique (`supabase-js`) : la RLS limite chaque compte à
+ses lignes, et seulement sur ses propres projets. `owner_id` vaut `auth.uid()` par défaut pour le front ; le backend
+et le script de démonstration (`scripts/seed_kit_demo.py`) le remplissent toujours explicitement.
+
+**Une pièce préparée une fois sert à tous les dossiers qui la demandent** : les pièces cochées à la main sont
+enregistrées une seule fois par projet (`kit_pieces`), jamais copiées dans chaque dossier. Les autres pièces
+(synopsis, sous-titres, déclaration IA, photos, page film) sont calculées par le front à partir des tables ci-dessous.
+
+#### `public.festival_dossiers` (un festival suivi pour un projet)
+| Colonne | Type | Rôle |
+|---|---|---|
+| `id` | uuid, PK | |
+| `owner_id` | uuid, réf. `profiles` | propriétaire |
+| `project_id` | uuid, réf. `projects` | unique avec `festival_id` |
+| `festival_id` | text, réf. `festivals` | `on delete restrict` |
+| `status` | enum `dossier_status` | « Où j'en suis », voir ci-dessous |
+| `ai_choice` | enum `ai_choice` (`aucune`, `outil_technique`, `generation`, `les_deux`), null | réponse validée à la question IA de ce festival (null : pas encore validée) |
+| `position` | integer | ordre d'affichage |
+| `created_at`, `updated_at` | timestamptz | |
+
+Enum `dossier_status` ↔ libellé affiché (`SHORTLIST_STATUS_LABELS`, `web/src/features/festival/lib/labels.ts`) :
+
+| Valeur | Libellé |
+|---|---|
+| `a_preparer` | En préparation |
+| `pret` | Prêt à soumettre |
+| `soumis` | Soumis sur le site officiel |
+| `reponse_recue` | Réponse reçue |
+| `prochain_appel` | Pour le prochain appel |
+
+#### `public.kit_pieces` (pièces cochées à la main, une ligne par projet et par clé)
+| Colonne | Type | Rôle |
+|---|---|---|
+| `project_id` + `piece_key` | PK | clé de pièce : `affiche`, `bio`, `droits_musique`, `format:<festival_id>` (`pieceKeyOf` côté front) |
+| `owner_id` | uuid, réf. `profiles` | propriétaire |
+| `state` | enum `piece_state` : `a_faire` (À faire) ou `pret` (Prêt) | « Bloquant » n'est jamais stocké : il est calculé |
+| `updated_at` | timestamptz | |
+
+#### `public.film_kits` (profil du film, synopsis, page film : une ligne par projet)
+`project_id` (PK, réf. `projects`), `owner_id`, `duration_min`, `language`, `genre`, `synopsis_phrase`,
+`synopsis_court`, `synopsis_long`, `synopsis_en` (jsonb : version anglaise relue, par version),
+`stills` (text[], 12 au plus), `trailer_url`, `updated_at`.
+
+#### `public.ai_passports` (Passeport IA : une ligne par projet)
+`project_id` (PK, réf. `projects`), `owner_id`, `film_title`, `director`, `declarations` (jsonb, liste),
+`c2pa_signed`, `badge_code` (unique, ex. `EN-DRHM-T1`, créé par le front), `created_at`, `updated_at`.
+
+Page publique `/verifier/<code>` : fonction `public.verify_badge(code text)` (`security definer`, exécutable par
+`anon`) qui renvoie **seulement** `film_title`, `director`, `declarations`, `c2pa_signed`.
+
+#### `public.subtitle_drafts` (brouillon de sous-titres, un par projet)
+Écrit **uniquement par le backend** (transcription). La 0005 ajoute `owner_id` (rempli par le backend) et une
+policy de lecture pour le propriétaire. Les anciennes lignes sans propriétaire ne sont plus visibles par personne.
+
 ### Bucket `scripts` (Supabase Storage, privé)
 Scénario conservé **uniquement si l'utilisateur coche « Garder mon scénario »** (désactivé par défaut). Chemin : `<user_id>/<project_id>/<fichier>`. Les fichiers ne sont pas supprimés automatiquement avec le projet : le backend doit le faire.
 
@@ -60,8 +117,8 @@ Le backend les renvoie telles quelles. Une clé facultative absente est **omise*
 | `locations` | liste de lieux (adresse, coordonnées, horaires, jours interdits, autorisation) |
 | `people` | liste (acteurs et équipe) |
 | `schedule` | planning (facultatif) |
-| `festival_shortlist` | festivals retenus et listes de contrôle |
-| `film_profile`, `synopsis`, `film_page` | Kit Festival (facultatifs) |
+| `festival_shortlist` | *ancien emplacement* des dossiers : remplacé par `festival_dossiers` / `kit_pieces` (0005) |
+| `film_profile`, `synopsis`, `film_page` | *ancien emplacement* : remplacé par `film_kits` (0005) |
 
 Un `PATCH /projects/{id}` **remplace en entier** chaque clé envoyée (pas de fusion profonde des listes) et laisse les autres intactes.
 

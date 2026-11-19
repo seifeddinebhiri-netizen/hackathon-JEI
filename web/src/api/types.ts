@@ -210,10 +210,40 @@ export type FilmProfile = {
 };
 /** « Où j'en suis » pour un dossier. La soumission se fait toujours sur le site officiel. */
 export type ShortlistStatus = 'a_preparer' | 'pret' | 'soumis' | 'reponse_recue' | 'prochain_appel';
+/**
+ * Un dossier (un festival suivi). Les pièces cochées à la main ne sont PAS dans le dossier :
+ * elles sont rangées une fois par projet (`KitData.pieces`) et servent à tous les dossiers.
+ */
 export type ShortlistItem = {
   festival_id: string;
   status: ShortlistStatus;
-  checklist: { requirement: FestivalRequirement; done: boolean }[];
+  /** Réponse validée à la question IA de ce festival (null ou absent : pas encore validée). */
+  ai_choice?: AiChoice | null;
+};
+/** Case cochée pour la question IA d'un festival. */
+export type AiChoice = 'aucune' | 'outil_technique' | 'generation' | 'les_deux';
+
+// ---------------------------------------------------------------------------
+// Kit Festival (Supabase : festival_dossiers, kit_pieces, film_kits)
+// ---------------------------------------------------------------------------
+/** Pièce cochée à la main. « Bloquant » n'est jamais stocké : il est calculé. */
+export type KitPieceState = 'a_faire' | 'pret';
+/** Version anglaise d'un synopsis : brouillon IA, avec le texte français qu'il traduit. */
+export type SynopsisEnDraft = { text: string; source: string; validated: boolean };
+export type SynopsisEnglish = Partial<Record<SynopsisKind, SynopsisEnDraft>>;
+/** Champs du film enregistrés par le Kit (table film_kits). */
+export type KitFilmFields = {
+  film_profile?: ProjectFilmProfile;
+  synopsis?: SynopsisTexts;
+  film_page?: FilmPageContent;
+  synopsis_en?: SynopsisEnglish;
+};
+export type KitData = KitFilmFields & {
+  project_id: string;
+  /** Dans l'ordre d'ajout. */
+  dossiers: ShortlistItem[];
+  /** Pièces cochées à la main, par clé (`pieceKeyOf`) : une seule ligne pour tous les dossiers. */
+  pieces: Record<string, KitPieceState>;
 };
 export type SubtitleLine = {
   id: string;

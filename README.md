@@ -329,6 +329,27 @@ Valider la base de règles :
 uv run python -m scripts.validate_rules rules/rules.json
 ```
 
+**Kit Festival dans Supabase (dossiers, pièces, synopsis, Passeport IA, sous-titres)**
+
+1. Appliquer les migrations dans *Supabase > SQL Editor*, dans l'ordre décrit dans
+   [`backend/migrations/schema.md`](backend/migrations/schema.md) (la dernière est `0005_kit_festival.sql`).
+2. Dans `backend/.env` : `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`, `DEMO_EMAIL`, `DEMO_PASSWORD`.
+   La clé `service_role` ne va **jamais** dans `web/.env` ni dans git.
+3. Dans `web/.env` : `VITE_USE_MOCKS=false`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (clé publique),
+   `VITE_DEMO_EMAIL` / `VITE_DEMO_PASSWORD` (mêmes valeurs que `DEMO_EMAIL` / `DEMO_PASSWORD`).
+
+**Compte de démonstration du pitch** : créer le compte, ou le remettre à zéro (relançable à volonté) :
+
+```bash
+cd backend
+uv run python -m scripts.seed_kit_demo
+```
+
+Il recrée le film « Dar Hmeti » avec trois dossiers (BSFF, Vienna Shorts, Clermont-Ferrand), leurs pièces, le
+Passeport IA (badge `EN-DRHM-T1`) et le brouillon de sous-titres (dont la version courte de l4). Le bouton
+« Continuer en démo » de la page de connexion ouvre ce compte en un clic. Les données viennent de
+`backend/data/demo_kit.json`, exporté des mocks du front par `node web/scripts/export-demo-seed.mjs`.
+
 ---
 
 ## 9.limites connues
@@ -336,7 +357,7 @@ uv run python -m scripts.validate_rules rules/rules.json
 - Les **seuils numériques** du Coach sont des réglages de départ, à calibrer sur le terrain.
 - Les règles de **moindre confiance** sont marquées comme telles, et plusieurs thèmes sont peu sourcés : iPhone (fréquence d'images, distorsion), documentaire en médina, son avec micro de téléphone, plan de dos. Nous les compléterons par l'expérience de terrain de l'équipe, en la citant comme telle.
 - Un conseil de lumière de la base provient d'une source nord-américaine (direction du soleil dans les rues) : **à vérifier en Tunisie**.
-- **Connexion réelle (Supabase) et plan par l'IA (Gemini) : branchés mais non testés avec de vraies clés** au moment de l'écriture. Planification, Passeport et Kit Festival restent sur des données simulées côté front.
+- **Connexion réelle (Supabase) et plan par l'IA (Gemini) : branchés mais non testés avec de vraies clés** au moment de l'écriture. Le Kit Festival et le Passeport IA sont lus et écrits dans Supabase (`VITE_USE_MOCKS=false`) ; la planification reste sur des données simulées côté front (le backend n'a pas encore ces routes).
 - Les **voyants de taille** (plan du corps entier) ne sont pas mesurés : il manque un modèle de pose.
 - Aucun chiffre de performance (précision, vitesse, satisfaction) n'est annoncé : nous n'avons pas encore mené d'évaluation. Elle fera l'objet d'un protocole sur des extraits tournés par l'équipe.
 

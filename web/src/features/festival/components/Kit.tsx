@@ -1,11 +1,20 @@
 import type { ReactNode } from 'react';
 import { Link, NavLink } from 'react-router';
 import type { Festival, Passport, Project } from '@/api/types';
-import { ErrorState, Icon, LoadingBlock, PageHeader, StatusChip } from '@/components/ui';
+import {
+  ButtonLink,
+  EmptyState,
+  ErrorState,
+  Icon,
+  LoadingBlock,
+  PageHeader,
+  StatusChip,
+} from '@/components/ui';
 import { useProjectPassport } from '@/features/passport/hooks/usePassport';
-import { useCurrentProject } from '@/features/project/hooks/useProject';
+import { useCurrentProject, useCurrentProjectId } from '@/features/project/hooks/useProject';
 import { cn } from '@/lib/cn';
 import { daysUntil, formatDate } from '@/lib/format';
+import { useKit, withKit } from '../hooks/useKit';
 import { hostOf, shortName } from '../lib/kit';
 import {
   AI_POLICY_ICONS,
@@ -117,7 +126,11 @@ export function Breadcrumb({ items, dark }: { items: { label: string; to?: strin
   );
 }
 
-/** Charge le projet courant et son Passeport ; affiche le chargement et l'erreur du projet. */
+/**
+ * Charge le projet courant, ses données du Kit (dossiers, pièces, synopsis) et son Passeport ;
+ * affiche le chargement, l'erreur et l'absence de projet. Le projet transmis contient les
+ * dossiers et les champs du film lus dans le Kit.
+ */
 export function WithProject({
   children,
   dark,
@@ -128,12 +141,49 @@ export function WithProject({
   ) => ReactNode;
   dark?: boolean;
 }) {
+  const projectId = useCurrentProjectId();
   const project = useCurrentProject();
+  const kit = useKit(project.data?.id);
   const passport = useProjectPassport(project.data?.id);
-  if (project.isPending)
-    return <LoadingBlock lines={8} label="Chargement du projet…" className={dark ? 'p-6' : undefined} />;
-  if (project.isError) return <ErrorState error={project.error} onRetry={() => void project.refetch()} />;
-  return <>{children(project.data, { data: passport.data, isError: passport.isError })}</>;
+  if (!projectId)
+    return (
+      <EmptyState
+        icon="film"
+        title="Pas encore de film"
+        action={
+          <ButtonLink to="/planner/projet" iconRight="arrowRight">
+            Créer mon film
+          </ButtonLink>
+        }
+      >
+        Le Kit Festival prépare les dossiers d’un film : crée d’abord ton projet.
+      </EmptyState>
+    );
+  if (project.isPending || kit.isPending)
+    return (
+      <LoadingBlock
+        lines={8}
+        label={project.isPending ? 'Chargement du projet…' : 'Chargement de tes dossiers…'}
+        className={dark ? 'p-6' : undefined}
+      />
+    );
+  if (project.isError)
+    return (
+      <ErrorState
+        title="Le projet n’a pas pu être chargé"
+        error={project.error}
+        onRetry={() => void project.refetch()}
+      />
+    );
+  if (kit.isError)
+    return (
+      <ErrorState
+        title="Tes dossiers n’ont pas pu être chargés"
+        error={kit.error}
+        onRetry={() => void kit.refetch()}
+      />
+    );
+  return <>{children(withKit(project.data, kit.data), { data: passport.data, isError: passport.isError })}</>;
 }
 
 const PLATES = ['bg-ink text-white', 'bg-brand-red text-white', 'bg-gold text-ink'] as const;

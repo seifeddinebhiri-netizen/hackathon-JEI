@@ -19,6 +19,7 @@ import { SunTimes, WeatherSummary } from '@/features/planner/components/Tags';
 import { usePeriodWeather } from '@/features/planner/hooks/usePlanner';
 import { CONFLICT_ICONS } from '@/features/planner/lib/labels';
 import { CONFLICT_LABELS, countConflicts } from '@/features/planner/lib/rules';
+import { useKit, withKit } from '@/features/festival/hooks/useKit';
 import { useCurrentProject } from '@/features/project/hooks/useProject';
 import { projectTodos } from '@/features/project/lib/todos';
 import { cn } from '@/lib/cn';
@@ -315,6 +316,8 @@ function Todos({ project }: { project: Project }) {
 
 export default function ProjectDashboard() {
   const project = useCurrentProject();
+  // Dossiers et champs du film : lus dans le Kit Festival (vides tant qu'il n'est pas chargé)
+  const kit = useKit(project.data?.id);
   if (project.isPending)
     return (
       <div className="flex flex-col gap-8">
@@ -341,7 +344,7 @@ export default function ProjectDashboard() {
       </EmptyState>
     );
   }
-  const p = project.data;
+  const p = withKit(project.data, kit.data ?? { project_id: project.data.id, dossiers: [], pieces: {} });
   return (
     <div className="flex flex-col gap-8">
       <PageHeader

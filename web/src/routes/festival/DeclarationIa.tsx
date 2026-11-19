@@ -23,17 +23,14 @@ import {
   choiceHint,
   deptLabel,
   proposeChoice,
-  readChoice,
   whyChoice,
-  writeChoice,
   type AiChoice,
 } from '@/features/festival/lib/aiDeclaration';
-import { newShortlistItem, setRequirementDone } from '@/features/festival/lib/dossier';
+import { newShortlistItem } from '@/features/festival/lib/dossier';
 import { passportWithReturn } from '@/features/festival/lib/retour';
 import { cn } from '@/lib/cn';
 
 const CHOICES = Object.keys(AI_CHOICE_LABELS) as AiChoice[];
-const DECLARATION = { kind: 'declaration_ia', detail: 'Déclaration d’usage de l’IA' } as const;
 
 function PassportSummary({ passport, returnTo }: { passport: Passport; returnTo: string }) {
   const used = passport.declarations.filter((d) => d.used_ai).length;
@@ -85,24 +82,18 @@ function Proposal({
   const item = project.festival_shortlist.find((s) => s.festival_id === festival.id);
   const req = festival.requirements.find((r) => r.kind === 'declaration_ia');
   const proposed = proposeChoice(passport);
-  const [saved, setSaved] = useState<AiChoice | null>(() => readChoice(project.id, festival.id));
+  // Réponse validée pour CE festival : enregistrée dans son dossier (festival_dossiers.ai_choice).
+  const saved = item?.ai_choice ?? null;
   const [choice, setChoice] = useState<AiChoice>(saved ?? proposed);
-  const validated =
-    saved === choice && !!item?.checklist.find((c) => c.requirement.kind === 'declaration_ia')?.done;
+  const validated = !!saved && saved === choice;
   const name = shortName(festival);
 
   const persist = (done: boolean) => {
-    const base = item ?? newShortlistItem(festival);
-    const next = setRequirementDone(base, req ?? DECLARATION, done);
+    const next = { ...(item ?? newShortlistItem(festival)), ai_choice: done ? choice : null };
     const p = item ? shortlist.replace(next) : shortlist.add(next);
-    return p
-      .then(() => {
-        writeChoice(project.id, festival.id, done ? choice : null);
-        setSaved(done ? choice : null);
-      })
-      .catch(() =>
-        toast({ tone: 'bad', title: 'Réponse non enregistrée', description: 'Réessaie dans un instant.' }),
-      );
+    return p.catch(() =>
+      toast({ tone: 'bad', title: 'Réponse non enregistrée', description: 'Réessaie dans un instant.' }),
+    );
   };
 
   return (

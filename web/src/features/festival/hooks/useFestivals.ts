@@ -2,19 +2,17 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   api,
   isApiError,
-  mockFallback,
   type CreateSubtitleDraftInput,
   type Festival,
   type FestivalSearchParams,
-  type Project,
-  type ShortlistItem,
   type SubtitleDraft,
   type SubtitleLine,
   type SynopsisFeedbackInput,
   type SynopsisTranslateInput,
 } from '@/api';
-import { useOptimisticProjectUpdate } from '@/features/planner/hooks/usePlanner';
-import { projectKeys } from '@/features/project/hooks/useProject';
+import type { UploadProgress } from '@/api/client';
+
+export { useShortlist } from './useKit';
 
 export const festivalKeys = {
   search: (p: FestivalSearchParams) => ['festivals', 'search', p] as const,
@@ -72,26 +70,6 @@ export function useShortlistFestivals(ids: string[]) {
   });
 }
 
-/** Sélection de festivals du projet (« Mes dossiers »), enregistrée avec PATCH /projects. */
-export function useShortlist(project: Project) {
-  const update = useOptimisticProjectUpdate(project.id);
-  const qc = useQueryClient();
-  const current = () =>
-    qc.getQueryData<Project>(projectKeys.one(project.id))?.festival_shortlist ?? project.festival_shortlist;
-  const save = (next: ShortlistItem[]) => update.mutateAsync({ festival_shortlist: next });
-  return {
-    pending: update.isPending,
-    error: update.error,
-    add: (item: ShortlistItem) =>
-      current().some((s) => s.festival_id === item.festival_id)
-        ? Promise.resolve()
-        : save([...current(), item]),
-    remove: (festivalId: string) => save(current().filter((s) => s.festival_id !== festivalId)),
-    replace: (item: ShortlistItem) =>
-      save(current().map((s) => (s.festival_id === item.festival_id ? item : s))),
-  };
-}
-
 export const subtitleKeys = { draft: (projectId: string) => ['subtitles', projectId] as const };
 
 export function useSubtitleDraft(projectId: string | undefined) {
@@ -102,22 +80,17 @@ export function useSubtitleDraft(projectId: string | undefined) {
   });
 }
 
+/** Import réel (ou simulé si VITE_USE_MOCKS=true) : aucun repli silencieux vers le brouillon d'exemple. */
 export function useCreateSubtitleDraft() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: CreateSubtitleDraftInput) => api.createSubtitleDraft(input),
-    onSuccess: (d) => qc.setQueryData(subtitleKeys.draft(d.project_id), d),
-  });
-}
-
-/** Repli du mode mixte : brouillon d'exemple (mock) quand le vrai import a échoué. */
-export function useExampleSubtitleDraft() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (input: CreateSubtitleDraftInput) => {
-      if (!mockFallback) throw new Error('Aucun brouillon d’exemple disponible.');
-      return mockFallback.createSubtitleDraft(input);
-    },
+    mutationFn: ({
+      input,
+      onUploadProgress,
+    }: {
+      input: CreateSubtitleDraftInput;
+      onUploadProgress?: UploadProgress;
+    }) => api.createSubtitleDraft(input, { onUploadProgress }),
     onSuccess: (d) => qc.setQueryData(subtitleKeys.draft(d.project_id), d),
   });
 }
