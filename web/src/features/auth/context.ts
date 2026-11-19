@@ -17,6 +17,10 @@ export type AuthContextValue = {
   signUp: (name: string, email: string, password: string) => Promise<'signed_in' | 'confirm_email'>;
   signInDemo: () => Promise<void>;
   signOut: () => Promise<void>;
+  /** Envoie le lien « nouveau mot de passe » par email (même réponse que le compte existe ou non). */
+  requestPasswordReset: (email: string) => Promise<void>;
+  /** Enregistre un nouveau mot de passe pour le compte connecté (après le lien reçu par email). */
+  updatePassword: (password: string) => Promise<void>;
   /** Change le projet courant (ex. après « Nouveau film »). Avec Supabase : profil utilisateur. */
   setCurrentProject: (projectId: string) => void;
 };

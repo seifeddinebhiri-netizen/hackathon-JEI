@@ -25,6 +25,8 @@ export const router = createBrowserRouter([
         children: [
           { index: true, ...page(() => import('@/routes/Home')) },
           { path: 'connexion', ...page(() => import('@/routes/Login')) },
+          { path: 'mot-de-passe-oublie', ...page(() => import('@/routes/ForgotPassword')) },
+          { path: 'nouveau-mot-de-passe', ...page(() => import('@/routes/ResetPassword')) },
           { path: 'verifier/:id', ...page(() => import('@/routes/Verify')) },
           { path: 'film/:id', ...page(() => import('@/routes/FilmPublic')) },
           { path: 'credits', ...page(() => import('@/routes/Credits')) },

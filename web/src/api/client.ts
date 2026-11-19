@@ -102,6 +102,19 @@ export function setAuthTokenGetter(fn: () => string | null): void {
   tokenGetter = fn;
 }
 
+// --- Session refusée par le backend (401) ----------------------------------------
+let onUnauthorized: () => void = () => {};
+/**
+ * Appelé par le fournisseur d'authentification : que faire quand le backend répond 401 à une
+ * requête qui portait un jeton (session expirée ou révoquée). Voir SupabaseAuthProvider.
+ */
+export function setUnauthorizedHandler(fn: () => void): void {
+  onUnauthorized = fn;
+}
+function notifyIf401(status: number, hadToken: boolean): void {
+  if (status === 401 && hadToken) onUnauthorized();
+}
+
 export const DEFAULT_TIMEOUT_MS = 15_000;
 export const UPLOAD_TIMEOUT_MS = 60_000;
 /** Transcription + traduction : une à plusieurs minutes selon la durée du film. */
@@ -165,6 +178,7 @@ export async function request<S extends z.ZodType>(
   }
 
   if (!res.ok) {
+    notifyIf401(res.status, !!headers.Authorization);
     let serverMessage: string | undefined;
     try {
       serverMessage = serverErrorMessage(await res.json());
@@ -192,7 +206,8 @@ export function uploadForm<S extends z.ZodType>(
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', apiUrl(path).toString());
-    for (const [k, v] of Object.entries(authHeaders())) xhr.setRequestHeader(k, v);
+    const headers = authHeaders();
+    for (const [k, v] of Object.entries(headers)) xhr.setRequestHeader(k, v);
     xhr.timeout = opts.timeoutMs;
     if (opts.onProgress) {
       const cb = opts.onProgress;
@@ -209,6 +224,7 @@ export function uploadForm<S extends z.ZodType>(
         body = undefined;
       }
       if (xhr.status < 200 || xhr.status >= 300) {
+        notifyIf401(xhr.status, !!headers.Authorization);
         reject(errorFromStatus(xhr.status, serverErrorMessage(body)));
         return;
       }

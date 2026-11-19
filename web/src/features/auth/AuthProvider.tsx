@@ -3,6 +3,7 @@
  * user, session, signIn(email, password), signInDemo(), signOut().
  * Voir docs/INTEGRATION.md pour le remplacer par supabase.auth.
  */
+import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { addDays, formatISO } from 'date-fns';
 import { setAuthTokenGetter } from '@/api/client';
@@ -35,6 +36,7 @@ function makeSession(user: User): Session {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(() => readSession());
   const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     setAuthTokenGetter(() => session?.access_token ?? null);
@@ -89,7 +91,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async () => {
     save(null);
-  }, [save]);
+    queryClient.clear(); // rien du compte précédent ne reste en mémoire
+  }, [save, queryClient]);
 
   const setCurrentProject = useCallback(
     (projectId: string) => {
@@ -113,6 +116,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       signInDemo,
       signOut,
+      requestPasswordReset: async () => {
+        throw new Error('La réinitialisation du mot de passe demande la connexion réelle (Supabase).');
+      },
+      updatePassword: async () => {
+        throw new Error('La réinitialisation du mot de passe demande la connexion réelle (Supabase).');
+      },
       setCurrentProject,
     }),
     [session, loading, signIn, signInDemo, signOut, setCurrentProject],
