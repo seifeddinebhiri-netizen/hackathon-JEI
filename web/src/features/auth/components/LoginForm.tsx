@@ -1,10 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { Link } from 'react-router';
 import { z } from 'zod';
 import { brand } from '@/app/brand';
 import { Button, Field, Icon, Input } from '@/components/ui';
 import { useAuth } from '../hooks/useAuth';
+import { AuthError, AuthNotice } from './AuthPage';
 
 const email = z.string().trim().min(1, 'Indique ton email.').email('Cet email n’a pas l’air valide.');
 const password = z.string().min(6, 'Au moins 6 caractères.');
@@ -17,20 +19,8 @@ const signUpSchema = z.object({
 type SignInValues = z.infer<typeof signInSchema>;
 type SignUpValues = z.infer<typeof signUpSchema>;
 
-function ErrorBox({ children }: { children: string }) {
-  return (
-    <p
-      role="alert"
-      className="flex items-center gap-2 border-2 border-bad-fg bg-bad-bg p-3 font-semibold text-bad-fg"
-    >
-      <Icon name="alert" size={18} />
-      {children}
-    </p>
-  );
-}
-
 function SignInForm({ onSuccess }: { onSuccess: () => void }) {
-  const { signIn, loading } = useAuth();
+  const { signIn, loading, authMode } = useAuth();
   const [serverError, setServerError] = useState<string>();
   const [pending, setPending] = useState(false);
   const {
@@ -65,16 +55,26 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
       <h2 id="form-titre" className="text-h3">
         Se connecter avec un email
       </h2>
-      {serverError ? <ErrorBox>{serverError}</ErrorBox> : null}
+      {serverError ? <AuthError>{serverError}</AuthError> : null}
       <Field label="Email" error={errors.email?.message} required>
         <Input type="email" autoComplete="email" inputMode="email" {...register('email')} />
       </Field>
       <Field label="Mot de passe" error={errors.password?.message} required>
         <Input type="password" autoComplete="current-password" {...register('password')} />
       </Field>
-      <Button type="submit" variant="secondary" loading={pending} disabled={loading} className="self-start">
-        Se connecter
-      </Button>
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+        <Button type="submit" variant="secondary" loading={pending} disabled={loading}>
+          Se connecter
+        </Button>
+        {authMode === 'supabase' ? (
+          <Link
+            to="/mot-de-passe-oublie"
+            className="inline-flex min-h-11 items-center text-meta font-semibold underline underline-offset-4"
+          >
+            Mot de passe oublié ?
+          </Link>
+        ) : null}
+      </div>
     </form>
   );
 }
@@ -116,7 +116,7 @@ function SignUpForm({ onSuccess, onConfirmEmail }: { onSuccess: () => void; onCo
       <h2 id="inscription-titre" className="text-h3">
         Créer mon compte
       </h2>
-      {serverError ? <ErrorBox>{serverError}</ErrorBox> : null}
+      {serverError ? <AuthError>{serverError}</AuthError> : null}
       <Field label="Prénom" error={errors.name?.message} required>
         <Input autoComplete="given-name" {...register('name')} />
       </Field>
@@ -189,15 +189,7 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
         </>
       ) : null}
 
-      {notice ? (
-        <p
-          role="status"
-          className="flex items-start gap-2 border-2 border-ok-fg bg-ok-bg p-3 font-semibold text-ok-fg"
-        >
-          <Icon name="check" size={18} className="mt-0.5 shrink-0" />
-          {notice}
-        </p>
-      ) : null}
+      {notice ? <AuthNotice>{notice}</AuthNotice> : null}
 
       {mode === 'signin' ? (
         <SignInForm onSuccess={onSuccess} />

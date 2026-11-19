@@ -4,6 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 from structlog.testing import capture_logs
 
+from app.core.auth import CurrentUser, get_current_user
 from app.core.config import Settings
 from app.main import app
 from app.services.translation_service import GeminiTranslator, PromptTranslator
@@ -31,9 +32,21 @@ class FakeTranslator(PromptTranslator):
 
 @pytest.fixture
 def client():
+    app.dependency_overrides[get_current_user] = lambda: CurrentUser(id="u1", email=None)
+    try:
+        with TestClient(app) as c:
+            app.state.translator = FakeTranslator()
+            yield c
+    finally:
+        app.dependency_overrides.pop(get_current_user, None)
+
+
+def test_translate_requires_a_token():
     with TestClient(app) as c:
         app.state.translator = FakeTranslator()
-        yield c
+        r = c.post("/synopsis/translate", json={"kind": "court", "text": TEXT, "target_lang": "en"})
+        assert r.status_code == 401
+        assert app.state.translator.calls == []  # aucun appel payant sans compte
 
 
 def post(client, **body):

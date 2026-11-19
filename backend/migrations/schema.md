@@ -2,7 +2,8 @@
 
 Les comptes sont gérés par **Supabase Auth** (`auth.users`). Nous ajoutons nos tables et un bucket.
 Les migrations sont à exécuter dans l'ordre dans *Supabase > SQL Editor* : `0001` à `0004`, puis les deux fichiers
-de `backend/supabase/migrations/` (`festivals`, `subtitle_drafts`), puis `0005` (Kit Festival).
+de `backend/supabase/migrations/` (`festivals`, `subtitle_drafts`), puis `0005` (Kit Festival), puis `0006`
+(durcissement des comptes).
 
 ## Tables
 
@@ -18,6 +19,9 @@ de `backend/supabase/migrations/` (`festivals`, `subtitle_drafts`), puis `0005` 
 | `created_at`, `updated_at` | timestamptz | `updated_at` est mis à jour par déclencheur |
 
 Créé automatiquement à l'inscription (déclencheur sur `auth.users`). Supprimer le compte supprime le profil, puis ses projets (`on delete cascade`).
+
+Depuis le navigateur (0006), seules `display_name`, `locale`, `terms_accepted_at` et `current_project_id` sont
+modifiables, et `current_project_id` doit être un projet du même compte. `is_demo` est réservé au backend et aux scripts.
 
 ### `public.projects`
 | Colonne | Type | Rôle |

@@ -2,14 +2,20 @@
  * Authentification réelle (Supabase Auth). Même interface que le faux fournisseur (context.ts).
  * Le jeton d'accès est envoyé au backend FastAPI dans `Authorization: Bearer ...` (api/client.ts).
  */
-import type { Session as SbSession, User as SbUser } from '@supabase/supabase-js';
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { setAuthTokenGetter } from '@/api/client';
+import {
+  isAuthRetryableFetchError,
+  type Session as SbSession,
+  type User as SbUser,
+} from '@supabase/supabase-js';
+import { useQueryClient } from '@tanstack/react-query';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { setAuthTokenGetter, setUnauthorizedHandler } from '@/api/client';
 import { DEMO_PROJECT_ID } from '@/api/mocks/data/project';
 import type { Session } from '@/api/types';
 import { env } from '@/lib/env';
 import { supabase } from '@/lib/supabase';
 import { authErrorMessage } from './authErrors';
+import { resetPasswordRedirect } from './redirect';
 import { AuthContext, type AuthContextValue } from './context';
 
 // Projet courant, par compte : un autre compte ouvert dans ce navigateur garde le sien.
@@ -43,23 +49,30 @@ function displayName(u: SbUser): string {
 }
 
 export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
   const [sb, setSb] = useState<SbSession | null>(null);
   const [initializing, setInitializing] = useState(true);
   const [loading, setLoading] = useState(false);
   // Projet courant du compte connecté (`userId` : pour quel compte il a été lu)
   const [current, setCurrent] = useState<{ userId: string; projectId?: string } | null>(null);
   const userId = sb?.user.id;
+  // Compte dont les données sont en cache : un autre compte (ou aucun) vide le cache.
+  const cachedFor = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     if (!supabase) return;
     let alive = true;
     void supabase.auth.getSession().then(({ data }) => {
       if (!alive) return;
+      cachedFor.current = data.session?.user.id;
       setSb(data.session);
       setAuthTokenGetter(() => data.session?.access_token ?? null);
       setInitializing(false);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
+      const nextId = next?.user.id;
+      if (cachedFor.current !== undefined && cachedFor.current !== nextId) queryClient.clear();
+      cachedFor.current = nextId;
       setSb(next);
       setAuthTokenGetter(() => next?.access_token ?? null); // jeton rafraîchi automatiquement
     });
@@ -67,6 +80,32 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       alive = false;
       sub.subscription.unsubscribe();
     };
+  }, [queryClient]);
+
+  // Le backend refuse le jeton (401) : on demande à Supabase de renouveler la session. S'il
+  // confirme qu'elle n'est plus valable, on la ferme et RequireAuth renvoie vers
+  // /connexion?suite=<page>. Si le renouvellement réussit, le jeton suivant passera ; s'il échoue
+  // faute de réseau, on ne déconnecte personne. Une seule tentative à la fois, 30 s au moins entre deux.
+  useEffect(() => {
+    const client = supabase;
+    if (!client) return;
+    let pending = false;
+    let last = 0;
+    setUnauthorizedHandler(() => {
+      if (pending || Date.now() - last < 30_000) return;
+      pending = true;
+      last = Date.now();
+      void client.auth
+        .refreshSession()
+        .then(async ({ error }) => {
+          if (error && !isAuthRetryableFetchError(error)) await client.auth.signOut({ scope: 'local' });
+        })
+        .catch(() => undefined)
+        .finally(() => {
+          pending = false;
+        });
+    });
+    return () => setUnauthorizedHandler(() => {});
   }, []);
 
   useEffect(() => {
@@ -132,7 +171,31 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   }, [signIn]);
 
   const signOut = useCallback(async () => {
-    await supabase?.auth.signOut();
+    try {
+      await supabase?.auth.signOut();
+    } finally {
+      cachedFor.current = undefined;
+      queryClient.clear(); // rien du compte précédent ne reste en mémoire
+    }
+  }, [queryClient]);
+
+  const requestPasswordReset = useCallback(async (email: string) => {
+    if (!supabase) throw new Error('Connexion indisponible.');
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: resetPasswordRedirect(),
+    });
+    if (error) throw new Error(authErrorMessage(error));
+  }, []);
+
+  const updatePassword = useCallback(async (password: string) => {
+    if (!supabase) throw new Error('Connexion indisponible.');
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw new Error(authErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const setCurrentProject = useCallback(
@@ -161,6 +224,8 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       signUp,
       signInDemo,
       signOut,
+      requestPasswordReset,
+      updatePassword,
       setCurrentProject,
     }),
     [
@@ -172,6 +237,8 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       signUp,
       signInDemo,
       signOut,
+      requestPasswordReset,
+      updatePassword,
       setCurrentProject,
     ],
   );
