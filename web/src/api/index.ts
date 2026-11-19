@@ -10,6 +10,7 @@ import { env } from '@/lib/env';
 import * as real from './endpoints';
 import { buildApi, unknownEndpoints } from './mixed';
 import { mockApi } from './mocks/handlers';
+import { getPublicFilm } from './supabase/film';
 import { supabasePassportApi } from './supabase/passport';
 import type { Api } from './endpoints';
 
@@ -37,7 +38,8 @@ const realApi: Api = {
   saveSubtitles: real.saveSubtitles,
   getSynopsisFeedback: real.getSynopsisFeedback,
   translateSynopsis: real.translateSynopsis,
-  getPublicFilm: real.getPublicFilm,
+  // Page film publique : fonction SQL public_film (le backend n'a pas de route /films)
+  getPublicFilm,
 };
 
 if (import.meta.env.DEV && env.useMocks) {
@@ -70,6 +72,12 @@ export const usingMocks = env.useMocks;
 export const realEndpointsInMockMode: readonly string[] = env.useMocks
   ? Object.keys(realApi).filter((n) => api[n as keyof Api] === realApi[n as keyof Api])
   : [];
+/**
+ * Questions du coach sur le synopsis : servies par le mock seulement. Le backend n'a pas encore
+ * POST /synopsis/feedback : en mode réel, le bloc est masqué plutôt que d'afficher une erreur.
+ */
+export const synopsisFeedbackAvailable =
+  env.useMocks && !realEndpointsInMockMode.includes('getSynopsisFeedback');
 /** Sous-titres simulés : seulement quand le mode démo est demandé (VITE_USE_MOCKS=true, sans mode mixte). */
 export const subtitlesSimulated = !realEndpointsInMockMode.includes('createSubtitleDraft') && env.useMocks;
 

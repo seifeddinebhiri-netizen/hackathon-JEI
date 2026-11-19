@@ -95,6 +95,10 @@ Enum `dossier_status` ↔ libellé affiché (`SHORTLIST_STATUS_LABELS`, `web/src
 Page publique `/verifier/<code>` : fonction `public.verify_badge(code text)` (`security definer`, exécutable par
 `anon`) qui renvoie **seulement** `film_title`, `director`, `declarations`, `c2pa_signed`.
 
+Page publique `/film/<id du projet>` (migration 0008) : fonction `public.public_film(film_id uuid)` (`security definer`,
+exécutable par `anon`) qui renvoie seulement titre, réalisation, synopsis, photos, générique (nom + rôle, sans contact),
+bande-annonce et code du Passeport, et seulement pour un projet qui a une ligne dans `film_kits`.
+
 #### `public.subtitle_drafts` (brouillon de sous-titres, un par projet)
 Écrit **uniquement par le backend** (transcription). La 0005 ajoute `owner_id` (rempli par le backend) et une
 policy de lecture pour le propriétaire. Les anciennes lignes sans propriétaire ne sont plus visibles par personne.
