@@ -56,11 +56,12 @@ Le message est affiché tel quel à l'utilisateur ; sans message, le front en af
 | `quickSlots` | POST `/planner/quick` | Scène rapide → créneaux classés | à confirmer |
 | `generateSchedule` | POST `/planner/schedule` | Projet → planning brouillon | à confirmer |
 | `getWeather` | GET `/planner/weather` | Prévisions par jour | à confirmer |
-| `getAiTools` | ~~GET `/ai-tools`~~ → fichier `mocks/data/ai-tools.json` | Catalogue des outils IA | **remplacée** (fichier de référence) |
+| `getAiTools` | GET `/ai-tools` | Catalogue des outils IA (statut calculé, fiche relue ou non) | **confirmé, branché** |
+| `resolveAiTool` / `getAiToolRun` | POST `/ai-tools/resolve`, GET `/ai-tools/runs/{id}` | Ajouter un outil absent : recherche guidée sur le serveur | **confirmé, branché** |
 | `savePassport` | ~~POST `/passport`~~ → table `ai_passports` | Créer ou mettre à jour la déclaration | **remplacée par Supabase** |
 | `checkPassport` | ~~GET `/passport/{id}/check`~~ → calcul dans le navigateur | Contrôle avant PDF | **remplacée** |
-| `getPassportPdfUrl` | ~~GET `/passport/{id}/pdf`~~ → page imprimable `/verifier/<code>?imprimer=1` | URL du PDF | **remplacée** |
-| `signC2pa` | ~~POST `/c2pa/sign`~~ → simulée dans le navigateur, rien n'est écrit | Signer le fichier final | **futur** (vraie signature côté serveur) |
+| `getPassportPdfUrl` | POST `/passports/{projectId}/pdf` | PDF du Passeport fabriqué et signé C2PA par le serveur | **confirmé, branché** |
+| `verifyPassportPdf` | POST `/verify/pdf` | Page publique : vérifier un PDF de Passeport reçu (public, par adresse IP) | **confirmé, branché** |
 | `verifyPassport` | ~~GET `/verify/{id}`~~ → fonction SQL `verify_badge(code)` | Page publique des festivals | **remplacée par Supabase** |
 | `searchFestivals` | GET `/festivals` | Recherche, filtres, classement | confirmé |
 | `getFestival` | GET `/festivals/{id}` | Fiche d'un festival | backend prêt |
@@ -254,44 +255,38 @@ Le front l'utilise pour recalculer les conflits même sur les jours vides du cal
 
 ## Passeport IA
 
-**Routes `/passport…`, `/c2pa/sign`, `/verify/{id}` et `/ai-tools` : remplacées par Supabase. Elles n'existent pas dans le
-backend et ne sont plus appelées.** Le front (`src/api/supabase/passport.ts`) lit et écrit la table `ai_passports` avec la
-session de l'utilisateur ; la RLS limite chacun à ses passeports. Les formats ci-dessous (`Passport`, `PassportCheck`…)
-restent ceux des types du front.
+**Les déclarations restent dans Supabase ; le catalogue d'outils, la recherche d'un outil absent et le PDF signé passent par le
+backend.** Le front (`src/api/supabase/passport.ts`) lit et écrit la table `ai_passports` avec la session de l'utilisateur ; la
+RLS limite chacun à ses passeports. Les routes `/passport…`, `/c2pa/sign` et `/verify/{id}` n'existent pas. Les formats
+ci-dessous (`Passport`, `PassportCheck`…) restent ceux des types du front.
+
+En mode démonstration, les fonctions du Passeport basculent **ensemble** vers le réel (voir `VITE_REAL_ENDPOINTS` dans
+`.env.example`) : le PDF est fabriqué à partir du Passeport enregistré en base, qui exige un vrai projet.
 
 Ce que le navigateur peut écrire (migration 0007) : `project_id` à la création, puis `film_title`, `director`,
 `declarations`. **`badge_code` est créé par la base** (déclencheur, format `EN-XXXX-XX`, unique) et **`c2pa_signed` n'est
 posé que par le serveur**.
 
-### `getAiTools` — remplacée (fichier de référence)
+### `getAiTools` — GET `/ai-tools` (jeton exigé)
 
-Catalogue lu dans `src/api/mocks/data/ai-tools.json` (données de référence versionnées, pas des données utilisateur).
+Catalogue des outils d'IA, lu dans les tables `ai_tools` / `ai_tool_facts` (migrations 0009 à 0011). Le front adapte chaque
+fiche en `AiTool` (`src/api/aiTools.ts`) : `id` = `slug` (c'est ce que les déclarations enregistrent dans `tool_id`),
+`provider` = `vendor`. Paramètre facultatif `q` (recherche par nom).
 
-Réponse 200 : `AiTool[]`. Le statut décrit ce que **le fournisseur publie** (données d'entraînement, droits),
-pas le travail du réalisateur. `non_divulgue` est un statut valide.
-```json
-[{ "id": "tool-montage-a", "name": "[Logiciel de montage avec IA]", "provider": "[Fournisseur E]",
-   "status": "partiel", "note": "Fonctions IA documentées, origine des données partiellement décrite.",
-   "source_url": "https://fournisseur-e.exemple.invalid/ia", "checked_at": "2026-10-01" }]
-```
+`status` : `documente`, `partiel`, `non_divulgue` ou **`non_evalue`** (aucune recherche n'a abouti : ce n'est pas « non
+divulgué »). `reviewed` : une personne a relu la fiche. Le statut décrit ce que **le fournisseur publie** ; il est **calculé par
+des règles** à partir de faits dont la phrase source a été retrouvée dans la page, jamais par l'IA.
 
-### `savePassport` — remplacée par Supabase (`ai_passports`)
+### `resolveAiTool` — POST `/ai-tools/resolve` (jeton exigé, 10 par heure et par utilisateur)
 
-Création (sans `id`) ou mise à jour (avec `id`). Corps (`SavePassportInput`) :
-```json
-{ "id": "pass-4ff7045785", "project_id": "demo-maree-basse", "film_title": "Dar Hmeti", "director": "Yassine",
-  "declarations": [
-    { "department": "scenario", "used_ai": false, "what": "", "human_decisions": "Écrit par le réalisateur." },
-    { "department": "montage", "used_ai": true, "tool_id": "tool-montage-a",
-      "what": "Détection automatique des plans et synchronisation du son.", "level": "assistance",
-      "human_decisions": "Choix des prises et du rythme." }
-  ] }
-```
-Création (`insert` de `project_id`, `film_title`, `director`, `declarations`) ou mise à jour (`update` des trois derniers).
-La base fixe `badge_code`, `c2pa_signed` (faux) et `updated_at` ; le front construit `verify_url`.
-Le front enregistre automatiquement à chaque modification. Départements : `scenario`, `image`, `montage`, `son_voix`,
-`musique`, `vfx`, `sous_titres`, `affiche_promo`. Niveaux : `assistance`, `generation_partielle`, `generation_complete`.
-Un outil hors catalogue passe par `custom_tool` (affiché « Non divulgué »).
+Corps : `{ "name": "Pika" }`. Réponse 200 : `{ "state": "found", "tool": … }` (déjà au catalogue) ou
+`{ "state": "researching", "run_id": "…" }` : une recherche guidée est lancée **sur le serveur** (10 à 60 s, 30 par jour au
+total). Le navigateur ne la règle ni ne la déclenche autrement. Erreurs : 422 (nom invalide), 429 (limite).
+
+### `getAiToolRun` — GET `/ai-tools/runs/{id}` (jeton exigé, réservé à celui qui l'a demandée)
+
+`{ "id", "state": "queued|running|done|failed", "tool_slug"?, "error"? }`. À relire toutes les 2 secondes (`findTool`). Une
+recherche qui ne trouve rien de vérifiable échoue avec un motif : **rien n'est enregistré au catalogue**.
 
 ### `checkPassport` — remplacée (calcul dans le navigateur, `checkPassportLocal`)
 
@@ -302,25 +297,41 @@ Réponse 200 (`PassportCheck`). Le bouton PDF est actif seulement si `ok = true`
   "warnings": ["Affiche et promotion : [Générateur d'images A] est « Non divulgué » (…). Ce statut est valide et sera affiché tel quel."] }
 ```
 
-### `getPassportPdfUrl` — remplacée (page imprimable)
+### `getPassportPdfUrl` — POST `/passports/{project_id}/pdf` (jeton exigé, 20 par heure et par utilisateur)
 
-Renvoie `{ "url": "<site>/verifier/<code>?imprimer=1" }` (aperçu imprimable de la page de vérification), ouvert dans un
-nouvel onglet. Pas encore de PDF généré côté serveur. Erreur : 404 (pas de Passeport).
+Le serveur fabrique **et signe** le PDF à partir du Passeport enregistré en base (le navigateur n'envoie que l'identifiant du
+projet, jamais le contenu). Réponse 200 : `application/pdf` ; en-têtes `X-C2PA-Simulated` (`true` : certificat de test),
+`X-C2PA-Manifest-Id`, `X-Signed-At`, `Content-Disposition`. Le front en fait une adresse `blob:` ouverte dans un nouvel onglet :
+`{ url, signed: true, simulated, manifest_id }`. Le serveur pose `c2pa_signed = true` ; **toute modification du Passeport le
+remet à faux** (migration 0011) : il faut régénérer le PDF.
 
-### `signC2pa` — simulée · vraie signature : futur (serveur)
+Erreurs : 401, 403 (projet d'un autre), 404 (pas de Passeport), 422 (`passeport_invalide`), 429, 502 (`signature_echouee`),
+503 (`signature_indisponible` : certificat non configuré). **On signe le PDF, pas le film** : le film n'est jamais envoyé.
+`signC2pa` n'existe plus. Voir `backend/docs/C2PA.md`.
 
-Corps : `{ "passport_id": "pass-4ff7045785", "file_name": "dar-hmeti-v-finale.mp4" }`.
-Réponse 200 :
+### `verifyPassportPdf` — POST `/verify/pdf` · **public, sans authentification**
+
+Un festival dépose le PDF reçu (`multipart/form-data`, champ `file`, 8 Mo au plus, 30 par heure et par adresse IP). Le serveur
+lit la signature et l'**oublie** : ni fichier ni base ne sont écrits. Erreurs : 413, 422 (`pas_un_pdf`), 429.
 ```json
-{ "signed": true, "manifest_id": "c2pa-…", "signed_at": "2026-11-14T16:10:00+01:00", "simulated": true }
+{ "state": "valid", "issued_by_us": true, "signer": "…", "signing_mode": "test",
+  "badge_code": "EN-ABCD-23", "film_title": "Dar Hmeti", "tools": [{ "slug": "claude", "status": "documente", "reviewed": true }],
+  "problems": [], "matches_passport": true, "reasons": [] }
 ```
-`simulated = true` : le front l'annonce (« aucune signature réelle n'a été posée »). **Rien n'est écrit** :
-`c2pa_signed` reste faux tant qu'une vraie signature n'est pas posée par le serveur. Erreur : 404.
+- `state` : `none` (aucune signature), `invalid` (modifié ou signature cassée), `valid` (intact), `trusted` (intact et signataire
+  de confiance).
+- **`issued_by_us`** : signé par NOTRE certificat. Quelqu'un peut signer un PDF avec le sien en copiant nos informations : dans
+  ce cas `valid` mais `issued_by_us = false`, et le serveur ne répète pas ce que le fichier prétend (`badge_code`, `tools`…
+  absents).
+- `matches_passport` : le Passeport actuel est-il celui que le PDF a signé ? Comparaison par empreinte SHA-256 des
+  déclarations (écrite dans la signature) : un mot modifié suffit à le passer à `false`. `null` : comparaison impossible
+  (code inconnu…), le motif est dans `reasons`. Rien du Passeport n'est révélé, seulement oui ou non.
 
 ### `verifyPassport` — fonction SQL `verify_badge(code)` · **public, sans authentification**
 
 `supabase.rpc('verify_badge', { code })` avec la clé publique : la fonction (`security definer`, migration 0005) ne renvoie
-que `film_title`, `director`, `declarations`, `c2pa_signed`. Le front y ajoute les outils du catalogue et forme le
+que `film_title`, `director`, `declarations`, `c2pa_signed`. Le front y ajoute les fiches des outils déclarés, lues dans la
+table `ai_tools` (lecture publique, sans compte ; une panne du catalogue n'empêche pas d'afficher la page) et forme le
 `VerifyResult` : la déclaration, les outils utilisés, l'état de la signature. Le code `exemple` affiche un Passeport fictif.
 ```json
 { "passport": { "id": "exemple", "film_title": "[Film d'exemple]", "badge_code": "EN-EXEM-PL", "c2pa_signed": true, "…": "…" },

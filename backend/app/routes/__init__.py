@@ -2,11 +2,13 @@ from fastapi import APIRouter, Depends
 
 from app.core.auth import get_current_user
 from app.routes import (
+    ai_tools,
     calibration,
     callsheets,
     festivals,
     health,
     planner,
+    passports,
     projects,
     scenario,
     scouting,
@@ -14,6 +16,7 @@ from app.routes import (
     shot_spec,
     subtitles,
     synopsis,
+    verify,
     workspaces,
 )
 
@@ -33,3 +36,6 @@ api_router.include_router(workspaces.router)
 api_router.include_router(festivals.router)
 api_router.include_router(subtitles.router)
 api_router.include_router(synopsis.router)
+api_router.include_router(ai_tools.router)
+api_router.include_router(passports.router)
+api_router.include_router(verify.router)

@@ -1,5 +1,6 @@
 import type { AiTool, Department, DepartmentDeclaration, UsageLevel } from '@/api/types';
-import { Field, Icon, Input, SegmentedControl, Select, TextArea } from '@/components/ui';
+import { Button, Field, Icon, Input, SegmentedControl, Select, TextArea } from '@/components/ui';
+import { useFindTool } from '../hooks/usePassport';
 import { DEPARTMENT_HINTS, DEPARTMENT_LABELS, USAGE_HINTS, USAGE_LABELS } from '../lib/labels';
 import { ToolInfo } from './ToolStatus';
 
@@ -27,6 +28,7 @@ export function DepartmentCard({
     human_decisions: '',
   };
   const set = (patch: Partial<DepartmentDeclaration>) => onChange({ ...d, ...patch });
+  const find = useFindTool();
   const tool = tools.find((t) => t.id === d.tool_id);
   const toolValue = d.tool_id ?? (d.custom_tool !== undefined ? OTHER : '');
 
@@ -91,9 +93,41 @@ export function DepartmentCard({
               </Select>
             </Field>
             {toolValue === OTHER ? (
-              <Field label="Nom de l’outil" hint="Absent du catalogue : son statut sera « Non divulgué ».">
-                <Input value={d.custom_tool ?? ''} onChange={(e) => set({ custom_tool: e.target.value })} />
-              </Field>
+              <div className="flex flex-col gap-3">
+                <Field
+                  label="Nom de l’outil"
+                  hint="Absent de la liste ? Nous cherchons sa documentation publique sur le site du fournisseur (10 à 60 secondes). Sans résultat vérifiable, il est déclaré « hors catalogue »."
+                >
+                  <Input value={d.custom_tool ?? ''} onChange={(e) => set({ custom_tool: e.target.value })} />
+                </Field>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    loading={find.isPending}
+                    disabled={(d.custom_tool ?? '').trim().length < 2}
+                    onClick={() =>
+                      find.mutate((d.custom_tool ?? '').trim(), {
+                        onSuccess: (found) => set({ tool_id: found.id, custom_tool: undefined }),
+                      })
+                    }
+                  >
+                    Chercher cet outil
+                  </Button>
+                  {find.isPending ? (
+                    <p role="status" className="text-meta text-muted-on-light">
+                      Recherche en cours… tu peux continuer à remplir cette page.
+                    </p>
+                  ) : null}
+                </div>
+                {find.isError ? (
+                  <p role="alert" className="flex items-start gap-1.5 text-meta font-semibold text-warn-fg">
+                    <Icon name="alert" size={14} className="mt-0.5 shrink-0" />
+                    {find.error.message} L’outil reste déclaré « hors catalogue » : ce n’est pas un reproche,
+                    nous n’avons simplement pas de source à citer.
+                  </p>
+                ) : null}
+              </div>
             ) : null}
             {tool ? <ToolInfo tool={tool} /> : null}
           </div>

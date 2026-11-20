@@ -10,6 +10,7 @@ from app.core.config import Settings
 from app.core.errors import AppError
 from app.prompts import moving, static
 from app.schemas.shot_spec import LLMMovingPlan, LLMStaticPlan, ShotSpecRequest
+from app.services import llm_service
 from app.services.llm_service import LLMService, LLMUnavailable
 
 CHOICES = {
@@ -161,3 +162,71 @@ def test_client_uses_v1beta_for_structured_output():
 def test_no_key_raises():
     with pytest.raises(LLMUnavailable, match="GEMINI_API_KEY"):
         run(LLMService(Settings(gemini_api_key="")).generate_static("", SCENE))
+
+
+def test_an_overloaded_model_is_not_reported_as_an_unknown_model():
+    """Un 503 « the model is overloaded » contient le mot « model » : ce n'est pas un modèle introuvable."""
+    overloaded = AsyncMock(
+        side_effect=errors.ServerError(
+            503, {"error": {"message": "The model is overloaded. Please try again later."}}
+        )
+    )
+    with pytest.raises(LLMUnavailable) as exc:
+        run(service(overloaded).generate_static("", SCENE))
+    assert "LLM_MODEL" not in str(exc.value) and "surchargé" in str(exc.value)
+    gone = AsyncMock(
+        side_effect=errors.ClientError(404, {"error": {"message": "models/x is not found"}})
+    )
+    with pytest.raises(LLMUnavailable, match="LLM_MODEL"):
+        run(service(gone).generate_static("", SCENE))
+
+
+def test_research_can_use_its_own_model_with_its_own_quota():
+    from app.services.llm_service import research_service
+
+    base = Settings(_env_file=None, gemini_api_key="k", llm_model="gemini-coach")
+    assert research_service(base).model == "gemini-coach"  # par défaut : le même modèle
+    other = Settings(
+        _env_file=None,
+        gemini_api_key="k",
+        llm_model="gemini-coach",
+        tool_research_model="gemini-research",
+    )
+    assert research_service(other).model == "gemini-research"
+    assert LLMService(other).model == "gemini-coach"  # le Coach n'est pas touché
+
+
+@pytest.fixture(autouse=True)
+def no_waiting(monkeypatch):
+    monkeypatch.setattr(llm_service, "RETRY_DELAYS", (0.0, 0.0))
+
+
+def _ok_response():
+    return SimpleNamespace(parsed=None, text=json.dumps(STATIC_JSON), usage_metadata=None)
+
+
+def test_a_passing_overload_is_retried_then_succeeds():
+    generate = AsyncMock(
+        side_effect=[
+            errors.ServerError(503, {"error": {"message": "The model is overloaded."}}),
+            errors.ServerError(503, {"error": {"message": "The model is overloaded."}}),
+            _ok_response(),
+        ]
+    )
+    plan = run(service(generate).generate_static("", SCENE))
+    assert plan.shot.label_fr and generate.await_count == 3
+
+
+def test_a_lasting_overload_gives_up_after_three_attempts():
+    generate = AsyncMock(side_effect=errors.ServerError(503, {"error": {"message": "overloaded"}}))
+    with pytest.raises(LLMUnavailable, match="surchargé"):
+        run(service(generate).generate_static("", SCENE))
+    assert generate.await_count == 3
+
+
+@pytest.mark.parametrize("code", [400, 401, 403, 404, 429])
+def test_quota_and_refusals_are_never_retried(code):
+    generate = AsyncMock(side_effect=errors.ClientError(code, {"error": {"message": "x"}}))
+    with pytest.raises((LLMUnavailable, AppError)):
+        run(service(generate).generate_static("", SCENE))
+    assert generate.await_count == 1

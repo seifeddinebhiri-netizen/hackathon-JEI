@@ -47,7 +47,7 @@ export function DayInfo({ day, index }: { day: ShootingDay; index: number }) {
           <Icon name="doc" size={18} />
         </Link>
       </p>
-      <h2 className="-mt-2 text-[22px] leading-tight">
+      <h2 className="-mt-2 font-display text-h4 font-bold">
         {locs.length ? locs.join(' et ') : 'Lieu à préciser'}
       </h2>
       <p className="text-meta">

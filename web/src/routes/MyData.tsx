@@ -47,6 +47,18 @@ const STORED: { icon: IconName; what: string; where: string; visible: string }[]
     where: 'Serveur',
     visible: 'Public via la page de vérification',
   },
+  {
+    icon: 'layers',
+    what: 'Tes espaces de travail du Coach : la scène que tu décris, le plan proposé par l’IA, tes modifications',
+    where: 'Serveur',
+    visible: 'Toi seulement',
+  },
+  {
+    icon: 'sparkle',
+    what: 'Le texte de ta scène, envoyé à l’IA pour proposer un plan',
+    where: 'Gemini (Google)',
+    visible: 'Google, selon son offre : avec l’offre gratuite, il peut servir à améliorer ses services',
+  },
   { icon: 'doc', what: 'Tes sous-titres', where: 'Serveur', visible: 'Toi seulement' },
   { icon: 'lock', what: 'Ta session de connexion', where: 'Ce navigateur', visible: 'Toi seulement' },
   {
@@ -64,11 +76,11 @@ const NOT_STORED: { icon: IconName; text: string }[] = [
   },
   {
     icon: 'phone',
-    text: 'Les images du Coach : elles seront traitées sur ton téléphone et jamais envoyées.',
+    text: 'Les images du Coach : elles sont traitées sur ton téléphone et jamais envoyées.',
   },
   {
-    icon: 'sparkle',
-    text: 'Encadré n’entraîne pas de modèle sur tes textes. Les conditions du fournisseur IA s’appliquent aux analyses demandées.',
+    icon: 'shield',
+    text: 'Les PDF du Passeport : ils sont fabriqués à la demande. Un PDF déposé pour vérification est lu puis oublié.',
   },
   { icon: 'eye', text: 'Pas de publicité ni de traceur publicitaire.' },
 ];
@@ -122,13 +134,32 @@ export default function MyData() {
         <h2 id="stocke" className="text-h2">
           Ce qui est enregistré
         </h2>
+        {/* Téléphone : une fiche par donnée (le tableau à trois colonnes sortait de l'écran). */}
+        <ul
+          aria-label="Données enregistrées"
+          className="mt-4 divide-y divide-line-light border-2 border-ink bg-white md:hidden"
+        >
+          {STORED.map((r) => (
+            <li key={r.what} className="flex flex-col gap-2 p-4">
+              <span className="flex items-start gap-2">
+                <Icon name={r.icon} size={18} className="mt-0.5 shrink-0" /> {r.what}
+              </span>
+              <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-meta">
+                <dt className="text-muted-on-light">Où</dt>
+                <dd>{r.where}</dd>
+                <dt className="text-muted-on-light">Qui la voit</dt>
+                <dd>{r.visible}</dd>
+              </dl>
+            </li>
+          ))}
+        </ul>
         <div
-          className="mt-4 overflow-x-auto border-2 border-ink bg-white"
+          className="mt-4 hidden overflow-x-auto border-2 border-ink bg-white md:block"
           role="region"
           aria-label="Tableau des données enregistrées"
           tabIndex={0}
         >
-          <table className="w-full min-w-[560px] text-left">
+          <table className="w-full text-left">
             <thead className="border-b-2 border-ink bg-paper">
               <tr>
                 <th scope="col" className="eyebrow p-3">

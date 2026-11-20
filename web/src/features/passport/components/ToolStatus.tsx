@@ -27,18 +27,26 @@ export function ToolInfo({ tool }: { tool: AiTool }) {
         </p>
         <ToolStatusChip status={tool.status} />
       </div>
-      <p className="text-meta">{tool.note}</p>
+      {tool.note ? <p className="text-meta">{tool.note}</p> : null}
       <p className="flex flex-wrap items-center gap-x-3 text-meta text-muted-on-light">
-        <a
-          href={tool.source_url}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex min-h-11 items-center gap-1 underline underline-offset-4"
-        >
-          <Icon name="external" size={14} /> Source du fournisseur
-        </a>
-        <span>Vérifié le {formatDate(tool.checked_at)}</span>
+        {tool.source_url ? (
+          <a
+            href={tool.source_url}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex min-h-11 items-center gap-1 underline underline-offset-4"
+          >
+            <Icon name="external" size={14} /> Source du fournisseur
+          </a>
+        ) : null}
+        {tool.checked_at ? <span>Vérifié le {formatDate(tool.checked_at)}</span> : null}
       </p>
+      {tool.reviewed === false ? (
+        <p className="flex items-start gap-1.5 text-meta text-muted-on-light">
+          <Icon name="info" size={14} className="mt-0.5 shrink-0" />
+          Fiche non relue par une personne : elle vient d’une recherche automatique.
+        </p>
+      ) : null}
     </div>
   );
 }

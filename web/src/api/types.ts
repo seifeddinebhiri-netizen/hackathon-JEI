@@ -272,7 +272,8 @@ export type QuickSlot = {
 // ---------------------------------------------------------------------------
 export type Department =
   'scenario' | 'image' | 'montage' | 'son_voix' | 'musique' | 'vfx' | 'sous_titres' | 'affiche_promo';
-export type AiToolStatus = 'documente' | 'partiel' | 'non_divulgue';
+/** `non_evalue` : aucune recherche n'a abouti pour cet outil. Ce n'est pas « non divulgué » (le fournisseur ne publie rien). */
+export type AiToolStatus = 'documente' | 'partiel' | 'non_divulgue' | 'non_evalue';
 export type AiTool = {
   id: string;
   name: string;
@@ -281,6 +282,17 @@ export type AiTool = {
   note: string;
   source_url: string;
   checked_at: string;
+  /** Une personne a relu cette fiche (sinon : recherche automatique ou chargement initial, non relue). */
+  reviewed?: boolean;
+};
+
+/** Réponse à « ajouter cet outil » : déjà au catalogue, ou une recherche est lancée sur le serveur. */
+export type ToolResolution = { state: 'found'; tool: AiTool } | { state: 'researching'; run_id: string };
+export type ToolRun = {
+  id: string;
+  state: 'queued' | 'running' | 'done' | 'failed';
+  tool_slug?: string;
+  error?: string;
 };
 export type UsageLevel = 'assistance' | 'generation_partielle' | 'generation_complete';
 export type DepartmentDeclaration = {
@@ -500,9 +512,25 @@ export type PassportCheck = {
   missing: { department: Department; message: string }[];
   warnings: string[];
 };
-export type PassportPdf = { url: string };
-export type C2paSignInput = { passport_id: string; file_name: string };
-export type C2paSignResult = { signed: boolean; manifest_id: string; signed_at: string; simulated: boolean };
+/** `url` : adresse du PDF à ouvrir. Avec le vrai backend, c'est le PDF signé (C2PA) ; `simulated` : signature de test. */
+export type PassportPdf = { url: string; signed?: boolean; simulated?: boolean; manifest_id?: string };
+/** Résultat de la vérification d'un PDF de Passeport déposé par un festival (rien n'est conservé). */
+export type PdfVerification = {
+  state: 'none' | 'invalid' | 'valid' | 'trusted';
+  /** Signé par NOTRE certificat (et pas par quelqu'un qui aurait copié nos informations). */
+  issued_by_us: boolean;
+  signer?: string;
+  issuer?: string;
+  signing_mode?: 'test' | 'production';
+  badge_code?: string;
+  film_title?: string;
+  issued_at?: string;
+  tools: { slug: string; status?: string; reviewed: boolean }[];
+  problems: string[];
+  /** Le Passeport actuel est-il celui du PDF ? `undefined` : impossible à dire. */
+  matches_passport?: boolean;
+  reasons: string[];
+};
 export type VerifyResult = {
   passport: Passport;
   tools: AiTool[];

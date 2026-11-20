@@ -1,0 +1,444 @@
+{
+ "version": 1,
+ "note": "Adresses lues par scripts/verify_tool_sources.py : seules les pages lisibles et juridiques sont gardées.",
+ "tools": [
+  {
+   "name": "Claude",
+   "vendor": "Anthropic",
+   "site": "https://claude.ai",
+   "pages": [
+    "https://www.anthropic.com/legal/consumer-terms",
+    "https://www.anthropic.com/legal/privacy",
+    "https://www.anthropic.com/legal/commercial-terms"
+   ],
+   "aliases": [
+    "claude ai",
+    "anthropic claude"
+   ],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "Gemini",
+   "vendor": "Google",
+   "site": "https://gemini.google.com",
+   "pages": [
+    "https://aistudio.google.com/docs/terms",
+    "https://support.google.com/gemini/answer/13594961",
+    "https://deepmind.google/models/synthid/"
+   ],
+   "aliases": [
+    "google gemini",
+    "gemini ai",
+    "bard"
+   ],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "Adobe Firefly",
+   "vendor": "Adobe",
+   "site": "https://www.adobe.com/products/firefly.html",
+   "pages": [
+    "https://www.adobe.com/privacy/policy.html",
+    "https://www.adobe.com/legal/licenses-terms/adobe-gen-ai-user-guidelines.html"
+   ],
+   "aliases": [
+    "adobefirefly",
+    "firefly"
+   ],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "Runway",
+   "vendor": "Runway AI, Inc.",
+   "site": "https://runway.com",
+   "pages": [
+    "https://runway.com/terms-of-use",
+    "https://runway.com/privacy-policy",
+    "https://runway.com/safety/verify"
+   ],
+   "aliases": [
+    "runwayml",
+    "runway ml",
+    "runway gen"
+   ],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "ElevenLabs",
+   "vendor": "Eleven Labs Inc.",
+   "site": "https://elevenlabs.io",
+   "pages": [
+    "https://elevenlabs.io/terms-of-use",
+    "https://elevenlabs.io/privacy-policy",
+    "https://elevenlabs.io/use-policy"
+   ],
+   "aliases": [
+    "eleven labs",
+    "11labs",
+    "elevenlabs ai"
+   ],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "Suno",
+   "vendor": "Suno, Inc.",
+   "site": "https://suno.com",
+   "pages": [
+    "https://suno.com/terms",
+    "https://suno.com/privacy",
+    "https://help.suno.com/en/articles/2416769"
+   ],
+   "aliases": [
+    "suno ai",
+    "sunoai"
+   ],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "Stable Diffusion",
+   "vendor": "Stability AI",
+   "site": "https://stability.ai",
+   "pages": [
+    "https://stability.ai/terms-of-service",
+    "https://stability.ai/privacypolicy",
+    "https://huggingface.co/stabilityai/stable-diffusion-3.5-large",
+    "https://stability.ai/community-license-agreement"
+   ],
+   "aliases": [
+    "stablediffusion",
+    "stability ai",
+    "sd",
+    "sdxl"
+   ],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "DeepL",
+   "vendor": "DeepL SE",
+   "site": "https://www.deepl.com",
+   "pages": [
+    "https://www.deepl.com/en/pro-license",
+    "https://www.deepl.com/en/privacy",
+    "https://www.deepl.com/en/terms-of-use"
+   ],
+   "aliases": [
+    "deepl translator",
+    "deepl write"
+   ],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "Perplexity",
+   "vendor": "Perplexity AI",
+   "site": "https://www.perplexity.ai",
+   "pages": [
+    "https://www.perplexity.ai/hub/legal/terms-of-service",
+    "https://www.perplexity.ai/hub/legal/privacy-notice"
+   ],
+   "aliases": [
+    "perplexity ai"
+   ],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "Leonardo.ai",
+   "vendor": "Leonardo Interactive",
+   "site": "https://leonardo.ai",
+   "pages": [
+    "https://leonardo.ai/privacy-policy"
+   ],
+   "aliases": [
+    "leonardo",
+    "leonardo ai"
+   ],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "Pika",
+   "vendor": "Pika Labs",
+   "site": "https://pika.art",
+   "pages": [
+    "https://pika.art/terms-of-service",
+    "https://pika.art/privacy-policy"
+   ],
+   "aliases": [
+    "pika labs",
+    "pika art"
+   ],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "Luma Dream Machine",
+   "vendor": "Luma AI",
+   "site": "https://lumalabs.ai",
+   "pages": [
+    "https://lumalabs.ai/legal/terms-of-service",
+    "https://lumalabs.ai/legal/privacy-policy"
+   ],
+   "aliases": [
+    "luma",
+    "luma ai",
+    "dream machine"
+   ],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "HeyGen",
+   "vendor": "HeyGen",
+   "site": "https://www.heygen.com",
+   "pages": [
+    "https://www.heygen.com/terms",
+    "https://www.heygen.com/privacy"
+   ],
+   "aliases": [],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "Synthesia",
+   "vendor": "Synthesia",
+   "site": "https://www.synthesia.io",
+   "pages": [
+    "https://www.synthesia.io/legal/privacy-policy"
+   ],
+   "aliases": [],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "Descript",
+   "vendor": "Descript",
+   "site": "https://www.descript.com",
+   "pages": [
+    "https://www.descript.com/terms",
+    "https://www.descript.com/privacy"
+   ],
+   "aliases": [],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "Canva",
+   "vendor": "Canva",
+   "site": "https://www.canva.com",
+   "pages": [
+    "https://www.canva.com/policies/terms-of-use/",
+    "https://www.canva.com/policies/privacy-policy/",
+    "https://www.canva.com/policies/ai-product-terms/"
+   ],
+   "aliases": [
+    "canva magic",
+    "magic studio"
+   ],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "Grok",
+   "vendor": "xAI",
+   "site": "https://x.ai",
+   "pages": [
+    "https://x.ai/legal/terms-of-service",
+    "https://x.ai/legal/privacy-policy"
+   ],
+   "aliases": [
+    "xai grok",
+    "grok ai",
+    "xai"
+   ],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "DeepSeek",
+   "vendor": "DeepSeek",
+   "site": "https://www.deepseek.com",
+   "pages": [
+    "https://cdn.deepseek.com/policies/en-US/deepseek-terms-of-use.html",
+    "https://cdn.deepseek.com/policies/en-US/deepseek-privacy-policy.html"
+   ],
+   "aliases": [
+    "deepseek r1",
+    "deepseek v3",
+    "deep seek"
+   ],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "Udio",
+   "vendor": "Uncharted Labs",
+   "site": "https://www.udio.com",
+   "pages": [
+    "https://www.udio.com/terms-of-service"
+   ],
+   "aliases": [],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "Mistral Le Chat",
+   "vendor": "Mistral AI",
+   "site": "https://mistral.ai",
+   "pages": [
+    "https://legal.mistral.ai/terms/get-started/"
+   ],
+   "aliases": [
+    "le chat",
+    "mistral",
+    "mistral ai",
+    "lechat"
+   ],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "Cohere",
+   "vendor": "Cohere",
+   "site": "https://cohere.com",
+   "pages": [
+    "https://cohere.com/terms-of-use",
+    "https://cohere.com/privacy"
+   ],
+   "aliases": [
+    "cohere command"
+   ],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "Hugging Face",
+   "vendor": "Hugging Face",
+   "site": "https://huggingface.co",
+   "pages": [
+    "https://huggingface.co/terms-of-service",
+    "https://huggingface.co/privacy"
+   ],
+   "aliases": [
+    "huggingface",
+    "hf"
+   ],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "Replicate",
+   "vendor": "Replicate",
+   "site": "https://replicate.com",
+   "pages": [
+    "https://replicate.com/terms",
+    "https://replicate.com/privacy"
+   ],
+   "aliases": [],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "Flux",
+   "vendor": "Black Forest Labs",
+   "site": "https://bfl.ai",
+   "pages": [
+    "https://bfl.ai/legal/terms-of-service"
+   ],
+   "aliases": [
+    "black forest labs",
+    "flux ai",
+    "flux pro",
+    "flux dev"
+   ],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "OpenAI ChatGPT",
+   "vendor": "OpenAI",
+   "site": "https://openai.com",
+   "pages": [
+    "https://openai.com/policies/terms-of-use/",
+    "https://openai.com/policies/privacy-policy/"
+   ],
+   "aliases": [
+    "chatgpt",
+    "chat gpt",
+    "gpt",
+    "openai",
+    "sora",
+    "dall-e",
+    "dalle"
+   ],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "Microsoft Copilot",
+   "vendor": "Microsoft",
+   "site": "https://copilot.microsoft.com",
+   "pages": [
+    "https://www.microsoft.com/en-us/servicesagreement",
+    "https://www.microsoft.com/en-us/privacy/privacystatement"
+   ],
+   "aliases": [
+    "copilot",
+    "bing chat",
+    "bing ai"
+   ],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "GitHub Copilot",
+   "vendor": "GitHub",
+   "site": "https://github.com/features/copilot",
+   "pages": [
+    "https://docs.github.com/en/site-policy/github-terms/github-terms-for-additional-products-and-features",
+    "https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement"
+   ],
+   "aliases": [
+    "github copilot"
+   ],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "Llama",
+   "vendor": "Meta",
+   "site": "https://www.llama.com",
+   "pages": [
+    "https://dev.meta.ai/llama/llama3/license",
+    "https://dev.meta.ai/llama/llama3_1/license"
+   ],
+   "aliases": [
+    "meta llama",
+    "llama 3",
+    "meta ai"
+   ],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "Resemble AI",
+   "vendor": "Resemble AI",
+   "site": "https://www.resemble.ai",
+   "pages": [
+    "https://www.resemble.ai/terms-of-service",
+    "https://www.resemble.ai/privacy-policy"
+   ],
+   "aliases": [
+    "resemble"
+   ],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "Krea",
+   "vendor": "Krea AI",
+   "site": "https://www.krea.ai",
+   "pages": [
+    "https://www.krea.ai/privacy"
+   ],
+   "aliases": [
+    "krea ai"
+   ],
+   "verified_on": "2026-11-20"
+  },
+  {
+   "name": "Kimi",
+   "vendor": "Moonshot AI",
+   "site": "https://www.kimi.com",
+   "pages": [
+    "https://www.kimi.com/user/agreement/userPrivacy"
+   ],
+   "aliases": [
+    "kimi k2",
+    "kimik2",
+    "moonshot",
+    "moonshot ai",
+    "kimi ai"
+   ],
+   "verified_on": "2026-11-20"
+  }
+ ]
+}

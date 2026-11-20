@@ -16,6 +16,15 @@ function fakeApi(origin: 'reel' | 'mock'): Api {
       'createSubtitleDraft',
       'getSubtitleDraft',
       'saveSubtitles',
+      'getProjectPassport',
+      'savePassport',
+      'checkPassport',
+      'verifyPassport',
+      'verifyPassportPdf',
+      'getPassportPdfUrl',
+      'getAiTools',
+      'resolveAiTool',
+      'getAiToolRun',
     ],
     getOwnPropertyDescriptor: () => ({ enumerable: true, configurable: true }),
   });
@@ -37,6 +46,24 @@ describe('mode mixte (VITE_REAL_ENDPOINTS)', () => {
     const api = buildApi({ useMocks: true, realEndpoints: ['createSubtitleDraft'], real, mock });
     await expect(api.getSubtitleDraft('p')).resolves.toBe('reel:getSubtitleDraft');
     await expect(api.saveSubtitles('p', [])).resolves.toBe('reel:saveSubtitles');
+    await expect(api.getProject('p')).resolves.toBe('mock:getProject');
+  });
+
+  it('Passeport IA : nommer une fonction rend réels le Passeport, le catalogue, la recherche et le PDF signé', async () => {
+    const api = buildApi({ useMocks: true, realEndpoints: ['getPassportPdfUrl'], real, mock });
+    for (const name of [
+      'getProjectPassport',
+      'savePassport',
+      'checkPassport',
+      'verifyPassport',
+      'verifyPassportPdf',
+      'getAiTools',
+      'resolveAiTool',
+      'getAiToolRun',
+    ] as const) {
+      await expect((api[name] as unknown as () => Promise<string>)()).resolves.toBe(`reel:${name}`);
+    }
+    // Le projet reste simulé tant qu'on ne le demande pas : voir .env.example (il doit exister en base).
     await expect(api.getProject('p')).resolves.toBe('mock:getProject');
   });
 

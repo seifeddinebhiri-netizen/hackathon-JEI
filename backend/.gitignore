@@ -3,3 +3,8 @@ __pycache__/
 .env
 .pytest_cache/
 .ruff_cache/
+
+# Certificats et clés de signature C2PA : jamais dans git
+certs/
+*.pem
+*.key

@@ -357,10 +357,11 @@ export const aiToolSchema: z.ZodType<T.AiTool> = z.object({
   id: z.string(),
   name: z.string(),
   provider: z.string(),
-  status: z.enum(['documente', 'partiel', 'non_divulgue']),
+  status: z.enum(['documente', 'partiel', 'non_divulgue', 'non_evalue']),
   note: z.string(),
   source_url: z.string(),
   checked_at: z.string(),
+  reviewed: z.boolean().optional(),
 });
 
 export const departmentDeclarationSchema: z.ZodType<T.DepartmentDeclaration> = z.object({
@@ -391,14 +392,28 @@ export const passportCheckSchema: z.ZodType<T.PassportCheck> = z.object({
   warnings: z.array(z.string()),
 });
 
-export const passportPdfSchema: z.ZodType<T.PassportPdf> = z.object({ url: z.string() });
-
-export const c2paSignResultSchema: z.ZodType<T.C2paSignResult> = z.object({
-  signed: z.boolean(),
-  manifest_id: z.string(),
-  signed_at: z.string(),
-  simulated: z.boolean(),
+export const passportPdfSchema: z.ZodType<T.PassportPdf> = z.object({
+  url: z.string(),
+  signed: z.boolean().optional(),
+  simulated: z.boolean().optional(),
+  manifest_id: z.string().optional(),
 });
+
+const nullish = <T extends z.ZodType>(s: T) => s.nullish().transform((v) => v ?? undefined);
+export const pdfVerificationSchema: z.ZodType<T.PdfVerification> = z.object({
+  state: z.enum(['none', 'invalid', 'valid', 'trusted']),
+  issued_by_us: z.boolean(),
+  signer: nullish(z.string()),
+  issuer: nullish(z.string()),
+  signing_mode: nullish(z.enum(['test', 'production'])),
+  badge_code: nullish(z.string()),
+  film_title: nullish(z.string()),
+  issued_at: nullish(z.string()),
+  tools: z.array(z.object({ slug: z.string(), status: nullish(z.string()), reviewed: z.boolean() })),
+  problems: z.array(z.string()),
+  matches_passport: nullish(z.boolean()),
+  reasons: z.array(z.string()),
+}) as z.ZodType<T.PdfVerification>;
 
 export const verifyResultSchema: z.ZodType<T.VerifyResult> = z.object({
   passport: passportSchema,
@@ -692,3 +707,43 @@ export const workspaceRecordSchema: z.ZodType<T.WorkspaceRecord> = z.object({
   created_at: z.string(),
   updated_at: z.string(),
 });
+
+// --- Catalogue des outils d'IA (backend : GET /ai-tools ; Supabase : table ai_tools) --------------
+/** Fiche d'outil telle que la renvoie le backend (et la table ai_tools) : adaptée par `toAiTool`. */
+export const catalogToolSchema = z.object({
+  slug: z.string(),
+  name: z.string(),
+  vendor: z.string(),
+  official_site: z.string().nullable().optional(),
+  terms_url: z.string().nullable().optional(),
+  status: z.enum(['documente', 'partiel', 'non_divulgue']).nullable().optional(),
+  review_state: z.enum(['a_verifier', 'verifie']),
+  research_state: z.enum(['none', 'incomplete_access', 'complete']),
+  note_fr: z.string().optional(),
+  checked_at: z.string().nullable().optional(),
+});
+export type CatalogTool = z.output<typeof catalogToolSchema>;
+
+export const toolResolutionSchema = z.discriminatedUnion('state', [
+  z.object({ state: z.literal('found'), tool: catalogToolSchema }),
+  z.object({ state: z.literal('researching'), run_id: z.string() }),
+]);
+
+/** Résolution déjà adaptée à l'interface (sortie de `resolveAiTool`). */
+export const toolResolutionOut: z.ZodType<T.ToolResolution> = z.union([
+  z.object({ state: z.literal('found'), tool: aiToolSchema }),
+  z.object({ state: z.literal('researching'), run_id: z.string() }),
+]);
+
+export const toolRunSchema: z.ZodType<T.ToolRun> = z.object({
+  id: z.string(),
+  state: z.enum(['queued', 'running', 'done', 'failed']),
+  tool_slug: z
+    .string()
+    .nullish()
+    .transform((v) => v ?? undefined),
+  error: z
+    .string()
+    .nullish()
+    .transform((v) => v ?? undefined),
+}) as z.ZodType<T.ToolRun>;

@@ -5,11 +5,13 @@
 import { z } from 'zod';
 import {
   request,
+  requestBlob,
   SUBTITLE_DRAFT_TIMEOUT_MS,
   UPLOAD_TIMEOUT_MS,
   uploadForm,
   type UploadProgress,
 } from './client';
+import { toAiTool } from './aiTools';
 import * as S from './schemas';
 import type * as T from './types';
 
@@ -132,8 +134,27 @@ export async function deleteWorkspace(id: string): Promise<{ ok: true }> {
   return request(`/workspaces/${encodeURIComponent(id)}`, { method: 'DELETE', schema: S.okSchema });
 }
 
+/** Catalogue des outils d'IA (nécessite un compte). L'identifiant d'un outil est son `slug`. */
 export async function getAiTools(): Promise<T.AiTool[]> {
-  return request('/ai-tools', { schema: z.array(S.aiToolSchema) });
+  const tools = await request('/ai-tools', { schema: z.array(S.catalogToolSchema) });
+  return tools.map(toAiTool);
+}
+
+/**
+ * « Ajouter cet outil » : déjà au catalogue, ou une recherche guidée est lancée SUR LE SERVEUR (le
+ * navigateur ne la règle ni ne la déclenche autrement ; elle prend 10 à 60 secondes).
+ */
+export async function resolveAiTool(name: string): Promise<T.ToolResolution> {
+  const r = await request('/ai-tools/resolve', {
+    method: 'POST',
+    body: { name },
+    schema: S.toolResolutionSchema,
+  });
+  return r.state === 'found' ? { state: 'found', tool: toAiTool(r.tool) } : r;
+}
+
+export async function getAiToolRun(runId: string): Promise<T.ToolRun> {
+  return request(`/ai-tools/runs/${encodeURIComponent(runId)}`, { schema: S.toolRunSchema });
 }
 
 /** Ajout proposé (à confirmer) : récupérer le Passeport d'un projet. `null` si aucun. */
@@ -151,12 +172,37 @@ export async function checkPassport(id: string): Promise<T.PassportCheck> {
   return request(`/passport/${encodeURIComponent(id)}/check`, { schema: S.passportCheckSchema });
 }
 
+/**
+ * PDF du Passeport d'un projet, fabriqué et SIGNÉ (C2PA) par le serveur à partir du Passeport enregistré.
+ * `id` est l'identifiant du projet (Passport.id = project_id). Le fichier est servi par une adresse
+ * locale au navigateur (`blob:`), à ouvrir dans un nouvel onglet.
+ */
 export async function getPassportPdfUrl(id: string): Promise<T.PassportPdf> {
-  return request(`/passport/${encodeURIComponent(id)}/pdf`, { schema: S.passportPdfSchema });
+  const { blob, headers } = await requestBlob(`/passports/${encodeURIComponent(id)}/pdf`, {
+    method: 'POST',
+    timeoutMs: 30_000,
+  });
+  return {
+    url: URL.createObjectURL(blob),
+    signed: true,
+    simulated: headers.get('X-C2PA-Simulated') !== 'false',
+    manifest_id: headers.get('X-C2PA-Manifest-Id') || undefined,
+  };
 }
 
-export async function signC2pa(input: T.C2paSignInput): Promise<T.C2paSignResult> {
-  return request('/c2pa/sign', { method: 'POST', body: input, schema: S.c2paSignResultSchema });
+/**
+ * Vérifier un PDF de Passeport reçu (PUBLIC, sans compte) : intact ? signé par nous ? identique au
+ * Passeport actuel ? Le fichier est lu par le serveur puis oublié.
+ */
+export async function verifyPassportPdf(file: File): Promise<T.PdfVerification> {
+  const formData = new FormData();
+  formData.append('file', file);
+  return request('/verify/pdf', {
+    method: 'POST',
+    formData,
+    timeoutMs: 30_000,
+    schema: S.pdfVerificationSchema,
+  });
 }
 
 export async function verifyPassport(id: string): Promise<T.VerifyResult> {
@@ -261,8 +307,10 @@ export type Api = {
   savePassport: typeof savePassport;
   checkPassport: typeof checkPassport;
   getPassportPdfUrl: typeof getPassportPdfUrl;
-  signC2pa: typeof signC2pa;
+  resolveAiTool: typeof resolveAiTool;
+  getAiToolRun: typeof getAiToolRun;
   verifyPassport: typeof verifyPassport;
+  verifyPassportPdf: typeof verifyPassportPdf;
   searchFestivals: typeof searchFestivals;
   getFestival: typeof getFestival;
   createSubtitleDraft: typeof createSubtitleDraft;

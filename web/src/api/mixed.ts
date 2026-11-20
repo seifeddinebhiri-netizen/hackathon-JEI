@@ -11,6 +11,20 @@ import type { Api } from './endpoints';
  */
 export const ENDPOINT_GROUPS: readonly (readonly (keyof Api)[])[] = [
   ['createSubtitleDraft', 'getSubtitleDraft', 'saveSubtitles'],
+  // Passeport IA : le PDF signé est fabriqué par le serveur à partir du Passeport enregistré dans
+  // Supabase, avec les outils du vrai catalogue. Le mélanger avec des mocks donnerait un PDF
+  // introuvable (404) ou des outils qui n'existent pas côté serveur.
+  [
+    'getProjectPassport',
+    'savePassport',
+    'checkPassport',
+    'verifyPassport',
+    'verifyPassportPdf',
+    'getPassportPdfUrl',
+    'getAiTools',
+    'resolveAiTool',
+    'getAiToolRun',
+  ],
 ];
 
 export function expandGroups(names: readonly string[]): string[] {

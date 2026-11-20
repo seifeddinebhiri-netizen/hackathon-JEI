@@ -10,6 +10,7 @@ export type FakeCall = { table: string; ops: [string, unknown[]][] };
 const METHODS = [
   'select',
   'eq',
+  'in',
   'order',
   'limit',
   'maybeSingle',

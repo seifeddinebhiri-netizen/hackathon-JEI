@@ -148,7 +148,7 @@ function PlanningProgress({ project }: { project: Project }) {
       }
     >
       <div className="flex items-baseline justify-between gap-2">
-        <p className="font-display text-[40px] leading-none font-bold">
+        <p className="font-display text-[40px] leading-none font-bold tabular-nums">
           {placed}
           <span className="text-h3 text-muted-on-light">/{total}</span>
         </p>
@@ -250,7 +250,7 @@ function PassportProgress({ project }: { project: Project }) {
         <ErrorState error={q.error} onRetry={() => void q.refetch()} />
       ) : (
         <>
-          <p className="font-display text-[40px] leading-none font-bold">
+          <p className="font-display text-[40px] leading-none font-bold tabular-nums">
             {declared}
             <span className="text-h3 text-muted-on-light">/{DEPARTMENTS.length}</span>
           </p>
@@ -270,7 +270,7 @@ function PassportProgress({ project }: { project: Project }) {
           ) : null}
           {q.data?.c2pa_signed ? (
             <p className="mt-3 flex items-center gap-1.5 text-meta text-ok-fg">
-              <Icon name="check" size={16} /> Fichier final signé
+              <Icon name="check" size={16} /> PDF du Passeport signé
             </p>
           ) : null}
         </>
@@ -291,6 +291,7 @@ function Deadlines({ project }: { project: Project }) {
     <Panel
       title="Prochaines dates limites"
       icon="clock"
+      className="md:col-span-2"
       action={
         <ButtonLink
           to={ids.length ? '/festival/dossiers' : '/festival'}

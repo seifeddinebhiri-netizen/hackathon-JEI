@@ -39,12 +39,14 @@ export const TOOL_STATUS_LABELS: Record<AiToolStatus, string> = {
   documente: 'Documenté',
   partiel: 'Partiel',
   non_divulgue: 'Non divulgué',
+  non_evalue: 'Non évalué',
 };
 
 export const TOOL_STATUS_TONES: Record<AiToolStatus, ChipTone> = {
   documente: 'ok',
   partiel: 'warn',
   non_divulgue: 'bad',
+  non_evalue: 'neutral',
 };
 
 /** Classe d'un département pour l'Étiquette IA. */
@@ -81,7 +83,7 @@ export const DEPARTMENT_HINTS: Record<Department, string> = {
 };
 
 export const TOOL_STATUS_HELP =
-  'Ce statut décrit ce que le fournisseur de l’outil publie sur ses données d’entraînement et ses droits. Ce n’est pas un jugement sur ton travail. « Non divulgué » est un statut valide.';
+  'Ce statut décrit ce que le fournisseur de l’outil publie sur ses données d’entraînement et ses droits. Ce n’est pas un jugement sur ton travail. « Non divulgué » est un statut valide. « Non évalué » veut dire que nous n’avons pas pu lire la documentation de l’outil : ce n’est pas un reproche.';
 
 export type DeclarationState = 'vide' | 'humain' | 'ia_complet' | 'ia_incomplet';
 

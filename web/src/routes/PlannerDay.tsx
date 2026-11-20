@@ -126,7 +126,7 @@ function SceneRow({
       </p>
       <div className="col-start-2 md:col-start-3 md:row-span-2">
         <p className="flex flex-wrap items-center gap-2">
-          <span className="font-display text-[18px] font-bold">Sc. {scene.number}</span>
+          <span className="font-display text-lead font-bold">Sc. {scene.number}</span>
           <SettingTag setting={scene.setting} />
           <MomentTag moment={scene.moment} />
           <span className="font-semibold">{scene.title}</span>

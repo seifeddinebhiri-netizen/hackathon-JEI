@@ -98,7 +98,7 @@ flowchart LR
 | Base de données | Supabase (authentification, Postgres, pgvector pour la recherche par similarité) |
 | LLM | API Google Gemini (offre gratuite pendant le hackathon), sorties structurées validées par Pydantic. Le modèle se règle par `LLM_MODEL` |
 | Météo et soleil | Open-Meteo, SunCalc |
-| Passeport | WeasyPrint ou ReportLab (PDF), `c2patool` (C2PA) |
+| Passeport | ReportLab (PDF), `c2pa-python` (C2PA) |
 | Déploiement | Vercel (front), Render ou Railway (backend), HTTPS obligatoire pour la caméra |
 
 ---
@@ -134,9 +134,9 @@ Détail complet : [section 4](#4-module-1-en-détail--le-coach-de-cadrage).
 
 **Flux prévu.**
 1. Le cinéaste liste les outils d'IA utilisés (et ce qu'il a **décidé lui-même**).
-2. Le backend interroge un **agent de recherche** pour retrouver la documentation publique de chaque outil (politique d'entraînement, conditions d'usage), et notre **jeu de données** d'outils déjà documentés.
+2. Le backend consulte son **catalogue** d'outils déjà documentés. Pour un outil absent, une **recherche guidée** (pas un agent libre) retrouve le site officiel, lit ses pages « conditions » et « confidentialité », puis **vérifie en code que chaque citation figure mot pour mot dans la page**. Un site qui refuse la lecture automatique n'est jamais contourné. Détails : `backend/docs/RECHERCHE_OUTILS.md`.
 3. Chaque outil reçoit un statut : **Documenté**, **Partiel** ou **Non divulgué**. « Non divulgué » est un statut valide.
-4. Le backend génère un **PDF** (WeasyPrint/ReportLab) et une **signature C2PA** (`c2patool`).
+4. Le backend génère un **PDF** (ReportLab) et le signe en **C2PA** (`c2pa-python`). Voir `backend/docs/C2PA.md`.
 5. Une **page de vérification** publique permet à un festival de contrôler le passeport.
 
 **Ce que le Passeport ne dit jamais.** Il ne déclare jamais un film « légal » ou « sûr ». Mention obligatoire : *« Déclaration fondée sur la documentation publique. Ce n'est pas un avis juridique. »*
@@ -281,6 +281,11 @@ Documentation interactive en local : `http://localhost:8000/docs`.
 | GET | `/me` | commun | fait (profil de l'utilisateur connecté) |
 | GET / PUT / DELETE | `/workspaces`, `/workspaces/{id}` | 1. Cadrage (espaces de travail) | fait. Jeton exigé, 12 espaces au maximum par utilisateur, détection des écritures périmées (409) |
 | POST | `/plan/suggest` | 2. Planification | prévu |
+| GET | `/ai-tools`, `/ai-tools/{slug}` | 3. Passeport | fait (catalogue des outils d'IA) |
+| POST | `/ai-tools/resolve` | 3. Passeport | fait (outil absent : recherche guidée lancée sur le serveur) |
+| GET | `/ai-tools/runs/{id}` | 3. Passeport | fait |
+| POST | `/passports/{project_id}/pdf` | 3. Passeport | fait (PDF fabriqué et signé C2PA par le serveur) |
+| POST | `/verify/pdf` | 3. Passeport | fait (public : un festival dépose le PDF reçu, rien n'est conservé) |
 | POST | `/passport` | 3. Passeport | prévu |
 | GET | `/passport/{id}/check`, `/passport/{id}/pdf`, `/verify/{id}` | 3. Passeport | prévu |
 | POST | `/c2pa/sign` | 3. Passeport | prévu |

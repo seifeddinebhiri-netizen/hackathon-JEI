@@ -109,7 +109,7 @@ function PassportEditor({ project, initial }: { project: Project; initial: Passp
         />
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="text-h3">Ta déclaration</h2>
-          <p className="text-meta text-muted-on-light">
+          <p className="text-meta text-muted-on-light tabular-nums">
             {declared}/{DEPARTMENTS.length} départements
           </p>
         </div>

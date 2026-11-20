@@ -19,6 +19,13 @@ dependencies = [
     "supabase>=2.34.1",
     "tzdata>=2025.1",
     "uvicorn[standard]>=0.54.0",
+    "reportlab>=5.1.0",
+    "c2pa-python>=0.39.0",
+]
+
+[project.optional-dependencies]
+browser = [
+    "playwright>=1.65.2",
 ]
 
 [dependency-groups]

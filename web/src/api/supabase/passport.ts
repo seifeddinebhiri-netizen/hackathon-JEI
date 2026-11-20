@@ -11,7 +11,7 @@ import { env } from '@/lib/env';
 import { supabase } from '@/lib/supabase';
 import { apiError, validate } from '../client';
 import type { Api } from '../endpoints';
-import aiTools from '../mocks/data/ai-tools.json';
+import { toAiTool } from '../aiTools';
 import { checkPassportLocal, mockApi } from '../mocks/handlers';
 import * as S from '../schemas';
 import type * as T from '../types';
@@ -64,18 +64,26 @@ async function requirePassport(id: string): Promise<T.Passport> {
   return p;
 }
 
-const tools = aiTools as T.AiTool[];
+const TOOL_COLUMNS =
+  'slug, name, vendor, official_site, terms_url, status, review_state, research_state, note_fr, checked_at';
+
+/**
+ * Fiches des outils déclarés, lues dans le catalogue (lecture publique, sans compte : la page de
+ * vérification est ouverte à tous les festivals). Une panne du catalogue ne casse pas la page :
+ * les déclarations s'affichent sans le statut des outils.
+ */
+async function publicTools(slugs: string[]): Promise<T.AiTool[]> {
+  if (!supabase || slugs.length === 0) return [];
+  const res = await supabase.from('ai_tools').select(TOOL_COLUMNS).in('slug', slugs);
+  if (res.error) return [];
+  const parsed = z.array(S.catalogToolSchema).safeParse(res.data ?? []);
+  return parsed.success ? parsed.data.map(toAiTool) : [];
+}
 
 /** Fonctions du Passeport servies par Supabase (remplacent celles du backend). */
 export const supabasePassportApi: Pick<
   Api,
-  | 'getProjectPassport'
-  | 'savePassport'
-  | 'checkPassport'
-  | 'getPassportPdfUrl'
-  | 'signC2pa'
-  | 'verifyPassport'
-  | 'getAiTools'
+  'getProjectPassport' | 'savePassport' | 'checkPassport' | 'verifyPassport'
 > = {
   getProjectPassport: (projectId) => load(projectId),
 
@@ -104,24 +112,6 @@ export const supabasePassportApi: Pick<
 
   checkPassport: async (id) => checkPassportLocal(await requirePassport(id)),
 
-  async getPassportPdfUrl(id) {
-    const p = await requirePassport(id);
-    // Aperçu imprimable de la page de vérification (pas encore de PDF généré côté serveur).
-    return { url: `${verifyUrl(p.badge_code!)}?imprimer=1` };
-  },
-
-  async signC2pa({ passport_id }) {
-    const p = await requirePassport(passport_id);
-    // Pas encore de vraie signature C2PA : rien n'est écrit (le Passeport reste « pas encore
-    // signé », c'est le vrai état) et le résultat le dit (simulated).
-    return {
-      signed: true,
-      manifest_id: `c2pa-${p.badge_code}`,
-      signed_at: formatISO(new Date()),
-      simulated: true,
-    };
-  },
-
   async verifyPassport(code) {
     // « exemple » : Passeport fictif de démonstration, jamais en base.
     if (code === 'exemple') return mockApi.verifyPassport(code);
@@ -143,12 +133,9 @@ export const supabasePassportApi: Pick<
         verify_url: verifyUrl(code),
         updated_at: checked_at,
       },
-      tools: tools.filter((t) => ids.has(t.id)),
+      tools: await publicTools([...ids] as string[]),
       signature: { signed: row.c2pa_signed },
       checked_at,
     };
   },
-
-  // Catalogue de référence des outils IA (fichier versionné, pas des données utilisateur).
-  getAiTools: async () => validate(z.array(S.aiToolSchema), tools, 'catalogue des outils IA'),
 };

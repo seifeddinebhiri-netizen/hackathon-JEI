@@ -185,11 +185,11 @@ export function StepScreenplay({
           <div>
             <p className="flex items-center gap-2 text-meta text-muted-on-light">
               <Icon name="lock" size={16} className="shrink-0" />
-              L’IA découpe ton texte. Il n’est pas conservé.
+              Ton scénario est envoyé à l’IA pour être découpé en scènes. Nous ne le conservons pas après le découpage.
             </p>
             <MoreInfo>
-              Ton scénario est découpé en scènes, lieux et personnages, puis oublié par le serveur. Il ne sert
-              pas à entraîner une IA. Tu relis chaque scène.
+              Ton scénario est découpé en scènes, lieux et personnages, puis oublié par le serveur.
+              Tu relis chaque scène.
             </MoreInfo>
           </div>
           <FileDrop
