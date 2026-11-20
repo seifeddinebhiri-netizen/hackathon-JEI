@@ -1,0 +1,48 @@
+{
+  "name": "encadre-prise-02",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Encadré — Prise 02 : Derrière la caméra. Présentation interactive de l'avancement.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --port 4174",
+    "typecheck": "tsc -b --noEmit",
+    "lint": "eslint .",
+    "assets:mascotte": "node scripts/copy-assets.mjs",
+    "assets:pdf": "node scripts/extract-pdf.mjs",
+    "assets:captures": "node scripts/capture-app.mjs",
+    "export:pdf": "node scripts/export-pdf.mjs",
+    "assets:maquettes": "node scripts/capture-maquettes.mjs",
+    "test": "node scripts/smoke-test.mjs",
+    "export:video": "node scripts/export-video.mjs"
+  },
+  "dependencies": {
+    "@fontsource/inter": "^5.2.6",
+    "@fontsource/jetbrains-mono": "^5.2.6",
+    "@fontsource/space-grotesk": "^5.2.8",
+    "gsap": "^3.13.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@napi-rs/canvas": "^0.1.70",
+    "@tailwindcss/vite": "^4.3.5",
+    "@types/node": "^26.6.6",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^6.3.0",
+    "eslint": "^10.15.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.14.0",
+    "pdfjs-dist": "^4.10.38",
+    "playwright-core": "^1.55.0",
+    "pngjs": "^7.0.0",
+    "tailwindcss": "^4.3.5",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.2",
+    "vite": "^8.3.8"
+  }
+}
