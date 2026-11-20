@@ -5,6 +5,7 @@ import structlog
 from app.core.errors import AppError
 from app.repositories import ai_tool_repository as repo
 from app.services.llm_service import LLMUnavailable
+from app.services.research.fetcher import fetch_page
 from app.services.research.pipeline import ResearchFailed, run_research
 
 log = structlog.get_logger()
@@ -16,9 +17,10 @@ class ResearchRunner:
     Aucune route n'expose ce lanceur : seul `ai_tool_service.resolve` l'appelle, quand un outil est
     absent. Au plus `concurrency` recherches en même temps ; une seule par nom (index unique en base)."""
 
-    def __init__(self, pool, llm, concurrency: int = 2):
+    def __init__(self, pool, llm, concurrency: int = 2, reader=None):
         self._pool = pool
         self._llm = llm
+        self._reader = reader or fetch_page
         self._sem = asyncio.Semaphore(max(1, concurrency))
         self._tasks: set[asyncio.Task] = set()
 
@@ -31,7 +33,7 @@ class ResearchRunner:
         async with self._sem:
             try:
                 await repo.update_run(self._pool, run_id, "running")
-                result = await run_research(name, self._llm)
+                result = await run_research(name, self._llm, read=self._reader)
                 tool = await repo.save_tool(
                     self._pool,
                     slug=result.slug,
@@ -61,7 +63,13 @@ class ResearchRunner:
                 await self._fail(run_id, str(exc))
             except (LLMUnavailable, AppError) as exc:
                 log.warning("tool_research_unavailable", reason=str(exc))
-                await self._fail(run_id, "Le service d'IA est indisponible, réessaie plus tard.")
+                quota = isinstance(exc, AppError) and exc.status_code == 429
+                await self._fail(
+                    run_id,
+                    "Le quota de l'IA est atteint : réessaie plus tard."
+                    if quota
+                    else "Le service d'IA est indisponible, réessaie plus tard.",
+                )
             except Exception:
                 log.exception("tool_research_error")
                 await self._fail(run_id, "Erreur interne pendant la recherche.")

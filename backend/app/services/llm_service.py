@@ -1,3 +1,5 @@
+import asyncio
+from dataclasses import dataclass
 from typing import TypeVar
 
 import structlog
@@ -12,11 +14,24 @@ from app.schemas.shot_spec import LLMMovingPlan, LLMStaticPlan, ShotSpecRequest
 
 log = structlog.get_logger()
 
+# Surcharge passagère de Google (500, 502, 503, 504) : deux nouvelles tentatives, après 2 s puis 5 s.
+# Jamais pour un quota (429) ni une requête refusée (400, 401, 403, 404) : réessayer n'y changerait rien.
+RETRY_DELAYS: tuple[float, ...] = (2.0, 5.0)
+TRANSIENT = (500, 502, 503, 504)
+
 T = TypeVar("T", bound=BaseModel)
 
 
 class LLMUnavailable(Exception):
     pass
+
+
+@dataclass(frozen=True)
+class GroundedResult:
+    """Réponse de l'IA appuyée sur une recherche web : son texte, et les domaines que la recherche a trouvés."""
+
+    text: str
+    domains: list[str]
 
 
 class LLMService:
@@ -59,6 +74,49 @@ class LLMService:
         """Appel générique à sortie structurée (utilisé par la recherche d'outils d'IA)."""
         return await self._generate(system, user, schema, temperature)
 
+    async def _call(self, **kwargs):
+        """Appel à Gemini avec nouvelles tentatives sur une surcharge passagère."""
+        for wait in (*RETRY_DELAYS, None):
+            try:
+                return await self._client.aio.models.generate_content(**kwargs)
+            except errors.APIError as exc:
+                if exc.code not in TRANSIENT or wait is None:
+                    raise
+                log.info("llm_retry", status=exc.code, wait_s=wait)
+                await asyncio.sleep(wait)
+
+    async def grounded_search(self, query: str) -> GroundedResult:
+        """Pose une question à l'IA AVEC la recherche Google (réponse appuyée sur de vraies pages).
+
+        Sert à retrouver le site officiel d'un outil au lieu de le deviner. La sortie structurée ne peut
+        pas être demandée en même temps que la recherche : on renvoie le texte et les domaines trouvés."""
+        if self._client is None:
+            raise LLMUnavailable("GEMINI_API_KEY non configurée.")
+        try:
+            response = await self._call(
+                model=self._model,
+                contents=query,
+                config=types.GenerateContentConfig(
+                    tools=[types.Tool(google_search=types.GoogleSearch())], temperature=0
+                ),
+            )
+        except errors.APIError as exc:
+            log.warning("llm_search_error", status=exc.code, detail=str(exc)[:200])
+            raise LLMUnavailable("La recherche web de l'IA est indisponible.") from exc
+        text = response.text or ""
+        meta = response.candidates[0].grounding_metadata if response.candidates else None
+        domains: list[str] = []
+        for chunk in getattr(meta, "grounding_chunks", None) or []:
+            title = getattr(getattr(chunk, "web", None), "title", None)
+            if title and title not in domains:
+                domains.append(title)
+        if self._debug:
+            print(
+                f"\n===== RECHERCHE WEB =====\n{query}\n--- RÉPONSE ---\n{text}\n--- DOMAINES: {domains}\n",
+                flush=True,
+            )
+        return GroundedResult(text=text, domains=domains)
+
     async def _generate(
         self, system: str, user: str, schema: type[T], temperature: float | None = None
     ) -> T:
@@ -72,7 +130,7 @@ class LLMService:
                     f"--- SYSTEM ---\n{system}\n--- USER ---\n{user}\n",
                     flush=True,
                 )
-            response = await self._client.aio.models.generate_content(
+            response = await self._call(
                 model=self._model,
                 contents=user,
                 config=types.GenerateContentConfig(
@@ -94,9 +152,15 @@ class LLMService:
             detail = str(exc).lower()
             if exc.code in (401, 403) or "api key" in detail:
                 raise LLMUnavailable("La clé GEMINI_API_KEY est refusée par Google.") from exc
-            if exc.code == 404 or "model" in detail:
+            if (
+                exc.code == 404
+            ):  # seulement un vrai 404 : « model overloaded » n'est pas « modèle inconnu »
                 raise LLMUnavailable(
                     "Le modèle d'IA demandé est introuvable (vérifie LLM_MODEL)."
+                ) from exc
+            if exc.code in (500, 502, 503, 504):
+                raise LLMUnavailable(
+                    "Le service d'IA est surchargé pour le moment. Réessaie dans un instant."
                 ) from exc
             if exc.code == 400:
                 raise LLMUnavailable(
@@ -124,3 +188,10 @@ class LLMService:
             except ValueError as exc:
                 raise LLMUnavailable("L'IA n'a pas produit de plan exploitable.") from exc
         return parsed
+
+
+def research_service(settings: Settings) -> "LLMService":
+    """Service IA de la recherche d'outils : son modèle (TOOL_RESEARCH_MODEL) peut différer de celui du Coach,
+    donc avoir son propre quota gratuit."""
+    model = settings.tool_research_model or settings.llm_model
+    return LLMService(settings.model_copy(update={"llm_model": model}))

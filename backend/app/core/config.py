@@ -56,6 +56,13 @@ class Settings(BaseSettings):
     tool_resolve_rate_window_s: int = 3600
     tool_research_daily_limit: int = 30  # recherches automatiques par jour, tous utilisateurs
     tool_research_concurrency: int = 2
+    # Modèle Gemini de la recherche d'outils (vide : le même que le Coach). Le quota gratuit est compté PAR
+    # MODÈLE : un modèle à part évite que les recherches privent le Coach de ses requêtes.
+    tool_research_model: str = ""
+    # Navigateur sans écran local pour les pages dont le texte est chargé par JavaScript (extra « browser »).
+    # Désactivé par défaut. Il ne sert jamais après un refus (403, robots.txt).
+    research_browser: bool = False
+    research_browser_concurrency: int = 2
 
     # Vérification publique d'un PDF reçu (sans compte) : limitée par adresse IP, fichiers petits, rien n'est gardé
     verify_pdf_rate_limit: int = 30  # vérifications par fenêtre et par adresse

@@ -3,6 +3,7 @@
     uv run python -m scripts.seed_ai_tools --dry-run    # lit les pages, vérifie les phrases, n'écrit rien
     uv run python -m scripts.seed_ai_tools              # écrit dans la base (migration 0009 faite)
     uv run python -m scripts.seed_ai_tools --force      # écrase aussi les fiches déjà relues par une personne
+    uv run --extra browser python -m scripts.seed_ai_tools --browser   # lit aussi les pages en JavaScript (Gemini)
 
 Chaque phrase citée est recherchée dans la page officielle rechargée par ce script : une phrase
 introuvable n'est pas comptée et le résultat s'affiche. Les pages qui refusent la lecture (403)
@@ -16,19 +17,23 @@ from pathlib import Path
 from app.core.config import get_settings
 from app.db.postgres import create_pool
 from app.repositories import ai_tool_repository as repo
-from app.services.research.fetcher import FetchError, fetch_page_text
+from app.services.research.browser import BrowserReader
+from app.services.research.fetcher import FetchError
+from app.services.research.reader import PageReader
 from app.services.research.seed import evaluate_seed_tool
 
 SEED = Path(__file__).resolve().parent.parent / "data" / "ai_tools_seed.json"
 
 
-async def main(dry_run: bool, force: bool = False) -> None:
+async def main(dry_run: bool, force: bool = False, use_browser: bool = False) -> None:
+    browser = BrowserReader() if use_browser else None
+    read = PageReader(browser)
     data = json.loads(SEED.read_text(encoding="utf-8"))
     urls = sorted({f["source_url"] for t in data["tools"] for f in t["facts"]})
     pages: dict[str, str] = {}
     for url in urls:
         try:
-            pages[url] = await fetch_page_text(url)
+            pages[url] = (await read(url)).text
             print(f"  lu      {url} ({len(pages[url])} car.)")
         except FetchError as exc:
             print(f"  REFUSÉ  {url} ({exc})")
@@ -54,6 +59,8 @@ async def main(dry_run: bool, force: bool = False) -> None:
                 print(f"      non vérifié : [{f.field}/{f.plan}] {f.quote[:70]}…")
         if pool is not None:
             await repo.save_tool(pool, **row)
+    if browser:
+        await browser.close()
     if pool is not None:
         await pool.close()
         print(
@@ -62,4 +69,4 @@ async def main(dry_run: bool, force: bool = False) -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main("--dry-run" in sys.argv, "--force" in sys.argv))
+    asyncio.run(main("--dry-run" in sys.argv, "--force" in sys.argv, "--browser" in sys.argv))

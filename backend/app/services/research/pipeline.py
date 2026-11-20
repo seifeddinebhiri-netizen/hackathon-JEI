@@ -1,4 +1,5 @@
 import asyncio
+import re
 from collections import Counter
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
@@ -9,20 +10,38 @@ import structlog
 from app.core.errors import AppError
 from app.prompts import tool_research as prompts
 from app.schemas.ai_tool import Fact, LLMDiscovery, LLMExtraction
-from app.services.research.fetcher import FetchError, check_url, fetch_page_text
+from app.services.llm_service import LLMUnavailable
+from app.services.research import sources
+from app.services.research.discovery import (
+    COMMON_PATHS,
+    legal_links,
+    same_site,
+    site_matches,
+    urls_in_text,
+)
+from app.services.research.fetcher import (
+    FetchBlocked,
+    FetchError,
+    FetchUnreachable,
+    Page,
+    check_url,
+    fetch_page,
+)
 from app.services.research.quotes import quote_in_page
 from app.services.tool_names import make_slug, normalize_name
 from app.services.tool_status import compute_status
 
 log = structlog.get_logger()
 
-MAX_PAGES = 6
-PAGE_CHARS_FOR_LLM = 60_000
-MAX_FACTS_PER_PAGE = 12
+MAX_PAGES = 6  # pages lues par l'IA
+MAX_CANDIDATES = 12  # adresses essayées au total
+PAGE_CHARS_FOR_LLM = 40_000  # par page ; 6 pages au plus dans un seul appel
+MAX_FACTS = 40  # faits retenus au total, toutes pages confondues
 MIN_PAGE_CHARS = 200  # en dessous, la page est une coquille (contenu chargé par JavaScript)
 RESEARCH_TEMPERATURE = 0.0  # lecture et extraction : la même page doit donner les mêmes faits
 
-Fetcher = Callable[[str], Awaitable[str]]
+Reader = Callable[[str], Awaitable[Page]]
+KnownLookup = Callable[[str], "sources.KnownSource | None"]
 
 
 def _squash(text: str) -> str:
@@ -34,7 +53,7 @@ def usable_pages(texts: dict[str, str], root_text: str | None) -> tuple[dict[str
 
     - coquille vide (< 200 caractères) : le contenu est chargé par JavaScript, on ne peut pas le lire ;
     - « soft 404 » : le site répond la page d'accueil (ou deux fois le même texte) à une adresse qui
-      n'existe pas. Le modèle devine souvent des adresses comme /terms ou /privacy.
+      n'existe pas.
     Retourne les pages utilisables, et la raison de l'échec si aucune ne l'est."""
     squashed = {u: _squash(t) for u, t in texts.items()}
     counts = Counter(squashed.values())
@@ -80,29 +99,18 @@ class ResearchResult:
     aliases: list[str]
     pages_read: list[str] = field(default_factory=list)
     rejected: int = 0
+    how: str = ""  # comment le site a été trouvé : connu, recherche web, ou mémoire du modèle
 
 
-def _registrable(host: str) -> str:
-    parts = host.lower().split(".")
-    return ".".join(parts[-2:]) if len(parts) >= 2 else host.lower()
-
-
-def same_site(url: str, official_site: str) -> bool:
-    """Une page n'est lue que si elle est sur le site officiel proposé : le modèle ne peut pas nous
-    envoyer lire n'importe quel domaine."""
-    try:
-        return _registrable(urlparse(url).hostname or "") == _registrable(
-            urlparse(official_site).hostname or ""
-        )
-    except ValueError:
-        return False
+def _host(url: str) -> str:
+    return (urlparse(url).hostname or "").lower().removeprefix("www.")
 
 
 def _kind_of(url: str) -> str:
     u = url.lower()
-    if "privacy" in u:
+    if "privacy" in u or "confidential" in u:
         return "privacy"
-    if "terms" in u or "tos" in u or "licen" in u or "legal" in u:
+    if "terms" in u or "tos" in u or "licen" in u or "legal" in u or "conditions" in u:
         return "terms"
     if "help" in u or "support" in u or "faq" in u:
         return "help"
@@ -111,21 +119,48 @@ def _kind_of(url: str) -> str:
     return "policy"
 
 
-async def run_research(
-    name: str,
-    llm,
-    fetch: Fetcher = fetch_page_text,
-    page_check: Callable[[str], str] = check_url,
-) -> ResearchResult:
-    """Recherche guidée d'UN outil. Étapes : découvrir les pages officielles, les lire, extraire des
-    faits citant la page, VÉRIFIER chaque citation en code, calculer le statut par des règles."""
+async def _find_site(
+    name: str, llm, known: "sources.KnownSource | None"
+) -> tuple[str, str, list[str], list[str], str]:
+    """Site officiel, fournisseur, adresses proposées, adresses vues dans la recherche, et la méthode.
+
+    1. outil connu : nos adresses vérifiées ; 2. recherche web : le site est choisi parmi de vrais
+    résultats ; 3. en dernier recours seulement, la mémoire du modèle."""
+    if known:
+        return known.site, known.vendor, list(known.pages), [], "connu"
+
+    search_text, domains = None, []
+    try:
+        grounded = await llm.grounded_search(prompts.grounded_query(name))
+        search_text, domains = grounded.text, grounded.domains
+    except (LLMUnavailable, AppError, AttributeError) as exc:
+        log.info("tool_research_no_search", reason=str(exc)[:120])
     discovery = await llm.generate_structured(
         prompts.DISCOVERY_SYSTEM,
-        prompts.discovery_user(name),
+        prompts.discovery_user(name, search_text, domains),
         LLMDiscovery,
         temperature=RESEARCH_TEMPERATURE,
     )
-    site = discovery.official_site.strip()
+    seen = urls_in_text(search_text) if search_text else []
+    how = "recherche web" if search_text else "mémoire du modèle"
+    return discovery.official_site.strip(), discovery.vendor, discovery.page_urls, seen, how
+
+
+async def run_research(
+    name: str,
+    llm,
+    read: Reader = fetch_page,
+    page_check: Callable[[str], str] = check_url,
+    known_lookup: KnownLookup = sources.lookup,
+) -> ResearchResult:
+    """Recherche guidée d'UN outil.
+
+    Étapes : trouver le site officiel, lire sa page d'accueil (y repérer les liens « conditions » et
+    « confidentialité »), lire les pages juridiques, faire extraire des faits citant la page, VÉRIFIER
+    chaque citation en code, calculer le statut par des règles. Un site qui refuse la lecture
+    automatique est signalé tel quel : on ne cherche pas à le contourner."""
+    known = known_lookup(name)
+    site, vendor, proposed, from_search, how = await _find_site(name, llm, known)
     if not site:
         raise ResearchFailed("Outil non reconnu : aucun site officiel trouvé.")
     try:
@@ -133,66 +168,142 @@ async def run_research(
     except FetchError as exc:
         raise ResearchFailed(f"Site officiel refusé : {exc}") from exc
 
-    urls: list[str] = []
-    for u in discovery.page_urls:
-        if u not in urls and same_site(u, site):
-            urls.append(u)
-    urls = urls[:MAX_PAGES]
+    blocked = 0
+    unreachable: list[str] = []  # raisons : « certificat HTTPS invalide », « domaine introuvable »…
 
-    texts: dict[str, str] = {}
-    sem = asyncio.Semaphore(3)
+    async def safe_read(url: str) -> Page | None:
+        nonlocal blocked
+        try:
+            return await read(url)
+        except FetchBlocked:
+            blocked += 1
+        except FetchUnreachable as exc:
+            unreachable.append(str(exc))
+            log.info("tool_research_site_unreachable", url=url, reason=str(exc))
+        except FetchError as exc:
+            log.info("tool_research_page_failed", url=url, reason=str(exc))
+        return None
 
-    async def read(url: str) -> None:
-        async with sem:
-            try:
-                texts[url] = await fetch(url)
-            except FetchError as exc:
-                log.info("tool_research_page_failed", url=url, reason=str(exc))
-
-    await asyncio.gather(*(read(u) for u in urls))
-    if not texts:
-        raise ResearchFailed("Aucune page officielle n'a pu être lue.")
-    try:
-        root_text = await fetch(site)
-    except FetchError:
-        root_text = None
-    texts, why = usable_pages(texts, root_text)
-    if not texts:
-        raise ResearchFailed(why or "Aucune page officielle exploitable.")
-
-    verified: list[Fact] = []
-    rejected = 0
-    returned = 0  # faits proposés par le modèle, vérifiés ou non
-    categories: list[str] = []
-    vendor = discovery.vendor
-    terms_updated = None
-    for url, text in texts.items():
-        extraction = await llm.generate_structured(
-            prompts.EXTRACTION_SYSTEM,
-            prompts.extraction_user(name, url, _kind_of(url), text[:PAGE_CHARS_FOR_LLM]),
-            LLMExtraction,
+    home = await safe_read(site)
+    if home is None and unreachable and not known:
+        # Site injoignable (faux site, certificat invalide, faute de frappe dans le nom) : on demande UNE
+        # fois l'orthographe officielle au modèle, puis on reprend avec le nouveau site.
+        why = unreachable[-1]
+        retry = await llm.generate_structured(
+            prompts.DISCOVERY_SYSTEM,
+            prompts.discovery_retry_user(name, site, why),
+            LLMDiscovery,
             temperature=RESEARCH_TEMPERATURE,
         )
-        categories = categories or extraction.categories
-        terms_updated = terms_updated or extraction.terms_updated
-        for f in extraction.facts[:MAX_FACTS_PER_PAGE]:
-            returned += 1
-            # La source doit être une page réellement lue, et la phrase doit s'y trouver mot pour mot.
-            source = f.source_url if f.source_url in texts else url
-            if not quote_in_page(f.quote, texts[source]):
-                rejected += 1
-                continue
-            verified.append(
-                Fact(
-                    field=f.field,
-                    plan=f.plan or "all",
-                    value_fr=f.value_fr,
-                    quote=f.quote[:500],
-                    source_url=source,
-                    source_kind=f.source_kind,
-                    quote_verified=True,
-                )
+        new_site = retry.official_site.strip()
+        if new_site and _host(new_site) != _host(site):
+            try:
+                page_check(new_site)
+            except FetchError as exc:
+                raise ResearchFailed(f"Site officiel refusé : {exc}") from exc
+            site, vendor, proposed, from_search = (
+                new_site,
+                retry.vendor or vendor,
+                retry.page_urls,
+                [],
             )
+            how += ", orthographe corrigée"
+            unreachable.clear()
+            home = await safe_read(site)
+    names = [name, vendor]
+    # Le site parle-t-il de cet outil ? Si l'accueil est illisible, l'adresse seule doit le suggérer.
+    if not known and not site_matches(names, site, home.text if home else ""):
+        raise ResearchFailed(
+            "Le site trouvé ne mentionne pas cet outil : nous préférons ne rien enregistrer plutôt qu'une "
+            "fiche douteuse."
+        )
+
+    candidates: dict[str, None] = {}
+
+    def add(urls) -> None:
+        for u in urls:
+            if u not in candidates and (known or same_site(u, site)):
+                candidates[u] = None
+
+    add(proposed if known else [])  # nos adresses vérifiées passent en premier
+    if home and home.html:
+        add(legal_links(home.html, home.url, site))
+    add(u for u in from_search if same_site(u, site))
+    add(proposed if not known else [])
+    # Les chemins courants ne sont devinés que s'il manque les conditions OU la confidentialité.
+    kinds = {_kind_of(u) for u in candidates}
+    if not {"terms", "privacy"} <= kinds:
+        base = site.rstrip("/")
+        add(base + path for path in COMMON_PATHS)
+    urls = list(candidates)[:MAX_CANDIDATES]
+
+    pages: dict[str, Page] = {}
+    gate = asyncio.Semaphore(4)
+
+    async def load(url: str) -> None:
+        async with gate:
+            page = await safe_read(url)
+            if page:
+                pages[url] = page
+
+    await asyncio.gather(*(load(u) for u in urls))
+    if not pages:
+        if unreachable and not blocked:
+            raise ResearchFailed(
+                f"Le site « {_host(site)} » est injoignable ({unreachable[-1]}). Le nom de l'outil est peut-être "
+                "mal orthographié : vérifie-le et réessaie."
+            )
+        if blocked:
+            raise ResearchFailed(
+                "Le site de cet outil refuse la lecture automatique de ses conditions (accès bloqué). "
+                "Nous ne contournons pas ce blocage."
+            )
+        raise ResearchFailed("Aucune page officielle n'a pu être lue.")
+
+    texts, why = usable_pages({u: p.text for u, p in pages.items()}, home.text if home else None)
+    if not texts:
+        raise ResearchFailed(why or "Aucune page officielle exploitable.")
+    texts = dict(list(texts.items())[:MAX_PAGES])
+    final_url = {u: pages[u].url for u in texts}
+
+    # UN seul appel pour toutes les pages : moins cher et plus rapide que un appel par page.
+    by_final = {final_url[u]: u for u in texts}
+    extraction = await llm.generate_structured(
+        prompts.EXTRACTION_SYSTEM,
+        prompts.extraction_user(
+            name,
+            [(final_url[u], _kind_of(u), t[:PAGE_CHARS_FOR_LLM]) for u, t in texts.items()],
+        ),
+        LLMExtraction,
+        temperature=RESEARCH_TEMPERATURE,
+    )
+    categories = extraction.categories
+    terms_updated = extraction.terms_updated
+    returned = min(
+        len(extraction.facts), MAX_FACTS
+    )  # faits proposés par le modèle, vérifiés ou non
+    verified: list[Fact] = []
+    rejected = 0
+    for f in extraction.facts[:MAX_FACTS]:
+        # La phrase doit se trouver MOT POUR MOT dans une page réellement lue : d'abord celle que le modèle
+        # cite, sinon n'importe quelle autre. La source enregistrée est la page où elle est vraiment.
+        cited = by_final.get(f.source_url)
+        order = ([cited] if cited else []) + [u for u in texts if u != cited]
+        found = next((u for u in order if quote_in_page(f.quote, texts[u])), None)
+        if found is None:
+            rejected += 1
+            continue
+        verified.append(
+            Fact(
+                field=f.field,
+                plan=f.plan or "all",
+                value_fr=f.value_fr,
+                quote=f.quote[:500],
+                source_url=final_url[found],
+                source_kind=f.source_kind,
+                quote_verified=True,
+            )
+        )
     if not verified and returned == 0:
         raise ResearchFailed(
             "Les pages officielles lues ne répondent à aucune de nos questions "
@@ -211,8 +322,8 @@ async def run_research(
             seen.add(key)
             facts.append(f)
 
-    terms = next((u for u in texts if _kind_of(u) == "terms"), None)
-    privacy = next((u for u in texts if _kind_of(u) == "privacy"), None)
+    terms = next((final_url[u] for u in texts if _kind_of(u) == "terms"), None)
+    privacy = next((final_url[u] for u in texts if _kind_of(u) == "privacy"), None)
     slug = make_slug(name)
     return ResearchResult(
         slug=slug,
@@ -226,11 +337,12 @@ async def run_research(
         status=compute_status(facts),
         facts=facts,
         aliases=sorted({normalize_name(name), normalize_name(slug)}),
-        pages_read=list(texts),
+        pages_read=list(final_url.values()),
         rejected=rejected,
+        how=how,
     )
 
 
 def ensure_ok(name: str) -> None:
-    if len(normalize_name(name)) < 2:
+    if len(re.sub(r"\W", "", name)) < 2:
         raise AppError("Nom d'outil trop court.", status_code=422, code="nom_invalide")

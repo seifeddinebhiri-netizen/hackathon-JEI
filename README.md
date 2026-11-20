@@ -130,7 +130,7 @@ Détail complet : [section 4](#4-module-1-en-détail--le-coach-de-cadrage).
 
 **Flux prévu.**
 1. Le cinéaste liste les outils d'IA utilisés (et ce qu'il a **décidé lui-même**).
-2. Le backend interroge un **agent de recherche** pour retrouver la documentation publique de chaque outil (politique d'entraînement, conditions d'usage), et notre **jeu de données** d'outils déjà documentés.
+2. Le backend consulte son **catalogue** d'outils déjà documentés. Pour un outil absent, une **recherche guidée** (pas un agent libre) retrouve le site officiel, lit ses pages « conditions » et « confidentialité », puis **vérifie en code que chaque citation figure mot pour mot dans la page**. Un site qui refuse la lecture automatique n'est jamais contourné. Détails : `backend/docs/RECHERCHE_OUTILS.md`.
 3. Chaque outil reçoit un statut : **Documenté**, **Partiel** ou **Non divulgué**. « Non divulgué » est un statut valide.
 4. Le backend génère un **PDF** (ReportLab) et le signe en **C2PA** (`c2pa-python`). Voir `backend/docs/C2PA.md`.
 5. Une **page de vérification** publique permet à un festival de contrôler le passeport.

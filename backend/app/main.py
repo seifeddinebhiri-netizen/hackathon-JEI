@@ -11,7 +11,9 @@ from app.db.supabase import create_supabase
 from app.middleware import register_middleware
 from app.repositories import ai_tool_repository
 from app.routes import api_router
-from app.services.llm_service import LLMService
+from app.services.llm_service import LLMService, research_service
+from app.services.research.browser import BrowserReader
+from app.services.research.reader import PageReader
 from app.services.research.runner import ResearchRunner
 from app.services.rules_service import get_all_rules
 from app.services.transcription_service import ElevenLabsTranscriber
@@ -33,13 +35,24 @@ def create_app() -> FastAPI:
                 await ai_tool_repository.mark_stale_runs_failed(app.state.db_pool)
             except Exception:  # noqa: BLE001 - migration 0009 pas encore exécutée
                 structlog.get_logger().warning("ai_tools_tables_missing")
+            browser = (
+                BrowserReader(settings.research_browser_concurrency)
+                if settings.research_browser
+                else None
+            )
+            app.state.research_browser = browser
             app.state.tool_runner = ResearchRunner(
-                app.state.db_pool, app.state.llm, settings.tool_research_concurrency
+                app.state.db_pool,
+                research_service(settings),
+                settings.tool_research_concurrency,
+                reader=PageReader(browser),
             )
         app.state.rules = get_all_rules()  # vide + avertissement si rules.json absent
         app.state.transcriber = ElevenLabsTranscriber(settings)
         app.state.translator = create_translator(settings)
         yield
+        if getattr(app.state, "research_browser", None) is not None:
+            await app.state.research_browser.close()
         if app.state.db_pool is not None:
             await app.state.db_pool.close()
 
