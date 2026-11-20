@@ -1,0 +1,529 @@
+{
+ "version": 1,
+ "collected_on": "2026-11-19",
+ "method": "Pages officielles lues par des agents de recherche ; chaque phrase est revérifiée par scripts.seed_ai_tools avant d'être comptée. Les phrases que les agents n'ont vues que dans un résumé ont été écartées.",
+ "tools": [
+  {
+   "slug": "chatgpt",
+   "name": "ChatGPT",
+   "vendor": "OpenAI",
+   "official_site": "https://chatgpt.com",
+   "categories": [
+    "text",
+    "image"
+   ],
+   "aliases": [
+    "chatgpt",
+    "chat gpt",
+    "gpt",
+    "openai chatgpt"
+   ],
+   "terms_url": null,
+   "privacy_url": null,
+   "terms_updated": null,
+   "note_fr": "Les pages d'OpenAI ont refusé la lecture automatique (erreur 403) : aucun fait n'a pu être relevé. À remplir à la main depuis un navigateur.",
+   "facts": []
+  },
+  {
+   "slug": "claude",
+   "name": "Claude",
+   "vendor": "Anthropic",
+   "official_site": "https://claude.ai",
+   "categories": [
+    "text"
+   ],
+   "aliases": [
+    "claude",
+    "claude ai",
+    "anthropic claude"
+   ],
+   "terms_url": "https://www.anthropic.com/legal/consumer-terms",
+   "privacy_url": "https://www.anthropic.com/legal/privacy",
+   "terms_updated": "2025-10-08 (conditions grand public) ; 2026-09-10 (confidentialité)",
+   "note_fr": "Les conditions diffèrent entre l'offre grand public et l'offre API/entreprise.",
+   "facts": [
+    {
+     "field": "training_data",
+     "plan": "all",
+     "value_fr": "La politique de confidentialité range parmi les données d'entraînement celles que fournissent les utilisateurs et des travailleurs, dont les entrées et sorties des services. Aucune liste détaillée des sources publiques n'a été trouvée dans les pages lues.",
+     "quote": "Data that our users or crowd workers provide, including Inputs and Outputs from our Services",
+     "source_url": "https://www.anthropic.com/legal/privacy",
+     "source_kind": "privacy"
+    },
+    {
+     "field": "input_training_use",
+     "plan": "consumer",
+     "value_fr": "Offre grand public : tes entrées et sorties peuvent servir à entraîner les modèles, sauf si tu refuses dans les réglages du compte.",
+     "quote": "We may use your Inputs and Outputs to train and improve Anthropic AI models, unless you opt out",
+     "source_url": "https://www.anthropic.com/legal/privacy",
+     "source_kind": "privacy"
+    },
+    {
+     "field": "input_training_use",
+     "plan": "api",
+     "value_fr": "Offre API / commerciale : Anthropic s'interdit d'entraîner ses modèles sur le contenu du client.",
+     "quote": "Anthropic may not train models on Customer Content from Services.",
+     "source_url": "https://www.anthropic.com/legal/commercial-terms",
+     "source_kind": "terms"
+    },
+    {
+     "field": "output_rights",
+     "plan": "consumer",
+     "value_fr": "Anthropic cède à l'utilisateur ses droits éventuels sur les sorties (offre grand public).",
+     "quote": "we assign to you all of our right, title, and interest—if any—in Outputs.",
+     "source_url": "https://www.anthropic.com/legal/consumer-terms",
+     "source_kind": "terms"
+    },
+    {
+     "field": "output_rights",
+     "plan": "api",
+     "value_fr": "Anthropic cède au client ses droits éventuels sur les sorties (offre commerciale).",
+     "quote": "Anthropic hereby assigns to Customer its right, title and interest (if any) in and to Outputs.",
+     "source_url": "https://www.anthropic.com/legal/commercial-terms",
+     "source_kind": "terms"
+    },
+    {
+     "field": "indemnity",
+     "plan": "api",
+     "value_fr": "Offre commerciale : Anthropic défend le client contre certaines réclamations de tiers.",
+     "quote": "Anthropic will defend Customer and its personnel, successors, and assigns from and against any Customer Claim",
+     "source_url": "https://www.anthropic.com/legal/commercial-terms",
+     "source_kind": "terms"
+    }
+   ]
+  },
+  {
+   "slug": "gemini",
+   "name": "Gemini",
+   "vendor": "Google",
+   "official_site": "https://gemini.google.com",
+   "categories": [
+    "text",
+    "image"
+   ],
+   "aliases": [
+    "gemini",
+    "google gemini",
+    "gemini ai",
+    "bard"
+   ],
+   "terms_url": "https://aistudio.google.com/docs/terms",
+   "privacy_url": "https://support.google.com/gemini/answer/13594961",
+   "terms_updated": "2026-03-23 (conditions de l'API)",
+   "note_fr": "L'offre gratuite de l'API et l'offre payante n'ont pas les mêmes règles sur l'usage de tes contenus.",
+   "facts": [
+    {
+     "field": "input_training_use",
+     "plan": "free_api",
+     "value_fr": "API gratuite et AI Studio : Google utilise ce que tu envoies et les réponses pour améliorer ses services.",
+     "quote": "Google uses the content you submit to the Services and any generated responses to provide, improve, and develop",
+     "source_url": "https://aistudio.google.com/docs/terms",
+     "source_kind": "terms"
+    },
+    {
+     "field": "input_training_use",
+     "plan": "paid_api",
+     "value_fr": "API payante : Google n'utilise pas tes prompts pour entraîner ses modèles.",
+     "quote": "Google doesn't use your prompts (including associated system instructions, cached content, and files such as images",
+     "source_url": "https://aistudio.google.com/docs/terms",
+     "source_kind": "terms"
+    },
+    {
+     "field": "input_training_use",
+     "plan": "consumer",
+     "value_fr": "Application Gemini : selon tes réglages, tes futures conversations peuvent servir à entraîner les modèles.",
+     "quote": "Google uses the content of your future chats to train generative AI models.",
+     "source_url": "https://support.google.com/gemini/answer/13594961",
+     "source_kind": "privacy"
+    },
+    {
+     "field": "output_rights",
+     "plan": "api",
+     "value_fr": "Google ne revendique pas la propriété de ce contenu (API). L'usage est réservé aux développeurs, pas au grand public.",
+     "quote": "Google won't claim ownership over that content.",
+     "source_url": "https://aistudio.google.com/docs/terms",
+     "source_kind": "terms"
+    },
+    {
+     "field": "provenance",
+     "plan": "all",
+     "value_fr": "Google marque les contenus générés avec SynthID, un filigrane.",
+     "quote": "Google SynthID is our watermarking tool, designed specifically for AI-generated content.",
+     "source_url": "https://deepmind.google/technologies/synthid/",
+     "source_kind": "policy"
+    }
+   ]
+  },
+  {
+   "slug": "midjourney",
+   "name": "Midjourney",
+   "vendor": "Midjourney, Inc.",
+   "official_site": "https://www.midjourney.com",
+   "categories": [
+    "image"
+   ],
+   "aliases": [
+    "midjourney",
+    "mid journey",
+    "mj"
+   ],
+   "terms_url": null,
+   "privacy_url": null,
+   "terms_updated": null,
+   "note_fr": "Les pages de Midjourney ont refusé la lecture automatique (erreur 403) : aucun fait n'a pu être relevé. À remplir à la main depuis un navigateur.",
+   "facts": []
+  },
+  {
+   "slug": "adobe-firefly",
+   "name": "Adobe Firefly",
+   "vendor": "Adobe",
+   "official_site": "https://www.adobe.com/products/firefly.html",
+   "categories": [
+    "image",
+    "video",
+    "audio"
+   ],
+   "aliases": [
+    "adobefirefly",
+    "firefly",
+    "adobe firefly"
+   ],
+   "terms_url": "https://www.adobe.com/legal/terms.html",
+   "privacy_url": "https://www.adobe.com/privacy/policy.html",
+   "terms_updated": "2026-05-15 (règles d'usage de l'IA générative)",
+   "note_fr": "La liste des données d'entraînement et l'indemnisation n'ont pas pu être relevées dans les pages lues (une page d'aide a refusé la lecture).",
+   "facts": [
+    {
+     "field": "input_training_use",
+     "plan": "all",
+     "value_fr": "Adobe affirme sur la page du produit que Firefly ne s'entraîne pas sur ce que tu crées ou importes. C'est une page commerciale, pas une clause contractuelle.",
+     "quote": "Firefly models never train on what you create or upload, so your authorship stays yours.",
+     "source_url": "https://www.adobe.com/products/firefly.html",
+     "source_kind": "marketing"
+    },
+    {
+     "field": "output_rights",
+     "plan": "all",
+     "value_fr": "Adobe affirme sur la page du produit que ce qui est généré est sûr pour un usage commercial. C'est une page commerciale, pas une clause contractuelle.",
+     "quote": "everything generated with Firefly models is safe for commercial use.",
+     "source_url": "https://www.adobe.com/products/firefly.html",
+     "source_kind": "marketing"
+    },
+    {
+     "field": "provenance",
+     "plan": "all",
+     "value_fr": "Adobe peut joindre des Content Credentials (norme C2PA) aux contenus créés ou modifiés avec l'IA générative.",
+     "quote": "Adobe may attach or publish Content Credentials for content created or modified with generative AI features",
+     "source_url": "https://www.adobe.com/legal/licenses-terms/adobe-gen-ai-user-guidelines.html",
+     "source_kind": "policy"
+    }
+   ]
+  },
+  {
+   "slug": "runway",
+   "name": "Runway",
+   "vendor": "Runway AI, Inc.",
+   "official_site": "https://runway.com",
+   "categories": [
+    "video",
+    "image"
+   ],
+   "aliases": [
+    "runway",
+    "runwayml",
+    "runway ml",
+    "runway gen"
+   ],
+   "terms_url": "https://runway.com/terms-of-use",
+   "privacy_url": "https://runway.com/privacy-policy",
+   "terms_updated": "2026-10-23",
+   "note_fr": "Les conditions des offres entreprise sont séparées et n'ont pas été lues.",
+   "facts": [
+    {
+     "field": "training_data",
+     "plan": "all",
+     "value_fr": "Runway peut utiliser les entrées et sorties pour entraîner et améliorer ses modèles. Aucune liste des sources d'entraînement du modèle n'a été trouvée.",
+     "quote": "Inputs and Outputs may be used by the Company to train and improve its AI models, algorithms and related technology",
+     "source_url": "https://runway.com/terms-of-use",
+     "source_kind": "terms"
+    },
+    {
+     "field": "input_training_use",
+     "plan": "all",
+     "value_fr": "Tes entrées et sorties peuvent servir à entraîner les modèles de Runway. Aucune option de refus n'a été trouvée dans les pages lues.",
+     "quote": "Inputs and Outputs may be used by the Company to train and improve its AI models, algorithms and related technology",
+     "source_url": "https://runway.com/terms-of-use",
+     "source_kind": "terms"
+    },
+    {
+     "field": "output_rights",
+     "plan": "all",
+     "value_fr": "Runway ne revendique pas la propriété de tes entrées et sorties, et ne restreint pas leur usage commercial, sous réserve du respect du contrat.",
+     "quote": "The Company does not claim ownership of any of your Inputs or Outputs.",
+     "source_url": "https://runway.com/terms-of-use",
+     "source_kind": "terms"
+    },
+    {
+     "field": "output_rights",
+     "plan": "all",
+     "value_fr": "Runway ne restreint pas l'usage commercial des sorties, sous réserve du respect du contrat.",
+     "quote": "Subject to your compliance with the Agreement, the Company does not restrict your commercial use of your Outputs.",
+     "source_url": "https://runway.com/terms-of-use",
+     "source_kind": "terms"
+    },
+    {
+     "field": "provenance",
+     "plan": "all",
+     "value_fr": "Runway propose un outil pour lire les manifestes C2PA. Nous n'avons pas trouvé que ses propres sorties en portent.",
+     "quote": "Inspect C2PA manifests embedded in images, videos, and audio.",
+     "source_url": "https://runway.com/safety/verify",
+     "source_kind": "policy"
+    },
+    {
+     "field": "indemnity",
+     "plan": "all",
+     "value_fr": "C'est l'utilisateur qui indemnise Runway, pas l'inverse.",
+     "quote": "You agree to indemnify and hold Company, its parents, subsidiaries, affiliates, and each of their respective officers",
+     "source_url": "https://runway.com/terms-of-use",
+     "source_kind": "terms"
+    }
+   ]
+  },
+  {
+   "slug": "elevenlabs",
+   "name": "ElevenLabs",
+   "vendor": "Eleven Labs Inc.",
+   "official_site": "https://elevenlabs.io",
+   "categories": [
+    "voice",
+    "audio"
+   ],
+   "aliases": [
+    "elevenlabs",
+    "eleven labs",
+    "11labs",
+    "elevenlabs ai"
+   ],
+   "terms_url": "https://elevenlabs.io/terms-of-use",
+   "privacy_url": "https://elevenlabs.io/privacy-policy",
+   "terms_updated": "2026-10-09",
+   "note_fr": "Conditions pour les pays hors Espace économique européen ; les conditions UE/UK/Suisse sont séparées et n'ont pas été lues. La liste des données d'entraînement du modèle n'est pas publiée dans les pages lues.",
+   "facts": [
+    {
+     "field": "input_training_use",
+     "plan": "all",
+     "value_fr": "ElevenLabs utilise tes données personnelles pour rechercher, construire, entraîner et améliorer ses modèles d'IA.",
+     "quote": "We use your personal information to research, build, train and improve our AI models.",
+     "source_url": "https://elevenlabs.io/privacy-policy",
+     "source_kind": "privacy"
+    },
+    {
+     "field": "input_training_use",
+     "plan": "all",
+     "value_fr": "Tu peux refuser l'usage de ton contenu pour l'entraînement à tout moment dans le menu « Data use ».",
+     "quote": "you may opt out of our use of your Content for training at any time by navigating to the 'Data use' menu",
+     "source_url": "https://elevenlabs.io/terms-of-use",
+     "source_kind": "terms"
+    },
+    {
+     "field": "output_rights",
+     "plan": "all",
+     "value_fr": "Tu gardes tous les droits sur tes sorties, vis-à-vis d'ElevenLabs.",
+     "quote": "as between you and ElevenLabs, you retain all rights in and to your Output.",
+     "source_url": "https://elevenlabs.io/terms-of-use",
+     "source_kind": "terms"
+    },
+    {
+     "field": "output_rights",
+     "plan": "free",
+     "value_fr": "Offre gratuite : usage non commercial seulement.",
+     "quote": "you may only use the Services for non-commercial purposes",
+     "source_url": "https://elevenlabs.io/terms-of-use",
+     "source_kind": "terms"
+    },
+    {
+     "field": "output_rights",
+     "plan": "paid",
+     "value_fr": "Offre payante : usage commercial permis.",
+     "quote": "you may use the Services for commercial purposes",
+     "source_url": "https://elevenlabs.io/terms-of-use",
+     "source_kind": "terms"
+    },
+    {
+     "field": "provenance",
+     "plan": "all",
+     "value_fr": "Il est interdit de retirer ou masquer les filigranes et métadonnées de provenance d'ElevenLabs.",
+     "quote": "You must not remove, alter, or conceal ElevenLabs watermarks, metadata or other provenance signals",
+     "source_url": "https://elevenlabs.io/use-policy",
+     "source_kind": "policy"
+    },
+    {
+     "field": "voice_likeness",
+     "plan": "all",
+     "value_fr": "Cloner la voix d'une personne exige son consentement explicite et éclairé, ou une autorisation valable.",
+     "quote": "without their explicit and informed consent or other valid authorization",
+     "source_url": "https://elevenlabs.io/use-policy",
+     "source_kind": "policy"
+    }
+   ]
+  },
+  {
+   "slug": "suno",
+   "name": "Suno",
+   "vendor": "Suno, Inc.",
+   "official_site": "https://suno.com",
+   "categories": [
+    "music"
+   ],
+   "aliases": [
+    "suno",
+    "suno ai",
+    "sunoai"
+   ],
+   "terms_url": "https://suno.com/terms",
+   "privacy_url": "https://suno.com/privacy",
+   "terms_updated": "2026-08-10 (dernière révision des conditions)",
+   "note_fr": "Les droits dépendent de l'offre au moment de la création du morceau. Aucune déclaration sur les données d'entraînement du modèle n'a été trouvée.",
+   "facts": [
+    {
+     "field": "input_training_use",
+     "plan": "all",
+     "value_fr": "Suno utilise tes contenus et ton activité, entre autres, pour améliorer ses services, y compris pour entraîner les modèles.",
+     "quote": "We use certain User Activity Information, Submissions, Interactive Chat Information, and other Content to improve our Services, product offerings, promotional activity, and business, including to train and enhance the models that power our Services",
+     "source_url": "https://suno.com/privacy",
+     "source_kind": "privacy"
+    },
+    {
+     "field": "output_rights",
+     "plan": "free",
+     "value_fr": "Offre gratuite : usage personnel et non commercial seulement.",
+     "quote": "If you are a user of the free or basic tier of the Service then you covenant and agree that you will only use such Outputs for your lawful, personal and non-commercial purposes.",
+     "source_url": "https://suno.com/terms",
+     "source_kind": "terms"
+    },
+    {
+     "field": "output_rights",
+     "plan": "paid",
+     "value_fr": "Offres Pro et Premier : tu es considéré comme propriétaire du morceau créé pendant l'abonnement.",
+     "quote": "If you were subscribed with a Pro or Premier plan when the song was created, you are considered the owner of the song.",
+     "source_url": "https://help.suno.com/en/articles/2416769",
+     "source_kind": "help"
+    },
+    {
+     "field": "provenance",
+     "plan": "all",
+     "value_fr": "Suno se réserve le droit d'ajouter une empreinte, un filigrane ou des métadonnées indiquant l'offre et si le téléchargement était autorisé. Aucune mention de C2PA.",
+     "quote": "We reserve the right to append a fingerprint, watermark, or metadata indicating the applicable service tier of an Output and whether such Output was a permitted Download.",
+     "source_url": "https://suno.com/terms",
+     "source_kind": "terms"
+    }
+   ]
+  },
+  {
+   "slug": "stable-diffusion",
+   "name": "Stable Diffusion",
+   "vendor": "Stability AI",
+   "official_site": "https://stability.ai",
+   "categories": [
+    "image"
+   ],
+   "aliases": [
+    "stablediffusion",
+    "stable diffusion",
+    "stability ai",
+    "sd",
+    "sdxl"
+   ],
+   "terms_url": "https://stability.ai/terms-of-service",
+   "privacy_url": "https://stability.ai/privacypolicy",
+   "terms_updated": "2026-09-30 (conditions) ; 2024-07-05 (licence communautaire)",
+   "note_fr": "Les modèles ouverts ont une licence qui change au-delà d'un million de dollars de chiffre d'affaires annuel. La licence dépend de la version du modèle utilisée.",
+   "facts": [
+    {
+     "field": "training_data",
+     "plan": "all",
+     "value_fr": "La fiche du modèle dit qu'il est entraîné sur des données variées, dont des données synthétiques et des données publiques filtrées. Aucune liste de jeux de données n'a été trouvée.",
+     "quote": "This model was trained on a wide variety of data, including synthetic data and filtered publicly available data.",
+     "source_url": "https://huggingface.co/stabilityai/stable-diffusion-3.5-large",
+     "source_kind": "model_card"
+    },
+    {
+     "field": "input_training_use",
+     "plan": "all",
+     "value_fr": "Stability peut utiliser tes entrées et sorties pour entraîner ses modèles ; tu peux refuser.",
+     "quote": "you can opt-out to prevent us from using your Inputs and Outputs to train our models",
+     "source_url": "https://stability.ai/terms-of-service",
+     "source_kind": "terms"
+    },
+    {
+     "field": "output_rights",
+     "plan": "all",
+     "value_fr": "Licence communautaire : tu es propriétaire des sorties générées, vis-à-vis de Stability AI.",
+     "quote": "As between You and Stability AI, You own any outputs generated from the Models or Derivative Works",
+     "source_url": "https://stability.ai/community-license-agreement",
+     "source_kind": "terms"
+    },
+    {
+     "field": "output_rights",
+     "plan": "all",
+     "value_fr": "L'usage gratuit de la licence communautaire est limité à moins d'un million de dollars de chiffre d'affaires annuel ; au-delà, une licence entreprise est nécessaire.",
+     "quote": "generate more than USD $1,000,000 in annual revenue",
+     "source_url": "https://stability.ai/community-license-agreement",
+     "source_kind": "terms"
+    }
+   ]
+  },
+  {
+   "slug": "deepl",
+   "name": "DeepL",
+   "vendor": "DeepL SE",
+   "official_site": "https://www.deepl.com",
+   "categories": [
+    "translation"
+   ],
+   "aliases": [
+    "deepl",
+    "deepl translator",
+    "deepl write"
+   ],
+   "terms_url": "https://www.deepl.com/en/pro-license",
+   "privacy_url": "https://www.deepl.com/en/privacy",
+   "terms_updated": "2024-11 (offre gratuite)",
+   "note_fr": "Les règles diffèrent entre l'offre gratuite et l'offre Pro / API. Les pages d'aide ont refusé la lecture.",
+   "facts": [
+    {
+     "field": "input_training_use",
+     "plan": "free",
+     "value_fr": "Offre gratuite : tes textes servent à entraîner et améliorer les réseaux de neurones de DeepL.",
+     "quote": "to train and improve our neural networks and algorithms",
+     "source_url": "https://www.deepl.com/en/privacy",
+     "source_kind": "privacy"
+    },
+    {
+     "field": "input_training_use",
+     "plan": "paid",
+     "value_fr": "Offre Pro : tes textes ne servent pas à améliorer la qualité des services.",
+     "quote": "your texts will not be used to improve the quality of our services",
+     "source_url": "https://www.deepl.com/en/privacy",
+     "source_kind": "privacy"
+    },
+    {
+     "field": "output_rights",
+     "plan": "paid",
+     "value_fr": "Offre Pro : DeepL ne prend aucun droit d'auteur sur les traductions.",
+     "quote": "DeepL does not assume any copyright to the translations or improvements made by Customer using the Services.",
+     "source_url": "https://www.deepl.com/en/pro-license",
+     "source_kind": "terms"
+    },
+    {
+     "field": "output_rights",
+     "plan": "free",
+     "value_fr": "Offre gratuite : DeepL ne prend aucun droit d'auteur sur les traductions.",
+     "quote": "DeepL SE does not obtain or assume any copyrights to the translations made by you using the translation service.",
+     "source_url": "https://www.deepl.com/en/terms-of-use",
+     "source_kind": "terms"
+    }
+   ]
+  }
+ ]
+}

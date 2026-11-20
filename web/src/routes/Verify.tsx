@@ -7,6 +7,7 @@ import { LogoImage } from '@/components/layout/Logo';
 import { Button, ButtonLink, EmptyState, ErrorState, Icon, LoadingBlock, StatusChip } from '@/components/ui';
 import { AiLabel } from '@/features/passport/components/AiLabel';
 import { DeclarationDetail } from '@/features/passport/components/DeclarationDetail';
+import { VerifyPdf } from '@/features/passport/components/VerifyPdf';
 import { useVerifyPassport } from '@/features/passport/hooks/usePassport';
 import { DEPARTMENTS, LABEL_DISCLAIMER, summarize, TOOL_STATUS_HELP } from '@/features/passport/lib/labels';
 import { formatDate } from '@/lib/format';
@@ -151,6 +152,7 @@ export default function Verify() {
             fournisseur, la source et la date de vérification.
           </p>
           <DeclarationDetail declarations={p.declarations} tools={tools} />
+          <VerifyPdf badgeCode={p.badge_code} />
           <div className="mt-8 flex flex-col gap-3 border-2 border-ink bg-white p-5">
             <p className="flex items-start gap-2 font-semibold">
               <Icon name="info" size={18} className="mt-0.5 shrink-0" /> {LABEL_DISCLAIMER}

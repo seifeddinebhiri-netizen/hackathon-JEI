@@ -383,6 +383,24 @@ export const mockApi: Api = {
 
   getAiTools: () => simulate('GET /ai-tools', z.array(S.aiToolSchema), () => aiTools),
 
+  // Mode démonstration : aucune recherche réelle. Un outil du catalogue d'exemple est trouvé ; sinon la
+  // « recherche » échoue en le disant (rien n'est inventé).
+  resolveAiTool: (name) =>
+    simulate('POST /ai-tools/resolve', S.toolResolutionOut, () => {
+      const wanted = name.trim().toLowerCase();
+      const hit = (aiTools as T.AiTool[]).find((t) => t.name.toLowerCase() === wanted || t.id === wanted);
+      return hit
+        ? ({ state: 'found', tool: hit } as const)
+        : ({ state: 'researching', run_id: 'demo-run' } as const);
+    }),
+
+  getAiToolRun: (runId) =>
+    simulate(`GET /ai-tools/runs/${runId}`, S.toolRunSchema, () => ({
+      id: runId,
+      state: 'failed' as const,
+      error: 'Mode démonstration : la recherche automatique n’est pas appelée.',
+    })),
+
   getProjectPassport: (projectId) =>
     simulate(
       `GET /projects/${projectId}/passport`,
@@ -422,20 +440,15 @@ export const mockApi: Api = {
       return { url: `${env.publicAppUrl}/verifier/${id}?imprimer=1` };
     }),
 
-  signC2pa: ({ passport_id }) =>
-    simulate(
-      'POST /c2pa/sign',
-      S.c2paSignResultSchema,
-      () => {
-        const db = getDb();
-        const p = db.passports[passport_id];
-        if (!p) throw apiError('introuvable', 404, 'Passeport introuvable.');
-        p.c2pa_signed = true;
-        persist();
-        return { signed: true, manifest_id: uid('c2pa'), signed_at: formatISO(new Date()), simulated: true };
-      },
-      2,
-    ),
+  // Mode démonstration : le serveur ne lit aucun fichier. On le dit au lieu d'inventer un verdict.
+  verifyPassportPdf: () =>
+    simulate('POST /verify/pdf', S.pdfVerificationSchema, () => {
+      throw apiError(
+        'serveur',
+        503,
+        'Mode démonstration : la vérification d’un fichier n’est pas appelée. Active le Passeport réel (voir .env.example).',
+      );
+    }),
 
   verifyPassport: (id) =>
     simulate(`GET /verify/${id}`, S.verifyResultSchema, () => {

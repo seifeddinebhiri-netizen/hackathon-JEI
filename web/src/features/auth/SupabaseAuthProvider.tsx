@@ -11,6 +11,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { setAuthTokenGetter, setUnauthorizedHandler } from '@/api/client';
 import { DEMO_PROJECT_ID } from '@/api/mocks/data/project';
+import { projectsAreReal } from '@/api/mode';
 import type { Session } from '@/api/types';
 import { env } from '@/lib/env';
 import { supabase } from '@/lib/supabase';
@@ -109,7 +110,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!userId || env.useMocks) return;
+    if (!userId || !projectsAreReal) return;
     let alive = true;
     const local = readProject(userId);
     void (local ? Promise.resolve(local) : profileProject(userId).catch(() => undefined)).then(
@@ -123,7 +124,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   }, [userId]);
   const projectId = current?.userId === userId ? current?.projectId : undefined;
   // Le projet du compte est en cours de lecture : pas encore d'écran « Pas encore de film »
-  const resolvingProject = !!userId && !env.useMocks && current?.userId !== userId;
+  const resolvingProject = !!userId && projectsAreReal && current?.userId !== userId;
 
   const session = useMemo<Session | null>(() => {
     if (!sb) return null;
@@ -136,8 +137,8 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         email: sb.user.email ?? '',
         name: displayName(sb.user),
         is_demo: !!env.demoEmail && sb.user.email === env.demoEmail,
-        // Projets simulés tant que /projects n'est pas branché : le projet de démonstration.
-        project_id: env.useMocks ? DEMO_PROJECT_ID : projectId,
+        // Projets simulés (mocks sans `getProject` réel) : le projet de démonstration.
+        project_id: projectsAreReal ? projectId : DEMO_PROJECT_ID,
       },
     };
   }, [sb, projectId]);

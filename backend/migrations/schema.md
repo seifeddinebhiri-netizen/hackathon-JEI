@@ -111,6 +111,18 @@ bande-annonce et code du Passeport, et seulement pour un projet qui a une ligne 
 Écrit **uniquement par le backend** (transcription). La 0005 ajoute `owner_id` (rempli par le backend) et une
 policy de lecture pour le propriétaire. Les anciennes lignes sans propriétaire ne sont plus visibles par personne.
 
+### Catalogue des outils d'IA (migrations 0009, 0010 et 0011 : Passeport IA)
+| Table | Contenu |
+|---|---|
+| `public.ai_tools` | un outil : nom, fournisseur, site, catégories, pages des conditions, **statut** (`documente`, `partiel`, `non_divulgue`, ou vide = pas évalué), `review_state` (`a_verifier` / `verifie`), `research_state` |
+| `public.ai_tool_aliases` | noms alternatifs normalisés (« chat gpt » retrouve ChatGPT) |
+| `public.ai_tool_facts` | un fait : `field` (`training_data`, `input_training_use`, `output_rights`, `provenance`, `indemnity`, `voice_likeness`), `plan`, `value_fr`, **`quote`** (phrase copiée de la page), `source_url`, `quote_verified` |
+| `public.ai_tool_research_runs` | journal des recherches automatiques ; une seule en cours par nom ; jamais lisible depuis le navigateur |
+
+La migration 0011 remet `ai_passports.c2pa_signed` à faux dès que le film, la réalisation ou les déclarations changent : une signature ne survit pas à une modification.
+
+Le statut est **calculé par des règles** à partir des faits dont la phrase a été retrouvée dans la page (`quote_verified`) : jamais décidé par l'IA. Lecture publique, écriture par le serveur seulement.
+
 ### Bucket `scripts` (Supabase Storage, privé)
 Scénario conservé **uniquement si l'utilisateur coche « Garder mon scénario »** (désactivé par défaut). Chemin : `<user_id>/<project_id>/<fichier>`. Les fichiers ne sont pas supprimés automatiquement avec le projet : le backend doit le faire.
 

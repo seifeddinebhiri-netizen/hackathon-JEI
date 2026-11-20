@@ -192,6 +192,41 @@ export async function request<S extends z.ZodType>(
   return validate(opts.schema, data, `${opts.method ?? 'GET'} ${path}`);
 }
 
+/**
+ * Réponse binaire (PDF). Mêmes erreurs typées en français que `request` : le corps d'une erreur est
+ * du JSON, le corps d'un succès est un fichier. Les en-têtes sont rendus pour lire les métadonnées.
+ */
+export async function requestBlob(
+  path: string,
+  opts: { method?: 'GET' | 'POST'; timeoutMs?: number } = {},
+): Promise<{ blob: Blob; headers: Headers }> {
+  const headers = authHeaders();
+  headers.Accept = 'application/pdf, application/json';
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort('timeout'), opts.timeoutMs ?? DEFAULT_TIMEOUT_MS);
+  let res: Response;
+  try {
+    res = await fetch(apiUrl(path), { method: opts.method ?? 'GET', headers, signal: controller.signal });
+  } catch (e) {
+    if (controller.signal.aborted && controller.signal.reason === 'timeout') throw apiError('delai_depasse');
+    if (e instanceof DOMException && e.name === 'AbortError') throw e;
+    throw apiError('reseau');
+  } finally {
+    clearTimeout(timer);
+  }
+  if (!res.ok) {
+    notifyIf401(res.status, !!headers.Authorization);
+    let serverMessage: string | undefined;
+    try {
+      serverMessage = serverErrorMessage(await res.json());
+    } catch {
+      /* corps vide ou non JSON */
+    }
+    throw errorFromStatus(res.status, serverMessage);
+  }
+  return { blob: await res.blob(), headers: res.headers };
+}
+
 /** Avancement d'un envoi : octets envoyés sur le total. */
 export type UploadProgress = (sent: number, total: number) => void;
 

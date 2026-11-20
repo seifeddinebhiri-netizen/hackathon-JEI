@@ -1,21 +1,11 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router';
 import type { Passport } from '@/api/types';
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  ErrorState,
-  Field,
-  Icon,
-  Input,
-  StatusChip,
-  useToast,
-} from '@/components/ui';
+import { Button, ErrorState, Icon, StatusChip, useToast } from '@/components/ui';
 import { env } from '@/lib/env';
 import { formatDate } from '@/lib/format';
 import { copyToClipboard, downloadBlob } from '@/lib/print';
-import { usePassportCheck, usePassportPdf, useSignC2pa } from '../hooks/usePassport';
+import { usePassportCheck, usePassportPdf } from '../hooks/usePassport';
 import { badgeSvg, svgToBlob, svgToPngBlob } from '../lib/badge';
 
 function verifyUrl(p: Passport): string {
@@ -125,17 +115,29 @@ export function BadgeExport({ passport }: { passport: Passport }) {
   );
 }
 
+/** Une adresse `blob:` n'est plus utile une fois le PDF ouvert : on la libère après un moment. */
+const RELEASE_BLOB_AFTER_MS = 5 * 60_000;
+
 export function PdfAndSign({ passport }: { passport: Passport }) {
   const check = usePassportCheck(passport.id);
-  const pdf = usePassportPdf();
-  const sign = useSignC2pa(passport.project_id);
+  const pdf = usePassportPdf(passport.project_id);
   const { toast } = useToast();
-  const [signOpen, setSignOpen] = useState(false);
-  const [fileName, setFileName] = useState('');
 
   const openPdf = () =>
     pdf.mutate(passport.id, {
-      onSuccess: (r) => window.open(r.url, '_blank', 'noopener'),
+      onSuccess: (r) => {
+        window.open(r.url, '_blank', 'noopener');
+        if (r.url.startsWith('blob:')) setTimeout(() => URL.revokeObjectURL(r.url), RELEASE_BLOB_AFTER_MS);
+        if (r.signed) {
+          toast({
+            tone: 'ok',
+            title: r.simulated ? 'PDF signé (signature de test)' : 'PDF signé (C2PA)',
+            description: r.simulated
+              ? 'Le certificat est un certificat de test : un lecteur public dira « signataire inconnu » tout en confirmant que le fichier n’a pas été modifié.'
+              : 'Toute modification du fichier invalidera la signature.',
+          });
+        }
+      },
       onError: (e) => toast({ tone: 'bad', title: 'PDF indisponible', description: e.message }),
     });
 
@@ -167,60 +169,15 @@ export function PdfAndSign({ passport }: { passport: Passport }) {
       ) : null}
       <div className="flex flex-wrap gap-2">
         <Button icon="doc" onClick={openPdf} loading={pdf.isPending} disabled={!check.data?.ok}>
-          Générer le PDF
-        </Button>
-        <Button
-          variant="secondary"
-          icon="shield"
-          onClick={() => setSignOpen(true)}
-          disabled={!check.data?.ok}
-        >
-          {passport.c2pa_signed ? 'Signer à nouveau (C2PA)' : 'Signer le fichier final (C2PA)'}
+          {passport.c2pa_signed ? 'Générer à nouveau le PDF signé' : 'Générer le PDF signé'}
         </Button>
       </div>
-
-      <Dialog open={signOpen} onOpenChange={setSignOpen}>
-        <DialogContent
-          title="Signer le fichier final (C2PA)"
-          description="Ajoute au fichier final une marque Content Credentials qui renvoie vers ce Passeport. Dans cette version de démonstration, la signature est simulée : aucune marque n’est posée et le Passeport reste « pas encore signé »."
-        >
-          <form
-            className="flex flex-col gap-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              sign.mutate(
-                { passport_id: passport.id, file_name: fileName.trim() },
-                {
-                  onSuccess: (r) => {
-                    setSignOpen(false);
-                    toast({
-                      tone: 'ok',
-                      title: r.simulated ? 'Signature simulée' : 'Fichier signé',
-                      description: r.simulated
-                        ? `Démonstration : aucune signature réelle n’a été posée sur « ${fileName.trim()} ».`
-                        : `Manifeste ${r.manifest_id}`,
-                    });
-                  },
-                  onError: (e2) =>
-                    toast({ tone: 'bad', title: 'Signature impossible', description: e2.message }),
-                },
-              );
-            }}
-          >
-            <Field label="Nom du fichier final" hint="Ex. dar-hmeti-v-finale.mp4" required>
-              <Input value={fileName} onChange={(e) => setFileName(e.target.value)} required />
-            </Field>
-            <div className="flex justify-end gap-3">
-              <Button variant="ghost" onClick={() => setSignOpen(false)}>
-                Annuler
-              </Button>
-              <Button type="submit" icon="shield" loading={sign.isPending} disabled={!fileName.trim()}>
-                Signer
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <p className="flex items-start gap-1.5 text-meta text-muted-on-light">
+        <Icon name="shield" size={14} className="mt-0.5 shrink-0" />
+        Le PDF est fabriqué et signé (C2PA) par notre serveur à partir de ton Passeport enregistré. La
+        signature prouve que le fichier n’a pas été modifié depuis son émission, pas que les déclarations sont
+        exactes. Si tu modifies le Passeport ensuite, il faut régénérer le PDF.
+      </p>
     </div>
   );
 }

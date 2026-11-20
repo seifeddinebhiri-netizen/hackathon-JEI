@@ -2,7 +2,7 @@
  * Point d'entrée unique de la couche données.
  * VITE_USE_MOCKS=true → mocks/handlers.ts, sauf le Coach si VITE_REAL_COACH et les fonctions
  * listées dans VITE_REAL_ENDPOINTS (mode mixte) ; sinon → endpoints.ts (FastAPI), avec le
- * Passeport IA lu et écrit dans Supabase (supabase/passport.ts).
+ * Passeport IA lu et écrit dans Supabase (supabase/passport.ts), catalogue d'outils et PDF signé par le backend.
  * Les deux respectent le type `Api` : aucun écran ne change quand on bascule.
  * Le Kit Festival (dossiers, pièces, synopsis) a sa propre couche : kit.ts.
  */
@@ -15,8 +15,14 @@ import { supabasePassportApi } from './supabase/passport';
 import type { Api } from './endpoints';
 
 const realApi: Api = {
-  // Passeport IA et catalogue des outils : Supabase et fichier de référence (le backend n'a pas ces routes)
+  // Passeport IA : déclarations lues et écrites dans Supabase ; catalogue des outils, recherche d'un outil
+  // absent et PDF signé : backend (le PDF est fabriqué et signé par le serveur).
   ...supabasePassportApi,
+  getAiTools: real.getAiTools,
+  resolveAiTool: real.resolveAiTool,
+  getAiToolRun: real.getAiToolRun,
+  getPassportPdfUrl: real.getPassportPdfUrl,
+  verifyPassportPdf: real.verifyPassportPdf,
   createProject: real.createProject,
   getProject: real.getProject,
   updateProject: real.updateProject,

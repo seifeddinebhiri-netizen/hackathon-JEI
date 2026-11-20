@@ -16,6 +16,8 @@ PUBLIC_ROUTES = {
     ("GET", "/festivals"),  # catalogue des festivals : lecture publique
     ("POST", "/festivals/match"),  # même recherche, critères dans le corps
     ("GET", "/festivals/{festival_id}"),
+    # Un festival n'a pas de compte : il dépose le PDF reçu. Limité par adresse IP, 8 Mo, rien n'est conservé.
+    ("POST", "/verify/pdf"),
 }
 
 

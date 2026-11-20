@@ -196,19 +196,71 @@ describe('Passeport IA dans Supabase', () => {
     expect(Object.keys(updated).sort()).toEqual(['declarations', 'director', 'film_title']);
   });
 
-  it('signature C2PA de démonstration : annoncée simulée, rien n’est écrit', async () => {
-    const row = {
-      project_id: 'p1',
-      film_title: 'Dar Hmeti',
-      director: 'Yassine',
-      declarations: [],
-      c2pa_signed: false,
-      badge_code: 'EN-ABCD-23',
-      updated_at: '2026-11-19T10:00:00Z',
-    };
-    const f = use(() => ({ data: row, error: null }));
-    const r = await supabasePassportApi.signC2pa({ passport_id: 'p1', file_name: 'film.mp4' });
-    expect(r).toMatchObject({ signed: true, simulated: true, manifest_id: 'c2pa-EN-ABCD-23' });
-    expect(f.calls.some((c) => has(c, 'update') || has(c, 'insert') || has(c, 'upsert'))).toBe(false);
+  const declared = [
+    { department: 'scenario', used_ai: true, tool_id: 'claude', what: 'a', human_decisions: 'b' },
+    { department: 'image', used_ai: false, what: '', human_decisions: 'c' },
+  ];
+  const CATALOG_ROW = {
+    slug: 'claude',
+    name: 'Claude',
+    vendor: 'Anthropic',
+    official_site: null,
+    terms_url: 'https://a.example/terms',
+    status: 'partiel',
+    review_state: 'a_verifier',
+    research_state: 'complete',
+    note_fr: '',
+    checked_at: '2026-11-19T10:00:00Z',
+  };
+
+  it('/verifier : les outils déclarés viennent du catalogue public, lu sans compte', async () => {
+    const f = use(
+      (c) => (c.table === 'ai_tools' ? { data: [CATALOG_ROW], error: null } : { data: null, error: null }),
+      { signedIn: false },
+    );
+    f.client.rpc.mockResolvedValueOnce({
+      data: [{ film_title: 'X', director: 'Y', declarations: declared, c2pa_signed: false }],
+      error: null,
+    });
+    const r = await supabasePassportApi.verifyPassport('EN-ABCD-23');
+    const call = f.calls.find((c) => c.table === 'ai_tools')!;
+    expect(call.ops).toContainEqual(['in', ['slug', ['claude']]]);
+    expect(r.tools).toEqual([
+      {
+        id: 'claude',
+        name: 'Claude',
+        provider: 'Anthropic',
+        status: 'partiel',
+        note: '',
+        source_url: 'https://a.example/terms',
+        checked_at: '2026-11-19T10:00:00Z',
+        reviewed: false, // fiche non relue : la page publique peut le dire
+      },
+    ]);
+  });
+
+  it('/verifier : une panne du catalogue ne casse pas la page publique', async () => {
+    const f = use((c) =>
+      c.table === 'ai_tools'
+        ? { data: null, error: { code: '42P01', message: 'relation "ai_tools" does not exist' } }
+        : { data: null, error: null },
+    );
+    f.client.rpc.mockResolvedValueOnce({
+      data: [{ film_title: 'X', director: 'Y', declarations: declared, c2pa_signed: true }],
+      error: null,
+    });
+    const r = await supabasePassportApi.verifyPassport('EN-ABCD-23');
+    expect(r.tools).toEqual([]);
+    expect(r.passport.film_title).toBe('X');
+  });
+
+  it('/verifier : sans outil déclaré, le catalogue n’est pas interrogé', async () => {
+    const f = use();
+    f.client.rpc.mockResolvedValueOnce({
+      data: [{ film_title: 'X', director: 'Y', declarations: [declared[1]], c2pa_signed: false }],
+      error: null,
+    });
+    await supabasePassportApi.verifyPassport('EN-ABCD-23');
+    expect(f.calls.some((c) => c.table === 'ai_tools')).toBe(false);
   });
 });
