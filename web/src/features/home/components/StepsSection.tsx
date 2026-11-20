@@ -39,7 +39,11 @@ const STEPS: Step[] = [
     name: 'Tourner',
     title: 'Le Coach, sur ton téléphone.',
     text: 'Des repères de cadrage en direct pendant le tournage. Les images restent sur ton téléphone.',
-    points: ['Les scènes du jour sous la main', 'Images traitées sur l’appareil', 'Rien n’est envoyé'],
+    points: [
+      'Les scènes du jour sous la main',
+      'Images traitées sur l’appareil',
+      'Seul le texte de la scène part vers l’IA',
+    ],
     capture: <CoachCapture />,
     soon: true,
   },

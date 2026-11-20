@@ -219,7 +219,7 @@ function FestivalCard({
           <DeadlineChip festival={f} />
           <AiPolicyChip festival={f} />
         </div>
-        <h3 id={`f-${f.id}`} className="text-[20px] leading-tight">
+        <h3 id={`f-${f.id}`} className="text-h4">
           {f.name}
         </h3>
         <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-meta">

@@ -97,14 +97,14 @@ export default function Verify() {
           <dl className="grid grid-cols-2 gap-x-8 gap-y-3 text-meta">
             <div>
               <dt className="eyebrow text-muted-on-dark print:text-ink">Identifiant</dt>
-              <dd className="font-mono text-[18px]">{p.badge_code ?? p.id}</dd>
+              <dd className="font-mono text-lead">{p.badge_code ?? p.id}</dd>
             </div>
             <div>
               <dt className="eyebrow text-muted-on-dark print:text-ink">Déclaration du</dt>
               <dd>{formatDate(p.updated_at)}</dd>
             </div>
             <div className="col-span-2">
-              <dt className="eyebrow text-muted-on-dark print:text-ink">Signature du fichier final</dt>
+              <dt className="eyebrow text-muted-on-dark print:text-ink">Signature du PDF</dt>
               <dd className="mt-1">
                 {signature.signed ? (
                   <StatusChip tone="ok">

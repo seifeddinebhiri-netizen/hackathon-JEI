@@ -48,10 +48,10 @@ export function VerifyLink({ passport }: { passport: Passport }) {
       </div>
       <p className="flex flex-wrap items-center gap-2 text-meta text-muted-on-dark">
         {passport.c2pa_signed ? (
-          <StatusChip tone="ok">Fichier final signé (C2PA)</StatusChip>
+          <StatusChip tone="ok">PDF signé (C2PA)</StatusChip>
         ) : (
           <StatusChip tone="warn" icon="clock">
-            Fichier final pas encore signé
+            PDF pas encore signé
           </StatusChip>
         )}
         Mis à jour le {formatDate(passport.updated_at)}

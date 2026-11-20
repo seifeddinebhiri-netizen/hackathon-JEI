@@ -31,7 +31,7 @@ export function PlannerCapture() {
   return (
     <CaptureFrame path="planner/calendrier" tilt="left">
       <div className="mb-3 flex items-center justify-between">
-        <p className="font-display text-[18px] font-bold">Semaine 1</p>
+        <p className="font-display text-lead font-bold">Semaine 1</p>
         <span className="eyebrow border border-dashed border-ink bg-gold-soft px-1.5 py-0.5">
           Brouillon IA
         </span>
@@ -80,7 +80,7 @@ export function CoachCapture() {
         <div className="w-52 border-[6px] border-ink bg-ink p-1 shadow-hard-gold">
           <div className="bg-paper p-3">
             <p className="eyebrow text-muted-on-light">Aujourd’hui</p>
-            <p className="font-display text-[18px] leading-tight font-bold">3 scènes · Médina</p>
+            <p className="font-display text-lead leading-tight font-bold">3 scènes · Médina</p>
             <ul className="mt-2 flex flex-col gap-1.5">
               {['Sc. 1 · Café · 10 h', 'Sc. 2 · Ruelles · 12 h 30', 'Sc. 7 · Nuit · 17 h 45'].map((s) => (
                 <li key={s} className="border-l-4 border-ink bg-white px-2 py-1 text-label">
@@ -90,7 +90,7 @@ export function CoachCapture() {
             </ul>
             <p className="mt-3 flex items-start gap-1 text-label leading-snug">
               <Icon name="lock" size={12} className="mt-0.5 shrink-0" />
-              Images traitées sur le téléphone. Rien n’est envoyé.
+              Les images ne quittent jamais le téléphone.
             </p>
           </div>
         </div>
@@ -134,7 +134,7 @@ const DEADLINES = [
 export function FestivalCapture() {
   return (
     <CaptureFrame path="festival/dossiers" tilt="right">
-      <p className="font-display text-[18px] font-bold">Ma sélection</p>
+      <p className="font-display text-lead font-bold">Ma sélection</p>
       <div className="relative mt-4 ml-2 border-l-2 border-ink pl-5">
         {DEADLINES.map((f) => (
           <div key={f.name} className="relative mb-4 last:mb-0">
