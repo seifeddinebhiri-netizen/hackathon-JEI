@@ -98,7 +98,7 @@ function DossierCard({
               {SHORTLIST_STATUS_LABELS[item.status]}
             </StatusChip>
           </div>
-          <h3 id={`d-${festival.id}`} className="text-[20px] leading-tight">
+          <h3 id={`d-${festival.id}`} className="text-h4">
             {festival.name}
           </h3>
           <p className="text-meta text-muted-on-light">{meta}</p>

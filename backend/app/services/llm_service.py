@@ -53,7 +53,15 @@ class LLMService:
             moving.build_system(rules_text), moving.build_user(scene), LLMMovingPlan
         )
 
-    async def _generate(self, system: str, user: str, schema: type[T]) -> T:
+    async def generate_structured(
+        self, system: str, user: str, schema: type[T], temperature: float | None = None
+    ) -> T:
+        """Appel générique à sortie structurée (utilisé par la recherche d'outils d'IA)."""
+        return await self._generate(system, user, schema, temperature)
+
+    async def _generate(
+        self, system: str, user: str, schema: type[T], temperature: float | None = None
+    ) -> T:
         if self._client is None:
             raise LLMUnavailable("GEMINI_API_KEY non configurée.")
         try:
@@ -71,7 +79,7 @@ class LLMService:
                     system_instruction=system,
                     response_mime_type="application/json",
                     response_schema=schema,
-                    temperature=self._temperature,
+                    temperature=self._temperature if temperature is None else temperature,
                 ),
             )
         except errors.APIError as exc:

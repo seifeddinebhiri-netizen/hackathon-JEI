@@ -75,10 +75,7 @@
     "deadline_note": "Pour l'édition 2027 : 9 juillet 2026 (films terminés entre le 1er oct. et le 31 déc. 2025) et 24 septembre 2026 (films terminés en 2026). Prochain appel (édition 2028) attendu à l'été 2027.",
     "fee": "13 € + 1 timbre Shortfilmdepot (-50 % pour les écoles qui inscrivent plusieurs réalisateurs)",
     "max_duration_min": 40,
-    "subtitle_langs": [
-      "en",
-      "fr"
-    ],
+    "subtitle_langs": ["en", "fr"],
     "ai_policy": "a_declarer",
     "ai_policy_detail": "Tout usage d'IA générative (image, son) et tout outil d'IA (écriture, production, post-production) doit être déclaré. L'IA n'est pas un critère de sélection en soi. Un seul film entièrement généré par IA par personne.",
     "eligibility": "Films produits après le 1er octobre 2025 ; pas de règle de première ; accord de l'école exigé pour un film d'école",
@@ -179,9 +176,7 @@
     "deadline_note": "Copies de visionnage et documents à envoyer avant le 31 décembre 2026.",
     "fee": "[non mentionné dans le règlement]",
     "max_duration_min": 60,
-    "subtitle_langs": [
-      "fr"
-    ],
+    "subtitle_langs": ["fr"],
     "ai_policy": "non_precisee",
     "eligibility": "Films de réalisateurs africains, produits de 2024 à 2027 ; fiction, animation, documentaire",
     "requirements": [
@@ -215,9 +210,7 @@
     "deadline_note": "Appel 2026 clos. Prochain appel attendu au printemps-été 2027.",
     "fee": "[non précisé]",
     "max_duration_min": 35,
-    "subtitle_langs": [
-      "fr"
-    ],
+    "subtitle_langs": ["fr"],
     "ai_policy": "non_precisee",
     "eligibility": "Courts métrages de fiction ou documentaires (section « Coup de cœur du court », non compétitive) ; réalisateur d'un pays méditerranéen ou production méditerranéenne ; terminés en 2025 ou 2026",
     "requirements": [
@@ -320,9 +313,7 @@
     "deadline_note": "HelloAsso indique le 20 décembre 2026, FilmFreeway le 10 décembre 2026 : on retient la date la plus prudente.",
     "fee": "25 € (fiction ou documentaire) ; 20 € (catégories techniques / acteurs)",
     "max_duration_min": 30,
-    "subtitle_langs": [
-      "fr"
-    ],
+    "subtitle_langs": ["fr"],
     "ai_policy": "non_precisee",
     "eligibility": "Jeunes cinéastes ; film francophone ou sous-titré en français",
     "requirements": [
@@ -365,9 +356,7 @@
     "deadline_note": "Tarif 16 € jusqu'au 3 décembre 2026, puis 23 € jusqu'au 14 janvier 2027. Résultats mi-mars 2027.",
     "fee": "16 € puis 23 € (paliers)",
     "max_duration_min": 30,
-    "subtitle_langs": [
-      "en"
-    ],
+    "subtitle_langs": ["en"],
     "ai_policy": "non_precisee",
     "eligibility": "Tous genres ; films produits (ou montrés pour la première fois en public) après le 1er novembre 2025 ; les films d'écoles vont dans la compétition Next Generation. Festival qualificatif pour les Oscars et les BAFTA.",
     "requirements": [
@@ -397,9 +386,7 @@
     "deadline_note": "Tarif 11 € jusqu'au 3 décembre 2026, puis 15 € jusqu'au 14 janvier 2027 (montants affichés différemment sur Festhome : à confirmer avant paiement).",
     "fee": "11 € puis 15 € (paliers, à confirmer)",
     "max_duration_min": 30,
-    "subtitle_langs": [
-      "en"
-    ],
+    "subtitle_langs": ["en"],
     "ai_policy": "non_precisee",
     "eligibility": "Films réalisés dans une école de cinéma ou un cursus supérieur de réalisation ; produits après le 1er novembre 2025",
     "requirements": [
@@ -429,9 +416,7 @@
     "deadline_note": "Tarif normal 19 € jusqu'au 5 janvier 2027, tarif tardif 29 € du 6 au 31 janvier 2027.",
     "fee": "19 € puis 29 €",
     "max_duration_min": 30,
-    "subtitle_langs": [
-      "en"
-    ],
+    "subtitle_langs": ["en"],
     "ai_policy": "a_declarer",
     "ai_policy_detail": "Déclaration obligatoire parmi 4 options : pas d'IA ; IA comme outil technique (sous-titrage, nettoyage audio, upscaling) ; IA pour générer des images ou du contenu artistique ; les deux. Le formulaire ne dit pas si le choix influe sur la sélection.",
     "eligibility": "Films terminés le 1er janvier 2026 ou après ; films d'écoles acceptés",
@@ -470,10 +455,7 @@
     "deadline_note": "Le règlement dit « avant le 1er janvier 2027 », mais Festhome affiche une date limite prolongée au 15 janvier 2027. On retient la date la plus prudente.",
     "fee": "15 $ (internationale) ; 12 $ (arabe) ; 11 $ (compétition IA), tarifs de la dernière période",
     "max_duration_min": 30,
-    "subtitle_langs": [
-      "en",
-      "ar"
-    ],
+    "subtitle_langs": ["en", "ar"],
     "ai_policy": "section_dediee",
     "ai_policy_detail": "Les films entièrement générés par IA vont dans une compétition à part (International AI Competition). Pas d'autre règle sur l'IA.",
     "eligibility": "Films produits après le 1er janvier 2024 ; jamais montrés en Égypte ; aucune diffusion en ligne avant la fin du festival ; compétition arabe réservée aux réalisateurs arabes ou d'origine arabe",
@@ -500,9 +482,7 @@
     "deadline_note": "Inscription avant le 22 janvier 2027 ; envoi du fichier du film avant le 22 février 2027.",
     "fee": "Gratuit",
     "max_duration_min": 5,
-    "subtitle_langs": [
-      "fr"
-    ],
+    "subtitle_langs": ["fr"],
     "ai_policy": "a_declarer",
     "ai_policy_detail": "Tout usage d'IA générative doit être crédité au générique, de la façon la plus transparente possible.",
     "eligibility": "Ouvert à tous, sans condition d'âge ni de nationalité ; œuvre datée de 2026 ou après ; thème obligatoire : la lutte contre le racisme",

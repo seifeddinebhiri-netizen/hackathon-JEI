@@ -133,8 +133,8 @@ export function StepScreenplay({
           <div className="flex items-start gap-3 border-2 border-ink bg-gold-soft p-4">
             <Icon name="lock" size={20} className="mt-0.5 shrink-0" />
             <p>
-              Ton scénario est envoyé pour être découpé en scènes. Il n’est pas conservé après le découpage et
-              ne sert pas à entraîner une IA.
+              Ton scénario est envoyé à l’IA pour être découpé en scènes. Nous ne le conservons pas après le
+              découpage.
             </p>
           </div>
           <FileDrop

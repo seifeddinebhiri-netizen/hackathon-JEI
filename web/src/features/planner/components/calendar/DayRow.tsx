@@ -37,7 +37,7 @@ export function DayInfo({ day, index }: { day: ShootingDay; index: number }) {
           <Icon name="doc" size={18} />
         </Link>
       </p>
-      <p className="-mt-2 font-display text-[20px] leading-tight font-bold">{locs[0] ?? 'Lieu à préciser'}</p>
+      <p className="-mt-2 font-display text-h4 font-bold">{locs[0] ?? 'Lieu à préciser'}</p>
       {locs.length > 1 ? <p className="text-meta">+ {locs.slice(1).join(', ')}</p> : null}
       <p className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-meta">
         <strong>RDV {day.call_time}</strong>
