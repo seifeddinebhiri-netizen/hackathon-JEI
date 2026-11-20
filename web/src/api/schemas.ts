@@ -17,6 +17,18 @@ export const sceneMomentSchema = z.enum([
 ]) satisfies z.ZodType<T.SceneMoment>;
 export const settingSchema = z.enum(['INT', 'EXT']);
 
+export const sceneDetailSchema: z.ZodType<T.SceneDetail> = z.object({
+  what_happens: z.string(),
+  on_screen: z.string(),
+  props: z.array(z.string()),
+  costumes: z.array(z.string()),
+  extras: z.string(),
+  sound: z.array(z.string()),
+  special: z.array(z.string()),
+  watch_out: z.array(z.string()),
+  model: z.string(),
+});
+
 export const sceneSchema: z.ZodType<T.Scene> = z.object({
   id: z.string(),
   number: z.string(),
@@ -27,6 +39,8 @@ export const sceneSchema: z.ZodType<T.Scene> = z.object({
   characters: z.array(z.string()),
   estimated_hours: z.number().nonnegative(),
   summary: z.string(),
+  excerpt: z.string().max(1200).optional(),
+  detail: sceneDetailSchema.optional(),
   source: z.enum(['import_ia', 'manuel']),
   validated: z.boolean(),
 });
@@ -43,6 +57,17 @@ export const locationSchema: z.ZodType<T.Location> = z.object({
   forbidden_days: z.array(z.string()),
   permit: permitStatusSchema,
   notes: z.string().optional(),
+});
+
+export const memberSchema: z.ZodType<T.Member> = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+  role: z.enum(['acteur', 'technicien']),
+  characters: z.array(z.string()),
+  email_consent: z.boolean(),
+  phone: z.string().optional(),
+  job: z.string().optional(),
 });
 
 export const personSchema: z.ZodType<T.Person> = z.object({
@@ -73,6 +98,7 @@ export const scheduleConflictSchema: z.ZodType<T.ScheduleConflict> = z.object({
     'jour_trop_long',
     'autorisation_manquante',
     'meteo_a_reverifier',
+    'lumiere_non_respectee',
   ]),
   message: z.string(),
 });
@@ -154,6 +180,7 @@ export const projectSchema: z.ZodType<T.Project> = z.object({
   scenes: z.array(sceneSchema),
   locations: z.array(locationSchema),
   people: z.array(personSchema),
+  members: z.array(memberSchema).optional(),
   schedule: scheduleSchema.optional(),
   festival_shortlist: z.array(shortlistItemSchema),
   film_profile: filmProfileSchema.optional(),
@@ -208,11 +235,110 @@ export const quickSlotsResponseSchema: z.ZodType<T.QuickSlotsResponse> = z.objec
   slots: z.array(quickSlotSchema),
 });
 
+// --- Lieux proposés par l'IA --------------------------------------------------------
+export const placeCandidateSchema: z.ZodType<T.PlaceCandidate> = z.object({
+  name: z.string(),
+  address: z.string(),
+  lat: z.number(),
+  lon: z.number(),
+  osm_url: z.string(),
+});
+
+export const locationPropositionSchema: z.ZodType<T.LocationProposition> = z.object({
+  type_de_lieu: z.string(),
+  pourquoi: z.string(),
+  requete_recherche: z.string(),
+  zone: z.string(),
+  facilite: z.enum(['facile', 'moyenne', 'difficile']),
+  autorisation_probable: z.enum(['non_necessaire', 'a_demander']),
+  a_verifier_sur_place: z.array(z.string()),
+  candidates: z.array(placeCandidateSchema).max(3),
+});
+
+export const locationSuggestResultSchema: z.ZodType<T.LocationSuggestResult> = z.object({
+  status: z.literal('Brouillon IA : à valider'),
+  decor: z.string(),
+  besoins: z.object({
+    a_voir: z.array(z.string()),
+    actions: z.array(z.string()),
+    ambiance: z.string(),
+    pratique: z.array(z.string()),
+  }),
+  propositions: z.array(locationPropositionSchema),
+  mutualisation: z.string().nullable(),
+  model: z.string(),
+});
+
+// --- Suggestions de tournage ----------------------------------------------------------
+export const sceneSuggestResultSchema: z.ZodType<T.SceneSuggestResult> = z.object({
+  status: z.literal('Brouillon IA : à valider'),
+  suggestions: z.array(
+    z.object({
+      id: z.string(),
+      scene_numbers: z.array(z.string()).min(1),
+      kind: z.enum([
+        'preciser_int_ext',
+        'preciser_moment',
+        'regrouper_decors',
+        'alleger_scene',
+        'info_manquante',
+      ]),
+      message: z.string(),
+      source: z.string(),
+      change_setting: settingSchema.nullable(),
+      change_moment: sceneMomentSchema.nullable(),
+      change_decor: z.string().nullable(),
+    }),
+  ),
+  model: z.string(),
+});
+
+// --- Dépouillement du scénario par l'IA --------------------------------------------------
+export const scenarioAnalysisSchema: z.ZodType<T.ScenarioAnalysis> = z.object({
+  title: z.string(),
+  status: z.literal('Brouillon IA : à valider'),
+  simulated: z.boolean(),
+  scenes: z
+    .array(
+      z.object({
+        number: z.number().int().positive(),
+        heading: z.string().min(1),
+        setting: z.enum(['INT', 'EXT', 'UNKNOWN']),
+        time_of_day: z.enum(['DAY', 'NIGHT', 'DAWN', 'DUSK', 'UNKNOWN']),
+        location: z.string(),
+        summary: z.string(),
+        characters: z.array(z.string()),
+        props: z.array(z.string()),
+        technical_requirements: z.array(z.string()),
+        production_challenges: z.array(z.string()),
+        missing_information: z.array(z.string()),
+        inferences: z.array(z.string()),
+        suggestions: z.array(z.string()),
+      }),
+    )
+    .min(1),
+  characters: z.array(
+    z.object({
+      name: z.string().min(1),
+      description: z.string(),
+      scenes: z.array(z.number().int().positive()),
+      production_observations: z.array(z.string()),
+    }),
+  ),
+});
+
+/** Le backend envoie `null` pour un champ vide : le contrat du front attend un champ absent. */
+const withoutNulls = (v: unknown) =>
+  v && typeof v === 'object' && !Array.isArray(v)
+    ? Object.fromEntries(Object.entries(v).filter(([, x]) => x !== null))
+    : v;
+
 export const parseScreenplayResultSchema: z.ZodType<T.ParseScreenplayResult> = z.object({
-  scenes: z.array(sceneSchema),
-  locations: z.array(locationSchema),
+  scenes: z.array(z.preprocess(withoutNulls, sceneSchema)),
+  locations: z.array(z.preprocess(withoutNulls, locationSchema)),
   characters: z.array(z.string()),
   warnings: z.array(z.string()),
+  ai_used: z.boolean().optional(),
 });
 
 // --- Passeport IA ------------------------------------------------------------
@@ -397,6 +523,62 @@ export const publicFilmSchema: z.ZodType<T.PublicFilm> = z.object({
 });
 
 export const okSchema = z.object({ ok: z.literal(true) });
+
+// --- Convocations ------------------------------------------------------------------
+const callsheetDraftSceneSchema: z.ZodType<T.CallsheetDraftScene> = z.object({
+  number: z.string(),
+  title: z.string(),
+  date: isoDate,
+  call_time: hhmm,
+  start: hhmm.nullable(),
+  end: hhmm.nullable(),
+  location_name: z.string(),
+  address: z.string(),
+  moment_label: z.string(),
+  characters: z.array(z.string()),
+  notes: z.string(),
+  text: z.string().nullable(),
+});
+
+export const callsheetPreviewSchema: z.ZodType<T.CallsheetPreview> = z.object({
+  drafts: z.array(
+    z.object({
+      member_id: z.string(),
+      name: z.string(),
+      role: z.enum(['acteur', 'technicien']),
+      to: z.string(),
+      subject: z.string(),
+      message: z.string(),
+      schedule_text: z.string(),
+      text: z.string(),
+      html: z.string(),
+      scenes: z.array(callsheetDraftSceneSchema),
+      ics: z.string(),
+      ics_filename: z.string(),
+      include_scene_text: z.boolean(),
+      blocked_reason: z.string().nullable(),
+    }),
+  ),
+  not_concerned: z.array(z.object({ member_id: z.string(), name: z.string(), reason: z.string() })),
+  email_configured: z.boolean(),
+});
+
+export const callsheetSendResultSchema: z.ZodType<T.CallsheetSendResult> = z.object({
+  dry_run: z.boolean(),
+  results: z.array(
+    z.object({
+      member_id: z.string(),
+      name: z.string(),
+      to: z.string(),
+      status: z.enum(['envoye', 'essai', 'ignore', 'erreur']),
+      reason: z.string().nullable(),
+      subject: z.string().nullable(),
+    }),
+  ),
+  sent: z.number(),
+  skipped: z.number(),
+  failed: z.number(),
+});
 
 // --- Coach : plan de prise de vue et calibration ------------------------------------
 const numRange = z.object({ min: z.number(), max: z.number() });

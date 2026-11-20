@@ -11,49 +11,27 @@ export default function PlannerHome() {
     <div className="flex flex-col gap-10">
       <PageHeader
         eyebrow="Étape 1 · Planifier"
-        title="Quand et où tourner chaque scène"
-        lead="Le Planner organise ton tournage selon la lumière, la météo et tes lieux. Il ne te dit pas comment cadrer : ça, ce sera le Coach."
+        title="Quand et où tourner"
+        lead="Ton planning selon la lumière, la météo et tes lieux."
       />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Link
-          to="/planner/rapide"
-          className="group flex flex-col justify-between gap-8 border-2 border-ink bg-white p-6 transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard md:p-8"
-        >
-          <div>
-            <span className="grid size-12 place-items-center bg-gold">
-              <Icon name="sun" size={24} />
-            </span>
-            <h2 className="mt-5 text-h2">Une scène rapide</h2>
-            <p className="mt-3 text-muted-on-light">
-              Décris une scène en quelques lignes, indique le lieu et le moment voulu. Tu obtiens les
-              meilleurs créneaux, la direction du soleil et les heures de lever et de coucher.
-            </p>
-          </div>
-          <span className="inline-flex items-center gap-2 font-semibold group-hover:underline">
-            Trouver un créneau <Icon name="arrowRight" size={18} />
+      <Link
+        to="/planner/projet"
+        className="group flex flex-col justify-between gap-6 border-2 border-ink bg-ink p-6 text-paper transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-gold md:flex-row md:items-center md:p-8"
+      >
+        <div className="flex items-start gap-5">
+          <span className="grid size-12 shrink-0 place-items-center bg-brand-red text-white">
+            <Icon name="calendar" size={24} />
           </span>
-        </Link>
-
-        <Link
-          to="/planner/projet"
-          className="group flex flex-col justify-between gap-8 border-2 border-ink bg-ink p-6 text-paper transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-gold md:p-8"
-        >
           <div>
-            <span className="grid size-12 place-items-center bg-brand-red text-white">
-              <Icon name="calendar" size={24} />
-            </span>
-            <h2 className="mt-5 text-h2">Planifier tout mon film</h2>
-            <p className="mt-3 text-muted-on-dark">
-              Projet, scénario, lieux, personnes : en cinq étapes, l’outil propose un calendrier de tournage
-              que tu ajustes à la main, puis une feuille de service pour chaque jour.
-            </p>
+            <h2 className="text-h2">Planifier mon tournage</h2>
+            <p className="mt-2 text-muted-on-dark">Scénario, lieux, équipe, puis calendrier.</p>
           </div>
-          <span className="inline-flex items-center gap-2 font-semibold text-gold group-hover:underline">
-            Ouvrir l’assistant <Icon name="arrowRight" size={18} />
-          </span>
-        </Link>
-      </div>
+        </div>
+        <span className="inline-flex min-h-11 items-center gap-2 font-semibold text-gold group-hover:underline">
+          Commencer <Icon name="arrowRight" size={18} />
+        </span>
+      </Link>
 
       <section aria-labelledby="film-en-cours">
         <h2 id="film-en-cours" className="eyebrow mb-3 text-muted-on-light">

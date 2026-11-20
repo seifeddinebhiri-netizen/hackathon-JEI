@@ -34,6 +34,7 @@ export const CONFLICT_LABELS: Record<ScheduleConflict['kind'], string> = {
   jour_trop_long: 'Journée trop longue',
   autorisation_manquante: 'Autorisation à demander',
   meteo_a_reverifier: 'Météo à revérifier',
+  lumiere_non_respectee: 'Lumière à revoir',
 };
 
 // --- Utilitaires de temps ----------------------------------------------------
@@ -124,6 +125,52 @@ export function anchoredSlot(scene: Scene, dateIso: string, loc: Location | unde
   }
 }
 
+/**
+ * Bande de lumière demandée par le script : lever du soleil (aube civile → fin de la lumière
+ * rasante du matin) ou lumière du soir (début de la lumière rasante → crépuscule). null sinon.
+ */
+export function lightBand(moment: Scene['moment'], dateIso: string, loc: Location | undefined): Slot | null {
+  const { lat, lon } = locationCoords(loc);
+  const sun = sunInfo(parseISO(dateIso), lat, lon);
+  if (moment === 'aube') return { start: sun.dawn, end: sun.goldenMorning.to };
+  if (moment === 'heure_doree') return { start: sun.goldenEvening.from, end: sun.dusk };
+  return null;
+}
+
+/** Durée (h) de [a] comprise dans [b]. */
+function overlapHours(a: Slot, b: Slot): number {
+  return (
+    Math.max(0, Math.min(a.end.getTime(), b.end.getTime()) - Math.max(a.start.getTime(), b.start.getTime())) /
+    3_600_000
+  );
+}
+
+/**
+ * Lumière non respectée : la scène est écrite au lever du soleil ou en lumière du soir,
+ * mais moins de la moitié de son créneau tombe dans cette lumière.
+ */
+export function lightConflict(
+  scene: Scene,
+  slot: Slot,
+  dateIso: string,
+  location: Location | undefined,
+): ScheduleConflict | null {
+  const band = lightBand(scene.moment, dateIso, location);
+  if (!band) return null;
+  const dur = hoursBetween(slot.start, slot.end);
+  if (dur <= 0 || overlapHours(slot, band) >= dur / 2) return null;
+  const { lat, lon } = locationCoords(location);
+  const sun = sunInfo(parseISO(dateIso), lat, lon);
+  const daylight = overlapHours(slot, { start: sun.sunrise, end: sun.sunset });
+  const outside = dur - overlapHours(slot, band);
+  const when = daylight >= outside / 2 ? 'en plein jour' : 'de nuit';
+  const written = scene.moment === 'aube' ? 'au lever du soleil' : 'en lumière du soir';
+  return {
+    kind: 'lumiere_non_respectee',
+    message: `La scène est écrite ${written}, mais elle est surtout tournée ${when}.`,
+  };
+}
+
 // --- Conflits ------------------------------------------------------------------
 export function sceneConflicts(args: {
   scene: Scene;
@@ -175,6 +222,8 @@ export function sceneConflicts(args: {
       });
     }
   }
+  const light = lightConflict(scene, slot, dateIso, location);
+  if (light) out.push(light);
   return out;
 }
 

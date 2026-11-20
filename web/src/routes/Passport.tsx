@@ -198,7 +198,7 @@ export default function Passport() {
       <PageHeader
         eyebrow="Étape 3 · Déclarer"
         title="Passeport IA"
-        lead="Département par département, ce que l’IA a fait et ce que tu as décidé. Les festivals le vérifient sur une page publique."
+        lead="Ce que l’IA a fait, ce que tu as décidé. Vérifiable par les festivals."
       />
       {!projectId ? (
         <NoProject>Le Passeport IA se remplit pour un film : crée d’abord ton projet.</NoProject>

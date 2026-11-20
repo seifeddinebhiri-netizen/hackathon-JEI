@@ -10,15 +10,10 @@ import { StepProject } from '@/features/planner/components/wizard/StepProject';
 import { StepScreenplay } from '@/features/planner/components/wizard/StepScreenplay';
 import type { Detected, PlannerDraft } from '@/features/planner/components/wizard/types';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { PLANNER_STEPS, plannerStepsDone } from '@/features/planner/lib/steps';
 import { useCreateProject, useCurrentProject, useUpdateProject } from '@/features/project/hooks/useProject';
 
-const STEPS = [
-  { id: 'projet', label: 'Projet' },
-  { id: 'scenario', label: 'Scénario' },
-  { id: 'lieux', label: 'Lieux' },
-  { id: 'personnes', label: 'Personnes' },
-  { id: 'generer', label: 'Générer' },
-];
+const STEPS = PLANNER_STEPS;
 
 const DETECTED_KEY = (id: string) => `pp-ia-detected-${id}`;
 function readDetected(id: string): Detected {
@@ -113,11 +108,26 @@ function DraftSteps({
           <SaveIndicator state={autosave.state} onRetry={() => void autosave.retry()} />
         </div>
       ) : null}
-      {step === 1 ? <StepScreenplay draft={draft} setDraft={setDraftState} onDetected={onDetected} /> : null}
-      {step === 2 ? (
-        <StepLocations draft={draft} setDraft={setDraftState} detected={detected.locations} />
+      {step === 1 ? (
+        <StepScreenplay project={project} draft={draft} setDraft={setDraftState} onDetected={onDetected} />
       ) : null}
-      {step === 3 ? <StepPeople draft={draft} setDraft={setDraftState} detected={detected.people} /> : null}
+      {step === 2 ? (
+        <StepLocations
+          project={project}
+          draft={draft}
+          setDraft={setDraftState}
+          detected={detected.locations}
+        />
+      ) : null}
+      {step === 3 ? (
+        <StepPeople
+          draft={draft}
+          setDraft={setDraftState}
+          detected={detected.people}
+          members={project.members}
+          onMembersChange={(members) => update.mutate({ members })}
+        />
+      ) : null}
       {step === 4 ? <StepGenerate project={current} /> : null}
       <nav
         aria-label="Navigation de l’assistant"
@@ -177,24 +187,18 @@ export default function PlannerWizard() {
   };
 
   const p = isNew ? undefined : project.data;
-  const done = p
-    ? [
-        true,
-        p.scenes.length > 0,
-        p.locations.length > 0 && p.locations.every((l) => l.address.trim()),
-        p.people.some((x) => x.kind === 'equipe'),
-        !!p.schedule,
-      ]
-    : [false, false, false, false, false];
+  const done = plannerStepsDone(p);
 
   return (
     <div className="flex flex-col gap-8">
       <PageHeader
         eyebrow={isNew ? 'Planifier · Nouveau film' : `Planifier · ${p?.title ?? 'Mon film'}`}
-        title="Planifier tout mon film"
-        lead="Cinq étapes. Chaque modification est enregistrée automatiquement."
+        title="Planifier mon tournage"
+        lead="Cinq étapes, enregistrées au fur et à mesure."
       />
+      {/* Barre d'étapes : toujours visible, y compris après la génération */}
       <Stepper
+        compact
         steps={STEPS.map((s, i) => ({ ...s, done: done[i] }))}
         current={step}
         onSelect={

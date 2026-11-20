@@ -20,6 +20,8 @@ export type Project = {
   scenes: Scene[];
   locations: Location[];
   people: Person[];
+  /** Équipe des convocations : qui reçoit sa feuille de service par e-mail. */
+  members?: Member[];
   schedule?: Schedule;
   festival_shortlist: ShortlistItem[];
   /** Kit Festival : profil du film (le nombre de départements IA est déduit du Passeport). */
@@ -43,6 +45,10 @@ export type Scene = {
   characters: string[]; // noms de personnages
   estimated_hours: number;
   summary: string;
+  /** Extrait du texte de la scène (1 200 caractères au plus), gardé au découpage du scénario. */
+  excerpt?: string;
+  /** Fiche de tournage écrite par l'IA à partir du texte de la scène (modifiable). */
+  detail?: SceneDetail;
   source: 'import_ia' | 'manuel';
   validated: boolean;
 };
@@ -67,6 +73,23 @@ export type Person = {
   contact?: string;
 };
 
+/** Membre de l'équipe pour les convocations par e-mail. */
+export type MemberRole = 'acteur' | 'technicien';
+export type Member = {
+  id: string;
+  name: string;
+  email: string;
+  role: MemberRole;
+  /** Acteurs : personnages joués (noms issus du découpage). */
+  characters: string[];
+  /** A accepté de recevoir des e-mails de la production. */
+  email_consent: boolean;
+  /** Téléphone, pour la liste de l'équipe (jamais envoyé par e-mail). */
+  phone?: string;
+  /** Techniciens : poste (Image, Son, Régie…). */
+  job?: string;
+};
+
 /** Au-delà de l'horizon de prévision : forecast = 'hors_horizon' et rain_pct / wind_kmh / cloud_pct = null. */
 export type WeatherDay = {
   date: string;
@@ -79,7 +102,14 @@ export type WeatherDay = {
   forecast: 'prevision' | 'hors_horizon';
 };
 export type ScheduleConflict = {
-  kind: 'pluie' | 'vent' | 'lieu_ferme' | 'jour_trop_long' | 'autorisation_manquante' | 'meteo_a_reverifier';
+  kind:
+    | 'pluie'
+    | 'vent'
+    | 'lieu_ferme'
+    | 'jour_trop_long'
+    | 'autorisation_manquante'
+    | 'meteo_a_reverifier'
+    | 'lumiere_non_respectee';
   message: string;
 };
 export type ScheduledScene = { scene_id: string; start: string; end: string; conflicts: ScheduleConflict[] };
@@ -96,6 +126,129 @@ export type Schedule = {
   status: 'brouillon_ia' | 'valide';
   days: ShootingDay[];
   unplaced: { scene_id: string; reason: string }[];
+};
+
+// --- Lieux proposés par l'IA pour un décor -------------------------------------------
+/** Scène envoyée au repérage : ce que le LLM lit pour déduire les besoins du lieu. */
+export type LocationSuggestScene = {
+  number: string;
+  title: string;
+  setting: 'INT' | 'EXT';
+  moment: SceneMoment;
+  summary: string;
+  characters: string[];
+  excerpt?: string;
+};
+export type LocationSuggestInput = {
+  film: { title: string; format: FilmFormat; city: string; genre?: string; synopsis?: string };
+  decor: { name: string };
+  scenes: LocationSuggestScene[];
+  other_decors: string[];
+  /** Types de lieux déjà proposés, à ne pas reproposer */
+  exclude: string[];
+  /** Contraintes à respecter, ex. « pluie probable : préférer des lieux abrités » */
+  constraints?: string[];
+};
+/** Lieu réel trouvé par la recherche géographique (OpenStreetMap), jamais inventé par l'IA. */
+export type PlaceCandidate = { name: string; address: string; lat: number; lon: number; osm_url: string };
+export type LocationProposition = {
+  type_de_lieu: string;
+  pourquoi: string;
+  requete_recherche: string;
+  zone: string;
+  facilite: 'facile' | 'moyenne' | 'difficile';
+  autorisation_probable: 'non_necessaire' | 'a_demander';
+  a_verifier_sur_place: string[];
+  candidates: PlaceCandidate[];
+};
+export type LocationNeeds = { a_voir: string[]; actions: string[]; ambiance: string; pratique: string[] };
+export type LocationSuggestResult = {
+  status: 'Brouillon IA : à valider';
+  decor: string;
+  besoins: LocationNeeds;
+  propositions: LocationProposition[];
+  mutualisation: string | null;
+  model: string;
+};
+
+// --- Suggestions de tournage sur le scénario (validées par l'auteur) --------------------
+/**
+ * Jamais d'écriture : l'IA propose seulement de préciser INT/EXT ou le moment, de regrouper deux
+ * décors, d'alléger une scène coûteuse à tourner, ou signale une information manquante.
+ */
+export type SceneSuggestionKind =
+  'preciser_int_ext' | 'preciser_moment' | 'regrouper_decors' | 'alleger_scene' | 'info_manquante';
+export type SceneSuggestInput = {
+  film: LocationSuggestInput['film'];
+  scenes: {
+    number: string;
+    title: string;
+    setting: 'INT' | 'EXT';
+    moment: SceneMoment;
+    decor: string;
+    summary: string;
+    characters: string[];
+    estimated_hours: number;
+    excerpt?: string;
+  }[];
+  decors: string[];
+};
+/** Fiche de tournage d'une scène (POST /planner/scenes/detail). Vide = non précisé dans le texte. */
+export type SceneDetail = {
+  what_happens: string;
+  on_screen: string;
+  props: string[];
+  costumes: string[];
+  extras: string;
+  sound: string[];
+  special: string[];
+  watch_out: string[];
+  model: string;
+};
+export type SceneDetailInput = {
+  film: LocationSuggestInput['film'];
+  scene: Omit<SceneSuggestInput['scenes'][number], 'estimated_hours'>;
+};
+export type SceneSuggestion = {
+  id: string;
+  scene_numbers: string[];
+  kind: SceneSuggestionKind;
+  message: string;
+  /** Ce qui, dans le texte, justifie la suggestion */
+  source: string;
+  change_setting: 'INT' | 'EXT' | null;
+  change_moment: SceneMoment | null;
+  /** Nom exact d'un décor existant, pour un regroupement */
+  change_decor: string | null;
+};
+export type SceneSuggestResult = {
+  status: 'Brouillon IA : à valider';
+  suggestions: SceneSuggestion[];
+  model: string;
+};
+
+// --- Dépouillement du scénario par l'IA (POST /scenarios/analyze) ----------------------
+export type ScenarioAnalysisScene = {
+  number: number;
+  heading: string;
+  setting: 'INT' | 'EXT' | 'UNKNOWN';
+  time_of_day: 'DAY' | 'NIGHT' | 'DAWN' | 'DUSK' | 'UNKNOWN';
+  location: string;
+  summary: string;
+  characters: string[];
+  props: string[];
+  technical_requirements: string[];
+  production_challenges: string[];
+  missing_information: string[];
+  inferences: string[];
+  suggestions: string[];
+};
+export type ScenarioAnalysis = {
+  title: string;
+  status: 'Brouillon IA : à valider';
+  simulated: boolean;
+  scenes: ScenarioAnalysisScene[];
+  characters: { name: string; description: string; scenes: number[]; production_observations: string[] }[];
 };
 
 export type QuickSlotRequest = {
@@ -319,6 +472,7 @@ export type UpdateProjectInput = Partial<
     | 'scenes'
     | 'locations'
     | 'people'
+    | 'members'
     | 'schedule'
     | 'festival_shortlist'
     | 'film_profile'
@@ -335,6 +489,8 @@ export type ParseScreenplayResult = {
   /** Personnages détectés. */
   characters: string[];
   warnings: string[];
+  /** false : découpage simple, sans IA (IA indisponible). Absent : inconnu (mock). */
+  ai_used?: boolean;
 };
 
 export type GeocodeResult = { label: string; lat: number; lon: number };
@@ -422,6 +578,96 @@ export type SynopsisTranslation = { text: string };
 
 export type User = { id: string; email: string; name: string; is_demo: boolean; project_id?: string };
 export type Session = { access_token: string; expires_at: string; user: User };
+
+// ---------------------------------------------------------------------------
+// Convocations (feuilles de service par e-mail) — POST /callsheets/preview et /send
+// ---------------------------------------------------------------------------
+export type CallsheetScene = {
+  id: string;
+  number: string;
+  title: string;
+  date: string; // ISO
+  /** Heure de rendez-vous, « 08:00 » */
+  call_time: string;
+  start?: string;
+  end?: string;
+  location_id: string;
+  moment: SceneMoment;
+  characters: string[];
+  notes: string;
+  /** Envoyé seulement si un membre doit recevoir le texte de ses scènes. */
+  text?: string;
+};
+export type CallsheetInput = {
+  project: { title: string; director_name: string; reply_to: string; timezone?: string };
+  scenes: CallsheetScene[];
+  locations: { id: string; name: string; address: string }[];
+  members: Member[];
+  include_scene_text?: boolean;
+  /** Membres qui reçoivent le texte de leurs scènes. */
+  include_scene_text_for?: string[];
+};
+export type CallsheetDraftScene = {
+  number: string;
+  title: string;
+  date: string;
+  call_time: string;
+  start: string | null;
+  end: string | null;
+  location_name: string;
+  address: string;
+  moment_label: string;
+  characters: string[];
+  notes: string;
+  text: string | null;
+};
+export type CallsheetDraft = {
+  member_id: string;
+  name: string;
+  role: MemberRole;
+  to: string;
+  subject: string;
+  /** Message personnel, modifiable. */
+  message: string;
+  /** Planning du membre, ajouté sous le message. */
+  schedule_text: string;
+  text: string;
+  html: string;
+  scenes: CallsheetDraftScene[];
+  ics: string;
+  ics_filename: string;
+  include_scene_text: boolean;
+  /** Raison pour laquelle l'envoi sera refusé, sinon null. */
+  blocked_reason: string | null;
+};
+export type CallsheetPreview = {
+  drafts: CallsheetDraft[];
+  not_concerned: { member_id: string; name: string; reason: string }[];
+  /** false : le serveur n'a pas de clé d'envoi, l'envoi sera un essai. */
+  email_configured: boolean;
+};
+export type CallsheetDraftEdit = {
+  member_id: string;
+  subject: string;
+  message: string;
+  include_scene_text: boolean;
+};
+export type CallsheetSendInput = CallsheetInput & { drafts: CallsheetDraftEdit[] };
+export type CallsheetSendStatus = 'envoye' | 'essai' | 'ignore' | 'erreur';
+export type CallsheetSendResult = {
+  dry_run: boolean;
+  results: {
+    member_id: string;
+    name: string;
+    to: string;
+    status: CallsheetSendStatus;
+    reason: string | null;
+    subject: string | null;
+  }[];
+  sent: number;
+  skipped: number;
+  failed: number;
+};
 
 // ---------------------------------------------------------------------------
 // Coach : plan de prise de vue (POST /shot-spec) et calibration (GET /calibration)

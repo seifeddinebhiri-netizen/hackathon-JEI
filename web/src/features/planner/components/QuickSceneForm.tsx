@@ -26,10 +26,13 @@ export function QuickSceneForm({
   onSubmit,
   loading,
   defaultPlace,
+  initial,
 }: {
   onSubmit: (req: QuickSlotRequest) => void;
   loading?: boolean;
   defaultPlace?: string;
+  /** Pré-remplissage depuis une scène du film (« Décaler à… »). */
+  initial?: Partial<QuickSlotRequest>;
 }) {
   const today = new Date();
   const {
@@ -46,6 +49,7 @@ export function QuickSceneForm({
       moment: 'heure_doree',
       from: isoDay(addDays(today, 1)),
       to: isoDay(addDays(today, 14)),
+      ...initial,
     },
   });
 

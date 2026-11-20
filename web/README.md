@@ -1,6 +1,6 @@
-# encadré — front web (`/web`)
+# Encadré — front web (`/web`)
 
-> **encadré.** — Tu cadres, on t’encadre.
+> **Encadré** — L'IA propose, le cinéaste décide.
 
 encadré accompagne les jeunes réalisateurs tunisiens, de l'organisation du tournage jusqu'au festival.
 **Planifier** : quand et où tourner chaque scène, selon la lumière, la météo et les lieux.

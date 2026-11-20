@@ -5,20 +5,20 @@
  * Ce fichier ne doit rien importer : il est lu par vite.config.ts.
  */
 export const brand = {
-  /** Nom affiché partout — toujours en minuscules, y compris en début de phrase */
-  name: 'encadré',
+  /** Nom officiel de l'application. */
+  name: 'Encadré',
   /** Nom court (écran d'accueil du téléphone) */
-  shortName: 'encadré',
+  shortName: 'Encadré',
   /** Identifiant technique ASCII (domaines de démo, noms de fichiers exportés) */
   slug: 'encadre',
   /** Slogan, en une phrase */
-  slogan: 'Tu cadres, on t’encadre.',
+  slogan: "L'IA propose, le cinéaste décide.",
   /**
    * Slogan du hero, une ligne par entrée. Le texte entre *astérisques* est mis en couleur.
    */
-  sloganLines: ['Tu cadres,', 'on t’*encadre.*'],
+  sloganLines: ["L'IA propose,", 'le cinéaste *décide.*'],
   /** Phrase courte sous le logo (pied de page) */
-  tagline: 'Du tournage au festival, sans faire le travail créatif à ta place.',
+  tagline: "L'IA propose, le cinéaste décide.",
   /** Public visé (surtitre du hero) */
   audience: 'Pour les jeunes réalisateurs tunisiens',
   /** Description longue (meta description, manifeste PWA) */

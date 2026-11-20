@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import type { Location, PermitStatus } from '@/api/types';
+import { useRef, useState } from 'react';
+import { LocationWeather } from './LocationWeather';
+import type { Location, PermitStatus, Project, Scene } from '@/api/types';
 import {
   AiDraftBadge,
   Button,
@@ -8,6 +9,7 @@ import {
   Field,
   Icon,
   Input,
+  MoreInfo,
   PhotoFrame,
   SegmentedControl,
   StatusChip,
@@ -18,6 +20,7 @@ import { formatDateNumeric } from '@/lib/format';
 import { useGeocode } from '../../hooks/usePlanner';
 import { localId } from '../../lib/ids';
 import { PERMIT_LABELS, WEEKDAYS } from '../../lib/labels';
+import { LocationSuggestions, type LocationSuggestionsHandle } from './LocationSuggestions';
 import type { DraftSetter, PlannerDraft } from './types';
 
 const PERMIT_OPTIONS = (Object.keys(PERMIT_LABELS) as PermitStatus[]).map((v) => ({
@@ -26,18 +29,27 @@ const PERMIT_OPTIONS = (Object.keys(PERMIT_LABELS) as PermitStatus[]).map((v) =>
 }));
 
 function LocationEditor({
+  project,
   location,
-  scenesCount,
+  scenes,
+  otherDecors,
   detected,
   onChange,
   onDelete,
 }: {
+  project: Project;
   location: Location;
-  scenesCount: number;
+  /** Scènes tournées dans ce décor */
+  scenes: Scene[];
+  /** Noms des autres décors du film (pour repérer un lieu qui peut servir deux fois) */
+  otherDecors: string[];
   detected: boolean;
   onChange: (l: Location) => void;
   onDelete: () => void;
 }) {
+  const scenesCount = scenes.length;
+  const addressId = `adresse-${location.id}`;
+  const suggestions = useRef<LocationSuggestionsHandle>(null);
   const geocode = useGeocode();
   const [dateToAdd, setDateToAdd] = useState('');
   const set = <K extends keyof Location>(k: K, v: Location[K]) => onChange({ ...location, [k]: v });
@@ -74,6 +86,16 @@ function LocationEditor({
         </div>
       </div>
 
+      <LocationSuggestions
+        project={project}
+        location={location}
+        scenes={scenes}
+        otherDecors={otherDecors}
+        onChange={onChange}
+        addressInputId={addressId}
+        ref={suggestions}
+      />
+
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Field label="Nom du lieu" required>
           <Input value={location.name} onChange={(e) => set('name', e.target.value)} />
@@ -87,7 +109,7 @@ function LocationEditor({
               : 'Sert au calcul du soleil.'
           }
         >
-          <Input value={location.address} onChange={(e) => set('address', e.target.value)} />
+          <Input id={addressId} value={location.address} onChange={(e) => set('address', e.target.value)} />
         </Field>
       </div>
       <Button
@@ -100,6 +122,13 @@ function LocationEditor({
       >
         Localiser ce lieu
       </Button>
+
+      <LocationWeather
+        project={project}
+        location={location}
+        scenes={scenes}
+        onShelteredPlaces={() => suggestions.current?.askSheltered()}
+      />
 
       <div className="mt-5 grid grid-cols-1 gap-6 md:grid-cols-2">
         <div className="flex flex-col gap-3">
@@ -221,10 +250,12 @@ function LocationEditor({
 }
 
 export function StepLocations({
+  project,
   draft,
   setDraft,
   detected,
 }: {
+  project: Project;
   draft: PlannerDraft;
   setDraft: DraftSetter;
   detected: string[];
@@ -244,10 +275,10 @@ export function StepLocations({
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-center">
         <div className="lg:col-span-6">
           <h2 className="text-h2">Tes lieux de tournage</h2>
-          <p className="mt-3 max-w-prose text-muted-on-light">
-            Horaires d’accès, jours interdits et autorisations : le planning en tient compte. Une autorisation
-            encore « à demander » sera signalée en alerte sur chaque scène concernée.
+          <p className="mt-3 text-muted-on-light">
+            Accès, jours interdits, autorisations : le planning suit.
           </p>
+          <MoreInfo>Une autorisation encore « à demander » est rappelée sur chaque scène concernée.</MoreInfo>
           {toAsk ? (
             <p className="mt-3 flex items-center gap-2 font-semibold text-warn-fg">
               <Icon name="doc" size={18} /> {toAsk} autorisation{toAsk > 1 ? 's' : ''} à demander
@@ -277,9 +308,11 @@ export function StepLocations({
           {draft.locations.map((l) => (
             <LocationEditor
               key={l.id}
+              project={project}
               location={l}
               detected={detected.includes(l.id)}
-              scenesCount={draft.scenes.filter((s) => s.location_id === l.id).length}
+              scenes={draft.scenes.filter((s) => s.location_id === l.id)}
+              otherDecors={draft.locations.filter((x) => x.id !== l.id).map((x) => x.name)}
               onChange={(nl) =>
                 setDraft((d) => ({ ...d, locations: d.locations.map((x) => (x.id === nl.id ? nl : x)) }))
               }

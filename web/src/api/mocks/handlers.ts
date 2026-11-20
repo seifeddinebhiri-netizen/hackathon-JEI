@@ -15,10 +15,14 @@ import type { Api } from '../endpoints';
 import * as S from '../schemas';
 import type * as T from '../types';
 import aiTools from './data/ai-tools.json';
+import { mockPreviewCallsheets, mockSendCallsheets } from './callsheets';
+import { getDb, persist, uid } from './db';
+import { mockSuggestLocations } from './locationSuggest';
+import { mockDetailScene } from './sceneDetail';
+import { mockSuggestScenes } from './sceneSuggest';
 import { loadFestivals, searchFestivalsLocal } from './festivals';
 import { checkRules } from './subtitleRules';
 import demoSubtitles from './data/subtitles.json';
-import { getDb, persist, uid } from './db';
 import { mockCalibration, mockShotSpec } from './coach';
 import { mockParseScreenplay } from './parser';
 import { mockSchedule } from './scheduler';
@@ -353,6 +357,26 @@ export const mockApi: Api = {
   geocode: (q) =>
     simulate('GET /planner/geocode', z.array(S.geocodeResultSchema), () => geocodeLocal(q), 0.4),
 
+  // Latence d'environ 2 s, comme un appel au LLM puis à la recherche de lieux
+  suggestLocations: (input) =>
+    simulate(
+      'POST /planner/locations/suggest',
+      S.locationSuggestResultSchema,
+      () => mockSuggestLocations(input),
+      2000 / Math.max(1, env.mockLatencyMs),
+    ),
+
+  detailScene: (input) =>
+    simulate('POST /planner/scenes/detail', S.sceneDetailSchema, () => mockDetailScene(input), 2),
+
+  suggestScenes: (input) =>
+    simulate(
+      'POST /planner/scenes/suggest',
+      S.sceneSuggestResultSchema,
+      () => mockSuggestScenes(input),
+      2000 / Math.max(1, env.mockLatencyMs),
+    ),
+
   quickSlots: (req) => simulate('POST /planner/quick', S.quickSlotsResponseSchema, () => quickSlotsFor(req)),
 
   generateSchedule: ({ project_id }) =>
@@ -529,6 +553,12 @@ export const mockApi: Api = {
 
   getSynopsisFeedback: (input) =>
     simulate('POST /synopsis/feedback', S.synopsisFeedbackSchema, () => synopsisQuestions(input)),
+
+  previewCallsheets: (input) =>
+    simulate('POST /callsheets/preview', S.callsheetPreviewSchema, () => mockPreviewCallsheets(input)),
+
+  sendCallsheets: (input) =>
+    simulate('POST /callsheets/send', S.callsheetSendResultSchema, () => mockSendCallsheets(input), 2),
 
   translateSynopsis: (input) =>
     simulate('POST /synopsis/translate', S.synopsisTranslationSchema, () => translateLocal(input), 1.5),

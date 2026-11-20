@@ -37,6 +37,8 @@ class UpdateProjectInput(BaseModel):
     scenes: JsonList | None = None
     locations: JsonList | None = None
     people: JsonList | None = None
+    # Équipe pour les convocations (type Member du contrat)
+    members: JsonList | None = Field(default=None, max_length=200)
     schedule: dict[str, Any] | None = None
     festival_shortlist: JsonList | None = None
     film_profile: dict[str, Any] | None = None
@@ -56,6 +58,7 @@ class Project(BaseModel):
     scenes: JsonList = []
     locations: JsonList = []
     people: JsonList = []
+    members: JsonList = []
     schedule: dict[str, Any] | None = None
     festival_shortlist: JsonList = []
     film_profile: dict[str, Any] | None = None

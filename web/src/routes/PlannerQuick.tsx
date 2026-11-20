@@ -1,7 +1,8 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { BabaJamil } from '@/components/BabaJamil';
 import type { QuickSlot, QuickSlotRequest } from '@/api/types';
-import { ErrorState, Icon, LoadingBlock, PageHeader, useToast } from '@/components/ui';
+import { ErrorState, Icon, LoadingBlock, MoreInfo, PageHeader, useToast } from '@/components/ui';
 import { QuickResults } from '@/features/planner/components/QuickResults';
 import { QuickSceneForm } from '@/features/planner/components/QuickSceneForm';
 import { useOptimisticProjectUpdate, useQuickSlots } from '@/features/planner/hooks/usePlanner';
@@ -11,6 +12,18 @@ import { useCurrentProject } from '@/features/project/hooks/useProject';
 export default function PlannerQuick() {
   const quick = useQuickSlots();
   const project = useCurrentProject();
+  const [params] = useSearchParams();
+  // « Décaler à… » depuis une scène du film : formulaire pré-rempli, pas d'ajout en double
+  const fromScene = project.data?.scenes.find((s) => s.id === params.get('scene'));
+  const fromLocation = project.data?.locations.find((l) => l.id === fromScene?.location_id);
+  const initial: Partial<QuickSlotRequest> | undefined = fromScene
+    ? {
+        description: fromScene.summary || fromScene.title,
+        place: fromLocation?.address || fromLocation?.name || project.data?.city,
+        setting: fromScene.setting,
+        moment: fromScene.moment,
+      }
+    : undefined;
   const update = useOptimisticProjectUpdate(project.data?.id);
   const { toast } = useToast();
   const [lastReq, setLastReq] = useState<QuickSlotRequest>();
@@ -68,13 +81,24 @@ export default function PlannerQuick() {
   return (
     <div className="flex flex-col gap-10">
       <PageHeader
-        eyebrow="Planifier · Scène rapide"
-        title="Une scène rapide"
-        lead="Les meilleurs créneaux pour une scène, selon la lumière et la météo. Au-delà de 14 jours, la météo n’est pas connue : seule la lumière compte."
+        eyebrow="Planifier · Créneau"
+        title={fromScene ? `Décaler la scène ${fromScene.number}` : 'Trouver un créneau'}
+        lead="Les meilleurs moments selon la lumière et la météo."
       />
+      <MoreInfo>Au-delà de 14 jours, la météo n’est pas connue : seule la lumière compte.</MoreInfo>
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
         <section aria-label="Ta scène" className="lg:col-span-4">
-          <QuickSceneForm onSubmit={submit} loading={quick.isPending} defaultPlace={project.data?.city} />
+          {project.isPending && params.get('scene') ? (
+            <LoadingBlock lines={4} />
+          ) : (
+            <QuickSceneForm
+              key={fromScene?.id ?? 'libre'}
+              onSubmit={submit}
+              loading={quick.isPending}
+              defaultPlace={project.data?.city}
+              initial={initial}
+            />
+          )}
         </section>
         <section aria-label="Créneaux proposés" aria-live="polite" className="lg:col-span-8">
           {quick.isPending ? (
@@ -83,13 +107,13 @@ export default function PlannerQuick() {
             <ErrorState error={quick.error} onRetry={() => lastReq && quick.mutate(lastReq)} />
           ) : quick.data ? (
             <div className="flex flex-col gap-4">
-              <p className="flex items-start gap-2 border-l-4 border-gold pl-3 text-meta text-muted-on-light">
-                <Icon name="info" size={16} className="mt-0.5 shrink-0" />
-                Suggestions calculées à partir du soleil et des prévisions : vérifie toujours sur place.
+              <p className="flex items-center gap-2 text-meta text-muted-on-light">
+                <Icon name="info" size={16} className="shrink-0" />
+                Vérifie toujours sur place.
               </p>
               <QuickResults
                 result={quick.data}
-                onAdd={project.data ? addToFilm : undefined}
+                onAdd={project.data && !fromScene ? addToFilm : undefined}
                 adding={update.isPending}
                 addedSlot={added}
               />
@@ -102,10 +126,7 @@ export default function PlannerQuick() {
                 bulle="Donne-moi ta scène, je te trouve le meilleur moment pour la tourner."
               />
               <p className="font-display text-h3 font-bold">Les créneaux apparaîtront ici.</p>
-              <p className="max-w-md text-muted-on-light">
-                Classés du plus recommandé au moins recommandé, avec la raison, la météo et la position du
-                soleil.
-              </p>
+              <p className="max-w-md text-muted-on-light">Du plus conseillé au moins conseillé.</p>
             </div>
           )}
         </section>

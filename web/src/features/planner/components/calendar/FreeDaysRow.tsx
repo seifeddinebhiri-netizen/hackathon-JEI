@@ -38,6 +38,8 @@ function FreeDay({ date }: { date: string }) {
   );
 }
 
+const capitalize = (s: string) => s.charAt(0).toLocaleUpperCase('fr') + s.slice(1);
+
 /** Jours sans tournage repliés en une ligne fine, qui reste une zone de dépôt (un jour = une case). */
 export function FreeDaysRow({ dates, highlight }: { dates: string[]; highlight?: boolean }) {
   const { dragging } = useCalendar();
@@ -47,6 +49,25 @@ export function FreeDaysRow({ dates, highlight }: { dates: string[]; highlight?:
     dates.length === 1
       ? format(first, 'EEE d MMM', { locale: fr })
       : `${format(first, 'd', { locale: fr })}–${format(last, 'd MMM', { locale: fr })}`;
+
+  // Au repos : une ligne fine et centrée, sans cadre
+  if (!dragging && !highlight) {
+    const text =
+      dates.length === 1
+        ? `${capitalize(format(first, 'EEEE d MMMM', { locale: fr }))} · pas de tournage`
+        : `Du ${format(first, 'd MMMM', { locale: fr })} au ${format(last, 'd MMMM', { locale: fr })} · pas de tournage prévu`;
+    return (
+      <li
+        id={`libre-${dates[0]}`}
+        className="flex scroll-mt-32 items-center gap-4 py-1 text-meta text-muted-on-light"
+      >
+        <span aria-hidden className="h-px flex-1 bg-line-light" />
+        <span className="text-center">{text}</span>
+        <span aria-hidden className="h-px flex-1 bg-line-light" />
+      </li>
+    );
+  }
+
   return (
     <li
       id={`libre-${dates[0]}`}
@@ -59,15 +80,11 @@ export function FreeDaysRow({ dates, highlight }: { dates: string[]; highlight?:
       <p className="eyebrow text-muted-on-light">
         {label} · {dates.length} jour{dates.length > 1 ? 's' : ''} libre{dates.length > 1 ? 's' : ''}
       </p>
-      {dragging || highlight ? (
-        <ul className="flex flex-wrap gap-1" aria-label="Déposer sur un jour libre">
-          {dates.map((d) => (
-            <FreeDay key={d} date={d} />
-          ))}
-        </ul>
-      ) : (
-        <span className="text-label text-muted-on-light">Dépose une scène ici pour l’ajouter</span>
-      )}
+      <ul className="flex flex-wrap gap-1" aria-label="Déposer sur un jour libre">
+        {dates.map((d) => (
+          <FreeDay key={d} date={d} />
+        ))}
+      </ul>
     </li>
   );
 }

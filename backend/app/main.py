@@ -16,6 +16,7 @@ from app.services.research.browser import BrowserReader
 from app.services.research.reader import PageReader
 from app.services.research.runner import ResearchRunner
 from app.services.rules_service import get_all_rules
+from app.services.scouting_service import ScoutingService
 from app.services.transcription_service import ElevenLabsTranscriber
 from app.services.translation_service import create_translator
 
@@ -29,6 +30,7 @@ def create_app() -> FastAPI:
         app.state.db_pool = await create_pool(settings)
         app.state.supabase = await create_supabase(settings)
         app.state.llm = LLMService(settings)
+        app.state.scouting = ScoutingService(settings)
         app.state.tool_runner = None
         if app.state.db_pool is not None:
             try:
@@ -51,13 +53,14 @@ def create_app() -> FastAPI:
         app.state.transcriber = ElevenLabsTranscriber(settings)
         app.state.translator = create_translator(settings)
         yield
+        await app.state.scouting.client.aclose()
         if getattr(app.state, "research_browser", None) is not None:
             await app.state.research_browser.close()
         if app.state.db_pool is not None:
             await app.state.db_pool.close()
 
     app = FastAPI(
-        title="Premier Plan API",
+        title="Encadré API",
         lifespan=lifespan,
         docs_url=None if settings.is_production else "/docs",
         redoc_url=None,

@@ -35,14 +35,53 @@ export async function deleteProject(id: string): Promise<{ ok: true }> {
   return request(`/projects/${encodeURIComponent(id)}`, { method: 'DELETE', schema: S.okSchema });
 }
 
+/** Le découpage par l'IA peut être long sur un long scénario. */
+const PARSE_TIMEOUT_MS = 190_000;
+
+/**
+ * Découpage du scénario (POST /planner/parse, multipart) : fichier tel quel (PDF, DOCX, TXT,
+ * Fountain, FDX) ou texte collé. Marche aussi sur un récit sans en-têtes INT./EXT.
+ * Le texte n'est envoyé qu'à ce moment-là, et n'est pas conservé par le serveur.
+ */
 export async function parseScreenplay(input: T.ParseScreenplayInput): Promise<T.ParseScreenplayResult> {
-  const fd = new FormData();
-  if (input.file) fd.append('file', input.file);
-  if (input.text) fd.append('text', input.text);
+  const form = new FormData();
+  if (input.file) form.append('file', input.file, input.file.name);
+  else form.append('text', input.text ?? '');
+  form.append('use_ai', 'true');
   return request('/planner/parse', {
     method: 'POST',
-    formData: fd,
+    formData: form,
     schema: S.parseScreenplayResultSchema,
+    timeoutMs: PARSE_TIMEOUT_MS,
+  });
+}
+
+/** Fiche de tournage d'une scène, écrite par l'IA à partir de son texte (rien d'inventé). */
+export async function detailScene(input: T.SceneDetailInput): Promise<T.SceneDetail> {
+  return request('/planner/scenes/detail', {
+    method: 'POST',
+    body: input,
+    schema: S.sceneDetailSchema,
+    timeoutMs: UPLOAD_TIMEOUT_MS,
+  });
+}
+
+/** Suggestions de tournage sur les scènes (jamais d'écriture), que l'auteur accepte ou refuse. */
+export async function suggestScenes(input: T.SceneSuggestInput): Promise<T.SceneSuggestResult> {
+  return request('/planner/scenes/suggest', {
+    method: 'POST',
+    body: input,
+    schema: S.sceneSuggestResultSchema,
+    timeoutMs: UPLOAD_TIMEOUT_MS,
+  });
+}
+
+/** Lieux proposés par l'IA pour un décor, avec de vrais lieux trouvés par la recherche géographique. */
+export async function suggestLocations(input: T.LocationSuggestInput): Promise<T.LocationSuggestResult> {
+  return request('/planner/locations/suggest', {
+    method: 'POST',
+    body: input,
+    schema: S.locationSuggestResultSchema,
     timeoutMs: UPLOAD_TIMEOUT_MS,
   });
 }
@@ -230,6 +269,21 @@ export async function getPublicFilm(id: string): Promise<T.PublicFilm> {
   return request(`/films/${encodeURIComponent(id)}/public`, { schema: S.publicFilmSchema });
 }
 
+/** Brouillons des convocations : rien n'est envoyé. */
+export async function previewCallsheets(input: T.CallsheetInput): Promise<T.CallsheetPreview> {
+  return request('/callsheets/preview', { method: 'POST', body: input, schema: S.callsheetPreviewSchema });
+}
+
+/** Envoi des convocations validées par le réalisateur (mode essai sans clé côté serveur). */
+export async function sendCallsheets(input: T.CallsheetSendInput): Promise<T.CallsheetSendResult> {
+  return request('/callsheets/send', {
+    method: 'POST',
+    body: input,
+    schema: S.callsheetSendResultSchema,
+    timeoutMs: 120_000, // 50 destinataires au plus, ~0,6 s chacun
+  });
+}
+
 export type Api = {
   createProject: typeof createProject;
   getProject: typeof getProject;
@@ -237,6 +291,9 @@ export type Api = {
   deleteProject: typeof deleteProject;
   parseScreenplay: typeof parseScreenplay;
   geocode: typeof geocode;
+  suggestLocations: typeof suggestLocations;
+  suggestScenes: typeof suggestScenes;
+  detailScene: typeof detailScene;
   quickSlots: typeof quickSlots;
   generateSchedule: typeof generateSchedule;
   getWeather: typeof getWeather;
@@ -262,4 +319,6 @@ export type Api = {
   getSynopsisFeedback: typeof getSynopsisFeedback;
   translateSynopsis: typeof translateSynopsis;
   getPublicFilm: typeof getPublicFilm;
+  previewCallsheets: typeof previewCallsheets;
+  sendCallsheets: typeof sendCallsheets;
 };

@@ -11,6 +11,10 @@ export type CalendarCtx = {
   /** Une scène est en cours de déplacement (affiche les zones de dépôt) */
   dragging: boolean;
   onMoveRequest: (sceneId: string) => void;
+  /** Pose une scène à « HH:mm » le même jour (action « Décaler à… ») */
+  onShift: (sceneId: string, date: string, hhmm: string) => void;
+  /** Scène mise en surbrillance depuis la colonne « Votre scénario » */
+  highlightScene: string | null;
 };
 
 export const CalendarContext = createContext<CalendarCtx | null>(null);

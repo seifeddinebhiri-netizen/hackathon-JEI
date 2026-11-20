@@ -1,8 +1,12 @@
-# Premier Plan
+# Encadré
 
-> **FilmFreeway t'aide à envoyer ton film. Premier Plan t'aide à ce qu'il soit prêt, sous-titré, et honnête sur l'IA.**
+> L'IA propose, le cinéaste décide.
 
-Premier Plan est une plateforme web (PWA, utilisable sur téléphone) qui accompagne un jeune cinéaste tunisien **du premier plan jusqu'au festival**, sans faire le travail à sa place, et qui lui permet de **prouver ce qui est humain et ce qui est IA** dans son film.
+L'IA dans la planification (dépouillement du scénario, suggestions de tournage validées par l'auteur, lieux et météo) est décrite dans [docs/PLANIFICATION_IA.md](docs/PLANIFICATION_IA.md). Lancement local du backend et d'Ollama : [docs/SCENARIO_ANALYSIS.md](docs/SCENARIO_ANALYSIS.md).
+
+> **FilmFreeway t'aide à envoyer ton film. Encadré t'aide à ce qu'il soit prêt, sous-titré, et honnête sur l'IA.**
+
+Encadré est une plateforme web (PWA, utilisable sur téléphone) qui accompagne un jeune cinéaste tunisien **du premier plan jusqu'au festival**, sans faire le travail à sa place, et qui lui permet de **prouver ce qui est humain et ce qui est IA** dans son film.
 
 Projet réalisé pour le hackathon **IA Éthique 360** (Junior Entreprise INSAT et OIF), sous-thème : *l'IA dans l'audiovisuel culturel*.
 
@@ -29,7 +33,7 @@ Un jeune cinéaste tunisien qui débute rencontre trois obstacles :
 - **Utiliser l'IA sans s'en cacher** : de plus en plus de festivals demandent de déclarer l'usage d'outils d'IA, mais il n'existe pas de moyen simple de le documenter.
 - **Diffuser** : sous-titres dans une autre langue, synopsis, choix d'un festival adapté.
 
-**Notre positionnement.** Les plateformes de soumission sont des places de marché pour *envoyer* un film. Premier Plan intervient **en amont** : préparer le film, le sous-titrer, rédiger le synopsis, déclarer l'IA, puis **renvoyer vers le site officiel du festival**. **Il n'y a ni soumission ni paiement chez nous.**
+**Notre positionnement.** Les plateformes de soumission sont des places de marché pour *envoyer* un film. Encadré intervient **en amont** : préparer le film, le sous-titrer, rédiger le synopsis, déclarer l'IA, puis **renvoyer vers le site officiel du festival**. **Il n'y a ni soumission ni paiement chez nous.**
 
 **Notre principe directeur.** L'IA propose, le cinéaste décide. Toute proposition est modifiable et marquée *« Brouillon IA : à valider »*.
 
@@ -269,11 +273,13 @@ Documentation interactive en local : `http://localhost:8000/docs`.
 |---|---|---|---|
 | GET | `/health` | commun | fait |
 | GET | `/health/ready` | commun (test de la base) | fait |
+| POST / GET / PATCH / DELETE | `/projects`, `/projects/{id}` | commun (projet enregistré dans Supabase, équipe comprise) | fait |
+| POST | `/callsheets/preview` | 2. Planification (brouillons des convocations, rien n'est envoyé) | fait |
+| POST | `/callsheets/send` | 2. Planification (envoi par Resend après validation ; mode essai sans clé) | fait |
 | POST | `/shot-spec` | 1. Cadrage | fait, **branché au Coach** (Gemini). Exige un jeton Supabase, limité par utilisateur. Appel réel à valider avec une clé |
 | GET | `/calibration` | 1. Cadrage (recalcul hors ligne côté client) | fait, public. Tables mots → nombres et libellés français |
 | GET | `/me` | commun | fait (profil de l'utilisateur connecté) |
 | GET / PUT / DELETE | `/workspaces`, `/workspaces/{id}` | 1. Cadrage (espaces de travail) | fait. Jeton exigé, 12 espaces au maximum par utilisateur, détection des écritures périmées (409) |
-| POST / GET / DELETE | `/projects`, `/projects/{id}` | commun | prévu |
 | POST | `/plan/suggest` | 2. Planification | prévu |
 | GET | `/ai-tools`, `/ai-tools/{slug}` | 3. Passeport | fait (catalogue des outils d'IA) |
 | POST | `/ai-tools/resolve` | 3. Passeport | fait (outil absent : recherche guidée lancée sur le serveur) |

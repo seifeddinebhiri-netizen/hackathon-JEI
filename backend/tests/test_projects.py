@@ -105,3 +105,22 @@ def test_validation(db):
         assert c.post("/projects", json={**BODY, "format": "serie"}).status_code == 422
         pid = c.post("/projects", json=BODY).json()["id"]
         assert c.patch(f"/projects/{pid}", json={"inconnu": 1}).status_code == 422
+
+
+def test_members_are_saved(db):
+    member = {"id": "m-1", "name": "Amira", "email": "amira@example.com", "role": "acteur"}
+    with _client(ME) as c:
+        pid = c.post("/projects", json=BODY).json()["id"]
+        assert c.get(f"/projects/{pid}").json()["members"] == []
+        patched = c.patch(f"/projects/{pid}", json={"members": [member]}).json()
+        assert patched["members"] == [member]
+
+
+def test_demo_login_refused_in_production(monkeypatch):
+    from app.core import auth
+    from app.core.config import Settings
+
+    monkeypatch.setattr(auth, "get_settings", lambda: Settings(app_env="production"))
+    with TestClient(app) as c:
+        r = c.get(f"/projects/{uuid.uuid4()}", headers={"Authorization": "Bearer demo.u.x"})
+    assert r.status_code == 401

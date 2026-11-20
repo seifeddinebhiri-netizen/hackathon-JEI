@@ -45,7 +45,8 @@ import { anchoredSlot } from '@/features/planner/lib/rules';
 import { useCurrentProject } from '@/features/project/hooks/useProject';
 import { cn } from '@/lib/cn';
 import { formatDayLong, formatTime } from '@/lib/format';
-import { copyToClipboard, printPage } from '@/lib/print';
+import { SceneDetailView } from '@/features/planner/components/SceneDetailView';
+import { copyToClipboard, fileSlug, printAsPdf } from '@/lib/print';
 
 /** Heures de rendez-vous au quart d'heure, de 04:00 à 22:00 (format 24 h quel que soit le navigateur). */
 const CALL_TIMES = Array.from({ length: (22 - 4) * 4 + 1 }, (_, i) => {
@@ -131,11 +132,22 @@ function SceneRow({
           <span className="font-semibold">{scene.title}</span>
         </p>
         {scene.summary ? <p className="mt-1 text-meta text-muted-on-light">{scene.summary}</p> : null}
+        <SceneDetailView detail={scene.detail} className="mt-2 border-l-4 border-gold pl-3" />
         <p className="mt-1 text-meta">
           {loc ? <>{loc.name} · </> : null}
           {scene.characters.length ? scene.characters.join(', ') : 'Sans personnage'}
         </p>
         <ConflictList conflicts={s.conflicts} className="mt-2" />
+        <ButtonLink
+          to={`/planner/rapide?scene=${encodeURIComponent(scene.id)}`}
+          variant="ghost"
+          size="sm"
+          icon="clock"
+          className="no-print mt-1 -ml-3"
+          aria-label={`Décaler la scène ${scene.number} à un autre créneau`}
+        >
+          Décaler à…
+        </ButtonLink>
       </div>
     </li>
   );
@@ -216,8 +228,16 @@ function DaySheet({
             <Button variant="secondary" icon="link" onClick={() => void copy()}>
               Copier le lien
             </Button>
-            <Button icon="printer" onClick={printPage}>
-              Imprimer
+            <Button
+              icon="download"
+              onClick={() =>
+                printAsPdf(
+                  `${fileSlug(project.title)}_feuille-de-service_${day.date}`,
+                  `${project.title} · Feuille de service du ${formatDayLong(day.date)}`,
+                )
+              }
+            >
+              Télécharger en PDF
             </Button>
           </div>
         </>
@@ -280,7 +300,7 @@ function DaySheet({
           <SunTimes weather={w} />
           {w ? (
             <p className="mt-1 flex items-center gap-1 text-meta">
-              <Icon name="golden" size={16} /> Heure dorée {formatTime(w.golden_hour.from)}–
+              <Icon name="golden" size={16} /> Lumière du soir {formatTime(w.golden_hour.from)}–
               {formatTime(w.golden_hour.to)}
             </p>
           ) : null}
@@ -305,8 +325,7 @@ function DaySheet({
 
       <Section title={`Ordre des scènes (${sceneObjs.length})`} className="mt-6">
         <p className="no-print mb-2 text-meta text-muted-on-light">
-          Glisse la poignée (ou Espace puis flèches) pour changer l’ordre des scènes de jour. Les scènes à
-          l’aube, à l’heure dorée et la nuit restent calées sur le soleil.
+          Glisse la poignée pour réordonner. Les scènes liées au soleil restent fixes.
         </p>
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
           <SortableContext items={day.scenes.map((s) => s.scene_id)} strategy={verticalListSortingStrategy}>

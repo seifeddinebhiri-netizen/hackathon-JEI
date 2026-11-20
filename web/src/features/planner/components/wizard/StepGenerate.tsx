@@ -104,7 +104,7 @@ export function StepGenerate({ project }: { project: Project }) {
           <p className="font-display text-h3 font-bold">L’outil propose, tu ajustes.</p>
           <ul className="flex flex-col gap-2 text-meta text-muted-on-dark">
             <li>Scènes extérieures sur les jours sans pluie ni vent fort.</li>
-            <li>Aube, heure dorée et nuit calées sur le soleil.</li>
+            <li>Lever du soleil, lumière du soir et nuit calés sur le soleil.</li>
             <li>Scènes d’un même lieu regroupées le même jour.</li>
             <li>Horaires d’accès et jours interdits respectés.</li>
           </ul>

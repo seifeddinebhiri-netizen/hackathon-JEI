@@ -19,6 +19,8 @@ export function list(v: string | undefined): string[] {
 export const env = {
   apiUrl: (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:8000',
   useMocks: bool(import.meta.env.VITE_USE_MOCKS as string | undefined, true),
+  /** Avec les mocks : le découpage du scénario passe quand même par le vrai backend. */
+  realParse: bool(import.meta.env.VITE_REAL_PARSE as string | undefined, false),
   /** Avec les mocks : fonctions de src/api/endpoints.ts qui passent quand même par le vrai backend. */
   realEndpoints: list(import.meta.env.VITE_REAL_ENDPOINTS as string | undefined),
   /** Coach branché au vrai backend (plan par l'IA) même quand le reste est simulé. */

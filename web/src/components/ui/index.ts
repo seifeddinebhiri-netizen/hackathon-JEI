@@ -23,3 +23,4 @@ export * from './Toast';
 export { useToast } from './toast-context';
 export * from './Icon';
 export * from './QueryState';
+export * from './MoreInfo';

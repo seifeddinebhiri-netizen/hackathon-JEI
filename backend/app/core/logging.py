@@ -5,6 +5,9 @@ import structlog
 
 def setup_logging(level: str, json_logs: bool) -> None:
     logging.basicConfig(format="%(message)s", level=level.upper())
+    # HTTP URLs may contain backend-only provider credentials.
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("httpcore").setLevel(logging.WARNING)
     structlog.configure(
         processors=[
             structlog.contextvars.merge_contextvars,

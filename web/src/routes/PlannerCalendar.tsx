@@ -13,7 +13,9 @@ import {
   type CollisionDetection,
   type DragEndEvent,
 } from '@dnd-kit/core';
+import { useIsMutating } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router';
 import type { Project, Schedule, ShootingDay } from '@/api/types';
 import {
   AiDraftBadge,
@@ -26,18 +28,26 @@ import {
   PageHeader,
   SegmentedControl,
   StatusChip,
+  Stepper,
   useToast,
 } from '@/components/ui';
+import { PLANNER_STEPS, plannerStepPath, plannerStepsDone } from '@/features/planner/lib/steps';
 import { ConflictPanel } from '@/features/planner/components/calendar/ConflictPanel';
 import {
   CalendarContext,
   parseDropTarget,
+  useCalendar,
   type CalendarCtx,
 } from '@/features/planner/components/calendar/context';
 import { DayRow } from '@/features/planner/components/calendar/DayRow';
-import { TimeAxis } from '@/features/planner/components/calendar/DayTimeline';
 import { FreeDaysRow } from '@/features/planner/components/calendar/FreeDaysRow';
-import { snapToHHMM, SPAN, T0 } from '@/features/planner/components/calendar/geometry';
+import {
+  DAY_LIGHT_CLASS,
+  FULL_RANGE,
+  LIGHT_CLASSES,
+  snapToHHMM,
+} from '@/features/planner/components/calendar/geometry';
+import { dayShortLabel, sceneHeadingPlain } from '@/features/planner/components/calendar/sceneText';
 import { MobileDayCard } from '@/features/planner/components/calendar/MobileDayCard';
 import { MoveDialog } from '@/features/planner/components/calendar/MoveDialog';
 import { PeriodView } from '@/features/planner/components/calendar/PeriodView';
@@ -47,12 +57,12 @@ import { GenerateScheduleButton } from '@/features/planner/components/GenerateSc
 import { usePeriodWeather } from '@/features/planner/hooks/usePlanner';
 import { useScheduleEditor } from '@/features/planner/hooks/useScheduleEditor';
 import { jumpToDroppable } from '@/features/planner/lib/keyboard';
-import { SCENE_KIND_LABELS, SCENE_KIND_SWATCH, type SceneKind } from '@/features/planner/lib/labels';
+import { SETTING_SWATCH } from '@/features/planner/lib/labels';
 import { anchoredSlot, countConflicts } from '@/features/planner/lib/rules';
 import { findScene, groupConflicts, scenesNotInSchedule } from '@/features/planner/lib/schedule';
 import { useCurrentProject } from '@/features/project/hooks/useProject';
 import { cn } from '@/lib/cn';
-import { formatDayLong } from '@/lib/format';
+import { formatDayLong, formatHourFr } from '@/lib/format';
 import { useMediaQuery } from '@/lib/useMediaQuery';
 
 const collision: CollisionDetection = (args) => {
@@ -81,28 +91,112 @@ function buildItems(windowDates: string[], days: ShootingDay[]): Item[] {
   return items;
 }
 
+/** Légende de la frise : trois entrées seulement. */
 function Legend() {
   return (
     <ul
-      className="flex flex-wrap items-center gap-x-4 gap-y-1 text-meta text-muted-on-light"
-      aria-label="Légende"
+      className="flex flex-wrap items-center gap-x-5 gap-y-1 text-meta text-muted-on-light"
+      aria-label="Comment lire la frise"
     >
-      {(['int-jour', 'ext-jour', 'int-nuit', 'ext-nuit'] as SceneKind[]).map((k) => (
-        <li key={k} className="inline-flex items-center gap-1.5">
-          <span className={cn('inline-block h-4 w-6 border-l-[4px]', SCENE_KIND_SWATCH[k])} />{' '}
-          {SCENE_KIND_LABELS[k]}
-        </li>
-      ))}
-      <li className="inline-flex items-center gap-1.5">
-        <span className="inline-block h-4 w-6 bg-gold-soft/70" /> aube
+      <li className="inline-flex items-center gap-2">
+        <span aria-hidden className={cn('inline-block h-4 w-6 rounded-sm', SETTING_SWATCH.INT)} /> Scène en
+        intérieur
       </li>
-      <li className="inline-flex items-center gap-1.5">
-        <span className="inline-block h-4 w-6 bg-gold/35" /> heure dorée
+      <li className="inline-flex items-center gap-2">
+        <span aria-hidden className={cn('inline-block h-4 w-6 rounded-sm', SETTING_SWATCH.EXT)} /> Scène en
+        extérieur
       </li>
-      <li className="inline-flex items-center gap-1.5">
-        <span className="inline-block h-4 w-6 bg-ink/10" /> nuit
+      <li className="inline-flex items-center gap-2">
+        <span aria-hidden className="inline-flex h-1.5 w-9 overflow-hidden rounded-full">
+          <span className={cn('flex-1', LIGHT_CLASSES.nuit)} />
+          <span className={cn('flex-1', DAY_LIGHT_CLASS)} />
+          <span className={cn('flex-1', LIGHT_CLASSES.heure_doree)} />
+        </span>
+        Nuit / jour / lumière du soir
       </li>
     </ul>
+  );
+}
+
+/** Tri dans l'ordre du script : 1, 2, 2A, 10… */
+const byNumber = (a: { number: string }, b: { number: string }) =>
+  a.number.localeCompare(b.number, 'fr', { numeric: true });
+
+/**
+ * « Votre scénario, scène par scène » : les scènes dans l'ordre du script, avec le jour et l'heure
+ * où chacune est tournée. Un clic amène au jour et met la scène en surbrillance.
+ */
+function ScriptColumn({
+  schedule,
+  onPick,
+}: {
+  schedule: Schedule;
+  onPick: (sceneId: string, date: string | null) => void;
+}) {
+  const { project, scheduledById } = useCalendar();
+  const dayIndex = new Map(schedule.days.map((d, i) => [d.date, i]));
+  return (
+    <aside
+      aria-labelledby="scenario-titre"
+      className="min-h-0 overflow-y-auto border-2 border-line-light bg-white p-4"
+    >
+      <h2 id="scenario-titre" className="text-h3">
+        Votre scénario, scène par scène
+      </h2>
+      <p className="mt-1 text-meta text-muted-on-light">
+        Dans l’ordre du script : quand chaque scène est tournée.
+      </p>
+      <ol className="-mx-2 mt-3 flex flex-col">
+        {[...project.scenes].sort(byNumber).map((scene) => {
+          const sch = scheduledById.get(scene.id);
+          const date = sch?.start.slice(0, 10) ?? null;
+          const n = sch?.conflicts.length ?? 0;
+          return (
+            <li key={scene.id}>
+              <button
+                type="button"
+                onClick={() => onPick(scene.id, date)}
+                className="flex min-h-11 w-full flex-col px-2 py-2 text-left hover:bg-gold-soft/50"
+              >
+                <span className="flex w-full items-start gap-2 font-display text-meta font-bold">
+                  <span className="min-w-0 flex-1">{sceneHeadingPlain(scene)}</span>
+                  {n ? (
+                    <span className="mt-1 inline-flex shrink-0">
+                      <span aria-hidden className="size-2.5 rounded-full bg-conflict" />
+                      <span className="sr-only">
+                        , {n} point{n > 1 ? 's' : ''} à régler
+                      </span>
+                    </span>
+                  ) : null}
+                </span>
+                <span className="text-meta text-muted-on-light">
+                  {sch && date
+                    ? `${dayShortLabel(date, dayIndex.get(date) ?? 0)} · ${formatHourFr(sch.start)}`
+                    : 'Pas encore placée'}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+    </aside>
+  );
+}
+
+/** Actions du planning, empilées : la convocation d'abord (bouton principal). */
+function PlanningActions({ className }: { className?: string }) {
+  return (
+    <div className={className ?? 'flex flex-col gap-3'}>
+      <ButtonLink to="/planner/convocations" icon="mail" className="w-full">
+        Préparer les convocations
+      </ButtonLink>
+      <ButtonLink to="/planner/projet?etape=2" variant="secondary" icon="edit" className="w-full">
+        Modifier les scènes
+      </ButtonLink>
+      <ButtonLink to="/planner/planning?pdf=1" variant="secondary" icon="download" className="w-full">
+        Télécharger en PDF
+      </ButtonLink>
+    </div>
   );
 }
 
@@ -115,6 +209,7 @@ function Calendar({ project, schedule }: { project: Project; schedule: Schedule 
   const [highlight, setHighlight] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [moveId, setMoveId] = useState<string | null>(null);
+  const [highlightScene, setHighlightScene] = useState<string | null>(null);
   const { windowDates } = editor;
 
   const ctx: CalendarCtx = useMemo(
@@ -130,8 +225,14 @@ function Calendar({ project, schedule }: { project: Project; schedule: Schedule 
       windowDates,
       dragging: activeId !== null,
       onMoveRequest: setMoveId,
+      onShift: (sceneId, date, hhmm) => {
+        if (editor.moveToTime(sceneId, date, hhmm)) setHighlight(date);
+      },
+      highlightScene,
     }),
-    [project, schedule, weather.byDate, windowDates, activeId],
+    // `editor` change d'identité à chaque rendu ; ses actions lisent toujours le projet courant.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [project, schedule, weather.byDate, windowDates, activeId, highlightScene],
   );
 
   const items = useMemo(() => buildItems(windowDates, schedule.days), [windowDates, schedule.days]);
@@ -197,12 +298,14 @@ function Calendar({ project, schedule }: { project: Project; schedule: Schedule 
         toast({
           tone: 'info',
           title: 'Horaire calé sur le soleil',
-          description: 'Aube, heure dorée et nuit suivent la lumière du jour.',
+          description: 'Les scènes au lever du soleil, en lumière du soir ou de nuit suivent le soleil.',
         });
       return editor.move(sceneId, target.date);
     }
-    const hours = T0 + ((rect.left - e.over.rect.left) / e.over.rect.width) * SPAN;
-    editor.moveToTime(sceneId, target.date, snapToHHMM(hours, scene.estimated_hours));
+    // Pendant le glisser-déposer, toutes les frises affichent la plage pleine 6 h–24 h
+    const span = FULL_RANGE.to - FULL_RANGE.from;
+    const hours = FULL_RANGE.from + ((rect.left - e.over.rect.left) / e.over.rect.width) * span;
+    editor.moveToTime(sceneId, target.date, snapToHHMM(hours, scene.estimated_hours, FULL_RANGE));
   };
 
   const placed = schedule.days.reduce((n, d) => n + d.scenes.length, 0);
@@ -274,7 +377,15 @@ function Calendar({ project, schedule }: { project: Project; schedule: Schedule 
           />
           <UnplacedTray schedule={schedule} extra={extra} />
 
-          <div className="flex flex-wrap items-end justify-between gap-4">
+          <PlanningActions
+            className={
+              view === 'periode'
+                ? 'flex flex-col gap-3 sm:flex-row'
+                : 'flex flex-col gap-3 sm:flex-row lg:hidden'
+            }
+          />
+
+          <div className="flex scroll-mt-24 flex-wrap items-end justify-between gap-4">
             <SegmentedControl
               legend="Affichage"
               value={view}
@@ -296,36 +407,45 @@ function Calendar({ project, schedule }: { project: Project; schedule: Schedule 
               }}
             />
           ) : desktop ? (
-            <div>
-              <div className="sticky top-16 z-10 grid grid-cols-[240px_1fr] border-x-2 border-transparent bg-paper pt-2">
-                <span className="eyebrow pl-3 text-muted-on-light">Jour</span>
-                <div className="px-3">
-                  <TimeAxis />
-                </div>
+            <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+              <div className="min-w-0">
+                <ol className="flex flex-col gap-3" aria-label="Jours de tournage">
+                  {items.map((it) =>
+                    it.type === 'day' ? (
+                      <DayRow
+                        key={it.day.date}
+                        day={it.day}
+                        index={it.index}
+                        highlight={highlight === it.day.date}
+                      />
+                    ) : (
+                      <FreeDaysRow
+                        key={it.dates[0]}
+                        dates={it.dates}
+                        highlight={!!highlight && it.dates.includes(highlight)}
+                      />
+                    ),
+                  )}
+                </ol>
+                <p className="mt-3 text-meta text-muted-on-light">
+                  Glisse une scène sur la frise pour la poser à une heure précise (au quart d’heure), ou sur
+                  la date pour qu’elle prenne le premier créneau libre. Entrée sur une scène : détail et «
+                  Déplacer vers… ».
+                </p>
               </div>
-              <ol className="flex flex-col gap-2" aria-label="Jours de tournage">
-                {items.map((it) =>
-                  it.type === 'day' ? (
-                    <DayRow
-                      key={it.day.date}
-                      day={it.day}
-                      index={it.index}
-                      highlight={highlight === it.day.date}
-                    />
-                  ) : (
-                    <FreeDaysRow
-                      key={it.dates[0]}
-                      dates={it.dates}
-                      highlight={!!highlight && it.dates.includes(highlight)}
-                    />
-                  ),
-                )}
-              </ol>
-              <p className="mt-3 text-meta text-muted-on-light">
-                Glisse une scène sur la frise pour la poser à une heure précise (au quart d’heure), ou sur la
-                date pour qu’elle prenne le premier créneau libre. Entrée sur une scène : détail et « Déplacer
-                vers… ».
-              </p>
+              {/* Colonne de droite : la carte et les actions restent collées ensemble */}
+              <div className="sticky top-24 hidden max-h-[calc(100dvh-7rem)] flex-col gap-4 lg:flex">
+                <ScriptColumn
+                  schedule={schedule}
+                  onPick={(sceneId, date) => {
+                    setHighlightScene(sceneId);
+                    const target = date ? `jour-${date}` : 'non-placees-titre';
+                    if (date) setHighlight(date);
+                    document.getElementById(target)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                />
+                <PlanningActions className="flex shrink-0 flex-col gap-3" />
+              </div>
             </div>
           ) : (
             <ol className="flex flex-col gap-3" aria-label="Jours de tournage">
@@ -369,20 +489,47 @@ function Calendar({ project, schedule }: { project: Project; schedule: Schedule 
   );
 }
 
+/** Barre d'étapes de l'assistant, avec l'étape Générer en cours : on revient à une étape d'un clic. */
+function PlannerSteps({ project }: { project: Project | undefined }) {
+  const navigate = useNavigate();
+  const saving = useIsMutating() > 0;
+  const done = plannerStepsDone(project);
+  return (
+    <div className="flex flex-col gap-2">
+      <Stepper
+        compact
+        steps={PLANNER_STEPS.map((s, i) => ({ ...s, done: done[i] }))}
+        current={PLANNER_STEPS.length - 1}
+        onSelect={project ? (n) => navigate(plannerStepPath(n)) : undefined}
+      />
+      {project ? (
+        <p role="status" className="flex items-center justify-end gap-2 text-meta text-muted-on-light">
+          <Icon name={saving ? 'clock' : 'check'} size={16} />
+          {saving ? 'Enregistrement…' : 'Enregistré'}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 export default function PlannerCalendar() {
   const project = useCurrentProject();
   return (
     <div className="flex flex-col gap-8">
+      <Link
+        to={plannerStepPath(PLANNER_STEPS.length - 1)}
+        className="no-print -mb-4 inline-flex min-h-11 items-center gap-2 self-start font-semibold underline-offset-4 hover:underline"
+      >
+        <Icon name="arrowLeft" size={18} />
+        Retour
+        <span className="sr-only">aux étapes de planification</span>
+      </Link>
       <PageHeader
         eyebrow="Planifier · Calendrier"
         title="Calendrier de tournage"
-        lead="Chaque jour de tournage sur une frise de 6 h à minuit, avec la lumière et la météo. Déplace les scènes : horaires et conflits sont recalculés."
-        actions={
-          <ButtonLink to="/planner/projet?etape=2" variant="secondary" icon="edit">
-            Modifier les scènes
-          </ButtonLink>
-        }
+        lead="Déplace une scène : horaires et rappels se mettent à jour."
       />
+      <PlannerSteps project={project.data} />
       {project.isPending ? (
         <LoadingBlock lines={8} label="Chargement du planning…" />
       ) : project.isError ? (

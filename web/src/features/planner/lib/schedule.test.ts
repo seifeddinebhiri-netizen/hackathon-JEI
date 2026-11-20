@@ -122,3 +122,40 @@ describe('conflits regroupés', () => {
     expect(sc.conflicts.some((c) => c.kind === 'pluie')).toBe(false);
   });
 });
+
+describe('lumière non respectée', () => {
+  it('ne signale rien pour une scène calée sur sa lumière par le planning', () => {
+    const { schedule } = setup();
+    const all = schedule.days.flatMap((d) => d.scenes.flatMap((s) => s.conflicts.map((c) => c.kind)));
+    expect(all).not.toContain('lumiere_non_respectee');
+  });
+
+  it('signale une scène « lumière du soir » posée en plein après-midi, et propose sa bande', async () => {
+    const { moveSceneToTime } = await import('./schedule');
+    const { lightBand } = await import('./rules');
+    const { conflictSentence } = await import('./labels');
+    const { project, weather, schedule } = setup();
+    const golden = project.scenes.find((s) => s.moment === 'heure_doree')!;
+    const date = schedule.days.find((d) => d.scenes.some((s) => s.scene_id === golden.id))!.date;
+    const r = moveSceneToTime(schedule, golden.id, date, '13:00', { project, weather });
+    if (!('schedule' in r)) throw new Error('horaire refusé');
+    const placed = r.schedule.days
+      .find((d) => d.date === date)!
+      .scenes.find((s) => s.scene_id === golden.id)!;
+    const conflict = placed.conflicts.find((c) => c.kind === 'lumiere_non_respectee')!;
+    expect(conflict.message).toBe(
+      'La scène est écrite en lumière du soir, mais elle est surtout tournée en plein jour.',
+    );
+    const loc = project.locations.find((l) => l.id === golden.location_id);
+    const s = conflictSentence(conflict, golden, loc, { date });
+    expect(s.action?.kind).toBe('shift');
+    // « Décaler à » le début de la bande, arrondi au quart d'heure supérieur
+    const band = lightBand('heure_doree', date, loc)!;
+    const hhmm = s.action?.kind === 'shift' ? s.action.hhmm : '';
+    const [h, m] = hhmm.split(':').map(Number);
+    const start = band.start.getHours() * 60 + band.start.getMinutes();
+    expect(h * 60 + m - start).toBeGreaterThanOrEqual(0);
+    expect(h * 60 + m - start).toBeLessThan(15);
+    expect(s.action?.label).toMatch(/^Décaler à \d{1,2} h \d{2}$/);
+  });
+});

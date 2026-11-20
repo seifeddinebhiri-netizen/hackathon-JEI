@@ -9,7 +9,7 @@ from app.schemas.project import CreateProjectInput, Me, Project, UpdateProjectIn
 
 DATA_FIELDS = (
     "shooting_window", "max_hours_per_day", "scenes", "locations", "people", "schedule",
-    "festival_shortlist", "film_profile", "synopsis", "film_page",
+    "festival_shortlist", "film_profile", "synopsis", "film_page", "members",
 )  # fmt: skip
 
 

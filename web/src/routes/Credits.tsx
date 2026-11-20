@@ -7,7 +7,7 @@ export default function Credits() {
       <PageHeader
         eyebrow="Crédits"
         title="Crédits photo"
-        lead="Toutes les photos viennent d’Unsplash et sont utilisées sous la licence Unsplash. Merci à leurs auteurs."
+        lead="Photos d’Unsplash, sous licence Unsplash. Merci à leurs auteurs."
       />
       <ul className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
         {Object.entries(PHOTOS).map(([key, p]) => (

@@ -4,30 +4,35 @@ import * as Popover from '@radix-ui/react-popover';
 import { Link } from 'react-router';
 import { Button, Icon } from '@/components/ui';
 import { cn } from '@/lib/cn';
-import { MOMENT_LABELS, sceneKind, SCENE_KIND_CLASSES, SCENE_KIND_LABELS } from '../../lib/labels';
-import { CONFLICT_LABELS } from '../../lib/rules';
-import { ConflictList } from '../Tags';
+import { MOMENT_TAGS, sceneKind, SCENE_KIND_CLASSES, SETTING_LABELS } from '../../lib/labels';
+import { ConflictSentences } from './ConflictSentences';
 import { useCalendar } from './context';
-import { hourOf, pct } from './geometry';
-import { sceneLine } from './sceneText';
+import { endHourOf, hourOf, pct, type HourRange } from './geometry';
+import { sceneHeading, sceneLine } from './sceneText';
+import { SceneDetailView } from '../SceneDetailView';
+import { useSceneSentences } from './hooks';
+
+function position(start: string, end: string, range: HourRange) {
+  const left = pct(hourOf(start), range);
+  return { left, width: Math.max(1.2, pct(endHourOf(start, end), range) - left) };
+}
 
 /**
- * Bande d'une scène placée à sa vraie heure sur la frise. Le texte complet est dans la bande
- * quand il tient (`showText`), sinon il est affiché sous la frise ; un clic ouvre le détail.
+ * Bloc d'une scène placée à sa vraie heure sur la frise, avec un texte court (`label`, peut être vide
+ * si le bloc est trop étroit). L'icône ⚠ signale un conflit ; la phrase complète est dans
+ * l'aria-label et dans la bulle ouverte au clic. Le bloc se glisse vers un autre jour ou une autre heure.
  */
-export function SceneBar({ sceneId, showText }: { sceneId: string; showText: boolean }) {
+export function SceneBar({ sceneId, label, range }: { sceneId: string; label: string; range: HourRange }) {
   const { sceneById, scheduledById, locationById, onMoveRequest } = useCalendar();
   const scene = sceneById.get(sceneId);
   const scheduled = scheduledById.get(sceneId);
+  const sentences = useSceneSentences(sceneId);
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: sceneId });
   if (!scene || !scheduled) return null;
   const kind = sceneKind(scene);
-  const text = sceneLine(scene, scheduled);
-  const left = pct(hourOf(scheduled.start));
-  const width = Math.max(1.2, pct(hourOf(scheduled.end)) - left);
-  const conflicts = scheduled.conflicts;
-  const severe = conflicts.some((c) => ['pluie', 'vent', 'lieu_ferme', 'jour_trop_long'].includes(c.kind));
+  const { left, width } = position(scheduled.start, scheduled.end, range);
   const loc = locationById.get(scene.location_id);
+  const problems = sentences.map((s) => s.text).join(' ');
 
   return (
     <Popover.Root>
@@ -42,20 +47,18 @@ export function SceneBar({ sceneId, showText }: { sceneId: string; showText: boo
             {...listeners}
             {...attributes}
             aria-roledescription="scène déplaçable"
-            aria-label={`${text}. ${SCENE_KIND_LABELS[kind]}.${conflicts.length ? ` ${conflicts.length} conflit(s) : ${conflicts.map((c) => CONFLICT_LABELS[c.kind]).join(', ')}.` : ''} Entrée pour le détail, Espace pour déplacer.`}
+            aria-label={`${sceneLine(scene, scheduled)}.${problems ? ` À régler : ${problems}` : ''} Entrée pour le détail, Espace pour déplacer.`}
+            title={problems || undefined}
             className={cn(
-              'flex size-full min-h-11 cursor-grab touch-none items-center gap-1 overflow-hidden border-l-[5px] px-1.5 text-left active:cursor-grabbing',
+              'flex size-full min-h-11 cursor-grab touch-none items-center gap-1 overflow-hidden rounded-sm border-l-[5px] px-1.5 text-left active:cursor-grabbing',
               SCENE_KIND_CLASSES[kind],
-              severe && 'outline-2 -outline-offset-2 outline-bad-fg outline-dashed',
             )}
           >
-            {showText ? (
-              <span className="text-meta leading-tight font-semibold whitespace-nowrap">{text}</span>
-            ) : (
-              <span className="sr-only">{text}</span>
-            )}
-            {conflicts.length ? (
-              <Icon name="alert" size={14} className={cn('shrink-0', showText ? 'ml-auto' : 'mx-auto')} />
+            {label ? (
+              <span className="text-meta leading-tight font-semibold whitespace-nowrap">{label}</span>
+            ) : null}
+            {sentences.length ? (
+              <Icon name="alert" size={14} className={cn('shrink-0', label ? 'ml-auto' : 'mx-auto')} />
             ) : null}
           </button>
         </Popover.Trigger>
@@ -66,18 +69,16 @@ export function SceneBar({ sceneId, showText }: { sceneId: string; showText: boo
           align="start"
           sideOffset={6}
           collisionPadding={16}
-          className="z-50 w-[min(360px,calc(100vw-32px))] border-2 border-ink bg-white p-4 text-ink shadow-hard"
+          className="z-50 w-[min(380px,calc(100vw-32px))] border-2 border-ink bg-white p-4 text-ink shadow-hard"
         >
-          <p className="eyebrow text-muted-on-light">
-            {SCENE_KIND_LABELS[kind]} · {MOMENT_LABELS[scene.moment]}
+          <p className="font-display font-bold">{sceneHeading(scene)}</p>
+          <p className="mt-1 text-meta text-muted-on-light">
+            {SETTING_LABELS[scene.setting]} · {MOMENT_TAGS[scene.moment]}
+            {loc ? ` · ${loc.name}` : ''}
           </p>
-          <p className="mt-1 font-semibold">{text}</p>
-          {scene.summary ? <p className="mt-1 text-meta text-muted-on-light">{scene.summary}</p> : null}
-          <p className="mt-1 text-meta">
-            {loc?.name}
-            {scene.characters.length ? ` · ${scene.characters.join(', ')}` : ''}
-          </p>
-          <ConflictList conflicts={conflicts} className="mt-3" />
+          {scene.summary ? <p className="mt-2 text-meta">{scene.summary}</p> : null}
+          <SceneDetailView detail={scene.detail} compact className="mt-3 border-t-2 border-line-light pt-2" />
+          <ConflictSentences sceneId={sceneId} className="mt-3" />
           <div className="mt-4 flex flex-wrap gap-2">
             <Popover.Close asChild>
               <Button size="sm" variant="secondary" icon="calendar" onClick={() => onMoveRequest(sceneId)}>
@@ -97,20 +98,32 @@ export function SceneBar({ sceneId, showText }: { sceneId: string; showText: boo
   );
 }
 
-/** Bande inerte (frise compacte du mobile) : la scène reste déplaçable depuis la liste en dessous. */
-export function StaticSceneBar({ sceneId }: { sceneId: string }) {
+/** Bloc inerte (frise compacte du mobile) : la scène reste déplaçable depuis la liste en dessous. */
+export function StaticSceneBar({
+  sceneId,
+  label,
+  range,
+}: {
+  sceneId: string;
+  label: string;
+  range: HourRange;
+}) {
   const { sceneById, scheduledById } = useCalendar();
+  const sentences = useSceneSentences(sceneId);
   const scene = sceneById.get(sceneId);
   const scheduled = scheduledById.get(sceneId);
   if (!scene || !scheduled) return null;
-  const left = pct(hourOf(scheduled.start));
-  const width = Math.max(1.2, pct(hourOf(scheduled.end)) - left);
+  const { left, width } = position(scheduled.start, scheduled.end, range);
   return (
     <div
-      className={cn('absolute top-0 bottom-0 border-l-[4px]', SCENE_KIND_CLASSES[sceneKind(scene)])}
+      className={cn(
+        'absolute top-0 bottom-0 flex items-center gap-1 overflow-hidden rounded-sm border-l-[4px] px-1',
+        SCENE_KIND_CLASSES[sceneKind(scene)],
+      )}
       style={{ left: `${left}%`, width: `${width}%` }}
     >
-      {scheduled.conflicts.length ? <Icon name="alert" size={12} className="mx-auto mt-1" /> : null}
+      {label ? <span className="text-label font-semibold whitespace-nowrap">{label}</span> : null}
+      {sentences.length ? <Icon name="alert" size={12} className="ml-auto shrink-0" /> : null}
     </div>
   );
 }

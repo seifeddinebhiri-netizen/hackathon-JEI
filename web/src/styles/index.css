@@ -37,6 +37,17 @@
   --color-ext: #ffe7a3;
   --color-int: #e2e0d9;
 
+  /* En-tête de l'application */
+  --color-header: #141414;
+  --color-header-accent: #f5c518;
+
+  /* Plan de travail : blocs de scène (texte blanc, AA) et phrases de conflit */
+  --color-scene-int: #34506b; /* blanc dessus : 8,3:1 */
+  --color-scene-int-night: #15202b; /* filet « nuit » */
+  --color-scene-ext: #9a5b00; /* blanc dessus : 5,4:1 */
+  --color-scene-ext-night: #3d2400; /* filet « nuit » */
+  --color-conflict: #8a3b00; /* orange foncé, 7,7:1 sur blanc */
+
   /* Typo */
   --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
@@ -167,7 +178,31 @@
 @media print {
   @page {
     size: A4;
-    margin: 14mm;
+    margin: 14mm 14mm 18mm;
+    /* Numéro de page en bas à droite ; le film et la date sont ajoutés par printAsPdf() */
+    @bottom-right {
+      content: 'Page ' counter(page) ' / ' counter(pages);
+      font:
+        500 9pt 'Inter',
+        sans-serif;
+      color: #55524c;
+    }
+    @bottom-left {
+      font:
+        500 9pt 'Inter',
+        sans-serif;
+      color: #55524c;
+    }
+  }
+  /* Couleurs de l'app gardées à l'impression (bandeaux, pastilles) */
+  html {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
   }
   html,
   body {

@@ -12,6 +12,7 @@ import {
   Skeleton,
   StatusChip,
 } from '@/components/ui';
+import { charactersWithoutActor, isValidEmail, projectCharacters } from '@/features/callsheets/lib';
 import { useShortlistFestivals } from '@/features/festival/hooks/useFestivals';
 import { useProjectPassport } from '@/features/passport/hooks/usePassport';
 import { DEPARTMENTS, summarize } from '@/features/passport/lib/labels';
@@ -177,6 +178,53 @@ function PlanningProgress({ project }: { project: Project }) {
             </li>
           ))
         )}
+      </ul>
+    </Panel>
+  );
+}
+
+function TeamSummary({ project }: { project: Project }) {
+  const members = project.members ?? [];
+  const actors = members.filter((m) => m.role === 'acteur').length;
+  const crew = members.length - actors;
+  const missing = charactersWithoutActor(projectCharacters(project), members);
+  const noEmail = members.filter((m) => !isValidEmail(m.email)).length;
+  return (
+    <Panel
+      title="Équipe"
+      icon="users"
+      action={
+        <>
+          <ButtonLink to="/equipe" size="sm" variant="secondary" iconRight="arrowRight">
+            {members.length ? 'Gérer l’équipe' : 'Ajouter l’équipe'}
+          </ButtonLink>
+          {members.length && project.schedule ? (
+            <ButtonLink to="/planner/convocations" size="sm" variant="ghost" icon="mail">
+              Convocations
+            </ButtonLink>
+          ) : null}
+        </>
+      }
+    >
+      <p className="font-display text-[40px] leading-none font-bold">{members.length}</p>
+      <p className="mt-1 text-meta text-muted-on-light">
+        {actors} acteur{actors > 1 ? 's' : ''} · {crew} technicien{crew > 1 ? 's' : ''}
+      </p>
+      <ul className="mt-4 flex flex-col gap-1.5 text-meta">
+        {missing.length ? (
+          <li className="flex items-center gap-1.5">
+            <Icon name="alert" size={16} /> Sans acteur : {missing.join(', ')}
+          </li>
+        ) : project.scenes.length ? (
+          <li className="flex items-center gap-1.5 text-ok-fg">
+            <Icon name="check" size={16} /> Chaque personnage a son acteur
+          </li>
+        ) : null}
+        {members.length && noEmail ? (
+          <li className="flex items-center gap-1.5">
+            <Icon name="mail" size={16} /> {noEmail} e-mail{noEmail > 1 ? 's' : ''} à compléter
+          </li>
+        ) : null}
       </ul>
     </Panel>
   );
@@ -366,6 +414,7 @@ export default function ProjectDashboard() {
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
         <NextDay project={p} />
         <PlanningProgress project={p} />
+        <TeamSummary project={p} />
         <PassportProgress project={p} />
         <Todos project={p} />
         <Deadlines project={p} />

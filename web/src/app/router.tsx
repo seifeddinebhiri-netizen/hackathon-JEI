@@ -1,4 +1,4 @@
-import { createBrowserRouter, type RouteObject } from 'react-router';
+import { createBrowserRouter, Navigate, type RouteObject } from 'react-router';
 import { AppLayout } from './layouts/AppLayout';
 import { PublicLayout } from './layouts/PublicLayout';
 import { RootLayout } from './layouts/RootLayout';
@@ -43,7 +43,12 @@ export const router = createBrowserRouter([
           { path: 'planner/rapide', ...page(() => import('@/routes/PlannerQuick')) },
           { path: 'planner/projet', ...page(() => import('@/routes/PlannerWizard')) },
           { path: 'planner/calendrier', ...page(() => import('@/routes/PlannerCalendar')) },
+          { path: 'planner/planning', ...page(() => import('@/routes/PlannerSchedulePrint')) },
+          { path: 'planner/convocations/fiche/:memberId', ...page(() => import('@/routes/CallsheetPrint')) },
           { path: 'planner/jour/:date', ...page(() => import('@/routes/PlannerDay')) },
+          { path: 'equipe', ...page(() => import('@/routes/Team')) },
+          { path: 'planner/equipe', element: <Navigate to="/equipe" replace /> },
+          { path: 'planner/convocations', ...page(() => import('@/routes/PlannerCallsheets')) },
           { path: 'coach', ...page(() => import('@/routes/Coach')) },
           { path: 'passeport', ...page(() => import('@/routes/Passport')) },
           { path: 'festival', ...page(() => import('@/routes/festival/Index')) },
